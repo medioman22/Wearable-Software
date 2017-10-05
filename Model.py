@@ -262,7 +262,7 @@ def main():
 
 
         """ preprocess entities """
-        Graphics.modelView(Events.style)
+        Graphics.modelView(0) # opaque style
         part = -1 # initialize the recursivity here
         stick(virtuMan, (virtuMan.x, virtuMan.y, virtuMan.z), (0,0,0,0))
 
@@ -272,7 +272,9 @@ def main():
         """ cursor feedback """
         color = glReadPixels( Cursor.mouse[0] , Events.display[1] - Cursor.mouse[1] - 1 , 1 , 1 , GL_RED , GL_FLOAT )
         ID = color[0][0]*len(Definitions.packageStickMan)
-        if ID - int(ID) >= 0.5:
+        if ID < 0.5: # otherwise 0 - 1 ==> 49
+            Definitions.packageStickMan[0][1] = True
+        elif ID - int(ID) >= 0.5:
             Definitions.packageStickMan[int(ID + 0.5)-1][1] = True 
         else:
             Definitions.packageStickMan[int(ID)-1][1] = True
