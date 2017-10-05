@@ -70,9 +70,13 @@ def drawStickMan(style):
     Graphics.vertexPositions[Graphics.vboCube].bind()
     glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
     """ draw all at once """
+    i = 0
     for pack in Definitions.packageStickMan:
+        i +=1./len(Definitions.packageStickMan)
         if pack[1] == True:
             glUniform4fv(Shaders.setColor_loc, 1, np.array([0.,0.,1.,0.3], dtype = np.float32))
+        if style == 3:
+            glUniform4fv(Shaders.setColor_loc, 1, np.array([i,0.,0.,1.], dtype = np.float32))
         glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[0])
         """ draw vbo """
         glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, None)
@@ -85,7 +89,7 @@ def drawStickMan(style):
         glUniform4fv(Shaders.setColor_loc, 1, np.array([0.5,0.5,0.5,1.], dtype = np.float32))
     elif style == 1:
         glUniform4fv(Shaders.setColor_loc, 1, np.array([1.,1.,1.,1.], dtype = np.float32))
-    if style != 2:
+    if style == 0 or style == 1:
         """ bind cube edges vbo """
         Graphics.indexPositions[Graphics.vboCube][Graphics.vboEdges].bind()
         Graphics.vertexPositions[Graphics.vboCube].bind()
@@ -97,9 +101,6 @@ def drawStickMan(style):
             glDrawElements(GL_LINES, 48, GL_UNSIGNED_INT, None)
 
             
-    """ empty package """
-    while len(Definitions.packageStickMan) > 0:
-        Definitions.packageStickMan = Definitions.packageStickMan[:-1]
 
 
 fi_a = 0.0323

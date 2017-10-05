@@ -128,67 +128,38 @@ def main():
     screen = pygame.display.set_mode(Events.display, pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE|NOFRAME)
     
     """ truxture """
-    #plane_vao = glGenVertexArrays(1)
-    #glBindVertexArray(plane_vao)
-    #plane_VBO = glGenBuffers(1)
-    #glBindBuffer(GL_ARRAY_BUFFER, plane_VBO)
-    #glBufferData(GL_ARRAY_BUFFER, plane.itemsize * len(plane), plane, GL_STATIC_DRAW)
-    #plane_EBO = glGenBuffers(1)
-    #glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, plane_EBO)
-    #glBufferData(GL_ELEMENT_ARRAY_BUFFER, plane_indices.itemsize * len(plane_indices), plane_indices, GL_STATIC_DRAW)
-    ##position
-    #glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, plane.itemsize * 5, ctypes.c_void_p(0))
-    #glEnableVertexAttribArray(0)
-    ##textures
-    #glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, plane.itemsize * 5, ctypes.c_void_p(12))
-    #glEnableVertexAttribArray(1)
-    #glBindVertexArray(0)
 
+    # create texture
     plane_texture = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, plane_texture)
     # texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
     # texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Events.display[0], Events.display[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
     glBindTexture(GL_TEXTURE_2D, 0)
 
+    # create render buffer
+    rbo = glGenRenderbuffers(1)
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo)
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Events.display[0], Events.display[1])
+    glBindRenderbuffer(GL_RENDERBUFFER, 0)
+
+    # create frame buffer
     FBO = glGenFramebuffers(1)
     glBindFramebuffer(GL_FRAMEBUFFER, FBO)
+    # attach texture to frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, plane_texture, 0)
+    # attach render buffer to frame buffer
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo)
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
+    
+
     """ Generate the FBOs """
-    #glEnable(GL_TEXTURE_2D) # Enable texturing so we can bind our frame buffer texture
-    
-    #FBO = glGenFramebuffers(1)
-    #glBindFramebuffer(GL_FRAMEBUFFER, FBO)
-    #
-    #
-    #texture0 = glGenTextures(1)
-    #glBindTexture(GL_TEXTURE_2D, texture0)
-    #
-    #glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-    #glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-    #glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Events.display[0], Events.display[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
-    #
-    ##texture1 = glGenTextures(1)
-    ##glBindTexture(GL_TEXTURE_2D, texture1)
-    ##
-    ##glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-    ##glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-    ##glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Events.display[0], Events.display[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
-    #
-    #glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture0, 0)
-    ##glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, texture1, 0)
-    #glBindTexture(GL_TEXTURE_2D, 0)
-    
-    #rbo = glGenRenderbuffers(1)
-    #glBindRenderbuffer(GL_RENDERBUFFER, rbo)
-    #glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, Events.display[0], Events.display[1])
-    #glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo)
     
     """ Generate the VBOs """
     Graphics.VBO_init()
@@ -230,10 +201,9 @@ def main():
     color = glGetAttribLocation(Shaders.shader, "color")
     glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(3*4))
     glEnableVertexAttribArray(color)
-
+    
     glUseProgram(Shaders.shader)
     
-
 
     """ Initialize some more stuff"""
     glDepthFunc(GL_LEQUAL)
@@ -260,9 +230,13 @@ def main():
     """
     Graphics.modelView(0)
     while True:
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO)
+        
+
         flagStart = time.clock()
         Cursor.mouse = pygame.mouse.get_pos()
-
+        
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
         Definitions.viewMatrix.push()
@@ -286,9 +260,6 @@ def main():
             j += 1
         
 
-        """ draw scene """
-        Graphics.modelView(1) # 1 == blending
-        Graphics.displayGround(math.fabs(Events.rMax))
 
         """ preprocess entities """
         Graphics.modelView(Events.style)
@@ -296,23 +267,47 @@ def main():
         stick(virtuMan, (virtuMan.x, virtuMan.y, virtuMan.z), (0,0,0,0))
 
         """ draw entities """
-        StickMan.drawStickMan(Events.style)
+        StickMan.drawStickMan(3) # id style
         
         """ cursor feedback """
-        color = glReadPixels( Cursor.mouse[0] , Events.display[1] - Cursor.mouse[1] - 1 , 1 , 1 , GL_RGB , GL_FLOAT )
-        #print(color)
-        
+        color = glReadPixels( Cursor.mouse[0] , Events.display[1] - Cursor.mouse[1] - 1 , 1 , 1 , GL_RED , GL_FLOAT )
+        ID = color[0][0]*len(Definitions.packageStickMan)
+        if ID - int(ID) >= 0.5:
+            Definitions.packageStickMan[int(ID + 0.5)-1][1] = True 
+        else:
+            Definitions.packageStickMan[int(ID)-1][1] = True
         pygame.display.flip()
         
         Definitions.viewMatrix.pop()
 
-        #print(1./(time.clock()-flagStart))
 
+
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0)
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        
+        
+        
+        """ draw scene """
+        Graphics.modelView(1) # 1 == blending
+        Graphics.displayGround(math.fabs(Events.rMax))
+
+        
+        Graphics.modelView(Events.style) # 1 == blending
+        StickMan.drawStickMan(Events.style)
+
+        """ empty package """
+        while len(Definitions.packageStickMan) > 0:
+            Definitions.packageStickMan = Definitions.packageStickMan[:-1]
+
+            
         if State.callSave == True:
             State.save(virtuMan)
         if State.callLoad == True:
             State.load(virtuMan)
-            
+
+        print(1./(time.clock()-flagStart))
+
         pygame.time.wait(10)
 
         
