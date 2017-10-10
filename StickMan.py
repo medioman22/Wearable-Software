@@ -43,6 +43,9 @@ class characteristics(object):
             print(p)
 
             
+selectedParts = [("Origin"),]
+virtuMan = None
+
 def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
 
     """ part transformations """

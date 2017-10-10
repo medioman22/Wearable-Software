@@ -5,7 +5,10 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import time
+import Cursor
 import State
+import Shaders
+import StickMan
 
 import Definitions
 
@@ -86,11 +89,10 @@ def manage():
     lastTime = time.clock()
     k = 18*dt # adjust speed to time instead of frame rate
 
-    
+    Cursor.mouse = pygame.mouse.get_pos()
 
     reset = False
     prevNext = 0
-
 
     """ New events """
     for event in pygame.event.get():
@@ -275,10 +277,13 @@ def manage():
     frontBack_cam += frontBack_acceleration
     leftRight_cam += leftRight_acceleration
     upDown_cam += upDown_acceleration
-
+    
+    Definitions.viewMatrix.push()
     Definitions.viewMatrix.translate(0,0,frontBack_cam)
     Definitions.viewMatrix.rotate(upDown_cam, 1, 0, 0)
     Definitions.viewMatrix.rotate(leftRight_cam, 0, 1, 0)
+    glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
+    Definitions.viewMatrix.pop()
 
     """ parts control """
     if q_keyHold == False and w_keyHold == False:
@@ -288,3 +293,23 @@ def manage():
     if t_keyHold == False and y_keyHold == False:
         pivot[2] = 0
     
+    """ StickMan Events """
+    j = 0
+    while j <  len(StickMan.selectedParts):
+        i = 0
+        while i <  len(StickMan.parts):
+            if StickMan.selectedParts[j] == StickMan.parts[i][StickMan.Data_id]:
+                if reset == True:
+                    StickMan.virtuMan.parts[i][StickMan.Data_angle] = [1,0,0,0]
+                if prevNext != 0:
+                    StickMan.selectedParts[j] = StickMan.parts[(i+prevNext+len(StickMan.parts))% len(StickMan.parts)][StickMan.Data_id]
+                break
+            i += 1
+        j += 1
+
+        
+    """ save/load model """
+    if State.callSave == True:
+        State.save(StickMan.virtuMan)
+    if State.callLoad == True:
+        State.load(StickMan.virtuMan)

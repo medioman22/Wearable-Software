@@ -29,7 +29,6 @@ import State
 import StickMan
 
 
-selectedParts = [("Origin"),]
 part = -1 # global helps through recursivity
 """ recursive function that draws body and sensors """
 def stick(entity = StickMan.characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
@@ -43,7 +42,7 @@ def stick(entity = StickMan.characteristics(), offset = (0,0,0), rotation = (0,0
 
     """ Check if part is selected """
     partIsSelected = False
-    for selectedPart in selectedParts:
+    for selectedPart in StickMan.selectedParts:
         if selectedPart == entity.parts[current_part][StickMan.Data_id]:
             partIsSelected = True
             break
@@ -120,8 +119,8 @@ def main():
     State.createList()
 
     """ Create Entities """
-    virtuMan = StickMan.characteristics(1.7, (0,0,0), StickMan.parts)
-    State.load(virtuMan)
+    StickMan.virtuMan = StickMan.characteristics(1.7, (0,0,0), StickMan.parts)
+    State.load(StickMan.virtuMan)
     Sensors.virtuSens = [Sensors.sensors("Forearm_r", (0,0), (1,1,0)), Sensors.sensors("Forearm_l", (0.1,90), (0,1,0)), Sensors.sensors("Head", (0.1,45)), Sensors.sensors("Forearm_l", (0.2,240)), Sensors.sensors("Upp_leg_r", (0.1,240)), Sensors.sensors("Head", (0.2,300), (0,0,1)), Sensors.sensors("Head", (0.15,160), (1,0,0.5)), Sensors.sensors("Head", (0.15,200), (1,0,0.5))]
 
     """ Create a window """
@@ -224,106 +223,102 @@ def main():
     while True:
         
         flagStart = time.clock()
+        
 
-        """ 
-            Draw on the ID BUFFER.
-            The ID BUFFER is used for the mouse implementation, to know which part is targeted with the cursor.
         """
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO)
-        
-        Cursor.mouse = pygame.mouse.get_pos()
-        
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-
-        Definitions.viewMatrix.push()
-
-        Events.manage() # user interaction
-        
-        glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
+            Events management.
+            Every interaction between the user and the software is aknowledged here.
+        """
+        Events.manage()
 
 
-        """ StickMan Events """
-        j = 0
-        while j <  len(selectedParts):
-            i = 0
-            while i <  len(StickMan.parts):
-                if selectedParts[j] == StickMan.parts[i][StickMan.Data_id]:
-                    if Events.reset == True:
-                        virtuMan.parts[i][StickMan.Data_angle] = [1,0,0,0]
-                    if Events.prevNext != 0:
-                        selectedParts[j] = StickMan.parts[(i+Events.prevNext+len(StickMan.parts))% len(StickMan.parts)][StickMan.Data_id]
-                    break
-                i += 1
-            j += 1
-        
 
-
-        """ preprocess entities : store all needed transformations to significantly lower calculation cost when rendering (redundancy otherwise) """
+        """
+            Preprocess entities.
+            Store all needed transformations to significantly lower calculation cost when rendering (redundancy otherwise between display buffer, ID buffer and bindings)
+        """
         Graphics.modelView(0) # 0 == opaque style
         part = -1 # initialize the recursivity here
-        stick(virtuMan, (virtuMan.x, virtuMan.y, virtuMan.z))
+        stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
 
-        """ fill ID BUFFER """
-        StickMan.drawStickMan(3) # 3 == ID BUFFER style
+
+
+        """ 
+            Draw on the ID buffer.
+            The ID BUFFER is used for the mouse implementation, to know which part is targeted with the cursor.
+        """
+        # bind the ID buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO)
         
+        # clear the ID buffer
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        
+        # fill ID buffer
+        StickMan.drawStickMan(3) # 3 == ID buffer style
         Sensors.displaySensor(3)
+
+        # update ID buffer
+        pygame.display.flip()
         
-        """ cursor feedback """
+
+
+        """
+            cursor feedback.
+            Read the value of the ID buffer at mouse position.
+        """
         color = glReadPixels( Cursor.mouse[0] , Events.display[1] - Cursor.mouse[1] - 1 , 1 , 1 , GL_RGB , GL_FLOAT )
         ID = 0
         if color[0][0][0] != 0: # RED channel for parts ID
             ID = color[0][0][0]*len(Definitions.packageStickMan)
         elif color[0][0][1] != 0: # GREEN channel for sensors ID
             ID = color[0][0][1]*len(Definitions.packageSensors)
-        # convert float to int with errors management
+        
+        #convert float to int with errors management
         if ID < 0.5:
             ID = 0
         elif ID - int(ID) >= 0.5:
             ID = int(ID + 0.5)-1
         else:
             ID = int(ID)-1
-        print(ID)
 
-        """ select part """
+        # select part
         if color[0][0][0] != 0:
             Definitions.packageStickMan[ID][1] = True
         
-        
-        Definitions.viewMatrix.pop()
-        
-        pygame.display.flip()
+
 
         """
-            Draw on the DISPLAY BUFFER.
-            The DISPLAY BUFFER is what the user will see on his screen.
+            Draw on the display buffer.
+            The display buffer is what the user will see on his screen.
         """
+        # bind the display buffer
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
+        
+        # clear the display buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         
-        
-        """ draw scene """
+        # draw scene
         Graphics.modelView(1) # 1 == blending style
         Graphics.displayGround(math.fabs(Events.rMax))
 
-        """ draw body """
+        # draw body
         Graphics.modelView(Events.style)
         StickMan.drawStickMan(Events.style)
 
-        """ draw sensors """
+        # draw sensors
         Graphics.modelView(0) # 0 == opaque style
         Sensors.displaySensor(Events.style)
 
-        """ empty preprocess packages """
+
+
+        """
+            empty preprocess packages
+        """
         while len(Definitions.packageStickMan) > 0:
             Definitions.packageStickMan = Definitions.packageStickMan[:-1]
         while len(Definitions.packageSensors) > 0:
             Definitions.packageSensors = Definitions.packageSensors[:-1]
 
-        """ save/load model """
-        if State.callSave == True:
-            State.save(virtuMan)
-        if State.callLoad == True:
-            State.load(virtuMan)
 
 
         pygame.time.wait(10)
