@@ -69,6 +69,10 @@ def VBO_init():
                       vbo.VBO(dashedIndices, target=GL_ELEMENT_ARRAY_BUFFER),
                       [vbo.VBO(hexagonIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(hexakonIndices, target=GL_ELEMENT_ARRAY_BUFFER)]]
 
+opaque = 0
+blending = 1
+wireframe = 2
+idBuffer = 3
 def modelView(style = 0):
     if style == 0 or style == 3:
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
@@ -147,7 +151,7 @@ def displayGround(rMax = 5):
     
     
     """ send color to shader """
-    glUniform4fv(Shaders.setColor_loc, 1, np.array([0.5,0.5,0,0.05], dtype = np.float32))
+    glUniform4fv(Shaders.setColor_loc, 1, np.array([0.5,0.,1.,0.2], dtype = np.float32))
 
     """ bind hexagon edges vbo """
     indexPositions[vboHexagon][vboEdges].bind()
@@ -174,3 +178,31 @@ def displayGround(rMax = 5):
             j += 1
         i += 1
     Definitions.transform.pop()
+
+def textTexture(text):
+    font = pygame.font.Font(None, 128)
+    textSurface = font.render(text, True, (255,255,255,255), (255,127,0,255))
+    ix, iy = textSurface.get_width(), textSurface.get_height()
+    image = pygame.image.tostring(textSurface, "RGBA", True)
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1)
+    TEX_TEXTURE = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, TEX_TEXTURE)
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, ix, iy, 0, GL_RGBA, GL_UNSIGNED_BYTE, image)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
+    
+    glUseProgram(0)
+    modelView(opaque)
+    glClear(GL_DEPTH_BUFFER_BIT)
+    glLoadIdentity()
+    glTranslatef(-1 + 0.05*ix/iy,0.95,0.0)
+    glScalef(0.05*ix/iy,0.05,1.)
+    glBindTexture(GL_TEXTURE_2D, TEX_TEXTURE)
+    glBegin(GL_QUADS)
+    glTexCoord2f(0.0, 0.0); glVertex3f(-1.0, -1.0,  1.0)
+    glTexCoord2f(1.0, 0.0); glVertex3f( 1.0, -1.0,  1.0)
+    glTexCoord2f(1.0, 1.0); glVertex3f( 1.0,  1.0,  1.0)
+    glTexCoord2f(0.0, 1.0); glVertex3f(-1.0,  1.0,  1.0)
+    glEnd()
+    glUseProgram(Shaders.shader)

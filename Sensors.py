@@ -54,7 +54,7 @@ def displaySensor(style):
         Definitions.transform.set(pack[0])
 
         """ send color to shader """
-        if style != 3:
+        if style != Graphics.idBuffer:
             glUniform4fv(Shaders.setColor_loc, 1, np.array([sensor.color[0], sensor.color[1], sensor.color[2], 1.], dtype = np.float32))
         else:
             glUniform4fv(Shaders.setColor_loc, 1, np.array([0, i, 0, 1.], dtype = np.float32))
@@ -93,7 +93,7 @@ def displaySensor(style):
         Shaders.transform_loc = glGetUniformLocation(Shaders.shader, "transform")
 
         """ bind pyramide vbo """
-        if style != 3:
+        if style != Graphics.idBuffer:
             Graphics.indexPositions[Graphics.vboPyramide][Graphics.vboEdges].bind()
         else:
             Graphics.indexPositions[Graphics.vboPyramide][Graphics.vboSurfaces].bind()
@@ -101,7 +101,7 @@ def displaySensor(style):
         glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         """ draw vbo """
         glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, Definitions.transform.peek())
-        if style != 3:
+        if style != Graphics.idBuffer:
             glDrawElements(GL_LINES, 12, GL_UNSIGNED_INT, None)
         else:
             glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, None)

@@ -191,6 +191,8 @@ def main():
     """ Create the shaders """
     Shaders.shader = OpenGL.GL.shaders.compileProgram(OpenGL.GL.shaders.compileShader(Shaders.vertex_shader,GL_VERTEX_SHADER),
                                                       OpenGL.GL.shaders.compileShader(Shaders.fragment_shader,GL_FRAGMENT_SHADER))
+    glUseProgram(Shaders.shader)
+
 
     position = glGetAttribLocation(Shaders.shader, "position")
     glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0*4))
@@ -199,14 +201,16 @@ def main():
     color = glGetAttribLocation(Shaders.shader, "color")
     glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(3*4))
     glEnableVertexAttribArray(color)
-    
-    glUseProgram(Shaders.shader)
-    
+
 
     """ Initialize some more stuff"""
+    
+    glEnable(GL_TEXTURE_2D)
     glDepthFunc(GL_LEQUAL)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST)
+    
+    
 
     """ Shader var. locations """
     Shaders.proj_loc = glGetUniformLocation(Shaders.shader, "projection")
@@ -237,7 +241,6 @@ def main():
             Preprocess entities.
             Store all needed transformations to significantly lower calculation cost when rendering (redundancy otherwise between display buffer, ID buffer and bindings)
         """
-        Graphics.modelView(0) # 0 == opaque style
         part = -1 # initialize the recursivity here
         stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
 
@@ -254,11 +257,10 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         
         # fill ID buffer
-        StickMan.drawStickMan(3) # 3 == ID buffer style
-        Sensors.displaySensor(3)
+        Graphics.modelView(Graphics.opaque)
+        StickMan.drawStickMan(Graphics.idBuffer)
+        Sensors.displaySensor(Graphics.idBuffer)
 
-        # update ID buffer
-        pygame.display.flip()
         
 
 
@@ -271,7 +273,7 @@ def main():
         if color[0][0][0] != 0: # RED channel for parts ID
             ID = color[0][0][0]*len(Definitions.packageStickMan)
         elif color[0][0][1] != 0: # GREEN channel for sensors ID
-            ID = color[0][0][1]*len(Definitions.packageSensors)
+            ID = color[0][0][1]*len(Definitions.packageSensors) + 1
         
         #convert float to int with errors management
         if ID < 0.5:
@@ -298,7 +300,7 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         
         # draw scene
-        Graphics.modelView(1) # 1 == blending style
+        Graphics.modelView(Graphics.blending)
         Graphics.displayGround(math.fabs(Events.rMax))
 
         # draw body
@@ -306,10 +308,15 @@ def main():
         StickMan.drawStickMan(Events.style)
 
         # draw sensors
-        Graphics.modelView(0) # 0 == opaque style
+        Graphics.modelView(Graphics.opaque)
         Sensors.displaySensor(Events.style)
+        
+        # draw text
+        Graphics.textTexture(str(ID))
+        
 
-
+        # update display buffer
+        pygame.display.flip()
 
         """
             empty preprocess packages

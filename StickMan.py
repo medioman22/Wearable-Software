@@ -82,11 +82,11 @@ def drawStickMan(style):
 
     
     """ send color to shader """
-    if style == 0:
+    if style == Graphics.opaque:
         glUniform4fv(Shaders.setColor_loc, 1, np.array([0.5,0.5,0.5,1.], dtype = np.float32))
-    elif style == 1:
+    elif style == Graphics.blending:
         glUniform4fv(Shaders.setColor_loc, 1, np.array([1.,1.,1.,1.], dtype = np.float32))
-    if style == 0 or style == 1:
+    if style == Graphics.opaque or style == Graphics.blending:
         """ bind cube edges vbo """
         Graphics.indexPositions[Graphics.vboCube][Graphics.vboEdges].bind()
         Graphics.vertexPositions[Graphics.vboCube].bind()
