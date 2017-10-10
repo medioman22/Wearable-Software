@@ -255,6 +255,10 @@ class matrix44:
         else:
             return []
 
+    def set(self, M):
+        
+        self.items[len(self.items)-1] = M
+
     def translate(self,x,y,z):
         t = np.array([[1, 0, 0, 0],
                       [0, 1, 0, 0],
@@ -336,9 +340,16 @@ class matrix44:
         
         self.items[len(self.items)-1] = np.dot(P, self.items[len(self.items)-1])
         
-projectionMatrix2 = matrix44(np.identity(4))
+
+"""
+    The model, view and projection matrices are three separate matrices.
+    Model maps from an object's local coordinate space into world space, view from world space to camera space, projection from camera to screen.
+"""
+projectionMatrix = matrix44(np.identity(4))
 viewMatrix = matrix44(np.identity(4))
 modelMatrix = matrix44(np.identity(4))
 transform = matrix44(np.identity(4))
 
+""" transformation matrix storage while preprocessing """
 packageStickMan = []
+packageSensors = []

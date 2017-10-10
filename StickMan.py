@@ -43,12 +43,7 @@ class characteristics(object):
             print(p)
 
             
-def preprocessPart(x,y,z,dx,dy,dz,partIsSelected):
-    """ mouse on part ? """
-    #if Cursor.mouseOnPart():
-    #    partIsSelected = True
-    #else:
-    #    partIsSelected = False
+def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
 
     """ part transformations """
     Definitions.transform.push()
@@ -56,8 +51,7 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected):
     Definitions.transform.scale(x,y,z)
     
     """ store transformation in package """
-    glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, Definitions.transform.peek())
-    Definitions.packageStickMan = Definitions.packageStickMan + [[Definitions.transform.peek(), partIsSelected],]
+    Definitions.packageStickMan = Definitions.packageStickMan + [[Definitions.transform.peek(), partIsSelected, ID],]
 
     Definitions.transform.pop()
 

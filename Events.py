@@ -30,7 +30,7 @@ upDown_cap = 5.
 frontBack_acceleration = 0.
 front_keyHold = False
 back_keyHold = False
-frontBack_cam = -4
+frontBack_cam = -2
 frontBack_cap = 0.2
 
 """ parts control """
@@ -188,7 +188,7 @@ def manage():
         if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
             prevNext = -1
         if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-            style = (style + 1)%3
+            style = (style + 1)%4
         if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
             State.callSave = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_l:

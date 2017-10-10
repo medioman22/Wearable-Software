@@ -46,6 +46,7 @@ def VBO_init():
     """ Create the "pyramide" VBO & index buffer arrays """
     pyramideVertices = np.array([[0,0,0],    [1,0.5,0],   [1,-0.25,0.25*math.sqrt(3)],    [1,-0.25,-0.25*math.sqrt(3)]],    dtype='f')
     pyramideIndices = np.array([[0,1,   0,2,    0,3,    1,2,    2,3,    3,1]], dtype=np.int32)
+    piramideIndices = np.array([[0,1,2,   0,2,3,    0,3,1,    1,2,3]], dtype=np.int32)
     
     """ Create the "dashed" VBO & index buffer arrays """
     dashedVertices = np.array([[0,0,0],    [1/6.,0,0],   [2/6.,0,0],    [3/6.,0,0],    [4/6.,0,0],    [5/6.,0,0],    [6/6.,0,0]],    dtype='f')
@@ -64,12 +65,12 @@ def VBO_init():
     """ Create the VBO & index buffer objects """
     vertexPositions = [vbo.VBO(cubeVertices), vbo.VBO(pyramideVertices), vbo.VBO(dashedVertices), vbo.VBO(hexagonVertices)]
     indexPositions = [[vbo.VBO(cubeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(kubeIndices, target=GL_ELEMENT_ARRAY_BUFFER)],
-                      vbo.VBO(pyramideIndices, target=GL_ELEMENT_ARRAY_BUFFER),
+                      [vbo.VBO(pyramideIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(piramideIndices, target=GL_ELEMENT_ARRAY_BUFFER)],
                       vbo.VBO(dashedIndices, target=GL_ELEMENT_ARRAY_BUFFER),
                       [vbo.VBO(hexagonIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(hexakonIndices, target=GL_ELEMENT_ARRAY_BUFFER)]]
 
 def modelView(style = 0):
-    if style == 0:
+    if style == 0 or style == 3:
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         glEnable(GL_DEPTH_TEST)
         glDisable(GL_BLEND)

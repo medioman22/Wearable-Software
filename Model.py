@@ -94,13 +94,14 @@ def stick(entity = StickMan.characteristics(), offset = (0,0,0), rotation = (0,0
     dx = 0.5*entity.size*entity.parts[current_part][StickMan.Data_dimensions][0]
     dy = 0
     dz = 0
-    StickMan.preprocessPart(x,y,z,dx,dy,dz,partIsSelected)
+    StickMan.preprocessPart(x,y,z,dx,dy,dz,partIsSelected, entity.parts[current_part][StickMan.Data_id])
 
-    """ draw sensors """
+    """ preprocess sensors """
     for sensor in Sensors.virtuSens:
         if sensor.attach == entity.parts[current_part][StickMan.Data_id]:
-            l = 0.707*max(entity.size*entity.parts[current_part][StickMan.Data_dimensions][1],entity.size*entity.parts[current_part][StickMan.Data_dimensions][2])
-            Sensors.displaySensor(sensor, l)
+            sensor.h = 0.707*max(entity.size*entity.parts[current_part][StickMan.Data_dimensions][1],entity.size*entity.parts[current_part][StickMan.Data_dimensions][2])
+            """ store transformation in package """
+            Definitions.packageSensors = Definitions.packageSensors + [[Definitions.transform.peek(), sensor],]
 
 
     """ recursive call for all parts attached to the current one """
@@ -127,8 +128,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode(Events.display, pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE|NOFRAME)
     
-    """ truxture """
-
+    """ texture """
     # create texture
     plane_texture = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, plane_texture)
@@ -142,12 +142,14 @@ def main():
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Events.display[0], Events.display[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
     glBindTexture(GL_TEXTURE_2D, 0)
 
+    """ render buffer for depth """
     # create render buffer
     rbo = glGenRenderbuffers(1)
     glBindRenderbuffer(GL_RENDERBUFFER, rbo)
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Events.display[0], Events.display[1])
     glBindRenderbuffer(GL_RENDERBUFFER, 0)
-
+    
+    """ frame buffer object """
     # create frame buffer
     FBO = glGenFramebuffers(1)
     glBindFramebuffer(GL_FRAMEBUFFER, FBO)
@@ -157,9 +159,6 @@ def main():
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo)
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
-    
-
-    """ Generate the FBOs """
     
     """ Generate the VBOs """
     Graphics.VBO_init()
@@ -210,31 +209,28 @@ def main():
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST)
 
-    """ matrix stuff """
-    
-    Definitions.projectionMatrix2.perspectiveProjection(90, Events.display[0]/Events.display[1], 0.1, 100.0)
-    
+    """ Shader var. locations """
     Shaders.proj_loc = glGetUniformLocation(Shaders.shader, "projection")
     Shaders.view_loc = glGetUniformLocation(Shaders.shader, "view")
     Shaders.model_loc = glGetUniformLocation(Shaders.shader, "model")
     Shaders.transform_loc = glGetUniformLocation(Shaders.shader, "transform")
     Shaders.setColor_loc = glGetUniformLocation(Shaders.shader, "setColor")
-
-    glUniformMatrix4fv(Shaders.proj_loc, 1, GL_FALSE, Definitions.projectionMatrix2.peek())
+    
+    Definitions.projectionMatrix.perspectiveProjection(90, Events.display[0]/Events.display[1], 0.1, 100.0)
+    glUniformMatrix4fv(Shaders.proj_loc, 1, GL_FALSE, Definitions.projectionMatrix.peek())
     glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
 
-
-    """
-    The model, view and projection matrices are three separate matrices.
-    Model maps from an object's local coordinate space into world space, view from world space to camera space, projection from camera to screen.
-    """
-    Graphics.modelView(0)
+    """ main loop """
     while True:
         
+        flagStart = time.clock()
+
+        """ 
+            Draw on the ID BUFFER.
+            The ID BUFFER is used for the mouse implementation, to know which part is targeted with the cursor.
+        """
         glBindFramebuffer(GL_FRAMEBUFFER, FBO)
         
-
-        flagStart = time.clock()
         Cursor.mouse = pygame.mouse.get_pos()
         
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
@@ -244,6 +240,7 @@ def main():
         Events.manage() # user interaction
         
         glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
+
 
         """ StickMan Events """
         j = 0
@@ -261,56 +258,77 @@ def main():
         
 
 
-        """ preprocess entities """
-        Graphics.modelView(0) # opaque style
+        """ preprocess entities : store all needed transformations to significantly lower calculation cost when rendering (redundancy otherwise) """
+        Graphics.modelView(0) # 0 == opaque style
         part = -1 # initialize the recursivity here
-        stick(virtuMan, (virtuMan.x, virtuMan.y, virtuMan.z), (0,0,0,0))
+        stick(virtuMan, (virtuMan.x, virtuMan.y, virtuMan.z))
 
-        """ draw entities """
-        StickMan.drawStickMan(3) # id style
+        """ fill ID BUFFER """
+        StickMan.drawStickMan(3) # 3 == ID BUFFER style
+        
+        Sensors.displaySensor(3)
         
         """ cursor feedback """
-        color = glReadPixels( Cursor.mouse[0] , Events.display[1] - Cursor.mouse[1] - 1 , 1 , 1 , GL_RED , GL_FLOAT )
-        ID = color[0][0]*len(Definitions.packageStickMan)
-        if ID < 0.5: # otherwise 0 - 1 ==> 49
-            Definitions.packageStickMan[0][1] = True
+        color = glReadPixels( Cursor.mouse[0] , Events.display[1] - Cursor.mouse[1] - 1 , 1 , 1 , GL_RGB , GL_FLOAT )
+        ID = 0
+        if color[0][0][0] != 0: # RED channel for parts ID
+            ID = color[0][0][0]*len(Definitions.packageStickMan)
+        elif color[0][0][1] != 0: # GREEN channel for sensors ID
+            ID = color[0][0][1]*len(Definitions.packageSensors)
+        # convert float to int with errors management
+        if ID < 0.5:
+            ID = 0
         elif ID - int(ID) >= 0.5:
-            Definitions.packageStickMan[int(ID + 0.5)-1][1] = True 
+            ID = int(ID + 0.5)-1
         else:
-            Definitions.packageStickMan[int(ID)-1][1] = True
-        pygame.display.flip()
+            ID = int(ID)-1
+        print(ID)
+
+        """ select part """
+        if color[0][0][0] != 0:
+            Definitions.packageStickMan[ID][1] = True
+        
         
         Definitions.viewMatrix.pop()
-
-
-
         
+        pygame.display.flip()
+
+        """
+            Draw on the DISPLAY BUFFER.
+            The DISPLAY BUFFER is what the user will see on his screen.
+        """
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         
         
-        
         """ draw scene """
-        Graphics.modelView(1) # 1 == blending
+        Graphics.modelView(1) # 1 == blending style
         Graphics.displayGround(math.fabs(Events.rMax))
 
-        
-        Graphics.modelView(Events.style) # 1 == blending
+        """ draw body """
+        Graphics.modelView(Events.style)
         StickMan.drawStickMan(Events.style)
 
-        """ empty package """
+        """ draw sensors """
+        Graphics.modelView(0) # 0 == opaque style
+        Sensors.displaySensor(Events.style)
+
+        """ empty preprocess packages """
         while len(Definitions.packageStickMan) > 0:
             Definitions.packageStickMan = Definitions.packageStickMan[:-1]
+        while len(Definitions.packageSensors) > 0:
+            Definitions.packageSensors = Definitions.packageSensors[:-1]
 
-            
+        """ save/load model """
         if State.callSave == True:
             State.save(virtuMan)
         if State.callLoad == True:
             State.load(virtuMan)
 
-        print(1./(time.clock()-flagStart))
 
         pygame.time.wait(10)
+
+        #print(1./(time.clock()-flagStart))
 
         
 
