@@ -6,23 +6,19 @@ import OpenGL.GL.shaders
 vertex_shader = """
     #version 330
     in vec3 position;
-    in vec3 color;
     
     uniform mat4 projection;
     uniform mat4 view;
     uniform mat4 model;
     uniform mat4 transform;
 
-    out vec3 newColor;
     void main() {
         gl_Position =  projection * view * model * transform * vec4(position, 1.0f);
-        newColor = color;
     }
     """
     
 fragment_shader = """
     #version 330
-    in vec3 newColor;
     uniform vec4 setColor;
     layout(location = 0) out vec4 outColor;
     void main()

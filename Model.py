@@ -23,6 +23,7 @@ import Cursor
 import Definitions
 import Events
 import Graphics
+import GUI
 import Sensors
 import Shaders
 import State
@@ -126,8 +127,9 @@ def main():
     """ Create a window """
     pygame.init()
     screen = pygame.display.set_mode(Events.display, pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE|NOFRAME)
+    glClearColor(0.0, 0.0, 0.0, 0.0);
     
-    """ texture """
+    """ texture for ID buffer """
     # create texture
     plane_texture = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, plane_texture)
@@ -141,14 +143,16 @@ def main():
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Events.display[0], Events.display[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
     glBindTexture(GL_TEXTURE_2D, 0)
 
-    """ render buffer for depth """
+
+    """ render buffer for depth for ID buffer """
     # create render buffer
     rbo = glGenRenderbuffers(1)
     glBindRenderbuffer(GL_RENDERBUFFER, rbo)
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Events.display[0], Events.display[1])
     glBindRenderbuffer(GL_RENDERBUFFER, 0)
     
-    """ frame buffer object """
+
+    """ frame buffer object as ID buffer """
     # create frame buffer
     FBO = glGenFramebuffers(1)
     glBindFramebuffer(GL_FRAMEBUFFER, FBO)
@@ -161,31 +165,6 @@ def main():
     
     """ Generate the VBOs """
     Graphics.VBO_init()
-    #       positions           colors          texture?
-    cube = [-0.5, -0.5, -0.5,   1., 0., 0.,
-             0.5, -0.5, -0.5,   0., 1., 0.,
-             0.5,  0.5, -0.5,   0., 0., 1.,
-            -0.5,  0.5, -0.5,   1., 1., 1.,
-            -0.5, -0.5,  0.5,   1., 0., 0.,
-             0.5, -0.5,  0.5,   0., 1., 0.,
-             0.5,  0.5,  0.5,   0., 0., 1.,
-            -0.5,  0.5,  0.5,   1., 1., 1.]
-    cube = np.array(cube, dtype = np.float32)
-    indices = [0, 1, 2, 2, 3, 0,
-               4, 5, 6, 6, 7, 4,
-               4, 5, 1, 1, 0, 4,
-               6, 7, 3, 3, 2, 6,
-               5, 6, 2, 2, 1, 5,
-               7, 4, 0, 0, 3, 7]
-    indices = np.array(indices, dtype = np.uint32)
-
-    VBO_test = glGenBuffers(1)
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_test)
-    glBufferData(GL_ARRAY_BUFFER, len(cube)*4, cube, GL_STATIC_DRAW)
-
-    EBO_test = glGenBuffers(1)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_test)
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, len(indices)*4, indices, GL_STATIC_DRAW)
 
     
     """ Create the shaders """
@@ -194,22 +173,17 @@ def main():
     glUseProgram(Shaders.shader)
 
 
+    """ Enable position attrib ? """
     position = glGetAttribLocation(Shaders.shader, "position")
-    glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0*4))
+    glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(position)
-
-    color = glGetAttribLocation(Shaders.shader, "color")
-    glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(3*4))
-    glEnableVertexAttribArray(color)
 
 
     """ Initialize some more stuff"""
-    
+    GUI.TEX_TEXTURE = glGenTextures(1)
     glEnable(GL_TEXTURE_2D)
     glDepthFunc(GL_LEQUAL)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST)
-    
     
 
     """ Shader var. locations """
@@ -225,13 +199,13 @@ def main():
 
     """ main loop """
     while True:
-        
+        # keep track of loop frequency
         flagStart = time.clock()
         
 
         """
             Events management.
-            Every interaction between the user and the software is aknowledged here.
+            Most interactions between the user and the software is aknowledged here.
         """
         Events.manage()
 
@@ -248,7 +222,7 @@ def main():
 
         """ 
             Draw on the ID buffer.
-            The ID BUFFER is used for the mouse implementation, to know which part is targeted with the cursor.
+            The ID BUFFER is used for the mouse implementation, to know which body/sensor/gui part is targeted with the cursor.
         """
         # bind the ID buffer
         glBindFramebuffer(GL_FRAMEBUFFER, FBO)
@@ -260,32 +234,17 @@ def main():
         Graphics.modelView(Graphics.opaque)
         StickMan.drawStickMan(Graphics.idBuffer)
         Sensors.displaySensor(Graphics.idBuffer)
-
+        glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
+        GUI.guiId = 0
+        GUI.textTexture(GUI.sensorTypes, -1, 1, 1, 1, True)
         
 
 
         """
-            cursor feedback.
-            Read the value of the ID buffer at mouse position.
+            Mouse interaction with ID buffer.
+            Read the value of the ID buffer at mouse position, do some stuff.
         """
-        color = glReadPixels( Cursor.mouse[0] , Events.display[1] - Cursor.mouse[1] - 1 , 1 , 1 , GL_RGB , GL_FLOAT )
-        ID = 0
-        if color[0][0][0] != 0: # RED channel for parts ID
-            ID = color[0][0][0]*len(Definitions.packageStickMan)
-        elif color[0][0][1] != 0: # GREEN channel for sensors ID
-            ID = color[0][0][1]*len(Definitions.packageSensors) + 1
-        
-        #convert float to int with errors management
-        if ID < 0.5:
-            ID = 0
-        elif ID - int(ID) >= 0.5:
-            ID = int(ID + 0.5)-1
-        else:
-            ID = int(ID)-1
-
-        # select part
-        if color[0][0][0] != 0:
-            Definitions.packageStickMan[ID][1] = True
+        Cursor.mouseManage()
         
 
 
@@ -299,9 +258,12 @@ def main():
         # clear the display buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         
+
         # draw scene
-        Graphics.modelView(Graphics.blending)
-        Graphics.displayGround(math.fabs(Events.rMax))
+        if Events.style != Graphics.idBuffer:
+            Graphics.modelView(Graphics.blending)
+            Graphics.displayGround(math.fabs(Events.rMax))
+        
 
         # draw body
         Graphics.modelView(Events.style)
@@ -311,8 +273,17 @@ def main():
         Graphics.modelView(Graphics.opaque)
         Sensors.displaySensor(Events.style)
         
-        # draw text
-        Graphics.textTexture(str(ID))
+        # draw GUI
+        Graphics.modelView(Graphics.opaque)
+        glClear(GL_DEPTH_BUFFER_BIT)
+        GUI.guiId = 0
+        GUI.textTexture(GUI.sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer)
+        if Events.style != Graphics.idBuffer:
+            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False)
+            GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name)], 1, -1, -1, -1, False)
+            GUI.textTexture(['Model : ' + str(State.fileName[State.currentFile])], 0, 1, 0, 1, False)
+            GUI.textTexture(['J. Heches'], 0, -1, 0, -1, False)
+        
         
 
         # update display buffer
@@ -330,7 +301,6 @@ def main():
 
         pygame.time.wait(10)
 
-        #print(1./(time.clock()-flagStart))
 
         
 

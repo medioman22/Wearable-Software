@@ -1,63 +1,56 @@
+import pygame
+from pygame.locals import *
+
+from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
 
+import Events
+import Definitions
+import GUI
+import StickMan
 
 mouse = [0,0]
+ID = 0
+name = ''
+def mouseManage():
+    global ID
+    global name
 
-
-
-def barycenter(points):
-    center = [0.,0.]
-    for point in points:
-        center[0] += point[0]
-        center[1] += point[1]
-    center[0] /= float(len(points))
-    center[1] /= float(len(points))
-    return center
-
-def intersect(P, R, Q, S):
-    R = np.subtract(R,P)
-    S = np.subtract(S,Q)
-    QP = np.subtract(Q,P)
-    RS = np.cross(R,S)
-    QPR = np.cross(QP, R)
-    QPS = np.cross(QP, S)
-    t = np.divide(QPS, float(RS))
-    u = np.divide(QPR, float(RS))
-    if RS == 0 and QPR == 0:
-        #case 1 : colinear
-        return [False, 0, 0] #change later to check superposition
-    elif RS == 0 and QPR != 0:
-        #case 2 : parallel
-        return [False, 0, 0]
-    elif RS != 0 and t >= 0 and t <= 1 and u >= 0 and u <= 1:
-        #case 3 : one point intersection
-        return [True, np.add(P, np.multiply(t, R))]
+    color = glReadPixels( mouse[0] , Events.display[1] - mouse[1] - 1 , 1 , 1 , GL_RGBA , GL_FLOAT )
+    ID = 0
+    name = ''
+    if color[0][0][0] != 0: # RED channel for parts ID
+        ID = color[0][0][0]*len(Definitions.packageStickMan)
+    elif color[0][0][1] != 0: # GREEN channel for sensors ID
+        ID = color[0][0][1]*len(Definitions.packageSensors) + 1
+        name = ' (sensor)'
+    elif color[0][0][2] != 0: # BLUE channel for gui ID
+        ID = color[0][0][2]*len(GUI.sensorTypes) + 1
+        name = ' (gui)'
+        
+    #convert float to int with errors management
+    if ID < 0.5:
+        ID = 0
+    elif ID - int(ID) >= 0.5:
+        ID = int(ID + 0.5)-1
     else:
-        #case 4 : no intersection
-        return [False, 0, 0]
-
-cube = [[[-0.5,-0.5,-0.5], [0.5,-0.5,-0.5],  [0.5,0.5,-0.5],  [-0.5,0.5,-0.5]],   \
-        [[-0.5,-0.5,-0.5], [-0.5,-0.5,0.5],  [0.5,-0.5,0.5],  [0.5,-0.5,-0.5]],   \
-        [[0.5,-0.5,-0.5],  [0.5,-0.5,0.5],   [0.5,0.5,0.5],   [0.5,0.5,-0.5] ],    \
-        [[0.5,0.5,-0.5],   [0.5,0.5,0.5],    [-0.5,0.5,0.5],  [-0.5,0.5,-0.5]],   \
-        [[-0.5,0.5,-0.5],  [-0.5,0.5,0.5],   [-0.5,-0.5,0.5], [-0.5,-0.5,-0.5]],  \
-        [[-0.5,0.5,0.5],   [0.5,0.5,0.5],    [0.5,-0.5,0.5],  [-0.5,-0.5,0.5]]]
-def mouseOnPart():
-    global mouse
-    i = 0
-    while i < 6:
-        p0 = gluProject(cube[i][0][0], cube[i][0][1], cube[i][0][2])
-        p1 = gluProject(cube[i][1][0], cube[i][1][1], cube[i][1][2])
-        p2 = gluProject(cube[i][2][0], cube[i][2][1], cube[i][2][2])
-        p3 = gluProject(cube[i][3][0], cube[i][3][1], cube[i][3][2])
-        points = [[p0[0], 900-p0[1]],[p1[0], 900-p1[1]],[p2[0], 900-p2[1]],[p3[0], 900-p3[1]]]
-        ctr = barycenter(points)
-        I = intersect(mouse,ctr,points[0],points[1])
-        J = intersect(mouse,ctr,points[1],points[2])
-        K = intersect(mouse,ctr,points[2],points[3])
-        L = intersect(mouse,ctr,points[3],points[0])
-        if I[0] == False and J[0] == False and K[0] == False and L[0] == False:
-            return True
-        i += 1
-    return False
+        ID = int(ID)-1
+            
+    # select part
+    if color[0][0][0] != 0:
+        if Events.mouse_click == True:
+            Select = True
+            for part in StickMan.selectedParts:
+                if part == StickMan.parts[ID][StickMan.Data_id]:
+                    Select = False
+                    StickMan.selectedParts.remove(part)
+                    break
+            if Select == True:
+                StickMan.selectedParts += [StickMan.parts[ID][StickMan.Data_id],]
+        Definitions.packageStickMan[ID][1] = True
+        name = ' = ' + StickMan.parts[ID][StickMan.Data_id]
+    if color[0][0][2] != 0:
+        GUI.selectedGuiId = ID
+    else:
+        GUI.selectedGuiId = 0

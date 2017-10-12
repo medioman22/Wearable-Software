@@ -17,6 +17,9 @@ display = [900, 900] # window size
 
 lastTime = 0 # for time between frames
 
+""" mouse controls """
+mouse_click = False
+
 """ camera controls """
 leftRight_acceleration = 0.
 left_keyHold = False
@@ -59,6 +62,8 @@ def manage():
 
     global lastTime
 
+    global mouse_click
+
     global leftRight_acceleration
     global left_keyHold
     global right_keyHold
@@ -90,7 +95,8 @@ def manage():
     k = 18*dt # adjust speed to time instead of frame rate
 
     Cursor.mouse = pygame.mouse.get_pos()
-
+    
+    mouse_click = False
     reset = False
     prevNext = 0
 
@@ -108,6 +114,10 @@ def manage():
         if event.type == VIDEORESIZE:
             display = event.size
             # not sure what to do after...
+
+        """ mouse controller """
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_click = True
 
         """ Camera controller """
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
