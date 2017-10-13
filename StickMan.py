@@ -65,9 +65,11 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
 def drawStickMan(style):
     """ send color to shader """
     glUniform4fv(Shaders.setColor_loc, 1, np.array([1.,1.,1.,0.3], dtype = np.float32))
-    """ bind cube surfaces vbo """
-    Graphics.indexPositions[Graphics.vboCube][Graphics.vboSurfaces].bind()
-    Graphics.vertexPositions[Graphics.vboCube].bind()
+    """ choose vbo """
+    vboId = Graphics.vboCube
+    """ bind surfaces vbo """
+    Graphics.indexPositions[vboId][Graphics.vboSurfaces].bind()
+    Graphics.vertexPositions[vboId].bind()
     glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
     """ draw all at once """
     i = 0
@@ -79,7 +81,7 @@ def drawStickMan(style):
             glUniform4fv(Shaders.setColor_loc, 1, np.array([i,0.,0.,1.], dtype = np.float32))
         glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[0])
         """ draw vbo """
-        glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, None)
+        glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
         if pack[1] == True:
             glUniform4fv(Shaders.setColor_loc, 1, np.array([1.,1.,1.,0.3], dtype = np.float32))
 
@@ -90,15 +92,15 @@ def drawStickMan(style):
     elif style == Graphics.blending:
         glUniform4fv(Shaders.setColor_loc, 1, np.array([1.,1.,1.,1.], dtype = np.float32))
     if style == Graphics.opaque or style == Graphics.blending:
-        """ bind cube edges vbo """
-        Graphics.indexPositions[Graphics.vboCube][Graphics.vboEdges].bind()
-        Graphics.vertexPositions[Graphics.vboCube].bind()
+        """ bind edges vbo """
+        Graphics.indexPositions[vboId][Graphics.vboEdges].bind()
+        Graphics.vertexPositions[vboId].bind()
         glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         """ draw all at once """
         for pack in Definitions.packageStickMan:
             glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[0])
             """ draw vbo """
-            glDrawElements(GL_LINES, 48, GL_UNSIGNED_INT, None)
+            glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
 
             
 

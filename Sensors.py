@@ -76,14 +76,16 @@ def displaySensor(style):
             Definitions.transform.scale(sensor.h,sensor.h,sensor.h)
             """ send transformation matrix to shader """
             glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, Definitions.transform.peek())
-
+            
+            """ choose vbo """
+            vboId = Graphics.vboDashed
             """ bind dashed vbo """
-            Graphics.indexPositions[Graphics.vboDashed].bind()
-            Graphics.vertexPositions[Graphics.vboDashed].bind()
+            Graphics.indexPositions[vboId][Graphics.vboEdges].bind()
+            Graphics.vertexPositions[vboId].bind()
             glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
 
             """ draw vbo """
-            glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, None)
+            glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
             Definitions.transform.pop()
         
         """ transformation matrix update """
@@ -91,19 +93,21 @@ def displaySensor(style):
         Definitions.transform.scale(0.03,0.03,0.03)
         """ send transformation matrix to shader """
         Shaders.transform_loc = glGetUniformLocation(Shaders.shader, "transform")
-
+        
+        """ choose vbo """
+        vboId = Graphics.vboPyramide
         """ bind pyramide vbo """
         if style != Graphics.idBuffer:
-            Graphics.indexPositions[Graphics.vboPyramide][Graphics.vboEdges].bind()
+            Graphics.indexPositions[vboId][Graphics.vboEdges].bind()
         else:
-            Graphics.indexPositions[Graphics.vboPyramide][Graphics.vboSurfaces].bind()
+            Graphics.indexPositions[vboId][Graphics.vboSurfaces].bind()
         Graphics.vertexPositions[Graphics.vboPyramide].bind()
         glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         """ draw vbo """
         glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, Definitions.transform.peek())
         if style != Graphics.idBuffer:
-            glDrawElements(GL_LINES, 12, GL_UNSIGNED_INT, None)
+            glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
         else:
-            glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, None)
+            glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
         Definitions.transform.pop()
         Definitions.transform.pop()

@@ -85,7 +85,6 @@ def main():
     
     """ Generate the VBOs """
     Graphics.VBO_init()
-
     
     """ Create the shaders """
     Shaders.shader = OpenGL.GL.shaders.compileProgram(OpenGL.GL.shaders.compileShader(Shaders.vertex_shader,GL_VERTEX_SHADER),

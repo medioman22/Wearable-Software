@@ -16,7 +16,8 @@ import Shaders
 
 vertexPositions = []
 indexPositions = []
-
+nbIndex = []
+styleIndex = []
 
 vboCube = 0
 vboPyramide = 1
@@ -27,6 +28,8 @@ vboSurfaces = 1
 def VBO_init():
     global vertexPositions
     global indexPositions
+    global nbIndex
+    global styleIndex
     """ init VBO & EBO buffers """
     VBO_init = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, VBO_init)
@@ -73,8 +76,16 @@ def VBO_init():
     vertexPositions = [vbo.VBO(cubeVertices), vbo.VBO(pyramideVertices), vbo.VBO(dashedVertices), vbo.VBO(hexagonVertices)]
     indexPositions = [[vbo.VBO(cubeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(kubeIndices, target=GL_ELEMENT_ARRAY_BUFFER)],
                       [vbo.VBO(pyramideIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(piramideIndices, target=GL_ELEMENT_ARRAY_BUFFER)],
-                      vbo.VBO(dashedIndices, target=GL_ELEMENT_ARRAY_BUFFER),
+                      [vbo.VBO(dashedIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(dashedIndices, target=GL_ELEMENT_ARRAY_BUFFER)],
                       [vbo.VBO(hexagonIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(hexakonIndices, target=GL_ELEMENT_ARRAY_BUFFER)]]
+    nbIndex = [[cubeIndices.size, kubeIndices.size],
+               [pyramideIndices.size, piramideIndices.size],
+               [dashedIndices.size, dashedIndices.size],
+               [hexagonIndices.size, hexakonIndices.size]]
+    styleIndex = [[GL_LINES, GL_QUADS],
+                  [GL_LINES, GL_TRIANGLES],
+                  [GL_LINES, GL_LINES],
+                  [GL_LINES, GL_QUADS]]
 
 opaque = 0
 blending = 1
