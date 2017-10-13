@@ -30,91 +30,11 @@ import State
 import StickMan
 
 
-part = -1 # global helps through recursivity
-""" recursive function that draws body and sensors """
-def stick(entity = StickMan.characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
-    global part
-    global selectedPart
-    if part + 1 >= len(entity.parts):
-        return
 
-    part += 1
-    current_part = part
-
-    """ Check if part is selected """
-    partIsSelected = False
-    for selectedPart in StickMan.selectedParts:
-        if selectedPart == entity.parts[current_part][StickMan.Data_id]:
-            partIsSelected = True
-            break
-
-
-    """ default orientation of part """
-    l = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, entity.parts[current_part][StickMan.Data_angleRepos][0], entity.parts[current_part][StickMan.Data_angleRepos][1], entity.parts[current_part][StickMan.Data_angleRepos][2])))
-
-    """ current rotation of part """
-    m = Definitions.vector4D((entity.parts[current_part][StickMan.Data_angle]))
-    
-    """ resulting orientation of part """
-    q = m
-
-    """ new rotation to implement """
-    n = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 0, 0)))
-    if partIsSelected == True:
-        """ the rotation command """
-        n = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, Events.pivot[0], Events.pivot[1], Events.pivot[2])))
-
-        """ resulting orientation of part ... """
-        q = Definitions.vector4D.QuatProd(m,n)
-
-        """ ... with saturations """
-        q = Definitions.vector4D.QuatSat(q, (entity.parts[current_part][StickMan.Data_saturation]))
-
-        """ store resulting orientation """
-        entity.parts[current_part][StickMan.Data_angle] = [q.o,q.x,q.y,q.z]
-    
-
-    """ Transformations """
-    glPushMatrix()
-    Definitions.transform.push()
-    """ offset to apply """
-    glTranslatef(offset[0] + entity.size*entity.parts[current_part][StickMan.Data_offset][0], offset[1] + entity.size*entity.parts[current_part][StickMan.Data_offset][1], offset[2] + entity.size*entity.parts[current_part][StickMan.Data_offset][2])
-    Definitions.transform.translate(offset[0] + entity.size*entity.parts[current_part][StickMan.Data_offset][0], offset[1] + entity.size*entity.parts[current_part][StickMan.Data_offset][1], offset[2] + entity.size*entity.parts[current_part][StickMan.Data_offset][2])
-    """ total rotation to apply """
-    p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,q))
-    if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
-        glRotatef(p.o, p.x, p.y, p.z)
-        Definitions.transform.rotate(p.o, p.x, p.y, p.z)
-        
-        
-    """ preprocess part """
-    x = entity.size*entity.parts[current_part][StickMan.Data_dimensions][0]
-    y = entity.size*entity.parts[current_part][StickMan.Data_dimensions][1]
-    z = entity.size*entity.parts[current_part][StickMan.Data_dimensions][2]
-    dx = 0.5*entity.size*entity.parts[current_part][StickMan.Data_dimensions][0]
-    dy = 0
-    dz = 0
-    StickMan.preprocessPart(x,y,z,dx,dy,dz,partIsSelected, entity.parts[current_part][StickMan.Data_id])
-
-    """ preprocess sensors """
-    for sensor in Sensors.virtuSens:
-        if sensor.attach == entity.parts[current_part][StickMan.Data_id]:
-            sensor.h = 0.707*max(entity.size*entity.parts[current_part][StickMan.Data_dimensions][1],entity.size*entity.parts[current_part][StickMan.Data_dimensions][2])
-            """ store transformation in package """
-            Definitions.packageSensors = Definitions.packageSensors + [[Definitions.transform.peek(), sensor],]
-
-
-    """ recursive call for all parts attached to the current one """
-    while part + 1 < len(entity.parts) and entity.parts[part+1][StickMan.Data_layer] > entity.parts[current_part][StickMan.Data_layer]:
-        stick(entity, (x, 0, 0), (0,0,0,0))
-
-    glPopMatrix()
-    Definitions.transform.pop()
 
 
 
 def main():
-    global part
     
     """ Create list of models """
     State.createList()
@@ -197,7 +117,10 @@ def main():
     glUniformMatrix4fv(Shaders.proj_loc, 1, GL_FALSE, Definitions.projectionMatrix.peek())
     glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
 
-    """ main loop """
+
+
+
+    """ >>> main loop <<< """
     while True:
         # keep track of loop frequency
         flagStart = time.clock()
@@ -215,8 +138,8 @@ def main():
             Preprocess entities.
             Store all needed transformations to significantly lower calculation cost when rendering (redundancy otherwise between display buffer, ID buffer and bindings)
         """
-        part = -1 # initialize the recursivity here
-        stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
+        StickMan.part = -1 # initialize the recursivity here
+        StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
 
 
 
@@ -237,6 +160,7 @@ def main():
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
         GUI.guiId = 0
         GUI.textTexture(GUI.sensorTypes, -1, 1, 1, 1, True)
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, True)
         
 
 
@@ -278,15 +202,17 @@ def main():
         glClear(GL_DEPTH_BUFFER_BIT)
         GUI.guiId = 0
         GUI.textTexture(GUI.sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer)
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer)
         if Events.style != Graphics.idBuffer:
+            GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False)
             GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False)
             GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name)], 1, -1, -1, -1, False)
             GUI.textTexture(['Model : ' + str(State.fileName[State.currentFile])], 0, 1, 0, 1, False)
-            GUI.textTexture(['J. Heches'], 0, -1, 0, -1, False)
+            #GUI.textTexture(['J. Heches'], 0, -1, 0, -1, False)
         
         
 
-        # update display buffer
+        # update screen
         pygame.display.flip()
 
         """

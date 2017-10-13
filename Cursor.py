@@ -26,7 +26,7 @@ def mouseManage():
         ID = color[0][0][1]*len(Definitions.packageSensors) + 1
         name = ' (sensor)'
     elif color[0][0][2] != 0: # BLUE channel for gui ID
-        ID = color[0][0][2]*len(GUI.sensorTypes) + 1
+        ID = color[0][0][2]*GUI.lenGui() + 1
         name = ' (gui)'
         
     #convert float to int with errors management

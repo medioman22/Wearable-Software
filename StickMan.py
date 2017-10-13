@@ -1,9 +1,12 @@
 from OpenGL.GL import *
 import numpy as np
+import math
 
 import Cursor
+import Events
 import Graphics
 import Definitions
+import Sensors
 import Shaders
 
 
@@ -99,6 +102,88 @@ def drawStickMan(style):
 
             
 
+part = -1 # global helps through recursivity
+""" recursive function that goes through all body parts and sensors """
+def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
+    global part
+    global selectedPart
+    if part + 1 >= len(entity.parts):
+        return
+
+    part += 1
+    current_part = part
+
+    """ Check if part is selected """
+    partIsSelected = False
+    for selectedPart in selectedParts:
+        if selectedPart == entity.parts[current_part][Data_id]:
+            partIsSelected = True
+            break
+
+
+    """ default orientation of part """
+    l = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, entity.parts[current_part][Data_angleRepos][0], entity.parts[current_part][Data_angleRepos][1], entity.parts[current_part][Data_angleRepos][2])))
+
+    """ current rotation of part """
+    m = Definitions.vector4D((entity.parts[current_part][Data_angle]))
+    
+    """ resulting orientation of part """
+    q = m
+
+    """ new rotation to implement """
+    n = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 0, 0)))
+    if partIsSelected == True:
+        """ the rotation command """
+        n = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, Events.pivot[0], Events.pivot[1], Events.pivot[2])))
+
+        """ resulting orientation of part ... """
+        q = Definitions.vector4D.QuatProd(m,n)
+
+        """ ... with saturations """
+        q = Definitions.vector4D.QuatSat(q, (entity.parts[current_part][Data_saturation]))
+
+        """ store resulting orientation """
+        entity.parts[current_part][Data_angle] = [q.o,q.x,q.y,q.z]
+    
+
+    """ Transformations """
+    glPushMatrix()
+    Definitions.transform.push()
+    """ offset to apply """
+    glTranslatef(offset[0] + entity.size*entity.parts[current_part][Data_offset][0], offset[1] + entity.size*entity.parts[current_part][Data_offset][1], offset[2] + entity.size*entity.parts[current_part][Data_offset][2])
+    Definitions.transform.translate(offset[0] + entity.size*entity.parts[current_part][Data_offset][0], offset[1] + entity.size*entity.parts[current_part][Data_offset][1], offset[2] + entity.size*entity.parts[current_part][Data_offset][2])
+    """ total rotation to apply """
+    p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,q))
+    if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
+        glRotatef(p.o, p.x, p.y, p.z)
+        Definitions.transform.rotate(p.o, p.x, p.y, p.z)
+        
+        
+    """ preprocess part """
+    x = entity.size*entity.parts[current_part][Data_dimensions][0]
+    y = entity.size*entity.parts[current_part][Data_dimensions][1]
+    z = entity.size*entity.parts[current_part][Data_dimensions][2]
+    dx = 0.5*entity.size*entity.parts[current_part][Data_dimensions][0]
+    dy = 0
+    dz = 0
+    preprocessPart(x,y,z,dx,dy,dz,partIsSelected, entity.parts[current_part][Data_id])
+
+    """ preprocess sensors """
+    for sensor in Sensors.virtuSens:
+        if sensor.attach == entity.parts[current_part][Data_id]:
+            sensor.h = 0.707*max(entity.size*entity.parts[current_part][Data_dimensions][1],entity.size*entity.parts[current_part][Data_dimensions][2])
+            """ store transformation in package """
+            Definitions.packageSensors = Definitions.packageSensors + [[Definitions.transform.peek(), sensor],]
+
+
+    """ recursive call for all parts attached to the current one """
+    while part + 1 < len(entity.parts) and entity.parts[part+1][Data_layer] > entity.parts[current_part][Data_layer]:
+        stick(entity, (x, 0, 0), (0,0,0,0))
+
+    glPopMatrix()
+    Definitions.transform.pop()
+
+
 
 fi_a = 0.0323
 fi_b = 0.0153
@@ -123,17 +208,17 @@ Data_layer = 6
 parts = [
     ["Origin",          [0, 0, 0],          [0., 0., 0.],                 [180, -180, 180, -180, 180, -180],   [0, 0, 90],         [1, 0, 0, 0],          0],
     ["Wrist",           [0, 0, 0],          [0.191, 0.15, 0.05],          [0, 0, 0, 0, 0, 0],                  [0, 0, 180],        [1, 0, 0, 0],          1],
-    ["Upp_leg_r",       [0, 0.075, 0],      [0.195, 0.1, 0.1],            [45, -45, 0, -90, 30, -30],          [0, 0, 0],          [1, 0, 0, 0],          2],
+    ["Upp_leg_r",       [0, 0.075, 0],      [0.195, 0.1, 0.1],            [45, -45, 0, -150, 30, -30],          [0, 0, 0],          [1, 0, 0, 0],          2],
     ["Low_leg_r",       [0, 0, 0],          [0.246, 0.08, 0.08],          [45, -45, 150, 0, 0, 0],             [0, 0, 0],          [1, 0, 0, 0],          3],
     ["Feet_r",          [0, 0, 0],          [0.0882, 0.0588, 0.02],       [5, -15, 60, -15, 0, 0],             [0, -90, 0],        [1, 0, 0, 0],          4],
-    ["Upp_leg_l",       [0, -0.075, 0],     [0.195, 0.1, 0.1],            [45, -45, 0, -90, 30, -30],          [0, 0, 0],          [1, 0, 0, 0],          2],
+    ["Upp_leg_l",       [0, -0.075, 0],     [0.195, 0.1, 0.1],            [45, -45, 0, -150, 30, -30],          [0, 0, 0],          [1, 0, 0, 0],          2],
     ["Low_leg_l",       [0, 0, 0],          [0.246, 0.08, 0.08],          [45, -45, 150, 0, 0, 0],             [0, 0, 0],          [1, 0, 0, 0],          3],
     ["Feet_l",          [0, 0, 0],          [0.0882, 0.0588, 0.02],       [15, -5, 60, -15, 0, 0],             [0, -90, 0],        [1, 0, 0, 0],          4],
     ["Torse",           [0, 0, 0],          [0.169, 0.15, 0.05],          [15, -15, 30, -60, 45, -45],         [0, 0, 0],          [1, 0, 0, 0],          1],
     ["Neck",            [0, 0, 0],          [0.052, 0.03, 0.03],          [0, 0, 15, -60, 30, -30],            [0, 0, 0],          [1, 0, 0, 0],          2],
     ["Head",            [0, 0, 0],          [0.130, 0.08, 0.08],          [60, -60, 30, -30, 15, -15],         [0, 0, 0],          [1, 0, 0, 0],          3],
-    ["Shoulder_r",      [0, 0, 0],          [0.106, 0.04, 0.04],          [0, 0, 0, -15, 15, -15],             [0, 0, 90],         [1, 0, 0, 0],          2],
-    ["Arm_r",           [0, 0, 0],          [0.136, 0.06, 0.06],          [90, -90, 60, -60, 90, 0],           [0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Shoulder_r",      [0, 0, 0],          [0.106, 0.04, 0.04],          [15, -15, 15, -15, 15, -15],             [0, 0, 90],         [1, 0, 0, 0],          2],
+    ["Arm_r",           [0, 0, 0],          [0.136, 0.06, 0.06],          [0, -90, 60, -60, 90, 0],            [0, 0, 0],          [1, 0, 0, 0],          3],
     ["Forearm_r",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, -150, 0, 0],            [0, 0, 0],          [1, 0, 0, 0],          4],
     ["Hand_r",          [0, 0, 0],          [0.0588, 0.06, 0.02],         [0, 0, 90, -90, 15, -15],            [0, 0, 5],          [1, 0, 0, 0],          5],
     ["Finger_r_1a",     [-0.04, -0.03, 0],  [fi_a, 0.01, 0.01],           [0, 0, 0, -90, 10, -10],             [0, 0, -30],        [1, 0, 0, 0],          6],
@@ -151,8 +236,8 @@ parts = [
     ["Finger_r_5a",     [0, 0.03, 0],       [fi_a, 0.01, 0.01],           [0, 0, 0, -90, 10, -10],             [0, 0, 15],         [1, 0, 0, 0],          6],
     ["Finger_r_5b",     [0, 0, 0],          [fi_b, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [0, 0, 0],          [1, 0, 0, 0],          7],
     ["Finger_r_5c",     [0, 0, 0],          [fi_c, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [0, 0, 0],          [1, 0, 0, 0],          8],
-    ["Shoulder_l",      [0, 0, 0],          [0.106, 0.04, 0.04],          [0, 0, 0, -15, 15, -15],             [0, 0, -90],        [1, 0, 0, 0],          2],
-    ["Arm_l",           [0, 0, 0],          [0.136, 0.06, 0.06],          [90, -90, 60, -60, 0, -90],          [0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Shoulder_l",      [0, 0, 0],          [0.106, 0.04, 0.04],          [15, -15, 15, -15, 15, -15],             [0, 0, -90],        [1, 0, 0, 0],          2],
+    ["Arm_l",           [0, 0, 0],          [0.136, 0.06, 0.06],          [90, 0, 60, -60, 0, -90],            [0, 0, 0],          [1, 0, 0, 0],          3],
     ["Forearm_l",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, -150, 0, 0],            [0, 0, 0],          [1, 0, 0, 0],          4],
     ["Hand_l",          [0, 0, 0],          [0.0588, 0.06, 0.02],         [0, 0, 90, -90, 15, -15],            [0, 0, -5],         [1, 0, 0, 0],          5],
     ["Finger_l_1a",     [-0.04, 0.03, 0],   [fi_a, 0.01, 0.01],           [0, 0, 0, -90, 10, -10],             [0, 0, 30],         [1, 0, 0, 0],          6],

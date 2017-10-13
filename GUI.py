@@ -23,6 +23,22 @@ sensorTypes = [ 'EEG',
                 'Marker',
                 'Custom']
 
+help = ['Help : ']
+
+helpList = ['Arrows, page up/page dn = camera',
+            'Q,W = rotate part around x axis',
+            'E,R = rotate part around y axis',
+            'T,Y = rotate part around z axis',
+            'U   = reset part orientation',
+            'I,O = switch selected part',
+            'P   = switch view mode',
+            'S,L = save/load model',
+            'J,K = switch model',
+            'G   = change floor']
+
+def lenGui():
+    return len(sensorTypes) + len(help)
+
 TEX_TEXTURE = None
 """
     display some text on the screen. each element in the "text" list is a new line.
@@ -32,14 +48,16 @@ TEX_TEXTURE = None
 """
 guiId = 0
 selectedGuiId = 0
+newGuiPosDir = [0,0,1,1]
 def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
     global guiId
+    global newGuiPosDir
     x = x
     dy = 0.03
     y = y
     glUseProgram(0)
 
-    font = pygame.font.Font('Fonts/UbuntuMono-R.ttf', 128)
+    font = pygame.font.Font('Fonts/UbuntuMono-R.ttf', 32)
     for txt in text:
         guiId += 1
         if idDraw != True:
@@ -48,9 +66,18 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
             else:
                 textSurface = font.render(txt, True, (255,0,0,255), (0,0,0,0))
         else:
-            textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/len(text),0))
+            textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/lenGui(),0))
         ix, iy = textSurface.get_width(), textSurface.get_height()
         dx = dy*ix/iy
+        if txt == help[0]:
+            if guiId == selectedGuiId:
+                newGuiPosDir[0] = x + 2*sx*dx
+                newGuiPosDir[1] = y
+                newGuiPosDir[2] = sx
+                newGuiPosDir[3] = sy
+            else:
+                newGuiPosDir[0] = -100
+                newGuiPosDir[1] = -100
         image = pygame.image.tostring(textSurface, "RGBA", True)
         glPixelStorei(GL_UNPACK_ALIGNMENT,1)
         glBindTexture(GL_TEXTURE_2D, TEX_TEXTURE)
@@ -63,7 +90,7 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
         glTranslatef(x + sx*dx,y - sy*dy,0.0)
         glScalef(dx,dy,1.)
         glBindTexture(GL_TEXTURE_2D, TEX_TEXTURE)
-        glColor4f(0,0,guiId/len(text),0)
+        glColor4f(0,0,guiId/lenGui(),0)
         glBegin(GL_QUADS)
         if idDraw != True:
             glTexCoord2f(0.0, 0.0)
