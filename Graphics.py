@@ -23,6 +23,7 @@ vboCube = 0
 vboPyramide = 1
 vboDashed = 2
 vboHexagon = 3
+vboSphere = 4
 vboEdges = 0
 vboSurfaces = 1
 def VBO_cube():
@@ -121,6 +122,48 @@ def VBO_hexagon():
     
     styleIndex = styleIndex + [[GL_LINES, GL_QUADS],]
 
+def VBO_sphere():
+    """ Create the "sphere" VBO & EBO """
+    global vertexPositions
+    global indexPositions
+    global nbIndex
+    global styleIndex
+
+    vertices = []
+    edgeIndices = []
+    surfIndices = []
+    iMax = 8
+    jMax = 8
+    i = 0
+    while i <= iMax:
+        phi = math.pi*i/float(iMax)
+        j = 0
+        while j < jMax:
+            theta = 2*math.pi*j/float(jMax)
+            vertices = vertices + [0.5*math.cos(phi), 0.5*math.sin(phi)*math.cos(theta), 0.5*math.sin(phi)*math.sin(theta)]
+            if i != iMax:
+                edgeIndices = edgeIndices + [i*jMax + j, i*jMax + (j+1)%jMax]
+                edgeIndices = edgeIndices + [i*jMax + j, (i+1)*jMax + j]
+                surfIndices = surfIndices + [i*jMax + j, i*jMax + (j+1)%jMax, (i+1)*jMax + (j+1)%jMax]
+                surfIndices = surfIndices + [(i+1)*jMax + (j+1)%jMax, (i+1)*jMax + j, i*jMax + j]
+            j +=1
+        i +=1
+
+
+    vertices = np.array([vertices],    dtype='f')
+
+    edgeIndices = np.array([edgeIndices], dtype=np.int32)
+
+    surfIndices = np.array([surfIndices], dtype=np.int32)
+
+    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
+    
+    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
+    
+    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
+    
+    styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+
 def VBO_init():
     global vertexPositions
     global indexPositions
@@ -140,11 +183,11 @@ def VBO_init():
     n+=1 ; VBO_pyramide()
     n+=1 ; VBO_dashed()
     n+=1 ; VBO_hexagon()
+    n+=1 ; VBO_sphere()
 
     while n > 0:
         n -= 1
         Definitions.packagePreprocess = Definitions.packagePreprocess + [[]]
-        Definitions.packageIndices = Definitions.packageIndices + [[]] # change to number of entity types instead, bad atm
 
 opaque = 0
 blending = 1
@@ -165,103 +208,25 @@ def modelView(style = 0):
         glDisable(GL_BLEND)
 
 
-def bindTexture(textureData, width, height):
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
-                 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData)
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-
-
-def loadTexture(texture = 'Textures/awesomeface.png'):
-    textureSurface = pygame.image.load(texture)
-    textureData = pygame.image.tostring(textureSurface, "RGBA", 1)
-    width = textureSurface.get_width()
-    height = textureSurface.get_height()
-
-    glEnable(GL_TEXTURE_2D)
-    texid = glGenTextures(1)
-
-    glBindTexture(GL_TEXTURE_2D, texid)
-
-    return [textureData, width, height]
-
-    
-def preprocessGround(rMax = 5):
-    Definitions.transform.push()
-    Definitions.transform.rotate(90, 0, 0, 1)
-    Definitions.transform.translate(-1.1, 0, 0)
-    Definitions.transform.scale(1,3,3)
-
-    i = -rMax
-    while i <= rMax:
-        j = -rMax
-        while j <= rMax:
-            dy = 0.75*i
-            dz = 0.5*math.sqrt(3)*j + 0.25*math.sqrt(3)*i
-            r = math.sqrt(dy*dy + dz*dz)
-            if  r <= 0.501*math.sqrt(3)*rMax:
-                """ transformation matrix update """
-                Definitions.transform.push()
-                Definitions.transform.translate(0.25*r, dy, dz)
-                Definitions.transform.scale(0.5*r,1,1)
-
-                Definitions.packagePreprocess[vboHexagon] = Definitions.packagePreprocess[vboHexagon] + [[Definitions.transform.peek(), "Ground"],]
-
-                Definitions.transform.pop()
-            j += 1
-        i += 1
-    Definitions.transform.pop()
-
-def drawGround():
-    vboId = -1
-    for indices in Definitions.packageIndices[0]:
-        pack = Definitions.packagePreprocess[indices[0]][indices[1]]
-
-        if vboId != indices[0]:
-            """ choose vbo """
-            vboId = indices[0]
-                    
-            """ bind surfaces vbo """
-            indexPositions[vboId][vboSurfaces].bind()
-            vertexPositions[vboId].bind()
-            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-
-        """ choose color """
-        color = np.array([0.5,0.,1,0.05], dtype = np.float32)
-
-        """ send color to shader """
-        glUniform4fv(Shaders.setColor_loc, 1, color)
-
-        """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
-
-        """ draw vbo """
-        glDrawElements(styleIndex[vboId][vboSurfaces], nbIndex[vboId][vboSurfaces], GL_UNSIGNED_INT, None)
-
-    vboId = -1
-    for indices in Definitions.packageIndices[0]:
-        pack = Definitions.packagePreprocess[indices[0]][indices[1]]
-
-        if vboId != indices[0]:
-            """ choose vbo """
-            vboId = indices[0]
-                    
-            """ bind surfaces vbo """
-            indexPositions[vboId][vboEdges].bind()
-            vertexPositions[vboId].bind()
-            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-
-        """ choose color """
-        color = np.array([0.5,0.,1,0.2], dtype = np.float32)
-
-        """ send color to shader """
-        glUniform4fv(Shaders.setColor_loc, 1, color)
-
-        """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
-
-        """ draw vbo """
-        glDrawElements(styleIndex[vboId][vboEdges], nbIndex[vboId][vboEdges], GL_UNSIGNED_INT, None)
+#def bindTexture(textureData, width, height):
+#    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
+#                 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData)
+#
+#    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+#    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+#    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+#    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+#
+#
+#def loadTexture(texture = 'Textures/awesomeface.png'):
+#    textureSurface = pygame.image.load(texture)
+#    textureData = pygame.image.tostring(textureSurface, "RGBA", 1)
+#    width = textureSurface.get_width()
+#    height = textureSurface.get_height()
+#
+#    glEnable(GL_TEXTURE_2D)
+#    texid = glGenTextures(1)
+#
+#    glBindTexture(GL_TEXTURE_2D, texid)
+#
+#    return [textureData, width, height]

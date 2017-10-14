@@ -23,6 +23,7 @@ import Cursor
 import Definitions
 import Events
 import Graphics
+import Ground
 import GUI
 import Sensors
 import Shaders
@@ -140,7 +141,7 @@ def main():
         StickMan.part = -1 # initialize the recursivity here
         Sensors.countID = 0
         StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
-        Graphics.preprocessGround(math.fabs(Events.rMax))
+        Ground.preprocessGround(math.fabs(Events.rMax))
 
         i = 0
         for package in Definitions.packagePreprocess:
@@ -199,9 +200,8 @@ def main():
         
 
         # draw scene
-        if Events.style != Graphics.idBuffer:
-            Graphics.modelView(Graphics.blending)
-            Graphics.drawGround()
+        Graphics.modelView(Graphics.blending)
+        Ground.drawGround()
         
         # draw body
         Graphics.modelView(Events.style)

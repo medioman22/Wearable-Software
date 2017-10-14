@@ -350,11 +350,12 @@ viewMatrix = matrix44(np.identity(4))
 modelMatrix = matrix44(np.identity(4))
 transform = matrix44(np.identity(4))
 
-""" transformation matrix storage while preprocessing """
+""" transformation matrix storage for preprocessing """
 packTransform = 0
 packParent = 1
-packID = 2
-selected = 3
-entity = 3
+packID = 2 # body & sensor
+radius = 2 # ground
+selected = 3 # body
+entity = 3 # sensor
 packagePreprocess = [[]]
-packageIndices = [[]]
+packageIndices = [[],[],[],[]] # Ground, Body, Sensor, Link

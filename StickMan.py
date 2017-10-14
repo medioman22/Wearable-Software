@@ -59,7 +59,7 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
     
     """ store transformation in package """
     if parts[ID][Data_id] == "Head":
-        Definitions.packagePreprocess[Graphics.vboPyramide] = Definitions.packagePreprocess[Graphics.vboPyramide] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
+        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
     else:
         Definitions.packagePreprocess[Graphics.vboCube] = Definitions.packagePreprocess[Graphics.vboCube] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
 
