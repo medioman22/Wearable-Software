@@ -24,6 +24,7 @@ vboPyramide = 1
 vboDashed = 2
 vboHexagon = 3
 vboSphere = 4
+vboCylindre = 5
 vboEdges = 0
 vboSurfaces = 1
 def VBO_cube():
@@ -122,7 +123,7 @@ def VBO_hexagon():
     
     styleIndex = styleIndex + [[GL_LINES, GL_QUADS],]
 
-def VBO_sphere():
+def VBO_sphere(iMax = 8, jMax = 8, iMin = 8, jMin = 8):
     """ Create the "sphere" VBO & EBO """
     global vertexPositions
     global indexPositions
@@ -132,20 +133,20 @@ def VBO_sphere():
     vertices = []
     edgeIndices = []
     surfIndices = []
-    iMax = 8
-    jMax = 8
+    
+    
     i = 0
-    while i <= iMax:
+    while i <= iMin:
         phi = math.pi*i/float(iMax)
         j = 0
-        while j < jMax:
+        while j < jMin:
             theta = 2*math.pi*j/float(jMax)
             vertices = vertices + [0.5*math.cos(phi), 0.5*math.sin(phi)*math.cos(theta), 0.5*math.sin(phi)*math.sin(theta)]
-            if i != iMax:
-                edgeIndices = edgeIndices + [i*jMax + j, i*jMax + (j+1)%jMax]
-                edgeIndices = edgeIndices + [i*jMax + j, (i+1)*jMax + j]
-                surfIndices = surfIndices + [i*jMax + j, i*jMax + (j+1)%jMax, (i+1)*jMax + (j+1)%jMax]
-                surfIndices = surfIndices + [(i+1)*jMax + (j+1)%jMax, (i+1)*jMax + j, i*jMax + j]
+            if i != iMin:
+                edgeIndices = edgeIndices + [i*jMin + j, i*jMin + (j+1)%jMin]
+                edgeIndices = edgeIndices + [i*jMin + j, (i+1)*jMin + j]
+                surfIndices = surfIndices + [i*jMin + j, i*jMin + (j+1)%jMin, (i+1)*jMin + (j+1)%jMin]
+                surfIndices = surfIndices + [(i+1)*jMin + (j+1)%jMin, (i+1)*jMin + j, i*jMin + j]
             j +=1
         i +=1
 
@@ -163,6 +164,51 @@ def VBO_sphere():
     nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
     
     styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+
+def VBO_cylindre(iMax = 8):
+    """ Create the "sphere" VBO & EBO """
+    global vertexPositions
+    global indexPositions
+    global nbIndex
+    global styleIndex
+
+    vertices = []
+    edgeIndices = []
+    surfIndices = []
+    
+    
+    i = 0
+    while i <= iMax:
+        phi = 2*math.pi*i/float(iMax)
+        vertices = vertices + [-0.5, 0.5*math.cos(phi), 0.5*math.sin(phi)]
+        vertices = vertices + [0.5, 0.5*math.cos(phi), 0.5*math.sin(phi)]
+        if i != iMax:
+            edgeIndices = edgeIndices + [2*i, 2*i+1]
+            edgeIndices = edgeIndices + [2*i, 2*(i+1)]
+            edgeIndices = edgeIndices + [2*i+1, 2*(i+1)+1]
+            surfIndices = surfIndices + [2*i, 2*(i+1), 2*(i+1)+1]
+            surfIndices = surfIndices + [2*(i+1)+1, 2*i+1, 2*i]
+            surfIndices = surfIndices + [2*i, 2*(i+1), 2*(iMax+1)]
+            surfIndices = surfIndices + [2*i+1, 2*(i+1)+1, 2*(iMax+1)+1]
+        i +=1
+    vertices = vertices + [-0.5, 0., 0.]
+    vertices = vertices + [0.5, 0., 0.]
+
+
+    vertices = np.array([vertices],    dtype='f')
+
+    edgeIndices = np.array([edgeIndices], dtype=np.int32)
+
+    surfIndices = np.array([surfIndices], dtype=np.int32)
+
+    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
+    
+    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
+    
+    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
+    
+    styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+
 
 def VBO_init():
     global vertexPositions
@@ -183,7 +229,8 @@ def VBO_init():
     n+=1 ; VBO_pyramide()
     n+=1 ; VBO_dashed()
     n+=1 ; VBO_hexagon()
-    n+=1 ; VBO_sphere()
+    n+=1 ; VBO_sphere(16, 16, 8, 16)
+    n+=1 ; VBO_cylindre(16)
 
     while n > 0:
         n -= 1

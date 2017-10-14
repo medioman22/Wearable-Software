@@ -84,7 +84,7 @@ def preprocessSensor(sensor):
     if countID < 4:
         Definitions.packagePreprocess[Graphics.vboCube] = Definitions.packagePreprocess[Graphics.vboCube] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
     elif countID < 6:
-        Definitions.packagePreprocess[Graphics.vboPyramide] = Definitions.packagePreprocess[Graphics.vboPyramide] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
+        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
     else:
         Definitions.packagePreprocess[Graphics.vboHexagon] = Definitions.packagePreprocess[Graphics.vboHexagon] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
     #Definitions.packageSensors = Definitions.packageSensors + [[Definitions.transform.peek(), sensor],]

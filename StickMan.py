@@ -58,10 +58,12 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
     Definitions.transform.scale(x,y,z)
     
     """ store transformation in package """
-    if parts[ID][Data_id] == "Head":
+    if parts[ID][Data_id] == "Brain":
         Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
-    else:
+    elif parts[ID][Data_id] == "Torse" or parts[ID][Data_id] == "Wrist":
         Definitions.packagePreprocess[Graphics.vboCube] = Definitions.packagePreprocess[Graphics.vboCube] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
+    else:
+        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
 
     Definitions.transform.pop()
 
@@ -120,7 +122,10 @@ def drawBodyEdge(style):
         if style == Graphics.opaque:
             color = np.array([0.5,0.5,0.5,1.], dtype = np.float32)
         elif style == Graphics.blending:
-            color = np.array([1.,1.,1.,1.], dtype = np.float32)
+            if pack[Definitions.selected] == True or Cursor.parent == 0 and pack[Definitions.packID] == Cursor.ID:
+                color = np.array([0.,0.,1.,0.3], dtype = np.float32)
+            else:
+                color = np.array([1.,1.,1.,1.], dtype = np.float32)
 
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)
@@ -237,16 +242,17 @@ Data_layer = 6
 parts = [
     ["Origin",          [0, 0, 0],          [0., 0., 0.],                 [180, -180, 180, -180, 180, -180],   [0, 0, 90],         [1, 0, 0, 0],          0],
     ["Wrist",           [0, 0, 0],          [0.191, 0.15, 0.05],          [0, 0, 0, 0, 0, 0],                  [0, 0, 180],        [1, 0, 0, 0],          1],
-    ["Upp_leg_r",       [0, 0.075, 0],      [0.195, 0.1, 0.1],            [45, -45, 0, -150, 30, -30],          [0, 0, 0],          [1, 0, 0, 0],          2],
+    ["Upp_leg_r",       [0, 0.075, 0],      [0.195, 0.1, 0.1],            [45, -45, 0, -150, 30, -30],         [0, 0, 0],          [1, 0, 0, 0],          2],
     ["Low_leg_r",       [0, 0, 0],          [0.246, 0.08, 0.08],          [45, -45, 150, 0, 0, 0],             [0, 0, 0],          [1, 0, 0, 0],          3],
     ["Feet_r",          [0, 0, 0],          [0.0882, 0.0588, 0.02],       [5, -15, 60, -15, 0, 0],             [0, -90, 0],        [1, 0, 0, 0],          4],
-    ["Upp_leg_l",       [0, -0.075, 0],     [0.195, 0.1, 0.1],            [45, -45, 0, -150, 30, -30],          [0, 0, 0],          [1, 0, 0, 0],          2],
+    ["Upp_leg_l",       [0, -0.075, 0],     [0.195, 0.1, 0.1],            [45, -45, 0, -150, 30, -30],         [0, 0, 0],          [1, 0, 0, 0],          2],
     ["Low_leg_l",       [0, 0, 0],          [0.246, 0.08, 0.08],          [45, -45, 150, 0, 0, 0],             [0, 0, 0],          [1, 0, 0, 0],          3],
     ["Feet_l",          [0, 0, 0],          [0.0882, 0.0588, 0.02],       [15, -5, 60, -15, 0, 0],             [0, -90, 0],        [1, 0, 0, 0],          4],
     ["Torse",           [0, 0, 0],          [0.169, 0.15, 0.05],          [15, -15, 30, -60, 45, -45],         [0, 0, 0],          [1, 0, 0, 0],          1],
     ["Neck",            [0, 0, 0],          [0.052, 0.03, 0.03],          [0, 0, 15, -60, 30, -30],            [0, 0, 0],          [1, 0, 0, 0],          2],
-    ["Head",            [0, 0, 0],          [0.130, 0.08, 0.08],          [60, -60, 30, -30, 15, -15],         [0, 0, 0],          [1, 0, 0, 0],          3],
-    ["Shoulder_r",      [0, 0, 0],          [0.106, 0.04, 0.04],          [15, -15, 15, -15, 15, -15],             [0, 0, 90],         [1, 0, 0, 0],          2],
+    ["Head",            [0, 0, 0],          [0.09, 0.08, 0.08],           [60, -60, 30, -30, 15, -15],         [0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Brain",           [-0.04, 0, 0],      [0.08, 0.08, 0.08],           [0, 0, 0, 0, 0, 0],                  [0, 0, 0],          [1, 0, 0, 0],          4],
+    ["Shoulder_r",      [0, 0, 0],          [0.106, 0.04, 0.04],          [15, -15, 15, -15, 15, -15],         [0, 0, 90],         [1, 0, 0, 0],          2],
     ["Arm_r",           [0, 0, 0],          [0.136, 0.06, 0.06],          [0, -90, 60, -60, 90, 0],            [0, 0, 0],          [1, 0, 0, 0],          3],
     ["Forearm_r",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, -150, 0, 0],            [0, 0, 0],          [1, 0, 0, 0],          4],
     ["Hand_r",          [0, 0, 0],          [0.0588, 0.06, 0.02],         [0, 0, 90, -90, 15, -15],            [0, 0, 5],          [1, 0, 0, 0],          5],
@@ -265,7 +271,7 @@ parts = [
     ["Finger_r_5a",     [0, 0.03, 0],       [fi_a, 0.01, 0.01],           [0, 0, 0, -90, 10, -10],             [0, 0, 15],         [1, 0, 0, 0],          6],
     ["Finger_r_5b",     [0, 0, 0],          [fi_b, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [0, 0, 0],          [1, 0, 0, 0],          7],
     ["Finger_r_5c",     [0, 0, 0],          [fi_c, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [0, 0, 0],          [1, 0, 0, 0],          8],
-    ["Shoulder_l",      [0, 0, 0],          [0.106, 0.04, 0.04],          [15, -15, 15, -15, 15, -15],             [0, 0, -90],        [1, 0, 0, 0],          2],
+    ["Shoulder_l",      [0, 0, 0],          [0.106, 0.04, 0.04],          [15, -15, 15, -15, 15, -15],         [0, 0, -90],        [1, 0, 0, 0],          2],
     ["Arm_l",           [0, 0, 0],          [0.136, 0.06, 0.06],          [90, 0, 60, -60, 0, -90],            [0, 0, 0],          [1, 0, 0, 0],          3],
     ["Forearm_l",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, -150, 0, 0],            [0, 0, 0],          [1, 0, 0, 0],          4],
     ["Hand_l",          [0, 0, 0],          [0.0588, 0.06, 0.02],         [0, 0, 90, -90, 15, -15],            [0, 0, -5],         [1, 0, 0, 0],          5],

@@ -38,7 +38,6 @@ import StickMan
 def main():
     """ Create list of models """
     State.createList()
-
     """ Create Entities """
     StickMan.virtuMan = StickMan.characteristics(1.7, (0,0,0), StickMan.parts)
     State.load(StickMan.virtuMan)
