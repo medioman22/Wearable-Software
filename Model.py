@@ -35,7 +35,6 @@ import StickMan
 
 
 def main():
-    
     """ Create list of models """
     State.createList()
 
@@ -86,6 +85,7 @@ def main():
     """ Generate the VBOs """
     Graphics.VBO_init()
     
+
     """ Create the shaders """
     Shaders.shader = OpenGL.GL.shaders.compileProgram(OpenGL.GL.shaders.compileShader(Shaders.vertex_shader,GL_VERTEX_SHADER),
                                                       OpenGL.GL.shaders.compileShader(Shaders.fragment_shader,GL_FRAGMENT_SHADER))
@@ -94,7 +94,7 @@ def main():
 
     """ Enable position attrib ? """
     position = glGetAttribLocation(Shaders.shader, "position")
-    glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, None)
+    glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, None) 
     glEnableVertexAttribArray(position)
 
 
@@ -138,8 +138,24 @@ def main():
             Store all needed transformations to significantly lower calculation cost when rendering (redundancy otherwise between display buffer, ID buffer and bindings)
         """
         StickMan.part = -1 # initialize the recursivity here
+        Sensors.countID = 0
         StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
+        Graphics.preprocessGround(math.fabs(Events.rMax))
 
+        i = 0
+        for package in Definitions.packagePreprocess:
+            j = 0
+            for pack in package:
+                if pack[Definitions.packParent] == "Ground":
+                    Definitions.packageIndices[0] = Definitions.packageIndices[0] + [[i, j],]
+                elif pack[Definitions.packParent] == "Body":
+                    Definitions.packageIndices[1] = Definitions.packageIndices[1] + [[i, j],]
+                elif pack[Definitions.packParent] == "Sensor":
+                    Definitions.packageIndices[2] = Definitions.packageIndices[2] + [[i, j],]
+                elif pack[Definitions.packParent] == "Link":
+                    Definitions.packageIndices[3] = Definitions.packageIndices[3] + [[i, j],]
+                j += 1
+            i += 1
 
 
         """ 
@@ -154,8 +170,8 @@ def main():
         
         # fill ID buffer
         Graphics.modelView(Graphics.opaque)
-        StickMan.drawStickMan(Graphics.idBuffer)
-        Sensors.displaySensor(Graphics.idBuffer)
+        StickMan.drawBodySurface(Graphics.idBuffer)
+        Sensors.drawSensor(Graphics.idBuffer)
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
         GUI.guiId = 0
         GUI.textTexture(GUI.sensorTypes, -1, 1, 1, 1, True)
@@ -185,17 +201,19 @@ def main():
         # draw scene
         if Events.style != Graphics.idBuffer:
             Graphics.modelView(Graphics.blending)
-            Graphics.displayGround(math.fabs(Events.rMax))
+            Graphics.drawGround()
         
-
         # draw body
         Graphics.modelView(Events.style)
-        StickMan.drawStickMan(Events.style)
+        StickMan.drawBodySurface(Events.style)
+        StickMan.drawBodyEdge(Events.style)
 
         # draw sensors
         Graphics.modelView(Graphics.opaque)
-        Sensors.displaySensor(Events.style)
-        
+        Sensors.drawSensor(Events.style)
+        Sensors.drawDashed(Events.style)
+
+
         # draw GUI
         Graphics.modelView(Graphics.opaque)
         glClear(GL_DEPTH_BUFFER_BIT)
@@ -207,7 +225,6 @@ def main():
             GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False)
             GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name)], 1, -1, -1, -1, False)
             GUI.textTexture(['Model : ' + str(State.fileName[State.currentFile])], 0, 1, 0, 1, False)
-            #GUI.textTexture(['J. Heches'], 0, -1, 0, -1, False)
         
         
 
@@ -215,13 +232,18 @@ def main():
         pygame.display.flip()
 
         """
-            empty preprocess packages
+            empty preprocess package
         """
-        while len(Definitions.packageStickMan) > 0:
-            Definitions.packageStickMan = Definitions.packageStickMan[:-1]
-        while len(Definitions.packageSensors) > 0:
-            Definitions.packageSensors = Definitions.packageSensors[:-1]
-
+        i = len(Definitions.packagePreprocess)
+        while i > 0:
+            i -= 1
+            while len(Definitions.packagePreprocess[i]) > 0:
+                Definitions.packagePreprocess[i] = Definitions.packagePreprocess[i][:-1]
+        i = len(Definitions.packageIndices)
+        while i > 0:
+            i -= 1
+            while len(Definitions.packageIndices[i]) > 0:
+                Definitions.packageIndices[i] = Definitions.packageIndices[i][:-1]
 
 
         pygame.time.wait(10)

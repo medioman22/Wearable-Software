@@ -351,5 +351,10 @@ modelMatrix = matrix44(np.identity(4))
 transform = matrix44(np.identity(4))
 
 """ transformation matrix storage while preprocessing """
-packageStickMan = []
-packageSensors = []
+packTransform = 0
+packParent = 1
+packID = 2
+selected = 3
+entity = 3
+packagePreprocess = [[]]
+packageIndices = [[]]

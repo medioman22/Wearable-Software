@@ -46,6 +46,7 @@ class characteristics(object):
             print(p)
 
             
+part = -1 # global helps through recursivity
 selectedParts = []
 virtuMan = None
 
@@ -57,54 +58,80 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
     Definitions.transform.scale(x,y,z)
     
     """ store transformation in package """
-    Definitions.packageStickMan = Definitions.packageStickMan + [[Definitions.transform.peek(), partIsSelected, ID],]
+    if parts[ID][Data_id] == "Head":
+        Definitions.packagePreprocess[Graphics.vboPyramide] = Definitions.packagePreprocess[Graphics.vboPyramide] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
+    else:
+        Definitions.packagePreprocess[Graphics.vboCube] = Definitions.packagePreprocess[Graphics.vboCube] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
 
     Definitions.transform.pop()
 
 
-def drawStickMan(style):
-    """ send color to shader """
-    glUniform4fv(Shaders.setColor_loc, 1, np.array([1.,1.,1.,0.3], dtype = np.float32))
-    """ choose vbo """
-    vboId = Graphics.vboCube
-    """ bind surfaces vbo """
-    Graphics.indexPositions[vboId][Graphics.vboSurfaces].bind()
-    Graphics.vertexPositions[vboId].bind()
-    glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-    """ draw all at once """
-    i = 0
-    for pack in Definitions.packageStickMan:
-        i +=1./len(Definitions.packageStickMan)
-        if pack[1] == True:
-            glUniform4fv(Shaders.setColor_loc, 1, np.array([0.,0.,1.,0.3], dtype = np.float32))
-        if style == 3:
-            glUniform4fv(Shaders.setColor_loc, 1, np.array([i,0.,0.,1.], dtype = np.float32))
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[0])
+def drawBodySurface(style):
+    vboId = -1
+    for indices in Definitions.packageIndices[1]:
+        pack = Definitions.packagePreprocess[indices[0]][indices[1]]
+
+        if vboId != indices[0]:
+            """ choose vbo """
+            vboId = indices[0]
+                    
+            """ bind surfaces vbo """
+            Graphics.indexPositions[vboId][Graphics.vboSurfaces].bind()
+            Graphics.vertexPositions[vboId].bind()
+            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+
+        """ choose color """
+        if style == Graphics.idBuffer:
+            i = (pack[Definitions.packID])/float(len(parts)-1)
+            color = np.array([i,0.,0.,1.], dtype = np.float32)
+        elif pack[Definitions.selected] == True or Cursor.parent == 0 and pack[Definitions.packID] == Cursor.ID:
+            color = np.array([0.,0.,1.,0.3], dtype = np.float32)
+        else:
+            color = np.array([1.,1.,1.,0.3], dtype = np.float32)
+
+        """ send color to shader """
+        glUniform4fv(Shaders.setColor_loc, 1, color)
+
+        """ send matrix to shader """
+        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
+
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
-        if pack[1] == True:
-            glUniform4fv(Shaders.setColor_loc, 1, np.array([1.,1.,1.,0.3], dtype = np.float32))
 
     
-    """ send color to shader """
-    if style == Graphics.opaque:
-        glUniform4fv(Shaders.setColor_loc, 1, np.array([0.5,0.5,0.5,1.], dtype = np.float32))
-    elif style == Graphics.blending:
-        glUniform4fv(Shaders.setColor_loc, 1, np.array([1.,1.,1.,1.], dtype = np.float32))
-    if style == Graphics.opaque or style == Graphics.blending:
-        """ bind edges vbo """
-        Graphics.indexPositions[vboId][Graphics.vboEdges].bind()
-        Graphics.vertexPositions[vboId].bind()
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-        """ draw all at once """
-        for pack in Definitions.packageStickMan:
-            glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[0])
-            """ draw vbo """
-            glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
+def drawBodyEdge(style):
+    if style != Graphics.opaque and style != Graphics.blending:
+        return
 
-            
+    vboId = -1
+    for indices in Definitions.packageIndices[1]:
+        pack = Definitions.packagePreprocess[indices[0]][indices[1]]
+                
+        if vboId != indices[0]:
+            """ choose vbo """
+            vboId = indices[0]
+                    
+            """ bind surfaces vbo """
+            Graphics.indexPositions[vboId][Graphics.vboEdges].bind()
+            Graphics.vertexPositions[vboId].bind()
+            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+                    
+        """ choose color """
+        if style == Graphics.opaque:
+            color = np.array([0.5,0.5,0.5,1.], dtype = np.float32)
+        elif style == Graphics.blending:
+            color = np.array([1.,1.,1.,1.], dtype = np.float32)
 
-part = -1 # global helps through recursivity
+        """ send color to shader """
+        glUniform4fv(Shaders.setColor_loc, 1, color)
+    
+        """ send matrix to shader """
+        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
+
+        """ draw vbo """
+        glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
+
+
 """ recursive function that goes through all body parts and sensors """
 def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     global part
@@ -168,14 +195,14 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     dx = 0.5*entity.size*entity.parts[current_part][Data_dimensions][0]
     dy = 0
     dz = 0
-    preprocessPart(x,y,z,dx,dy,dz,partIsSelected, entity.parts[current_part][Data_id])
+    preprocessPart(x,y,z,dx,dy,dz,partIsSelected, part)
 
     """ preprocess sensors """
     for sensor in Sensors.virtuSens:
         if sensor.attach == entity.parts[current_part][Data_id]:
             sensor.h = 0.707*max(entity.size*entity.parts[current_part][Data_dimensions][1],entity.size*entity.parts[current_part][Data_dimensions][2])
-            """ store transformation in package """
-            Definitions.packageSensors = Definitions.packageSensors + [[Definitions.transform.peek(), sensor],]
+            # preprocess sensors
+            Sensors.preprocessSensor(sensor)
 
 
     """ recursive call for all parts attached to the current one """
