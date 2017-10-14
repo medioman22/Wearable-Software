@@ -36,10 +36,17 @@ def load(entity):
 
     file = open(path + fileName[currentFile], 'r')
 
-    for part in entity.parts:
-        line = file.readline() # read part name
+    while True:
+        ID = file.readline() # read part name
+        if ID == "":
+            break
+        ID = ID[:-1] # remove end of line character
         line = file.readline() # read part orientations
         values = map(float, line.split())
-        part[StickMan.Data_angle] = values
+        for part in entity.parts:
+            #print(part[StickMan.Data_id])
+            if part[StickMan.Data_id] == ID:
+                part[StickMan.Data_angle] = values
+                break
     file.close()
     callLoad = False
