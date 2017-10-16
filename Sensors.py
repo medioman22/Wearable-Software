@@ -8,10 +8,11 @@ class sensors(object):
     nb__init__ = 0 # keeps track of how many creations there are
 
 
-    def __init__(self, attach = "Origin", coord = (0, 0), color = (1,0,0)): # add orientation sometime...
+    def __init__(self, attach = "Origin", type = "Custom", coord = (0, 0), color = (1,0,0)): # add orientation sometime...
         """ constructor """
         sensors.nb__init__ += 1
         self.attach = attach
+        self.type = type
         self.x = coord[0]
         self.t = coord[1]
         self.s = coord[2]
@@ -45,11 +46,12 @@ import numpy as np
 
 import Cursor
 import Definitions
+import Events
 import Graphics
 import Shaders
 
 countID = 0
-def preprocessSensor(sensor):
+def preprocessSensor(sensor, x, y, z):
     global countID
     countID += 1
     Definitions.transform.push()
@@ -70,7 +72,8 @@ def preprocessSensor(sensor):
         Definitions.transform.rotate(t.o, t.x, t.y, t.z)
 
         Definitions.transform.push()
-        Definitions.transform.scale(sensor.h,sensor.h,sensor.h)
+        Definitions.transform.scale(sensor.h,1,1)
+        Definitions.transform.translate(0.5, 0, 0)
         
         """ store transformation in package """
         Definitions.packagePreprocess[Graphics.vboDashed] = Definitions.packagePreprocess[Graphics.vboDashed] + [[Definitions.transform.peek(), "Link", countID, sensor],]
@@ -80,17 +83,22 @@ def preprocessSensor(sensor):
         
     """ transformation matrix update """
     Definitions.transform.translate(sensor.h, 0, 0)
+    Definitions.transform.rotate(-t.o, t.x, t.y, t.z)
+    Definitions.transform.scale(1/x,1/y,1/z)
+    Definitions.transform.rotate(t.o, t.x, t.y, t.z)
     Definitions.transform.scale(0.03,0.03,0.03)
     Definitions.transform.translate(0.5, 0, 0)
     
     
     """ store transformation in package """
-    if countID < 4:
-        Definitions.packagePreprocess[Graphics.vboCube] = Definitions.packagePreprocess[Graphics.vboCube] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
-    elif countID < 6:
+    if sensor.type == "EEG":
+        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
+    elif sensor.type == "Custom":
         Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
-    else:
+    elif sensor.type == "EMG":
         Definitions.packagePreprocess[Graphics.vboHexagon] = Definitions.packagePreprocess[Graphics.vboHexagon] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
+    else:
+        Definitions.packagePreprocess[Graphics.vboPyramide] = Definitions.packagePreprocess[Graphics.vboPyramide] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
     #Definitions.packageSensors = Definitions.packageSensors + [[Definitions.transform.peek(), sensor],]
 
     Definitions.transform.pop()
@@ -106,8 +114,17 @@ def drawSensor(style):
         """ choose color """
         if style != Graphics.idBuffer:
             color = np.array([sensor.color[0], sensor.color[1], sensor.color[2], 1.], dtype = np.float32)
-            if pack[Definitions.packID] == selectedSens or Cursor.parent == 1 and pack[Definitions.packID] == Cursor.ID:
-                #color = np.array([0.,0.,1.,0.3], dtype = np.float32)
+            if pack[Definitions.packID] == selectedSens:
+                pack[Definitions.entity].x += Events.incSens[0]
+                pack[Definitions.entity].t += Events.incSens[1]
+                pack[Definitions.entity].s += Events.incSens[2]
+                if Events.resetSens == True:
+                    pack[Definitions.entity].x = 0
+                    pack[Definitions.entity].t = 90
+                    pack[Definitions.entity].s = 90
+
+                vboDraw = Graphics.vboSurfaces
+            elif Cursor.parent == 1 and pack[Definitions.packID] == Cursor.ID:
                 vboDraw = Graphics.vboSurfaces
             else:
                 vboDraw = Graphics.vboEdges

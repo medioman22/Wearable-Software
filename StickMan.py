@@ -65,7 +65,6 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
     else:
         Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
 
-    Definitions.transform.pop()
 
 
 def drawBodySurface(style):
@@ -205,9 +204,11 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     """ preprocess sensors """
     for sensor in Sensors.virtuSens:
         if sensor.attach == entity.parts[current_part][Data_id]:
-            sensor.h = 0.707*max(entity.size*entity.parts[current_part][Data_dimensions][1],entity.size*entity.parts[current_part][Data_dimensions][2])
+            #sensor.h = 0.707*max(entity.size*entity.parts[current_part][Data_dimensions][1],entity.size*entity.parts[current_part][Data_dimensions][2])
+            sensor.h = 0.6
             # preprocess sensors
-            Sensors.preprocessSensor(sensor)
+            Sensors.preprocessSensor(sensor, x, y, z)
+    Definitions.transform.pop()
 
 
     """ recursive call for all parts attached to the current one """

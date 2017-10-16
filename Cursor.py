@@ -31,7 +31,6 @@ def mouseManage():
     elif color[0][0][1] != 0: # GREEN channel for sensors ID
         parent = 1
         ID = color[0][0][1]*Sensors.countID
-        name = ' (sensor)'
     elif color[0][0][2] != 0: # BLUE channel for gui ID
         parent = 2
         ID = color[0][0][2]*GUI.lenGui()
@@ -55,13 +54,14 @@ def mouseManage():
             if Select == True:
                 StickMan.selectedParts += [StickMan.parts[ID][StickMan.Data_id],]
         #Definitions.packagePreprocess[Graphics.vboCube][ID][1] = True
-        name = ' = ' + StickMan.parts[ID][StickMan.Data_id]
+        name = ' (' + StickMan.parts[ID][StickMan.Data_id] + ')'
     elif parent == 1:
         if Events.mouse_click == True:
             if Sensors.selectedSens == ID:
                 Sensors.selectedSens = 0
             else:
                 Sensors.selectedSens = ID
+        name = ' (' + 'sensor' + ')'
     if parent == 2:
         GUI.selectedGuiId = ID
     else:

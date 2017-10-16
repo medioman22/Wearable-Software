@@ -6,6 +6,7 @@ from OpenGL.GLU import *
 
 import time
 import Cursor
+import Sensors
 import State
 import Shaders
 import StickMan
@@ -48,9 +49,18 @@ e_keyHold = False
 r_keyHold = False
 t_keyHold = False
 y_keyHold = False
-
 reset = False # reset selected part orientation
 prevNext = 0 # select previous/next part
+
+""" sensors control """
+incSens = [0,0,0] # [x,t,s]
+z_keyHold = False
+x_keyHold = False
+c_keyHold = False
+v_keyHold = False
+b_keyHold = False
+n_keyHold = False
+resetSens = False
 
 style = 0 # model visualization style
 
@@ -87,6 +97,16 @@ def manage():
     global y_keyHold
     global reset
     global prevNext
+    
+    global z_keyHold
+    global x_keyHold
+    global c_keyHold
+    global v_keyHold
+    global b_keyHold
+    global n_keyHold
+    global resetSens
+    global incSens
+
     global style
     global rMax
 
@@ -98,6 +118,7 @@ def manage():
     
     mouse_click = False
     reset = False
+    resetSens = False
     prevNext = 0
 
     """ New events """
@@ -192,6 +213,39 @@ def manage():
             pivot[2] = -pivotSpeed
         elif event.type == pygame.KEYUP and event.key == pygame.K_y:
             y_keyHold = False
+
+        if event.type == pygame.KEYUP and event.key == pygame.K_z:
+            z_keyHold = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+            z_keyHold = True
+            incSens[0] = 0.1
+        if event.type == pygame.KEYUP and event.key == pygame.K_x:
+            x_keyHold = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+            x_keyHold = True
+            incSens[0] = -0.1
+        if event.type == pygame.KEYUP and event.key == pygame.K_c:
+            c_keyHold = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+            c_keyHold = True
+            incSens[1] = 5
+        if event.type == pygame.KEYUP and event.key == pygame.K_v:
+            v_keyHold = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
+            v_keyHold = True
+            incSens[1] = -5
+        if event.type == pygame.KEYUP and event.key == pygame.K_b:
+            b_keyHold = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+            b_keyHold = True
+            incSens[2] = 5
+        if event.type == pygame.KEYUP and event.key == pygame.K_n:
+            n_keyHold = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+            n_keyHold = True
+            incSens[2] = -5
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+            resetSens = True
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_u:
             reset = True
@@ -302,6 +356,14 @@ def manage():
         pivot[1] = 0
     if t_keyHold == False and y_keyHold == False:
         pivot[2] = 0
+
+    """ sensors control """
+    if z_keyHold == False and x_keyHold == False:
+        incSens[0] = 0
+    if c_keyHold == False and v_keyHold == False:
+        incSens[1] = 0
+    if b_keyHold == False and n_keyHold == False:
+        incSens[2] = 0
     
     """ StickMan Events """
     j = 0
