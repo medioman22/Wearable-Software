@@ -86,13 +86,18 @@ def preprocessSensor(sensor, x, y, z):
     Definitions.transform.rotate(-t.o, t.x, t.y, t.z)
     Definitions.transform.scale(1/x,1/y,1/z)
     Definitions.transform.rotate(t.o, t.x, t.y, t.z)
-    Definitions.transform.scale(0.03,0.03,0.03)
+    
+    if sensor.type == "EEG":
+        Definitions.transform.scale(0.01,0.01,0.01)
+    else:
+        Definitions.transform.scale(0.03,0.03,0.03)
+
     Definitions.transform.translate(0.5, 0, 0)
     
     
     """ store transformation in package """
     if sensor.type == "EEG":
-        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
+        Definitions.packagePreprocess[Graphics.vboCircle] = Definitions.packagePreprocess[Graphics.vboCircle] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
     elif sensor.type == "Custom":
         Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
     elif sensor.type == "EMG":
@@ -125,6 +130,8 @@ def drawSensor(style):
 
                 vboDraw = Graphics.vboSurfaces
             elif Cursor.parent == 1 and pack[Definitions.packID] == Cursor.ID:
+                vboDraw = Graphics.vboSurfaces
+            elif sensor.type == "EEG":
                 vboDraw = Graphics.vboSurfaces
             else:
                 vboDraw = Graphics.vboEdges
