@@ -218,12 +218,12 @@ def manage():
             z_keyHold = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
             z_keyHold = True
-            incSens[0] = 0.1
+            incSens[0] = 0.025
         if event.type == pygame.KEYUP and event.key == pygame.K_x:
             x_keyHold = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
             x_keyHold = True
-            incSens[0] = -0.1
+            incSens[0] = -0.025
         if event.type == pygame.KEYUP and event.key == pygame.K_c:
             c_keyHold = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
