@@ -54,7 +54,7 @@ countID = 0
 def preprocessSensor(sensor, x, y, z):
     global countID
     countID += 1
-    Definitions.transform.push()
+    Definitions.modelMatrix.push()
 
     """ sensor orientation """
     u = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 90, 0)))
@@ -63,51 +63,51 @@ def preprocessSensor(sensor, x, y, z):
     w = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, time.clock()*100, 0, 0)))
     t = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(u, Definitions.vector4D.QuatProd(v, Definitions.vector4D.QuatProd(s,w))))
 
-    """ transformation matrix update """
-    Definitions.transform.push()
-    Definitions.transform.translate(sensor.x, 0, 0)
+    """ model matrix update """
+    Definitions.modelMatrix.push()
+    Definitions.modelMatrix.translate(sensor.x, 0, 0)
 
     if math.sqrt(t.x*t.x + t.y*t.y + t.z*t.z) >= 0.0001:
-        """ transformation matrix update """
-        Definitions.transform.rotate(t.o, t.x, t.y, t.z)
+        """ model matrix update """
+        Definitions.modelMatrix.rotate(t.o, t.x, t.y, t.z)
 
-        Definitions.transform.push()
-        Definitions.transform.scale(sensor.h,1,1)
-        Definitions.transform.translate(0.5, 0, 0)
+        Definitions.modelMatrix.push()
+        Definitions.modelMatrix.scale(sensor.h,1,1)
+        Definitions.modelMatrix.translate(0.5, 0, 0)
         
-        """ store transformation in package """
-        Definitions.packagePreprocess[Graphics.vboDashed] = Definitions.packagePreprocess[Graphics.vboDashed] + [[Definitions.transform.peek(), "Link", countID, sensor],]
-        #Definitions.packageDashed = Definitions.packageDashed + [[Definitions.transform.peek(), sensor],]
+        """ store modelMatrix in package """
+        Definitions.packagePreprocess[Graphics.vboDashed] = Definitions.packagePreprocess[Graphics.vboDashed] + [[Definitions.modelMatrix.peek(), "Link", countID, sensor],]
+        #Definitions.packageDashed = Definitions.packageDashed + [[Definitions.modelMatrix.peek(), sensor],]
         
-        Definitions.transform.pop()
+        Definitions.modelMatrix.pop()
         
-    """ transformation matrix update """
-    Definitions.transform.translate(sensor.h, 0, 0)
-    Definitions.transform.rotate(-t.o, t.x, t.y, t.z)
-    Definitions.transform.scale(1/x,1/y,1/z)
-    Definitions.transform.rotate(t.o, t.x, t.y, t.z)
+    """ model matrix update """
+    Definitions.modelMatrix.translate(sensor.h, 0, 0)
+    Definitions.modelMatrix.rotate(-t.o, t.x, t.y, t.z)
+    Definitions.modelMatrix.scale(1/x,1/y,1/z)
+    Definitions.modelMatrix.rotate(t.o, t.x, t.y, t.z)
     
     if sensor.type == "EEG":
-        Definitions.transform.scale(0.01,0.01,0.01)
+        Definitions.modelMatrix.scale(0.01,0.01,0.01)
     else:
-        Definitions.transform.scale(0.03,0.03,0.03)
+        Definitions.modelMatrix.scale(0.03,0.03,0.03)
 
-    Definitions.transform.translate(0.5, 0, 0)
+    Definitions.modelMatrix.translate(0.5, 0, 0)
     
     
-    """ store transformation in package """
+    """ store modelMatrix in package """
     if sensor.type == "EEG":
-        Definitions.packagePreprocess[Graphics.vboCircle] = Definitions.packagePreprocess[Graphics.vboCircle] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
-    elif sensor.type == "Custom":
-        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
+        Definitions.packagePreprocess[Graphics.vboCircle] = Definitions.packagePreprocess[Graphics.vboCircle] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
+    elif sensor.type == "Eye":
+        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
     elif sensor.type == "EMG":
-        Definitions.packagePreprocess[Graphics.vboHexagon] = Definitions.packagePreprocess[Graphics.vboHexagon] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
+        Definitions.packagePreprocess[Graphics.vboHexagon] = Definitions.packagePreprocess[Graphics.vboHexagon] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
     else:
-        Definitions.packagePreprocess[Graphics.vboPyramide] = Definitions.packagePreprocess[Graphics.vboPyramide] + [[Definitions.transform.peek(), "Sensor", countID, sensor],]
-    #Definitions.packageSensors = Definitions.packageSensors + [[Definitions.transform.peek(), sensor],]
+        Definitions.packagePreprocess[Graphics.vboPyramide] = Definitions.packagePreprocess[Graphics.vboPyramide] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
+    #Definitions.packageSensors = Definitions.packageSensors + [[Definitions.modelMatrix.peek(), sensor],]
 
-    Definitions.transform.pop()
-    Definitions.transform.pop()
+    Definitions.modelMatrix.pop()
+    Definitions.modelMatrix.pop()
 
 def drawSensor(style):
     vboId = -1
@@ -127,7 +127,8 @@ def drawSensor(style):
                     pack[Definitions.entity].x = 0
                     pack[Definitions.entity].t = 90
                     pack[Definitions.entity].s = 90
-
+                if sensor.type == "EEG":
+                    color = np.array([1, 0.5, 0, 1.], dtype = np.float32)
                 vboDraw = Graphics.vboSurfaces
             elif Cursor.parent == 1 and pack[Definitions.packID] == Cursor.ID:
                 vboDraw = Graphics.vboSurfaces
@@ -156,7 +157,7 @@ def drawSensor(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ load matrix in shader """
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
@@ -194,7 +195,7 @@ def drawDashed(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ load matrix in shader """
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
         
         """ draw vbo """
         if style != Graphics.idBuffer:

@@ -348,10 +348,9 @@ class matrix44:
 projectionMatrix = matrix44(np.identity(4))
 viewMatrix = matrix44(np.identity(4))
 modelMatrix = matrix44(np.identity(4))
-transform = matrix44(np.identity(4))
 
 """ transformation matrix storage for preprocessing """
-packTransform = 0
+packModel = 0
 packParent = 1
 packID = 2 # body & sensor
 radius = 2 # ground

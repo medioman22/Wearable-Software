@@ -49,21 +49,23 @@ class characteristics(object):
 part = -1 # global helps through recursivity
 selectedParts = []
 virtuMan = None
-
+lookingAt = np.array([[0, 0, 0, 1]])
 def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
+    global lookingAt
 
     """ part transformations """
-    Definitions.transform.push()
-    Definitions.transform.translate(dx,dy,dz)
-    Definitions.transform.scale(x,y,z)
-    
+    Definitions.modelMatrix.push()
+    Definitions.modelMatrix.translate(dx,dy,dz)
+    Definitions.modelMatrix.scale(x,y,z)
+    if partIsSelected:
+        lookingAt = np.dot(np.array([[0, 0, 0, 1]]), Definitions.modelMatrix.peek())
     """ store transformation in package """
     if parts[ID][Data_id] == "Head":
-        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
+        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
     elif parts[ID][Data_id] == "Brain":
-        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
+        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
     else:
-        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.transform.peek(), "Body", ID, partIsSelected],]
+        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
 
 
 
@@ -94,7 +96,7 @@ def drawBodySurface(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
@@ -130,7 +132,7 @@ def drawBodyEdge(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
     
         """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
@@ -181,15 +183,15 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
 
     """ Transformations """
     glPushMatrix()
-    Definitions.transform.push()
+    Definitions.modelMatrix.push()
     """ offset to apply """
     glTranslatef(offset[0] + entity.size*entity.parts[current_part][Data_offset][0], offset[1] + entity.size*entity.parts[current_part][Data_offset][1], offset[2] + entity.size*entity.parts[current_part][Data_offset][2])
-    Definitions.transform.translate(offset[0] + entity.size*entity.parts[current_part][Data_offset][0], offset[1] + entity.size*entity.parts[current_part][Data_offset][1], offset[2] + entity.size*entity.parts[current_part][Data_offset][2])
+    Definitions.modelMatrix.translate(offset[0] + entity.size*entity.parts[current_part][Data_offset][0], offset[1] + entity.size*entity.parts[current_part][Data_offset][1], offset[2] + entity.size*entity.parts[current_part][Data_offset][2])
     """ total rotation to apply """
     p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,q))
     if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
         glRotatef(p.o, p.x, p.y, p.z)
-        Definitions.transform.rotate(p.o, p.x, p.y, p.z)
+        Definitions.modelMatrix.rotate(p.o, p.x, p.y, p.z)
         
         
     """ preprocess part """
@@ -206,9 +208,11 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
         if sensor.attach == entity.parts[current_part][Data_id]:
             #sensor.h = 0.707*max(entity.size*entity.parts[current_part][Data_dimensions][1],entity.size*entity.parts[current_part][Data_dimensions][2])
             sensor.h = 0.6
+            if sensor.type == 'Eye':
+                sensor.h = 0.4
             # preprocess sensors
             Sensors.preprocessSensor(sensor, x, y, z)
-    Definitions.transform.pop()
+    Definitions.modelMatrix.pop()
 
 
     """ recursive call for all parts attached to the current one """
@@ -216,7 +220,7 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
         stick(entity, (x, 0, 0), (0,0,0,0))
 
     glPopMatrix()
-    Definitions.transform.pop()
+    Definitions.modelMatrix.pop()
 
 
 

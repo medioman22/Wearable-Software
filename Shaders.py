@@ -10,10 +10,9 @@ vertex_shader = """
     uniform mat4 projection;
     uniform mat4 view;
     uniform mat4 model;
-    uniform mat4 transform;
 
     void main() {
-        gl_Position =  projection * view * model * transform * vec4(position, 1.0f);
+        gl_Position =  projection * view * model * vec4(position, 1.0f);
     }
     """
     
@@ -33,7 +32,6 @@ shader = None
 proj_loc = None
 view_loc = None
 model_loc = None
-transform_loc = None
 setColor_loc = None
 
 

@@ -12,10 +12,10 @@ import Graphics
 import Shaders
     
 def preprocessGround(rMax = 5):
-    Definitions.transform.push()
-    Definitions.transform.rotate(90, 0, 0, 1)
-    Definitions.transform.translate(-1.1, 0, 0)
-    Definitions.transform.scale(1,3,3)
+    Definitions.modelMatrix.push()
+    Definitions.modelMatrix.rotate(90, 0, 0, 1)
+    Definitions.modelMatrix.translate(-1.1, 0, 0)
+    Definitions.modelMatrix.scale(1,3,3)
 
     i = -rMax
     while i <= rMax:
@@ -25,17 +25,17 @@ def preprocessGround(rMax = 5):
             dz = 0.5*math.sqrt(3)*j + 0.25*math.sqrt(3)*i
             r = math.sqrt(dy*dy + dz*dz)
             if  r <= 0.501*math.sqrt(3)*rMax:
-                """ transformation matrix update """
-                Definitions.transform.push()
-                Definitions.transform.translate(0.25*r, dy, dz)
-                Definitions.transform.scale(0.5*r,1,1)
+                """ model matrix update """
+                Definitions.modelMatrix.push()
+                Definitions.modelMatrix.translate(0.25*r, dy, dz)
+                Definitions.modelMatrix.scale(0.5*r,1,1)
 
-                Definitions.packagePreprocess[Graphics.vboHexagon] = Definitions.packagePreprocess[Graphics.vboHexagon] + [[Definitions.transform.peek(), "Ground"],]
+                Definitions.packagePreprocess[Graphics.vboHexagon] = Definitions.packagePreprocess[Graphics.vboHexagon] + [[Definitions.modelMatrix.peek(), "Ground"],]
 
-                Definitions.transform.pop()
+                Definitions.modelMatrix.pop()
             j += 1
         i += 1
-    Definitions.transform.pop()
+    Definitions.modelMatrix.pop()
 
 def drawGround():
     if Events.style == Graphics.idBuffer:
@@ -61,7 +61,7 @@ def drawGround():
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
@@ -86,7 +86,7 @@ def drawGround():
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.transform_loc, 1, GL_FALSE, pack[Definitions.packTransform])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
