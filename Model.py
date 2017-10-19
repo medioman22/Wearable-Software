@@ -48,7 +48,9 @@ def main():
                          Sensors.sensors("Head", "Custom", (0.,160,90), (1,0,0.5)),
                          Sensors.sensors("Head", "Custom", (0.,200,90), (1,0,0.5))]
     Sensors.virtuSens = Sensors.virtuSens + [
+
                          ##### 10/20 System Position
+
                          Sensors.sensors("Head", "EEG", (0.,0,0), (0.5,0.5,0.5)),           #Cz
                          
                          Sensors.sensors("Head", "EEG", (0.,0,36), (0.5,0.5,0.5)),          #Pz
@@ -63,57 +65,87 @@ def main():
                          
                          Sensors.sensors("Head", "EEG", (0.,-18,72), (0.5,0.5,0.5)),        #O1
                          Sensors.sensors("Head", "EEG", (0.,18,72), (0.5,0.5,0.5)),         #O2
+                         Sensors.sensors("Head", "EEG", (0.,-(180-18),72), (0.5,0.5,0.5)),       #Fp1
+                         Sensors.sensors("Head", "EEG", (0.,180-18,72), (0.5,0.5,0.5)),        #Fp2
+
                          Sensors.sensors("Head", "EEG", (0.,-54,72), (0.5,0.5,0.5)),        #T5
                          Sensors.sensors("Head", "EEG", (0.,54,72), (0.5,0.5,0.5)),         #T6
-                         Sensors.sensors("Head", "EEG", (0.,-126,72), (0.5,0.5,0.5)),       #F7
-                         Sensors.sensors("Head", "EEG", (0.,126,72), (0.5,0.5,0.5)),        #F8
-                         Sensors.sensors("Head", "EEG", (0.,-162,72), (0.5,0.5,0.5)),       #Fp1
-                         Sensors.sensors("Head", "EEG", (0.,162,72), (0.5,0.5,0.5)),        #Fp2
+                         Sensors.sensors("Head", "EEG", (0.,-(180-54),72), (0.5,0.5,0.5)),       #F7
+                         Sensors.sensors("Head", "EEG", (0.,180-54,72), (0.5,0.5,0.5)),        #F8
                          
                          Sensors.sensors("Head", "EEG", (0.,-33.86,51), (0.5,0.5,0.5)),         #P3
                          Sensors.sensors("Head", "EEG", (0.,33.86,51), (0.5,0.5,0.5)),          #P4
                          Sensors.sensors("Head", "EEG", (0.,-(180-33.86),51), (0.5,0.5,0.5)),   #F3
                          Sensors.sensors("Head", "EEG", (0.,180-33.86,51), (0.5,0.5,0.5)),      #F4
                          
-                         #Sensors.sensors("Head", "EEG", (0.,-45,25.46), (0.5,0.5,0.5)),     #CP1
-                         #Sensors.sensors("Head", "EEG", (0.,45,25.46), (0.5,0.5,0.5)),      #CP2
-                         #Sensors.sensors("Head", "EEG", (0.,-135,25.46), (0.5,0.5,0.5)),    #FC1
-                         #Sensors.sensors("Head", "EEG", (0.,135,25.46), (0.5,0.5,0.5)),     #FC2
-                         #
-                         #Sensors.sensors("Head", "EEG", (0.,-63.43,40.25), (0.5,0.5,0.5)),  #CP3
-                         #Sensors.sensors("Head", "EEG", (0.,63.43,40.25), (0.5,0.5,0.5)),   #CP4
-                         #Sensors.sensors("Head", "EEG", (0.,-(180-63.43),40.25), (0.5,0.5,0.5)), #FC3
-                         #Sensors.sensors("Head", "EEG", (0.,180-63.43,40.25), (0.5,0.5,0.5)),  #FC4
-                         #
-                         #Sensors.sensors("Head", "EEG", (0.,-71.57,56.92), (0.5,0.5,0.5)),  #CP5
-                         #Sensors.sensors("Head", "EEG", (0.,71.57,56.92), (0.5,0.5,0.5)),   #CP6
-                         #Sensors.sensors("Head", "EEG", (0.,-(180-71.57),56.92), (0.5,0.5,0.5)), #FC5
-                         #Sensors.sensors("Head", "EEG", (0.,180-71.57,56.92), (0.5,0.5,0.5)),  #FC6
-                         #
-                         #Sensors.sensors("Head", "EEG", (0.,-72,74.22), (0.5,0.5,0.5)),  #TP7
-                         #Sensors.sensors("Head", "EEG", (0.,72,74.22), (0.5,0.5,0.5)),   #TP8
-                         #Sensors.sensors("Head", "EEG", (0.,-(180-72),74.22), (0.5,0.5,0.5)), #FT7
-                         #Sensors.sensors("Head", "EEG", (0.,180-72,74.22), (0.5,0.5,0.5)),  #FT8
+                         
+                         ##### 10/10 System Position
+                         
+                         Sensors.sensors("Head", "EEG", (0.,0,18), (0.5,0.5,0.5)),          #CPz
+                         Sensors.sensors("Head", "EEG", (0.,-90,18), (0.5,0.5,0.5)),        #C1
+                         Sensors.sensors("Head", "EEG", (0.,90,18), (0.5,0.5,0.5)),         #C2
+                         Sensors.sensors("Head", "EEG", (0.,180,18), (0.5,0.5,0.5)),        #FCz
 
+                         Sensors.sensors("Head", "EEG", (0.,0,54), (0.5,0.5,0.5)),          #POz
+                         Sensors.sensors("Head", "EEG", (0.,-90,54), (0.5,0.5,0.5)),        #C5
+                         Sensors.sensors("Head", "EEG", (0.,90,54), (0.5,0.5,0.5)),         #C6
+                         Sensors.sensors("Head", "EEG", (0.,180,54), (0.5,0.5,0.5)),        #AFz
                          
-                         #Sensors.sensors("Head", "EEG", (0.,0,54), (0.5,0.5,0.5)),          #POz
-                         #Sensors.sensors("Head", "EEG", (0.,-90,54), (0.5,0.5,0.5)),        #C5
-                         #Sensors.sensors("Head", "EEG", (0.,90,54), (0.5,0.5,0.5)),         #C6
-                         #Sensors.sensors("Head", "EEG", (0.,180,54), (0.5,0.5,0.5)),        #AFz
+                         Sensors.sensors("Head", "EEG", (0.,-36,72), (0.5,0.5,0.5)),        #PO7
+                         Sensors.sensors("Head", "EEG", (0.,36,72), (0.5,0.5,0.5)),         #PO8
+                         Sensors.sensors("Head", "EEG", (0.,-(180-36),72), (0.5,0.5,0.5)),  #AF7
+                         Sensors.sensors("Head", "EEG", (0.,180-36,72), (0.5,0.5,0.5)),     #AF8
+                         
+                         Sensors.sensors("Head", "EEG", (0.,-72,72), (0.5,0.5,0.5)),        #TP7
+                         Sensors.sensors("Head", "EEG", (0.,72,72), (0.5,0.5,0.5)),         #TP8
+                         Sensors.sensors("Head", "EEG", (0.,-(180-72),72), (0.5,0.5,0.5)),  #FT7
+                         Sensors.sensors("Head", "EEG", (0.,180-72,72), (0.5,0.5,0.5)),     #FT8
+                         
+                         Sensors.sensors("Head", "EEG", (0.,-25.13,61.27), (0.5,0.5,0.5)),          #PO3
+                         Sensors.sensors("Head", "EEG", (0.,25.13,61.27), (0.5,0.5,0.5)),           #PO4
+                         Sensors.sensors("Head", "EEG", (0.,-(180-25.13),61.27), (0.5,0.5,0.5)),    #AF3
+                         Sensors.sensors("Head", "EEG", (0.,180-25.13,61.27), (0.5,0.5,0.5)),       #AF4
+                         
+                         Sensors.sensors("Head", "EEG", (0.,-19.35,42.26), (0.5,0.5,0.5)),          #P1
+                         Sensors.sensors("Head", "EEG", (0.,19.35,42.26), (0.5,0.5,0.5)),           #P2
+                         Sensors.sensors("Head", "EEG", (0.,-(180-19.35),42.26), (0.5,0.5,0.5)),    #F1
+                         Sensors.sensors("Head", "EEG", (0.,180-19.35,42.26), (0.5,0.5,0.5)),       #F2
+                         
+                         Sensors.sensors("Head", "EEG", (0.,-44.95,61.13), (0.5,0.5,0.5)),          #P5
+                         Sensors.sensors("Head", "EEG", (0.,44.95,61.13), (0.5,0.5,0.5)),           #P6
+                         Sensors.sensors("Head", "EEG", (0.,-(180-44.95),61.13), (0.5,0.5,0.5)),    #F5
+                         Sensors.sensors("Head", "EEG", (0.,180-44.95,61.13), (0.5,0.5,0.5)),       #F6
+                         
+                         Sensors.sensors("Head", "EEG", (0.,-56.31,40.78), (0.5,0.5,0.5)),          #CP3
+                         Sensors.sensors("Head", "EEG", (0.,56.31,40.78), (0.5,0.5,0.5)),           #CP4
+                         Sensors.sensors("Head", "EEG", (0.,-(180-56.31),40.78), (0.5,0.5,0.5)),    #FC3
+                         Sensors.sensors("Head", "EEG", (0.,180-56.31,40.78), (0.5,0.5,0.5)),       #FC4
+                         
+                         Sensors.sensors("Head", "EEG", (0.,-38.99,26.82), (0.5,0.5,0.5)),          #CP1
+                         Sensors.sensors("Head", "EEG", (0.,38.99,26.82), (0.5,0.5,0.5)),           #CP2
+                         Sensors.sensors("Head", "EEG", (0.,-(180-38.99),26.82), (0.5,0.5,0.5)),    #FC1
+                         Sensors.sensors("Head", "EEG", (0.,180-38.99,26.82), (0.5,0.5,0.5)),       #FC2
+                         
+                         Sensors.sensors("Head", "EEG", (0.,-65.62,56.15), (0.5,0.5,0.5)),          #CP5
+                         Sensors.sensors("Head", "EEG", (0.,65.62,56.15), (0.5,0.5,0.5)),           #CP6
+                         Sensors.sensors("Head", "EEG", (0.,-(180-65.62),56.15), (0.5,0.5,0.5)),    #FC5
+                         Sensors.sensors("Head", "EEG", (0.,180-65.62,56.15), (0.5,0.5,0.5)),       #FC6
 
-                         #Sensors.sensors("Head", "EEG", (0.,0,90), (0.5,0.5,0.5)),          #Iz
-                         #Sensors.sensors("Head", "EEG", (0.,-90,90), (0.5,0.5,0.5)),        #T9
-                         #Sensors.sensors("Head", "EEG", (0.,90,90), (0.5,0.5,0.5)),         #T10
-                         #Sensors.sensors("Head", "EEG", (0.,180,90), (0.5,0.5,0.5)),        #Nzn
-                         
-                         
-                         #Sensors.sensors("Head", "EEG", (0.,0,18), (0.5,0.5,0.5)),          #CPz
-                         #Sensors.sensors("Head", "EEG", (0.,-90,18), (0.5,0.5,0.5)),        #C1
-                         #Sensors.sensors("Head", "EEG", (0.,90,18), (0.5,0.5,0.5)),         #C2
-                         #Sensors.sensors("Head", "EEG", (0.,180,18), (0.5,0.5,0.5)),        #FCz
-                         
+                         # all spher 90
+                         Sensors.sensors("Head", "EEG", (0.,0,90), (0.5,0.5,0.5)),          #Iz
+                         Sensors.sensors("Head", "EEG", (0.,-90,90), (0.5,0.5,0.5)),        #T9
+                         Sensors.sensors("Head", "EEG", (0.,90,90), (0.5,0.5,0.5)),         #T10
+                         Sensors.sensors("Head", "EEG", (0.,180,90), (0.5,0.5,0.5)),        #Nzn
 
-                         #Sensors.sensors("Head", "EEG", (0.,25.13,61.27), (0.5,0.5,0.5)),       #PO4
+                         Sensors.sensors("Head", "EEG", (0.,-54,90), (0.5,0.5,0.5)),          #P9
+                         Sensors.sensors("Head", "EEG", (0.,54,90), (0.5,0.5,0.5)),           #P10
+                         Sensors.sensors("Head", "EEG", (0.,-(180-54),90), (0.5,0.5,0.5)),    #F9
+                         Sensors.sensors("Head", "EEG", (0.,180-54,90), (0.5,0.5,0.5)),       #F10
+                         
+                         Sensors.sensors("Head", "EEG", (0.,-72,90), (0.5,0.5,0.5)),          #TP9
+                         Sensors.sensors("Head", "EEG", (0.,72,90), (0.5,0.5,0.5)),           #TP10
+                         Sensors.sensors("Head", "EEG", (0.,-(180-72),90), (0.5,0.5,0.5)),    #FT9
+                         Sensors.sensors("Head", "EEG", (0.,180-72,90), (0.5,0.5,0.5)),       #FT10
                          ]
 
     """ Create a window """
