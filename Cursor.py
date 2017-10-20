@@ -41,9 +41,10 @@ def mouseManage():
         ID = int(ID + 0.5)
     else:
         ID = int(ID)
-            
+    
     if Events.setLookAt == True:
-        StickMan.lookingAtID = ID
+        if parent == 0 or parent == -1:
+            StickMan.lookingAtID = ID
     # select part
     if parent == 0:
         if Events.mouse_click == True:

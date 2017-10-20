@@ -156,6 +156,9 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
         if selectedPart == entity.parts[current_part][Data_id]:
             partIsSelected = True
             break
+        if selectedPart == 'Wrist' and entity.parts[current_part][Data_id] == "Origin":
+            partIsSelected = True
+            break
 
 
     """ default orientation of part """
