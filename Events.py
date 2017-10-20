@@ -20,6 +20,7 @@ lastTime = 0 # for time between frames
 
 """ mouse controls """
 mouse_click = False
+setLookAt = False
 
 """ camera controls """
 leftRight_acceleration = 0.
@@ -73,6 +74,7 @@ def manage():
     global lastTime
 
     global mouse_click
+    global setLookAt
 
     global leftRight_acceleration
     global left_keyHold
@@ -117,6 +119,7 @@ def manage():
     Cursor.mouse = pygame.mouse.get_pos()
     
     mouse_click = False
+    setLookAt = False
     reset = False
     resetSens = False
     prevNext = 0
@@ -137,8 +140,10 @@ def manage():
             # not sure what to do after...
 
         """ mouse controller """
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left mouse button
             mouse_click = True
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right mouse button
+            setLookAt = True
 
         """ Camera controller """
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:

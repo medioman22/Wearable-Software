@@ -50,15 +50,12 @@ part = -1 # global helps through recursivity
 selectedParts = []
 virtuMan = None
 lookingAt = np.array([[0, 0, 0, 1]])
+lookingAtID = 0
 def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
-    global lookingAt
-
     """ part transformations """
     Definitions.modelMatrix.push()
     Definitions.modelMatrix.translate(dx,dy,dz)
     Definitions.modelMatrix.scale(x,y,z)
-    if partIsSelected:
-        lookingAt = np.dot(np.array([[0, 0, 0, 1]]), Definitions.modelMatrix.peek())
     """ store transformation in package """
     if parts[ID][Data_id] == "Head":
         Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
@@ -70,6 +67,8 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
 
 
 def drawBodySurface(style):
+    global lookingAt
+
     vboId = -1
     for indices in Definitions.packageIndices[1]:
         pack = Definitions.packagePreprocess[indices[0]][indices[1]]
@@ -100,6 +99,9 @@ def drawBodySurface(style):
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
+        
+        if pack[Definitions.packID] == lookingAtID:
+            lookingAt = np.dot(np.array([[0, 0, 0, 1]]), pack[Definitions.packModel])
 
     
 def drawBodyEdge(style):

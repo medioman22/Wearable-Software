@@ -26,6 +26,7 @@ sensorTypes = [ 'EEG',
 help = ['Help : ']
 
 helpList = ['Arrows, page up/page dn = camera',
+            'right mouse = lock camera on target',
             'Left mouse = (un)select entity',
             'Q,W = rotate part around x axis',
             'E,R = rotate part around y axis',
