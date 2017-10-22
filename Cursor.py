@@ -66,6 +66,9 @@ def mouseManage():
                 Sensors.selectedSens = ID
         name = ' (' + 'sensor' + ')'
     if parent == 2:
-        GUI.selectedGuiId = ID
+        if Events.mouse_click == True:
+            GUI.selectedGuiId = ID
+            for part in StickMan.selectedParts:
+                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, GUI.sensorTypes[GUI.selectedGuiId-1], (0.,0,90), (1, 0, 0))]
     else:
         GUI.selectedGuiId = 0
