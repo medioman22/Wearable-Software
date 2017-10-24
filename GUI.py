@@ -53,6 +53,7 @@ TEX_TEXTURE = None
     sy = 1|-1 : new line under|over current line
 """
 guiId = 0
+overGuiId = 0
 selectedGuiId = 0
 newGuiPosDir = [0,0,1,1]
 def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
@@ -67,10 +68,12 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
     for txt in text:
         guiId += 1
         if idDraw != True:
-            if selectedGuiId != guiId:
-                textSurface = font.render(txt, True, (255,255,255,255), (0,0,0,0))
-            else:
+            if selectedGuiId == guiId:
                 textSurface = font.render(txt, True, (255,0,0,255), (0,0,0,0))
+            elif overGuiId == guiId:
+                textSurface = font.render(txt, True, (127,0,0,255), (0,0,0,0))
+            else:
+                textSurface = font.render(txt, True, (255,255,255,255), (0,0,0,0))
         else:
             textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/lenGui(),0))
         ix, iy = textSurface.get_width(), textSurface.get_height()

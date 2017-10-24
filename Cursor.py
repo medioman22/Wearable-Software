@@ -46,7 +46,11 @@ def mouseManage():
         if parent == 0 or parent == -1:
             StickMan.lookingAtID = ID
     # select part
+    GUI.overGuiId = 0
+    StickMan.overPartId = 0
+    Sensors.overSensId = 0
     if parent == 0:
+        StickMan.overPartId = ID
         if Events.mouse_click == True:
             Select = True
             for part in StickMan.selectedParts:
@@ -59,6 +63,7 @@ def mouseManage():
         #Definitions.packagePreprocess[Graphics.vboCube][ID][1] = True
         name = ' (' + StickMan.parts[ID][StickMan.Data_id] + ')'
     elif parent == 1:
+        Sensors.overSensId = ID
         if Events.mouse_click == True:
             if Sensors.selectedSens == ID:
                 Sensors.selectedSens = 0
@@ -66,9 +71,14 @@ def mouseManage():
                 Sensors.selectedSens = ID
         name = ' (' + 'sensor' + ')'
     if parent == 2:
+        GUI.overGuiId = ID
         if Events.mouse_click == True:
-            GUI.selectedGuiId = ID
-            for part in StickMan.selectedParts:
-                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, GUI.sensorTypes[GUI.selectedGuiId-1], (0.,0,90), (1, 0, 0))]
+            if GUI.selectedGuiId != ID:
+                GUI.selectedGuiId = ID
+                if GUI.selectedGuiId-1 < len(GUI.sensorTypes):
+                    for part in StickMan.selectedParts:
+                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, GUI.sensorTypes[GUI.selectedGuiId-1], (0.,90,90), (1, 0, 0))]
+            else:
+                GUI.selectedGuiId = 0
     else:
-        GUI.selectedGuiId = 0
+        pass

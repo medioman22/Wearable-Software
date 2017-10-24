@@ -47,6 +47,7 @@ class characteristics(object):
 
             
 part = -1 # global helps through recursivity
+overPartId = 0
 selectedParts = []
 virtuMan = None
 lookingAt = np.array([[0, 0, 0, 1]])
@@ -86,7 +87,9 @@ def drawBodySurface(style):
         if style == Graphics.idBuffer:
             i = (pack[Definitions.packID])/float(len(parts)-1)
             color = np.array([i,0.,0.,1.], dtype = np.float32)
-        elif pack[Definitions.selected] == True or Cursor.parent == 0 and pack[Definitions.packID] == Cursor.ID:
+        elif pack[Definitions.selected] == True:
+            color = np.array([0.,0.,0.5,0.3], dtype = np.float32)
+        elif pack[Definitions.packID] == overPartId:
             color = np.array([0.,0.,1.,0.3], dtype = np.float32)
         else:
             color = np.array([1.,1.,1.,0.3], dtype = np.float32)
@@ -125,7 +128,9 @@ def drawBodyEdge(style):
         if style == Graphics.opaque:
             color = np.array([0.5,0.5,0.5,1.], dtype = np.float32)
         elif style == Graphics.blending:
-            if pack[Definitions.selected] == True or Cursor.parent == 0 and pack[Definitions.packID] == Cursor.ID:
+            if pack[Definitions.selected] == True:
+                color = np.array([0.,0.,0.5,0.3], dtype = np.float32)
+            elif pack[Definitions.packID] == overPartId:
                 color = np.array([0.,0.,1.,0.3], dtype = np.float32)
             else:
                 color = np.array([1.,1.,1.,1.], dtype = np.float32)

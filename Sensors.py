@@ -36,6 +36,7 @@ class sensors(object):
 
 
 virtuSens = ["",]
+overSensId = 0
 selectedSens = []
 
 from OpenGL.GL import *
@@ -120,6 +121,7 @@ def drawSensor(style):
         if style != Graphics.idBuffer:
             color = np.array([sensor.color[0], sensor.color[1], sensor.color[2], 1.], dtype = np.float32)
             if pack[Definitions.packID] == selectedSens:
+                color = np.array([0.5*sensor.color[0], 0.5*sensor.color[1], 0.5*sensor.color[2], 1.], dtype = np.float32)
                 pack[Definitions.entity].x += Events.incSens[0]
                 pack[Definitions.entity].t += Events.incSens[1]
                 pack[Definitions.entity].s += Events.incSens[2]
@@ -130,7 +132,7 @@ def drawSensor(style):
                 if sensor.type == "EEG":
                     color = np.array([1, 0.5, 0, 1.], dtype = np.float32)
                 vboDraw = Graphics.vboSurfaces
-            elif Cursor.parent == 1 and pack[Definitions.packID] == Cursor.ID:
+            elif Cursor.parent == 1 and pack[Definitions.packID] == Cursor.ID or pack[Definitions.packID] == overSensId:
                 vboDraw = Graphics.vboSurfaces
             elif sensor.type == "EEG":
                 vboDraw = Graphics.vboSurfaces
