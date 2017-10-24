@@ -10,6 +10,7 @@ import time
 import numpy as np
 
 import Definitions
+import Sensors
 import Shaders
 
 
@@ -70,10 +71,15 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
     for txt in text:
         guiId += 1
         if idDraw != True:
+            if guiId-1 < len(Sensors.sensorGraphics):
+                color = Sensors.sensorGraphics[guiId-1][1]
+            else:
+                color = (255, 0, 0, 255)
             if selectedGuiId == guiId:
-                textSurface = font.render(txt, True, (255,0,0,255), (0,0,0,0))
+                textSurface = font.render(txt, True, color, (0,0,0,0))
             elif overGuiId == guiId:
-                textSurface = font.render(txt, True, (127,0,0,255), (0,0,0,0))
+                color = (0.5*color[0], 0.5*color[1], 0.5*color[2],255)
+                textSurface = font.render(txt, True, color, (0,0,0,0))
             else:
                 textSurface = font.render(txt, True, (255,255,255,255), (0,0,0,0))
         else:

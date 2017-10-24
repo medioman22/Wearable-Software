@@ -41,14 +41,10 @@ def main():
     """ Create Entities """
     StickMan.virtuMan = StickMan.characteristics(1.7, (0,0,0), StickMan.parts)
     State.loadModel(StickMan.virtuMan)
-    Sensors.virtuSens = [Sensors.sensors("Forearm_r", "EMG", (-0.5,0,90), (1,1,0)),
-                         Sensors.sensors("Forearm_l", "EMG", (0.,90,90), (0,1,0)),
-                         Sensors.sensors("Forearm_l", "IMU", (0.25,240,90)),
-                         Sensors.sensors("Upp_leg_r", "IMU", (0.,240,90)),
-                         Sensors.sensors("Head", "Eye", (0.,160,90), (1,0,0.5)),
+    """Sensors.virtuSens = [Sensors.sensors("Head", "Eye", (0.,160,90), (1,0,0.5)),
                          Sensors.sensors("Head", "Eye", (0.,200,90), (1,0,0.5))]
     # EEG templates
-    """color = (0.5, 0.5, 0.)
+    color = (0.5, 0.5, 0.)
     Sensors.virtuSens = Sensors.virtuSens + [
 
                          ##### 10/20 System Position

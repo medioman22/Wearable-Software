@@ -34,11 +34,6 @@ class sensors(object):
         print(self.attach, self.x, self.t)
 
 
-
-virtuSens = ["",]
-overSensId = 0
-selectedSens = []
-
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import math
@@ -50,6 +45,21 @@ import Definitions
 import Events
 import Graphics
 import Shaders
+
+
+sensorGraphics = [  ['EEG',         (255, 0, 0, 255),       Graphics.vboCircle],
+                    ['EMG',         (255, 127, 0, 255),     Graphics.vboHexagon],
+                    ['ECG',         (255, 255, 0, 255),     Graphics.vboCone],
+                    ['IMU',         (127, 255, 0, 255),     Graphics.vboCube],
+                    ['Strain',      (0, 255, 0, 255),       Graphics.vboPyramide],
+                    ['Pressure',    (0, 255, 127, 255),     Graphics.vboPyramide],
+                    ['Marker',      (0, 255, 255, 255),     Graphics.vboPyramide],
+                    ['Custom',      (127, 127, 127, 255),   Graphics.vboPyramide],
+                    ['Eye',         (255, 127, 127, 255),   Graphics.vboSphere]]
+
+virtuSens = ["",]
+overSensId = 0
+selectedSens = []
 
 countID = 0
 def preprocessSensor(sensor, x, y, z):
@@ -78,7 +88,6 @@ def preprocessSensor(sensor, x, y, z):
         
         """ store modelMatrix in package """
         Definitions.packagePreprocess[Graphics.vboDashed] = Definitions.packagePreprocess[Graphics.vboDashed] + [[Definitions.modelMatrix.peek(), "Link", countID, sensor],]
-        #Definitions.packageDashed = Definitions.packageDashed + [[Definitions.modelMatrix.peek(), sensor],]
         
         Definitions.modelMatrix.pop()
         
@@ -97,17 +106,10 @@ def preprocessSensor(sensor, x, y, z):
     
     
     """ store modelMatrix in package """
-    if sensor.type == "EEG":
-        Definitions.packagePreprocess[Graphics.vboCircle] = Definitions.packagePreprocess[Graphics.vboCircle] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
-    elif sensor.type == "Eye":
-        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
-    elif sensor.type == "EMG":
-        Definitions.packagePreprocess[Graphics.vboHexagon] = Definitions.packagePreprocess[Graphics.vboHexagon] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
-    elif sensor.type == "ECG":
-        Definitions.packagePreprocess[Graphics.vboCone] = Definitions.packagePreprocess[Graphics.vboCone] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
-    else:
-        Definitions.packagePreprocess[Graphics.vboPyramide] = Definitions.packagePreprocess[Graphics.vboPyramide] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
-    #Definitions.packageSensors = Definitions.packageSensors + [[Definitions.modelMatrix.peek(), sensor],]
+    for type in sensorGraphics:
+        if sensor.type == type[0]:
+            Definitions.packagePreprocess[type[2]] = Definitions.packagePreprocess[type[2]] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
+            break
 
     Definitions.modelMatrix.pop()
     Definitions.modelMatrix.pop()
@@ -145,7 +147,6 @@ def drawSensor(style):
             i = pack[Definitions.packID]/float(countID)
             color = np.array([0, i, 0, 1.], dtype = np.float32)
 
-        #if vboId != indices[0]:
         """ choose vbo """
         vboId = indices[0]
                     

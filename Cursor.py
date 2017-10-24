@@ -77,7 +77,9 @@ def mouseManage():
                 GUI.selectedGuiId = ID
                 if GUI.selectedGuiId-1 < len(GUI.sensorTypes):
                     for part in StickMan.selectedParts:
-                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, GUI.sensorTypes[GUI.selectedGuiId-1], (0.,90,90), (1, 0, 0))]
+                        color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
+                        color = (color[0]/255., color[1]/255., color[2]/255.)
+                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, GUI.sensorTypes[GUI.selectedGuiId-1], (0.,90,90), color)]
             else:
                 GUI.selectedGuiId = 0
     else:
