@@ -26,6 +26,7 @@ vboHexagon = 3
 vboSphere = 4
 vboCylindre = 5
 vboCircle = 6
+vboCone = 7
 vboEdges = 0
 vboSurfaces = 1
 def VBO_cube():
@@ -68,6 +69,43 @@ def VBO_pyramide():
     edgeIndices = np.array([[0,1,   0,2,    0,3,    1,2,    2,3,    3,1]], dtype=np.int32)
 
     surfIndices = np.array([[0,1,2,   0,2,3,    0,3,1,    1,2,3]], dtype=np.int32)
+
+    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
+    
+    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
+    
+    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
+    
+    styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+
+def VBO_cone(iMax = 8):
+    """ Create the "pyramide" VBO & EBO """
+    global vertexPositions
+    global indexPositions
+    global nbIndex
+    global styleIndex
+    
+    vertices = []
+    edgeIndices = []
+    surfIndices = []
+
+    i = 0
+    while i <= iMax:
+        phi = 2*math.pi*i/float(iMax)
+        vertices = vertices + [-0.5, 0.5*math.cos(phi), 0.5*math.sin(phi)]
+        if i != iMax:
+            edgeIndices = edgeIndices + [i, i+1]
+            edgeIndices = edgeIndices + [i, (iMax+1)]
+            surfIndices = surfIndices + [i, i+1, (iMax+1)]
+        i +=1
+    vertices = vertices + [0.5, 0., 0.]
+
+
+    vertices = np.array([vertices],    dtype='f')
+
+    edgeIndices = np.array([edgeIndices], dtype=np.int32)
+
+    surfIndices = np.array([surfIndices], dtype=np.int32)
 
     vertexPositions = vertexPositions + [vbo.VBO(vertices),]
     
@@ -269,6 +307,7 @@ def VBO_init():
     n+=1 ; VBO_sphere(16, 16, 16, 16)
     n+=1 ; VBO_cylindre(16)
     n+=1 ; VBO_circle(16)
+    n+=1 ; VBO_cone(16)
 
     while n > 0:
         n -= 1

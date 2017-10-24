@@ -103,6 +103,8 @@ def preprocessSensor(sensor, x, y, z):
         Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
     elif sensor.type == "EMG":
         Definitions.packagePreprocess[Graphics.vboHexagon] = Definitions.packagePreprocess[Graphics.vboHexagon] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
+    elif sensor.type == "ECG":
+        Definitions.packagePreprocess[Graphics.vboCone] = Definitions.packagePreprocess[Graphics.vboCone] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
     else:
         Definitions.packagePreprocess[Graphics.vboPyramide] = Definitions.packagePreprocess[Graphics.vboPyramide] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
     #Definitions.packageSensors = Definitions.packageSensors + [[Definitions.modelMatrix.peek(), sensor],]
