@@ -38,10 +38,9 @@ import StickMan
 def main():
     """ Create list of models """
     State.createList()
-    State.loadSensors()
     """ Create Entities """
     StickMan.virtuMan = StickMan.characteristics(1.7, (0,0,0), StickMan.parts)
-    State.load(StickMan.virtuMan)
+    State.loadModel(StickMan.virtuMan)
     Sensors.virtuSens = [Sensors.sensors("Forearm_r", "EMG", (-0.5,0,90), (1,1,0)),
                          Sensors.sensors("Forearm_l", "EMG", (0.,90,90), (0,1,0)),
                          Sensors.sensors("Forearm_l", "IMU", (0.25,240,90)),
@@ -49,7 +48,7 @@ def main():
                          Sensors.sensors("Head", "Eye", (0.,160,90), (1,0,0.5)),
                          Sensors.sensors("Head", "Eye", (0.,200,90), (1,0,0.5))]
     # EEG templates
-    color = (0.5, 0.5, 0.)
+    """color = (0.5, 0.5, 0.)
     Sensors.virtuSens = Sensors.virtuSens + [
 
                          ##### 10/20 System Position
@@ -149,7 +148,9 @@ def main():
                          Sensors.sensors("Head", "EEG", (0.,72,90), color),             #TP10
                          Sensors.sensors("Head", "EEG", (0.,-(180-72),90), color),      #FT9
                          Sensors.sensors("Head", "EEG", (0.,180-72,90), color),         #FT10
-                         ]
+                         ]"""
+    
+    State.loadSensors()
 
     """ Create a window """
     pygame.init()
@@ -331,7 +332,8 @@ def main():
             GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False)
             GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False)
             GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name)], 1, -1, -1, -1, False)
-            GUI.textTexture(['Model : ' + str(State.fileName[State.currentFile])], 0, 1, 0, 1, False)
+            GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile]),
+                             'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False)
         
         
 

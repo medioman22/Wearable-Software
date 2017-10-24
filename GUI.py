@@ -38,8 +38,10 @@ helpList = ['Arrows, page up/page dn = camera',
             'B,N = rotate sensor around sphere',
             'M   = reset sensor orientation',
             'P   = switch view mode',
-            'S,L = save/load model',
+            'H,L = save/load model',
             'J,K = switch model',
+            'A,F = save/load sensor group',
+            'S,D = switch sensor group',
             'G   = change floor']
 
 def lenGui():

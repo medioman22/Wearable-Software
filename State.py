@@ -3,27 +3,27 @@ import os
 import StickMan
 import Sensors
 
-path = "States/"
-pathSensors = "Sensors/"
-currentFile = 0
-fileName = []
+pathModels = "States/Models/"
+pathSensors = "States/Sensors/"
+currentModelFile = 0
+modelFileName = []
 currentSensorFile = 0
 sensorFileName = []
 
 def createList():
-    global fileName
+    global modelFileName
     global sensorFileName
     print(" - creating list of models - ")
-    fileName = os.listdir(path)
-    print(fileName)
+    modelFileName = os.listdir(pathModels)
+    print(modelFileName)
     print(" - creating list of sensor groups - ")
     sensorFileName = os.listdir(pathSensors)
     print(sensorFileName)
 
-def save(entity):
-    print("save model : {}".format(fileName[currentFile]))
+def saveModel(entity):
+    print("save model : {}".format(modelFileName[currentModelFile]))
 
-    file = open(path + fileName[currentFile], 'w')
+    file = open(pathModels + modelFileName[currentModelFile], 'w')
 
     for part in entity.parts:
         file.write(part[StickMan.Data_id])
@@ -34,10 +34,10 @@ def save(entity):
     file.close()
 
     
-def load(entity):
-    print("load model : {}".format(fileName[currentFile]))
+def loadModel(entity):
+    print("load model : {}".format(modelFileName[currentModelFile]))
 
-    file = open(path + fileName[currentFile], 'r')
+    file = open(pathModels + modelFileName[currentModelFile], 'r')
 
     while True:
         ID = file.readline() # read part name

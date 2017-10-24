@@ -261,15 +261,15 @@ def manage():
         if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
             style = (style + 1)%4
         if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
-            State.save(StickMan.virtuMan)
+            State.saveModel(StickMan.virtuMan)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-            State.load(StickMan.virtuMan)
+            State.loadModel(StickMan.virtuMan)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
-            State.currentFile = (State.currentFile - 1 + len(State.fileName))%len(State.fileName)
-            State.load(StickMan.virtuMan)
+            State.currentModelFile = (State.currentModelFile - 1 + len(State.modelFileName))%len(State.modelFileName)
+            State.loadModel(StickMan.virtuMan)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
-            State.currentFile = (State.currentFile + 1)%len(State.fileName)
-            State.load(StickMan.virtuMan)
+            State.currentModelFile = (State.currentModelFile + 1)%len(State.modelFileName)
+            State.loadModel(StickMan.virtuMan)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
             State.saveSensors()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
