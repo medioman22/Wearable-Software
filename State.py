@@ -1,20 +1,26 @@
 import os
 
 import StickMan
+import Sensors
 
 path = "States/"
-fileName = []
+pathSensors = "Sensors/"
 currentFile = 0
+fileName = []
+currentSensorFile = 0
+sensorFileName = []
 
 def createList():
     global fileName
+    global sensorFileName
     print(" - creating list of models - ")
     fileName = os.listdir(path)
     print(fileName)
+    print(" - creating list of sensor groups - ")
+    sensorFileName = os.listdir(pathSensors)
+    print(sensorFileName)
 
-callSave = False
 def save(entity):
-    global callSave
     print("save model : {}".format(fileName[currentFile]))
 
     file = open(path + fileName[currentFile], 'w')
@@ -26,12 +32,9 @@ def save(entity):
         file.write(wat)
         file.write("\n")
     file.close()
-    callSave = False
+
     
-    
-callLoad = False
 def load(entity):
-    global callLoad
     print("load model : {}".format(fileName[currentFile]))
 
     file = open(path + fileName[currentFile], 'r')
@@ -49,4 +52,42 @@ def load(entity):
                 part[StickMan.Data_angle] = values
                 break
     file.close()
-    callLoad = False
+
+
+def saveSensors():
+    print("save sensor group : {}".format(sensorFileName[currentSensorFile]))
+
+    file = open(pathSensors + sensorFileName[currentSensorFile], 'w')
+
+    for sensor in Sensors.virtuSens:
+        file.write(sensor.attach)
+        file.write(" ")
+        file.write(sensor.type)
+        file.write(" ")
+        file.write(str(sensor.x))
+        file.write(" ")
+        file.write(str(sensor.t))
+        file.write(" ")
+        file.write(str(sensor.s))
+        file.write(" ")
+        file.write(str(sensor.color[0]))
+        file.write(" ")
+        file.write(str(sensor.color[1]))
+        file.write(" ")
+        file.write(str(sensor.color[2]))
+        file.write("\n")
+    file.close()
+
+def loadSensors():
+    print("load sensor group : {}".format(sensorFileName[currentSensorFile]))
+
+    file = open(pathSensors + sensorFileName[currentSensorFile], 'r')
+    
+    Sensors.virtuSens = []
+    while True:
+        line = file.readline() # read sensor data
+        if line == "":
+            break
+        parent, type, x, t, s, r, g, b = line.split(' ')
+        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), (float(r), float(g), float(b)))]
+    file.close()

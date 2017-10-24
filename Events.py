@@ -260,16 +260,26 @@ def manage():
             prevNext = -1
         if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
             style = (style + 1)%4
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-            State.callSave = True
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
+            State.save(StickMan.virtuMan)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-            State.callLoad = True
+            State.load(StickMan.virtuMan)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
             State.currentFile = (State.currentFile - 1 + len(State.fileName))%len(State.fileName)
-            State.callLoad = True
+            State.load(StickMan.virtuMan)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
             State.currentFile = (State.currentFile + 1)%len(State.fileName)
-            State.callLoad = True
+            State.load(StickMan.virtuMan)
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+            State.saveSensors()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+            State.loadSensors()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+            State.currentSensorFile = (State.currentSensorFile - 1 + len(State.sensorFileName))%len(State.sensorFileName)
+            State.loadSensors()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+            State.currentSensorFile = (State.currentSensorFile + 1)%len(State.sensorFileName)
+            State.loadSensors()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
             rMax += 1
             if rMax > 6:
@@ -388,8 +398,3 @@ def manage():
         j += 1
 
         
-    """ save/load model """
-    if State.callSave == True:
-        State.save(StickMan.virtuMan)
-    if State.callLoad == True:
-        State.load(StickMan.virtuMan)
