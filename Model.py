@@ -327,7 +327,8 @@ def main():
         if Events.style != Graphics.idBuffer:
             GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False)
             GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False)
-            GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name)], 1, -1, -1, -1, False)
+            GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
+                             + Cursor.info, 1, -1, -1, -1, False)
             GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile]),
                              'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False)
         

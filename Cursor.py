@@ -16,15 +16,18 @@ mouse = [0,0]
 parent = -1
 ID = 0
 name = ''
+info = []
 def mouseManage():
     global ID
     global parent
     global name
+    global info
 
     color = glReadPixels( mouse[0] , Events.display[1] - mouse[1] - 1 , 1 , 1 , GL_RGBA , GL_FLOAT )
     ID = 0
     parent = -1
     name = ''
+    info = []
     if color[0][0][0] != 0: # RED channel for parts ID
         parent = 0
         ID = color[0][0][0]*(len(StickMan.parts)-1)
@@ -60,7 +63,6 @@ def mouseManage():
                     break
             if Select == True:
                 StickMan.selectedParts += [StickMan.parts[ID][StickMan.Data_id],]
-        #Definitions.packagePreprocess[Graphics.vboCube][ID][1] = True
         name = ' (' + StickMan.parts[ID][StickMan.Data_id] + ')'
     elif parent == 1:
         Sensors.overSensId = ID
@@ -69,7 +71,12 @@ def mouseManage():
                 Sensors.selectedSens = 0
             else:
                 Sensors.selectedSens = ID
-        name = ' (' + 'sensor' + ')'
+        for indices in Definitions.packageIndices[2]:
+            pack = Definitions.packagePreprocess[indices[0]][indices[1]]
+            if pack[Definitions.packID] == Sensors.overSensId:
+                name = ' (' + pack[Definitions.entity].type + ')'
+                info = [str(pack[Definitions.entity].x), str(pack[Definitions.entity].t), str(pack[Definitions.entity].s)]
+                break
     if parent == 2:
         GUI.overGuiId = ID
         if Events.mouse_click == True:
@@ -80,6 +87,7 @@ def mouseManage():
                         color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
                         color = (color[0]/255., color[1]/255., color[2]/255.)
                         Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, GUI.sensorTypes[GUI.selectedGuiId-1], (0.,90,90), color)]
+                        Sensors.selectedSens = 0 # remove when ID for sensor is well implemented, right now sensor selection may change by adding new ones
             else:
                 GUI.selectedGuiId = 0
     else:
