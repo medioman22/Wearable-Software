@@ -124,10 +124,18 @@ def drawSensor(style):
 
         """ choose color """
         if style != Graphics.idBuffer:
-            color = np.array([sensor.color[0], sensor.color[1], sensor.color[2], 1.], dtype = np.float32)
+            for sensorData in sensorGraphics:
+                if sensor.type == sensorData[0]:
+                    color = np.array([sensorData[1][0]/255., sensorData[1][1]/255., sensorData[1][2]/255., sensorData[1][3]/255.], dtype = np.float32)
+                    break
             if pack[Definitions.packID] == selectedSens:
-                color = np.array([0.5*sensor.color[0], 0.5*sensor.color[1], 0.5*sensor.color[2], 1.], dtype = np.float32)
+                color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
                 pack[Definitions.entity].x += Events.incSens[0]
+                if pack[Definitions.entity].x < -0.5:
+                    pack[Definitions.entity].x = -0.5
+                elif pack[Definitions.entity].x > 0.5:
+                    pack[Definitions.entity].x = 0.5
+
                 pack[Definitions.entity].t += Events.incSens[1]
                 pack[Definitions.entity].s += Events.incSens[2]
                 if Events.resetSens == True:
@@ -137,10 +145,6 @@ def drawSensor(style):
                 vboDraw = Graphics.vboSurfaces
             elif pack[Definitions.packID] == overSensId:
                 vboDraw = Graphics.vboSurfaces
-                #if sensor.type == "EEG":
-                #    color = np.array([1, 0.5, 0, 1.], dtype = np.float32)
-            #elif sensor.type == "EEG":
-            #    vboDraw = Graphics.vboSurfaces
             else:
                 vboDraw = Graphics.vboEdges
         else:
@@ -189,10 +193,12 @@ def drawDashed(style):
         """ choose color """
         sensor = pack[Definitions.entity]
         if style != Graphics.idBuffer:
-            if Cursor.parent == 1 and pack[Definitions.packID] == Cursor.ID:
-                color = np.array([0.,0.,1.,0.3], dtype = np.float32)
-            else:
-                color = np.array([sensor.color[0], sensor.color[1], sensor.color[2], 1.], dtype = np.float32)
+            for sensorData in sensorGraphics:
+                if sensor.type == sensorData[0]:
+                    color = np.array([sensorData[1][0]/255., sensorData[1][1]/255., sensorData[1][2]/255., sensorData[1][3]/255.], dtype = np.float32)
+                    break
+            if pack[Definitions.packID] == selectedSens:
+                color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
         else:
             i = pack[Definitions.packID]/float(countID)
             color = np.array([0, i, 0, 1.], dtype = np.float32)

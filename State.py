@@ -72,11 +72,11 @@ def saveSensors():
 
     file = open(pathSensors + sensorFileName[currentSensorFile], 'w')
 
-    for sensor in Sensors.templateSens:
+    for sensor in Sensors.virtuSens:
         file.write(sensor.attach)
         file.write(" ")
-        #file.write(sensor.type)
-        #file.write(" ")
+        file.write(sensor.type)
+        file.write(" ")
         file.write(str(sensor.x))
         file.write(" ")
         file.write(str(sensor.t))
@@ -101,8 +101,8 @@ def loadSensors():
         line = file.readline() # read sensor data
         if line == "":
             break
-        parent, type, x, t, s, r, g, b = line.split(' ')
-        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), (float(r), float(g), float(b)))]
+        parent, type, x, t, s = line.split(' ')
+        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
     file.close()
 
 def loadTemplates(templateFileName):

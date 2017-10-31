@@ -219,7 +219,6 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
             sensor.h = 0.6
             if sensor.type == 'Eye':
                 sensor.h = 0.4
-            # preprocess sensors
             Sensors.preprocessSensor(sensor, x, y, z)
     Definitions.modelMatrix.pop()
 
