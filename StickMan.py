@@ -214,9 +214,8 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     preprocessPart(x,y,z,dx,dy,dz,partIsSelected, part)
 
     """ preprocess sensors """
-    for sensor in Sensors.virtuSens:
+    for sensor in Sensors.virtuSens + Sensors.templateSens:
         if sensor.attach == entity.parts[current_part][Data_id]:
-            #sensor.h = 0.707*max(entity.size*entity.parts[current_part][Data_dimensions][1],entity.size*entity.parts[current_part][Data_dimensions][2])
             sensor.h = 0.6
             if sensor.type == 'Eye':
                 sensor.h = 0.4

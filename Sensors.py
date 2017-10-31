@@ -54,10 +54,11 @@ sensorGraphics = [  ['EEG',         (255, 0, 0, 255),       Graphics.vboCircle],
                     ['Strain',      (0, 255, 0, 255),       Graphics.vboPyramide],
                     ['Pressure',    (0, 255, 127, 255),     Graphics.vboPyramide],
                     ['Marker',      (0, 255, 255, 255),     Graphics.vboPyramide],
-                    ['Custom',      (127, 127, 127, 255),   Graphics.vboPyramide],
-                    ['Eye',         (255, 127, 127, 255),   Graphics.vboSphere]]
+                    ['Eye',         (0, 127, 255, 255),     Graphics.vboSphere],
+                    ['Custom',      (127, 127, 127, 255),   Graphics.vboPyramide]]
 
-virtuSens = ["",]
+virtuSens = []
+templateSens = []
 overSensId = 0
 selectedSens = []
 
@@ -133,13 +134,13 @@ def drawSensor(style):
                     pack[Definitions.entity].x = 0
                     pack[Definitions.entity].t = 90
                     pack[Definitions.entity].s = 90
-                if sensor.type == "EEG":
-                    color = np.array([1, 0.5, 0, 1.], dtype = np.float32)
                 vboDraw = Graphics.vboSurfaces
-            elif Cursor.parent == 1 and pack[Definitions.packID] == Cursor.ID or pack[Definitions.packID] == overSensId:
+            elif pack[Definitions.packID] == overSensId:
                 vboDraw = Graphics.vboSurfaces
-            elif sensor.type == "EEG":
-                vboDraw = Graphics.vboSurfaces
+                #if sensor.type == "EEG":
+                #    color = np.array([1, 0.5, 0, 1.], dtype = np.float32)
+            #elif sensor.type == "EEG":
+            #    vboDraw = Graphics.vboSurfaces
             else:
                 vboDraw = Graphics.vboEdges
         else:

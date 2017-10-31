@@ -10,6 +10,7 @@ import Events
 import Graphics
 import GUI
 import Sensors
+import State
 import StickMan
 
 mouse = [0,0]
@@ -82,13 +83,15 @@ def mouseManage():
         if Events.mouse_click == True:
             if GUI.selectedGuiId != ID:
                 GUI.selectedGuiId = ID
-                if GUI.selectedGuiId-1 < len(GUI.sensorTypes):
+                if GUI.selectedGuiId-1 < len(Sensors.sensorGraphics):
+                    State.loadTemplates(Sensors.sensorGraphics[GUI.selectedGuiId-1])
                     for part in StickMan.selectedParts:
                         color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
                         color = (color[0]/255., color[1]/255., color[2]/255.)
-                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, GUI.sensorTypes[GUI.selectedGuiId-1], (0.,90,90), color)]
+                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (0.,90,90), color)]
                         Sensors.selectedSens = 0 # remove when ID for sensor is well implemented, right now sensor selection may change by adding new ones
             else:
+                State.loadTemplates([""])
                 GUI.selectedGuiId = 0
     else:
         pass

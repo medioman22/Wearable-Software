@@ -14,16 +14,6 @@ import Sensors
 import Shaders
 
 
-
-sensorTypes = [ 'EEG',
-                'EMG',
-                'ECG',
-                'IMU',
-                'Strain',
-                'Pressure',
-                'Marker',
-                'Custom']
-
 help = ['Help : ']
 
 helpList = ['Arrows, page up/page dn = camera',
@@ -46,7 +36,7 @@ helpList = ['Arrows, page up/page dn = camera',
             'G   = change floor']
 
 def lenGui():
-    return len(sensorTypes) + len(help)
+    return len(Sensors.sensorGraphics) + len(help)
 
 TEX_TEXTURE = None
 """
@@ -87,14 +77,10 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
         ix, iy = textSurface.get_width(), textSurface.get_height()
         dx = dy*ix/iy
         if txt == help[0]:
-            if guiId == selectedGuiId:
-                newGuiPosDir[0] = x + 2*sx*dx
-                newGuiPosDir[1] = y
-                newGuiPosDir[2] = sx
-                newGuiPosDir[3] = sy
-            else:
-                newGuiPosDir[0] = -100
-                newGuiPosDir[1] = -100
+            newGuiPosDir[0] = x + 2*sx*dx
+            newGuiPosDir[1] = y
+            newGuiPosDir[2] = sx
+            newGuiPosDir[3] = sy
         image = pygame.image.tostring(textSurface, "RGBA", True)
         glPixelStorei(GL_UNPACK_ALIGNMENT,1)
         glBindTexture(GL_TEXTURE_2D, TEX_TEXTURE)

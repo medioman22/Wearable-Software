@@ -38,6 +38,7 @@ import StickMan
 def main():
     """ Create list of models """
     State.createList()
+    State.updateTemplateList()
     """ Create Entities """
     StickMan.virtuMan = StickMan.characteristics(1.7, (0,0,0), StickMan.parts)
     State.loadModel(StickMan.virtuMan)
@@ -222,12 +223,20 @@ def main():
 
 
 
-
     """ >>> main loop <<< """
     while True:
         # keep track of loop frequency
         flagStart = time.clock()
-        
+
+        """
+            Update template list.
+            you can edit / add / remove template files without closing software (as long as syntax is respected)
+        """
+        State.updateTemplateList()
+        sensorTypes = []
+        for sensorType in Sensors.sensorGraphics:
+            sensorTypes = sensorTypes + [sensorType[0]]
+
 
         """
             Events management.
@@ -279,7 +288,7 @@ def main():
         Sensors.drawSensor(Graphics.idBuffer)
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
         GUI.guiId = 0
-        GUI.textTexture(GUI.sensorTypes, -1, 1, 1, 1, True)
+        GUI.textTexture(sensorTypes, -1, 1, 1, 1, True)
         GUI.textTexture(GUI.help, -1, -1, 1, -1, True)
         
 
@@ -322,10 +331,11 @@ def main():
         Graphics.modelView(Graphics.opaque)
         glClear(GL_DEPTH_BUFFER_BIT)
         GUI.guiId = 0
-        GUI.textTexture(GUI.sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer)
+        GUI.textTexture(sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer)
         GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer)
         if Events.style != Graphics.idBuffer:
-            GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False)
+            if GUI.selectedGuiId == GUI.lenGui():
+                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False)
             GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False)
             GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
                              + Cursor.info, 1, -1, -1, -1, False)

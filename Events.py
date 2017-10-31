@@ -39,7 +39,7 @@ frontBack_acceleration = 0.
 front_keyHold = False
 back_keyHold = False
 frontBack_cam = -2
-frontBack_cap = 0.2
+frontBack_cap = 0.1
 
 """ parts control """
 pivot = [0,0,0]
