@@ -13,6 +13,8 @@ class sensors(object):
         sensors.nb__init__ += 1
         self.attach = attach
         self.type = type
+        self.id = 0
+        self.tag = 'Tag'
         self.x = coord[0]
         self.t = coord[1]
         self.s = coord[2]
@@ -61,6 +63,7 @@ virtuSens = []
 templateSens = []
 overSensId = 0
 selectedSens = []
+
 
 countID = 0
 def preprocessSensor(sensor, x, y, z):

@@ -49,7 +49,7 @@ guiId = 0
 overGuiId = 0
 selectedGuiId = 0
 newGuiPosDir = [0,0,1,1]
-def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
+def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, r = 1):
     global guiId
     global newGuiPosDir
     x = x
@@ -75,7 +75,7 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
         else:
             textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/lenGui(),0))
         ix, iy = textSurface.get_width(), textSurface.get_height()
-        dx = dy*ix/iy
+        dx = r*dy*ix/iy
         if txt == help[0]:
             newGuiPosDir[0] = x + 2*sx*dx
             newGuiPosDir[1] = y
@@ -110,3 +110,38 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False):
         glEnd()
         y -= 2*sy*dy
     glUseProgram(Shaders.shader)
+
+
+def subWindow(x,y,dx,dy,e, drawBorder = True, color = (0.5,0.5,0.5,1)):
+    if drawBorder == True:
+        glViewport(x,y, dx, dy)
+        
+        glDisable(GL_TEXTURE_2D)
+        glUseProgram(0)
+        glLoadIdentity()
+        glBegin(GL_QUADS)
+        glColor4f(color[0], color[1], color[2], color[3])
+        glVertex3f(-1,-1, 1)
+        glVertex3f(1,-1, 1)
+        glVertex3f(1,1, 1)
+        glVertex3f(-1,1, 1)
+        glEnd()
+        glUseProgram(Shaders.shader)
+        glEnable(GL_TEXTURE_2D)
+        
+        glViewport(int(x+e*max(dx,dy)),int(y+e*max(dx,dy)), int(dx-2*e*max(dx,dy)), int(dy-2*e*max(dx,dy)))
+
+        glDisable(GL_TEXTURE_2D)
+        glUseProgram(0)
+        glLoadIdentity()
+        glBegin(GL_QUADS)
+        glColor4f(0,0,0,1)
+        glVertex3f(-1,-1, 1)
+        glVertex3f(1,-1, 1)
+        glVertex3f(1,1, 1)
+        glVertex3f(-1,1, 1)
+        glEnd()
+        glUseProgram(Shaders.shader)
+        glEnable(GL_TEXTURE_2D)
+    else:
+        glViewport(int(x+e*max(dx,dy)),int(y+e*max(dx,dy)), int(dx-2*e*max(dx,dy)), int(dy-2*e*max(dx,dy)))

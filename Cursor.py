@@ -75,8 +75,16 @@ def mouseManage():
         for indices in Definitions.packageIndices[2]:
             pack = Definitions.packagePreprocess[indices[0]][indices[1]]
             if pack[Definitions.packID] == Sensors.overSensId:
+
+                if Events.deleteSens == True:
+                    removeId = pack[Definitions.entity].id
+                    if removeId < len(Sensors.virtuSens):
+                        del Sensors.virtuSens[removeId]
+                    else:
+                        del Sensors.templateSens[removeId - len(Sensors.virtuSens)]
+
                 name = ' (' + pack[Definitions.entity].type + ')'
-                info = [str(pack[Definitions.entity].x), str(pack[Definitions.entity].t), str(pack[Definitions.entity].s)]
+                info = [str(pack[Definitions.entity].x) + ' ' + str(pack[Definitions.entity].t) + ' ' + str(pack[Definitions.entity].s), str(pack[Definitions.entity].id), str(pack[Definitions.entity].tag)]
                 break
     if parent == 2:
         GUI.overGuiId = ID

@@ -17,7 +17,6 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
 import math
 import time
 import random
-import enum
 
 import Cursor
 import Definitions
@@ -34,6 +33,15 @@ import StickMan
 
 
 
+def refreshId():
+    id = 0
+    for i in range(0, len(Sensors.virtuSens)):
+        Sensors.virtuSens[i].id = id
+        id += 1
+    for i in range(0, len(Sensors.templateSens)):
+        Sensors.templateSens[i].id = id
+        id += 1
+        #TODO : do it with body & GUI as well, cange ID buffer also ?
 
 def main():
     """ Create list of models """
@@ -187,7 +195,6 @@ def main():
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo)
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
-    
     """ Generate the VBOs """
     Graphics.VBO_init()
     
@@ -217,13 +224,14 @@ def main():
     Shaders.model_loc = glGetUniformLocation(Shaders.shader, "model")
     Shaders.setColor_loc = glGetUniformLocation(Shaders.shader, "setColor")
     
-    Definitions.projectionMatrix.perspectiveProjection(90, Events.display[0]/Events.display[1], 0.1, 100.0)
+    Definitions.projectionMatrix.perspectiveProjection(90, 0.5*Events.display[0]/Events.display[1], 0.1, 100.0)
     glUniformMatrix4fv(Shaders.proj_loc, 1, GL_FALSE, Definitions.projectionMatrix.peek())
     glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
 
-
-
+    border = 0.01
+    ratio = [0.5-2*border, 1-2*border]
     """ >>> main loop <<< """
+    wut = 0
     while True:
         # keep track of loop frequency
         flagStart = time.clock()
@@ -243,7 +251,8 @@ def main():
             Most interactions between the user and the software is aknowledged here.
         """
         Events.manage()
-
+        
+        refreshId() # TODO : only when adding/removing sensors
 
 
         """
@@ -281,16 +290,21 @@ def main():
         
         # clear the ID buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        
+
+
         # fill ID buffer
+        GUI.subWindow(0,0,Events.display[1],Events.display[1],border,False)
+
         Graphics.modelView(Graphics.opaque)
         StickMan.drawBodySurface(Graphics.idBuffer)
         Sensors.drawSensor(Graphics.idBuffer)
-        glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
-        GUI.guiId = 0
-        GUI.textTexture(sensorTypes, -1, 1, 1, 1, True)
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, True)
         
+        glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
+        GUI.subWindow(Events.display[1],0,int(ratio[0]/ratio[1]*Events.display[1]),Events.display[1],border,False)
+        
+        GUI.guiId = 0
+        GUI.textTexture(sensorTypes, -1, 1, 1, 1, True, ratio[1]/ratio[0])
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, ratio[1]/ratio[0])
 
 
         """
@@ -310,7 +324,8 @@ def main():
         
         # clear the display buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        
+
+        GUI.subWindow(0,0,Events.display[1],Events.display[1],border,True,(0.5,0.5,0.5,1))
 
         # draw scene
         Graphics.modelView(Graphics.blending)
@@ -325,22 +340,28 @@ def main():
         Graphics.modelView(Graphics.opaque)
         Sensors.drawSensor(Events.style)
         Sensors.drawDashed(Events.style)
-
+        
 
         # draw GUI
-        Graphics.modelView(Graphics.opaque)
+        
+
         glClear(GL_DEPTH_BUFFER_BIT)
+        Graphics.modelView(Graphics.opaque)
+        GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile]),
+                         'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False)
+
+        
+        GUI.subWindow(Events.display[1],0,int(ratio[0]/ratio[1]*Events.display[1]),Events.display[1],border,True,(0,1,0,1))
+
         GUI.guiId = 0
-        GUI.textTexture(sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer)
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer)
+        GUI.textTexture(sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer, ratio[1]/ratio[0])
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, ratio[1]/ratio[0])
         if Events.style != Graphics.idBuffer:
             if GUI.selectedGuiId == GUI.lenGui():
-                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False)
-            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False)
-            GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
-                             + Cursor.info, 1, -1, -1, -1, False)
-            GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile]),
-                             'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False)
+                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, ratio[1]/ratio[0])
+        GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, ratio[1]/ratio[0])
+        GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
+                        + Cursor.info, 1, -1, -1, -1, False, ratio[1]/ratio[0])
         
         
 

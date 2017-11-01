@@ -14,7 +14,7 @@ import StickMan
 import Definitions
 
 
-display = [900, 900] # window size
+display = [1800, 900] # window size
 
 lastTime = 0 # for time between frames
 
@@ -62,6 +62,7 @@ v_keyHold = False
 b_keyHold = False
 n_keyHold = False
 resetSens = False
+deleteSens = False
 
 style = 0 # model visualization style
 
@@ -108,6 +109,7 @@ def manage():
     global n_keyHold
     global resetSens
     global incSens
+    global deleteSens
 
     global style
     global rMax
@@ -122,6 +124,7 @@ def manage():
     setLookAt = False
     reset = False
     resetSens = False
+    deleteSens = False
     prevNext = 0
 
     """ New events """
@@ -280,6 +283,8 @@ def manage():
         if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
             State.currentSensorFile = (State.currentSensorFile + 1)%len(State.sensorFileName)
             State.loadSensors()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
+            deleteSens = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
             rMax += 1
             if rMax > 6:
