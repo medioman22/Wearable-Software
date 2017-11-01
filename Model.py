@@ -228,8 +228,11 @@ def main():
     glUniformMatrix4fv(Shaders.proj_loc, 1, GL_FALSE, Definitions.projectionMatrix.peek())
     glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
 
-    border = 0.01
-    ratio = [0.5-2*border, 1-2*border]
+    border = 0.01*Events.display[1]
+    windowScene = [0,0,Events.display[1],Events.display[1]]
+    windowGui = [Events.display[1],0,int(0.5*Events.display[1]),int(0.6*Events.display[1])]
+    textScale = [1/0.5,1/0.6]
+    windowData = [Events.display[1],int(0.6*Events.display[1]),int(0.7*Events.display[1]),int(0.4*Events.display[1])]
     """ >>> main loop <<< """
     wut = 0
     while True:
@@ -293,18 +296,18 @@ def main():
 
 
         # fill ID buffer
-        GUI.subWindow(0,0,Events.display[1],Events.display[1],border,False)
+        GUI.subWindow(windowScene[0],windowScene[1],windowScene[2],windowScene[3],border,False)
 
         Graphics.modelView(Graphics.opaque)
         StickMan.drawBodySurface(Graphics.idBuffer)
         Sensors.drawSensor(Graphics.idBuffer)
         
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
-        GUI.subWindow(Events.display[1],0,int(ratio[0]/ratio[1]*Events.display[1]),Events.display[1],border,False)
+        GUI.subWindow(windowGui[0],windowGui[1],windowGui[2],windowGui[3],border,False)
         
         GUI.guiId = 0
-        GUI.textTexture(sensorTypes, -1, 1, 1, 1, True, ratio[1]/ratio[0])
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, ratio[1]/ratio[0])
+        GUI.textTexture(sensorTypes, -1, 1, 1, 1, True, textScale[0], textScale[1])
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, textScale[0], textScale[1])
 
 
         """
@@ -325,7 +328,7 @@ def main():
         # clear the display buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-        GUI.subWindow(0,0,Events.display[1],Events.display[1],border,True,(0.5,0.5,0.5,1))
+        GUI.subWindow(windowScene[0],windowScene[1],windowScene[2],windowScene[3],border,Events.style != Graphics.idBuffer,(0.5,0.5,0.5,1))
 
         # draw scene
         Graphics.modelView(Graphics.blending)
@@ -343,25 +346,24 @@ def main():
         
 
         # draw GUI
-        
-
         glClear(GL_DEPTH_BUFFER_BIT)
-        Graphics.modelView(Graphics.opaque)
-        GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile]),
-                         'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False)
 
         
-        GUI.subWindow(Events.display[1],0,int(ratio[0]/ratio[1]*Events.display[1]),Events.display[1],border,True,(0,1,0,1))
-
+        GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,Events.style != Graphics.idBuffer,(0,0,1,1))
+        GUI.subWindow(windowGui[0],windowGui[1],windowGui[2],windowGui[3],border,Events.style != Graphics.idBuffer,(0,1,0,1))
+        
+        Graphics.modelView(Graphics.opaque)
         GUI.guiId = 0
-        GUI.textTexture(sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer, ratio[1]/ratio[0])
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, ratio[1]/ratio[0])
+        GUI.textTexture(sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer, textScale[0], textScale[1])
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, textScale[0], textScale[1])
         if Events.style != Graphics.idBuffer:
+            GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile]),
+                             'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False, textScale[0], textScale[1])
+            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, textScale[0], textScale[1])
+            GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
+                            + Cursor.info, 1, -1, -1, -1, False, textScale[0], textScale[1])
             if GUI.selectedGuiId == GUI.lenGui():
-                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, ratio[1]/ratio[0])
-        GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, ratio[1]/ratio[0])
-        GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
-                        + Cursor.info, 1, -1, -1, -1, False, ratio[1]/ratio[0])
+                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, 0.75*textScale[0], 0.75*textScale[1])
         
         
 
