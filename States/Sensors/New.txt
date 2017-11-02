@@ -1,0 +1,2 @@
+Arm_l EMG 0.5 135.0 90.0
+Forearm_l ECG -0.5 70.0 90.0

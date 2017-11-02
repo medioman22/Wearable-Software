@@ -60,7 +60,7 @@ sensorGraphics = [  ['EEG',         (255, 0, 0, 255),       Graphics.vboCircle],
                     ['Custom',      (127, 127, 127, 255),   Graphics.vboPyramide]]
 
 virtuSens = []
-templateSens = []
+zoiSens = []
 overSensId = 0
 selectedSens = []
 

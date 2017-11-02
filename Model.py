@@ -38,8 +38,8 @@ def refreshId():
     for i in range(0, len(Sensors.virtuSens)):
         Sensors.virtuSens[i].id = id
         id += 1
-    for i in range(0, len(Sensors.templateSens)):
-        Sensors.templateSens[i].id = id
+    for i in range(0, len(Sensors.zoiSens)):
+        Sensors.zoiSens[i].id = id
         id += 1
         #TODO : do it with body & GUI as well, cange ID buffer also ?
 
@@ -52,7 +52,7 @@ def main():
     State.loadModel(StickMan.virtuMan)
     """Sensors.virtuSens = [Sensors.sensors("Head", "Eye", (0.,160,90), (1,0,0.5)),
                          Sensors.sensors("Head", "Eye", (0.,200,90), (1,0,0.5))]
-    # EEG templates
+    # EEG ZOI
     color = (0.5, 0.5, 0.)
     Sensors.virtuSens = Sensors.virtuSens + [
 
@@ -230,9 +230,9 @@ def main():
 
     border = 0.01*Events.display[1]
     windowScene = [0,0,Events.display[1],Events.display[1]]
-    windowGui = [Events.display[1],0,int(0.5*Events.display[1]),int(0.6*Events.display[1])]
-    textScale = [1/0.5,1/0.6]
-    windowData = [Events.display[1],int(0.6*Events.display[1]),int(0.7*Events.display[1]),int(0.4*Events.display[1])]
+    windowGui = [Events.display[1],0,int(0.3*Events.display[1]),int(0.6*Events.display[1]),1/0.3,1/0.6]
+    windowGroups = [int(Events.display[1]+0.3*Events.display[1]),0,int(0.3*Events.display[1]),int(0.6*Events.display[1]),1/0.3,1/0.6]
+    windowData = [Events.display[1],int(0.6*Events.display[1]),int(0.7*Events.display[1]),int(0.4*Events.display[1]),1/0.7,1/0.4]
     """ >>> main loop <<< """
     wut = 0
     while True:
@@ -240,8 +240,8 @@ def main():
         flagStart = time.clock()
 
         """
-            Update template list.
-            you can edit / add / remove template files without closing software (as long as syntax is respected)
+            Update ZOI list.
+            you can edit / add / remove ZOI files without closing software (as long as syntax is respected)
         """
         State.updateTemplateList()
         sensorTypes = []
@@ -304,10 +304,13 @@ def main():
         
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
         GUI.subWindow(windowGui[0],windowGui[1],windowGui[2],windowGui[3],border,False)
+        GUI.textTexture(sensorTypes, -1, 1-3*0.03*windowGui[5], 1, 1, True, windowGui[4], windowGui[5], 0)
         
-        GUI.guiId = 0
-        GUI.textTexture(sensorTypes, -1, 1, 1, 1, True, textScale[0], textScale[1])
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, textScale[0], textScale[1])
+        GUI.subWindow(windowGroups[0],windowGroups[1],windowGroups[2],windowGroups[3],border,False)
+        GUI.textTexture(State.sensorFileName, -1, 1-3*0.03*windowGroups[5], 1, 1, True, windowGroups[4], windowGroups[5], len(sensorTypes))
+
+        GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,False)
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, windowData[4], windowData[5], len(sensorTypes) + len(State.sensorFileName))
 
 
         """
@@ -347,23 +350,28 @@ def main():
 
         # draw GUI
         glClear(GL_DEPTH_BUFFER_BIT)
-
-        
-        GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,Events.style != Graphics.idBuffer,(0,0,1,1))
-        GUI.subWindow(windowGui[0],windowGui[1],windowGui[2],windowGui[3],border,Events.style != Graphics.idBuffer,(0,1,0,1))
-        
         Graphics.modelView(Graphics.opaque)
-        GUI.guiId = 0
-        GUI.textTexture(sensorTypes, -1, 1, 1, 1, Events.style == Graphics.idBuffer, textScale[0], textScale[1])
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, textScale[0], textScale[1])
+
+        GUI.subWindow(windowGui[0],windowGui[1],windowGui[2],windowGui[3],border,Events.style != Graphics.idBuffer,(0,1,0,1))
+        if Events.style != Graphics.idBuffer:
+            GUI.textTexture(['Wearable templates'], 0, 1, 0, 1, False, windowGui[4], windowGui[5])
+        GUI.textTexture(sensorTypes, -1, 1-3*0.03*windowGui[5], 1, 1, Events.style == Graphics.idBuffer, windowGui[4], windowGui[5], 0)
+        
+        GUI.subWindow(windowGroups[0],windowGroups[1],windowGroups[2],windowGroups[3],border,Events.style != Graphics.idBuffer,(1,0,0,1))
+        if Events.style != Graphics.idBuffer:
+            GUI.textTexture(['Wearable groups'], 0, 1, 0, 1, False, windowGroups[4], windowGroups[5])
+        GUI.textTexture(State.sensorFileName, -1, 1-3*0.03*windowGroups[5], 1, 1, Events.style == Graphics.idBuffer, windowGroups[4], windowGroups[5], len(sensorTypes))
+
+        GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,Events.style != Graphics.idBuffer,(0,0,1,1))
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, windowData[4], windowData[5], len(sensorTypes) + len(State.sensorFileName))
         if Events.style != Graphics.idBuffer:
             GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile]),
-                             'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False, textScale[0], textScale[1])
-            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, textScale[0], textScale[1])
+                             'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False, windowData[4], windowData[5])
+            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, windowData[4], windowData[5])
             GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
-                            + Cursor.info, 1, -1, -1, -1, False, textScale[0], textScale[1])
+                            + Cursor.info, 1, -1, -1, -1, False, windowData[4], windowData[5])
             if GUI.selectedGuiId == GUI.lenGui():
-                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, 0.75*textScale[0], 0.75*textScale[1])
+                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, 0.75*windowData[4], 0.75*windowData[5])
         
         
 

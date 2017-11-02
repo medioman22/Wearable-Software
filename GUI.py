@@ -12,6 +12,7 @@ import numpy as np
 import Definitions
 import Sensors
 import Shaders
+import State
 
 
 help = ['Help : ']
@@ -36,7 +37,7 @@ helpList = ['Arrows, page up/page dn = camera',
             'G   = change floor']
 
 def lenGui():
-    return len(Sensors.sensorGraphics) + len(help)
+    return len(Sensors.sensorGraphics) + len(State.sensorFileName) + len(help)
 
 TEX_TEXTURE = None
 """
@@ -45,12 +46,11 @@ TEX_TEXTURE = None
     sx = 1|0|-1 : text aligned on left|center|right side
     sy = 1|-1 : new line under|over current line
 """
-guiId = 0
+
 overGuiId = 0
 selectedGuiId = 0
 newGuiPosDir = [0,0,1,1]
-def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, rx = 1, ry = 1):
-    global guiId
+def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, rx = 1, ry = 1, guiId = 9999):
     global newGuiPosDir
     x = x
     dy = ry*0.03

@@ -7,6 +7,7 @@ import Sensors
 pathModels = "States/Models/"
 pathSensors = "States/Sensors/"
 pathTemplates = "States/Templates/"
+pathZoi = "States/Zoi/"
 extension = ".txt"
 currentModelFile = 0
 modelFileName = []
@@ -21,6 +22,8 @@ def createList():
 
     sensorFileName = os.listdir(pathSensors)
     
+    zoiFileName = os.listdir(pathZoi)
+    
 def updateTemplateList():
     templateFileName = os.listdir(pathTemplates)
     Sensors.sensorGraphics = []
@@ -33,6 +36,9 @@ def updateTemplateList():
         Sensors.sensorGraphics = Sensors.sensorGraphics + [[template[:-len(extension)], (int(r),int(g),int(b),int(a)), int(shape)]]
         file.close()
 
+"""
+    Human model files
+"""
 def saveModel(entity):
     print("save model : {}".format(modelFileName[currentModelFile]))
 
@@ -66,7 +72,11 @@ def loadModel(entity):
                 break
     file.close()
 
+    
 
+"""
+    Sensors files
+"""
 def saveSensors():
     print("save sensor group : {}".format(sensorFileName[currentSensorFile]))
 
@@ -82,12 +92,6 @@ def saveSensors():
         file.write(str(sensor.t))
         file.write(" ")
         file.write(str(sensor.s))
-        #file.write(" ")
-        #file.write(str(sensor.color[0]))
-        #file.write(" ")
-        #file.write(str(sensor.color[1]))
-        #file.write(" ")
-        #file.write(str(sensor.color[2]))
         file.write("\n")
     file.close()
 
@@ -105,24 +109,40 @@ def loadSensors():
         Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
     file.close()
 
-def loadTemplates(templateFileName):
-    Sensors.templateSens = []
 
-    if templateFileName[0] == "":
+"""
+    Zones of interest files
+"""
+#def saveZoi(sensor):
+#    print("save sensor group : {}".format(sensorFileName[currentSensorFile]))
+#
+#    file = open(pathZoi + sensor.type + extension, 'w')
+#    
+#    file.write(str(sensor.color[0]))
+#    file.write(" ")
+#    file.write(str(sensor.color[1]))
+#    file.write(" ")
+#    file.write(str(sensor.color[2]))
+#    file.write(" 255 ")
+#    file.write(sensor.type) #string here, int when read. fix it.
+#    file.close()
+
+def loadZOI(zoiFileName):
+    Sensors.zoiSens = []
+
+    if zoiFileName[0] == "":
         return
 
-    print("load template group : {}".format(templateFileName[0]))
+    print("load zoi : {}".format(zoiFileName[0]))
 
-    file = open(pathTemplates + templateFileName[0] + '.txt', 'r')
-    line = file.readline() #ignore first line, which is used at initialisation
+    file = open(pathZoi + zoiFileName[0] + '.txt', 'r')
     
-    color = (templateFileName[1][0]/255.,templateFileName[1][1]/255.,templateFileName[1][2]/255.,templateFileName[1][3]/255.)
-    type = templateFileName[0]
+    color = (zoiFileName[1][0]/255.,zoiFileName[1][1]/255.,zoiFileName[1][2]/255.,zoiFileName[1][3]/255.)
+    type = zoiFileName[0]
     while True:
         line = file.readline() # read sensor data
         if line == "":
             break
         parent, x, t, s = line.split(' ')
-        Sensors.templateSens = Sensors.templateSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
+        Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
     file.close()
-

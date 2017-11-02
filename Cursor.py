@@ -81,7 +81,7 @@ def mouseManage():
                     if removeId < len(Sensors.virtuSens):
                         del Sensors.virtuSens[removeId]
                     else:
-                        del Sensors.templateSens[removeId - len(Sensors.virtuSens)]
+                        del Sensors.zoiSens[removeId - len(Sensors.virtuSens)]
 
                 name = ' (' + pack[Definitions.entity].type + ')'
                 info = [str(pack[Definitions.entity].x) + ' ' + str(pack[Definitions.entity].t) + ' ' + str(pack[Definitions.entity].s), str(pack[Definitions.entity].id), str(pack[Definitions.entity].tag)]
@@ -92,14 +92,14 @@ def mouseManage():
             if GUI.selectedGuiId != ID:
                 GUI.selectedGuiId = ID
                 if GUI.selectedGuiId-1 < len(Sensors.sensorGraphics):
-                    State.loadTemplates(Sensors.sensorGraphics[GUI.selectedGuiId-1])
+                    State.loadZOI(Sensors.sensorGraphics[GUI.selectedGuiId-1])
                     for part in StickMan.selectedParts:
                         color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
                         color = (color[0]/255., color[1]/255., color[2]/255.)
                         Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (0.,90,90), color)]
                         Sensors.selectedSens = 0 # remove when ID for sensor is well implemented, right now sensor selection may change by adding new ones
             else:
-                State.loadTemplates([""])
+                State.loadZOI([""])
                 GUI.selectedGuiId = 0
     else:
         pass

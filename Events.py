@@ -14,7 +14,7 @@ import StickMan
 import Definitions
 
 
-display = [1800, 900] # window size
+display = [1550, 900] # window size
 
 lastTime = 0 # for time between frames
 
