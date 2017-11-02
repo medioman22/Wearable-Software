@@ -38,7 +38,7 @@ upDown_cap = 5.
 frontBack_acceleration = 0.
 front_keyHold = False
 back_keyHold = False
-frontBack_cam = -2
+frontBack_cam = -1.5
 frontBack_cap = 0.1
 
 """ parts control """
@@ -276,12 +276,6 @@ def manage():
         if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
             State.saveSensors()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
-            State.loadSensors()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-            State.currentSensorFile = (State.currentSensorFile - 1 + len(State.sensorFileName))%len(State.sensorFileName)
-            State.loadSensors()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-            State.currentSensorFile = (State.currentSensorFile + 1)%len(State.sensorFileName)
             State.loadSensors()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
             deleteSens = True

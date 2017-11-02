@@ -65,13 +65,23 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, rx = 1, ry =
                 color = Sensors.sensorGraphics[guiId-1][1]
             else:
                 color = (255, 0, 0, 255)
-            if selectedGuiId == guiId:
+            if guiId-1 >= len(Sensors.sensorGraphics) and guiId-1 < len(Sensors.sensorGraphics) + len(State.sensorFileName):
+                if State.sensorFileName[guiId-1 - len(Sensors.sensorGraphics)][1] == True:
+                    color = (0, 255, 0, 255)
+                    textSurface = font.render(txt, True, color, (0,0,0,0))
+                elif overGuiId == guiId:
+                    color = (0, 127, 0, 255)
+                    textSurface = font.render(txt, True, color, (0,0,0,0))
+                else:
+                    textSurface = font.render(txt, True, (255,255,255,255), (0,0,0,0))
+            elif selectedGuiId == guiId:
                 textSurface = font.render(txt, True, color, (0,0,0,0))
             elif overGuiId == guiId:
                 color = (0.5*color[0], 0.5*color[1], 0.5*color[2],255)
                 textSurface = font.render(txt, True, color, (0,0,0,0))
             else:
                 textSurface = font.render(txt, True, (255,255,255,255), (0,0,0,0))
+                
         else:
             textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/lenGui(),0))
         ix, iy = textSurface.get_width(), textSurface.get_height()
@@ -119,6 +129,7 @@ def subWindow(x,y,dx,dy,e, drawBorder = True, color = (0.5,0.5,0.5,1)):
         glDisable(GL_TEXTURE_2D)
         glUseProgram(0)
         glLoadIdentity()
+
         glBegin(GL_QUADS)
         glColor4f(color[0], color[1], color[2], color[3])
         glVertex3f(-1,-1, 1)
@@ -126,14 +137,9 @@ def subWindow(x,y,dx,dy,e, drawBorder = True, color = (0.5,0.5,0.5,1)):
         glVertex3f(1,1, 1)
         glVertex3f(-1,1, 1)
         glEnd()
-        glUseProgram(Shaders.shader)
-        glEnable(GL_TEXTURE_2D)
         
         glViewport(int(x+e),int(y+e), int(dx-2*e), int(dy-2*e))
 
-        glDisable(GL_TEXTURE_2D)
-        glUseProgram(0)
-        glLoadIdentity()
         glBegin(GL_QUADS)
         glColor4f(0,0,0,1)
         glVertex3f(-1,-1, 1)
@@ -141,6 +147,7 @@ def subWindow(x,y,dx,dy,e, drawBorder = True, color = (0.5,0.5,0.5,1)):
         glVertex3f(1,1, 1)
         glVertex3f(-1,1, 1)
         glEnd()
+
         glUseProgram(Shaders.shader)
         glEnable(GL_TEXTURE_2D)
     else:

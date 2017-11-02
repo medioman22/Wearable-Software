@@ -12,6 +12,7 @@ extension = ".txt"
 currentModelFile = 0
 modelFileName = []
 currentSensorFile = 0
+saveGroupFile = "Default" + extension
 sensorFileName = []
 
 def createList():
@@ -20,11 +21,25 @@ def createList():
 
     modelFileName = os.listdir(pathModels)
 
-    sensorFileName = os.listdir(pathSensors)
+    listFiles = os.listdir(pathSensors)
+    sensorFileName = []
+    for file in listFiles:
+        sensorFileName = sensorFileName + [[file, False]]
     
     zoiFileName = os.listdir(pathZoi)
     
 def updateTemplateList():
+    global sensorFileName
+    listFiles = os.listdir(pathSensors)
+    tempList = []
+    for file in listFiles:
+        tempList = tempList + [[file, False]]
+    for fileName in sensorFileName:
+        for i in range(0,len(tempList)):
+            if fileName[0] == tempList[i][0]:
+                tempList[i][1] = fileName[1]
+    sensorFileName = tempList
+
     templateFileName = os.listdir(pathTemplates)
     Sensors.sensorGraphics = []
     for template in templateFileName:
@@ -78,9 +93,9 @@ def loadModel(entity):
     Sensors files
 """
 def saveSensors():
-    print("save sensor group : {}".format(sensorFileName[currentSensorFile]))
+    print("save sensor group : {}".format(saveGroupFile))
 
-    file = open(pathSensors + sensorFileName[currentSensorFile], 'w')
+    file = open(pathSensors + saveGroupFile, 'w')
 
     for sensor in Sensors.virtuSens:
         file.write(sensor.attach)
@@ -96,25 +111,28 @@ def saveSensors():
     file.close()
 
 def loadSensors():
-    print("load sensor group : {}".format(sensorFileName[currentSensorFile]))
-
-    file = open(pathSensors + sensorFileName[currentSensorFile], 'r')
-    
     Sensors.virtuSens = []
-    while True:
-        line = file.readline() # read sensor data
-        if line == "":
-            break
-        parent, type, x, t, s = line.split(' ')
-        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
-    file.close()
+
+    for file in sensorFileName:
+        if file[1] == True:
+            print("load sensor group : {}".format(file[0]))
+
+            file = open(pathSensors + file[0], 'r')
+    
+            while True:
+                line = file.readline() # read sensor data
+                if line == "":
+                    break
+                parent, type, x, t, s = line.split(' ')
+                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
+            file.close()
 
 
 """
     Zones of interest files
 """
 #def saveZoi(sensor):
-#    print("save sensor group : {}".format(sensorFileName[currentSensorFile]))
+#    print("save sensor group : {}".format(sensorFileName[currentSensorFile][0]))
 #
 #    file = open(pathZoi + sensor.type + extension, 'w')
 #    

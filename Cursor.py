@@ -89,6 +89,14 @@ def mouseManage():
     if parent == 2:
         GUI.overGuiId = ID
         if Events.mouse_click == True:
+
+            if GUI.overGuiId-1 >= len(Sensors.sensorGraphics) and GUI.overGuiId-1 < len(Sensors.sensorGraphics) + len(State.sensorFileName):
+                if State.sensorFileName[GUI.overGuiId-1 - len(Sensors.sensorGraphics)][1] == False:
+                    State.sensorFileName[GUI.overGuiId-1 - len(Sensors.sensorGraphics)][1] = True
+                else:
+                    State.sensorFileName[GUI.overGuiId-1 - len(Sensors.sensorGraphics)][1] = False
+                State.loadSensors()
+
             if GUI.selectedGuiId != ID:
                 GUI.selectedGuiId = ID
                 if GUI.selectedGuiId-1 < len(Sensors.sensorGraphics):

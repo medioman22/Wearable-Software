@@ -294,8 +294,11 @@ def main():
         # clear the ID buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-
+        list = []
+        for file in State.sensorFileName:
+            list = list + [file[0]]
         # fill ID buffer
+
         GUI.subWindow(windowScene[0],windowScene[1],windowScene[2],windowScene[3],border,False)
 
         Graphics.modelView(Graphics.opaque)
@@ -307,10 +310,10 @@ def main():
         GUI.textTexture(sensorTypes, -1, 1-3*0.03*windowGui[5], 1, 1, True, windowGui[4], windowGui[5], 0)
         
         GUI.subWindow(windowGroups[0],windowGroups[1],windowGroups[2],windowGroups[3],border,False)
-        GUI.textTexture(State.sensorFileName, -1, 1-3*0.03*windowGroups[5], 1, 1, True, windowGroups[4], windowGroups[5], len(sensorTypes))
+        GUI.textTexture(list, -1, 1-3*0.05*windowGroups[5], 1, 1, True, windowGroups[4], windowGroups[5], len(sensorTypes))
 
         GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,False)
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, windowData[4], windowData[5], len(sensorTypes) + len(State.sensorFileName))
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, windowData[4], windowData[5], len(sensorTypes) + len(list))
 
 
         """
@@ -359,19 +362,19 @@ def main():
         
         GUI.subWindow(windowGroups[0],windowGroups[1],windowGroups[2],windowGroups[3],border,Events.style != Graphics.idBuffer,(1,0,0,1))
         if Events.style != Graphics.idBuffer:
-            GUI.textTexture(['Wearable groups'], 0, 1, 0, 1, False, windowGroups[4], windowGroups[5])
-        GUI.textTexture(State.sensorFileName, -1, 1-3*0.03*windowGroups[5], 1, 1, Events.style == Graphics.idBuffer, windowGroups[4], windowGroups[5], len(sensorTypes))
+            GUI.textTexture(['Wearable groups',
+                             'Save in ' + State.saveGroupFile], 0, 1, 0, 1, False, windowGroups[4], windowGroups[5])
+        GUI.textTexture(list, -1, 1-5*0.03*windowGroups[5], 1, 1, Events.style == Graphics.idBuffer, windowGroups[4], windowGroups[5], len(sensorTypes))
 
         GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,Events.style != Graphics.idBuffer,(0,0,1,1))
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, windowData[4], windowData[5], len(sensorTypes) + len(State.sensorFileName))
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, windowData[4], windowData[5], len(sensorTypes) + len(list))
         if Events.style != Graphics.idBuffer:
-            GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile]),
-                             'Group : ' + str(State.sensorFileName[State.currentSensorFile])], 0, 1, 0, 1, False, windowData[4], windowData[5])
-            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, windowData[4], windowData[5])
+            GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile])], 0, 1, 0, 1, False, windowData[4], windowData[5])
             GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
                             + Cursor.info, 1, -1, -1, -1, False, windowData[4], windowData[5])
             if GUI.selectedGuiId == GUI.lenGui():
                 GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, 0.75*windowData[4], 0.75*windowData[5])
+            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, windowData[4], windowData[5])
         
         
 
