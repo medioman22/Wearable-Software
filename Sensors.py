@@ -164,8 +164,6 @@ def drawSensor(style):
         glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
 
             
-        
-        
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)
 

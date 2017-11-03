@@ -350,6 +350,7 @@ def main():
         Sensors.drawSensor(Events.style)
         Sensors.drawDashed(Events.style)
         
+        
 
         # draw GUI
         glClear(GL_DEPTH_BUFFER_BIT)
@@ -367,6 +368,42 @@ def main():
         GUI.textTexture(list, -1, 1-5*0.03*windowGroups[5], 1, 1, Events.style == Graphics.idBuffer, windowGroups[4], windowGroups[5], len(sensorTypes))
 
         GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,Events.style != Graphics.idBuffer,(0,0,1,1))
+
+        """ draw template """
+        if Events.style != Graphics.idBuffer and GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
+            glUseProgram(Shaders.shader)
+            """ choose vbo """
+            vboId = Sensors.sensorGraphics[GUI.selectedGuiId-1][2]
+            vboDraw = Graphics.vboEdges
+            """ bind surfaces vbo """
+            Graphics.indexPositions[vboId][vboDraw].bind()
+            Graphics.vertexPositions[vboId].bind()
+            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+            """ send color to shader """
+            r,g,b,a = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
+            color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
+            glUniform4fv(Shaders.setColor_loc, 1, color)
+            """ load matrix in shader """
+            I = np.array([[1, 0, 0, 0],
+                          [0, 1, 0, 0],
+                          [0, 0, 1, 0],
+                          [0, 0, 0, 1]])
+            Definitions.modelMatrix.push()
+            Definitions.modelMatrix.set(I)
+            u = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 0, 90))), Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, time.clock()*100, 0, 0)))))
+            Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
+
+            glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
+            Definitions.modelMatrix.pop()
+            
+            Definitions.viewMatrix.push()
+            Definitions.viewMatrix.translate(0,0,-1.5)
+            glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
+            Definitions.viewMatrix.pop()
+            """ draw vbo """
+            glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
+            glUseProgram(0)
+
         GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, windowData[4], windowData[5], len(sensorTypes) + len(list))
         if Events.style != Graphics.idBuffer:
             GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile])], 0, 1, 0, 1, False, windowData[4], windowData[5])
