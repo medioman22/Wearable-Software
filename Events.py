@@ -6,6 +6,7 @@ from OpenGL.GLU import *
 
 import time
 import Cursor
+import GUI
 import Sensors
 import State
 import Shaders
@@ -277,6 +278,14 @@ def manage():
             State.saveSensors()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
             State.loadSensors()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+            if GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
+                Sensors.sensorGraphics[GUI.selectedGuiId-1][2] = (Sensors.sensorGraphics[GUI.selectedGuiId-1][2]-1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
+                State.saveTemplates(Sensors.sensorGraphics[GUI.selectedGuiId-1])
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+            if GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
+                Sensors.sensorGraphics[GUI.selectedGuiId-1][2] = (Sensors.sensorGraphics[GUI.selectedGuiId-1][2]+1) % len(Definitions.packagePreprocess)
+                State.saveTemplates(Sensors.sensorGraphics[GUI.selectedGuiId-1])
         if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
             deleteSens = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_g:

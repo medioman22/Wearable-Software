@@ -87,7 +87,23 @@ def loadModel(entity):
                 break
     file.close()
 
-    
+"""
+    Template files
+"""
+def saveTemplates(template):
+    file = open(pathTemplates + template[0] + extension, 'w')
+
+    file.write(str(template[1][0]))
+    file.write(" ")
+    file.write(str(template[1][1]))
+    file.write(" ")
+    file.write(str(template[1][2]))
+    file.write(" ")
+    file.write(str(template[1][3]))
+    file.write(" ")
+    file.write(str(template[2]))
+
+    file.close()
 
 """
     Sensors files

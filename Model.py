@@ -233,6 +233,7 @@ def main():
     windowGui = [Events.display[1],0,int(0.3*Events.display[1]),int(0.6*Events.display[1]),1/0.3,1/0.6]
     windowGroups = [int(Events.display[1]+0.3*Events.display[1]),0,int(0.3*Events.display[1]),int(0.6*Events.display[1]),1/0.3,1/0.6]
     windowData = [Events.display[1],int(0.6*Events.display[1]),int(0.7*Events.display[1]),int(0.4*Events.display[1]),1/0.7,1/0.4]
+    windowTemplate = [Events.display[1],int(0.6*Events.display[1]),int(0.4*Events.display[1]),int(0.4*Events.display[1]),1/0.7,1/0.4]
     """ >>> main loop <<< """
     wut = 0
     while True:
@@ -367,9 +368,9 @@ def main():
                              'Save in ' + State.saveGroupFile], 0, 1, 0, 1, False, windowGroups[4], windowGroups[5])
         GUI.textTexture(list, -1, 1-5*0.03*windowGroups[5], 1, 1, Events.style == Graphics.idBuffer, windowGroups[4], windowGroups[5], len(sensorTypes))
 
-        GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,Events.style != Graphics.idBuffer,(0,0,1,1))
+        GUI.subWindow(windowTemplate[0],windowTemplate[1],windowTemplate[2],windowTemplate[3],border,False)
 
-        """ draw template """
+        """ display selected template """
         if Events.style != Graphics.idBuffer and GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
             glUseProgram(Shaders.shader)
             """ choose vbo """
@@ -403,6 +404,8 @@ def main():
             """ draw vbo """
             glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
             glUseProgram(0)
+
+        GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,Events.style != Graphics.idBuffer,(0,0,1,1))
 
         GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, windowData[4], windowData[5], len(sensorTypes) + len(list))
         if Events.style != Graphics.idBuffer:
