@@ -41,7 +41,7 @@ def refreshId():
     for i in range(0, len(Sensors.zoiSens)):
         Sensors.zoiSens[i].id = id
         id += 1
-        #TODO : do it with body & GUI as well, cange ID buffer also ?
+        #TODO : do it with body & GUI as well, change ID buffer also ?
 
 def main():
     """ Create list of models """
@@ -241,8 +241,8 @@ def main():
         flagStart = time.clock()
 
         """
-            Update ZOI list.
-            you can edit / add / remove ZOI files without closing software (as long as syntax is respected)
+            Update ZOI & template lists.
+            you can edit / add / remove ZOI & template files without closing software (as long as syntax is respected)
         """
         State.updateTemplateList()
         sensorTypes = []

@@ -8,7 +8,7 @@ class sensors(object):
     nb__init__ = 0 # keeps track of how many creations there are
 
 
-    def __init__(self, attach = "Origin", type = "Custom", coord = (0, 0), color = (1,0,0)): # add orientation sometime...
+    def __init__(self, attach = "Origin", type = "Custom", coord = (0, 0, 0), color = (1,0,0)): # add orientation sometime...
         """ constructor """
         sensors.nb__init__ += 1
         self.attach = attach
@@ -129,10 +129,15 @@ def drawSensor(style):
         if style != Graphics.idBuffer:
             for sensorData in sensorGraphics:
                 if sensor.type == sensorData[0]:
-                    color = np.array([sensorData[1][0]/255., sensorData[1][1]/255., sensorData[1][2]/255., sensorData[1][3]/255.], dtype = np.float32)
+                    if sensor.tag == 'Zoi':
+                        color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
+                        vboDraw = Graphics.vboSurfaces
+                    else:
+                        color = np.array([sensorData[1][0]/255., sensorData[1][1]/255., sensorData[1][2]/255., sensorData[1][3]/255.], dtype = np.float32)
                     break
             if pack[Definitions.packID] == selectedSens:
-                color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
+                if sensor.tag != 'Zoi':
+                    color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
                 pack[Definitions.entity].x += Events.incSens[0]
                 if pack[Definitions.entity].x < -0.5:
                     pack[Definitions.entity].x = -0.5
@@ -147,6 +152,8 @@ def drawSensor(style):
                     pack[Definitions.entity].s = 90
                 vboDraw = Graphics.vboSurfaces
             elif pack[Definitions.packID] == overSensId:
+                if sensor.tag == 'Zoi':
+                    color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
                 vboDraw = Graphics.vboSurfaces
             else:
                 vboDraw = Graphics.vboEdges
@@ -157,7 +164,10 @@ def drawSensor(style):
 
         """ choose vbo """
         vboId = indices[0]
-                    
+        if sensor.tag == 'Zoi':
+            vboId = Graphics.vboCircle
+            vboDraw = Graphics.vboSurfaces
+
         """ bind surfaces vbo """
         Graphics.indexPositions[vboId][vboDraw].bind()
         Graphics.vertexPositions[vboId].bind()
@@ -196,7 +206,10 @@ def drawDashed(style):
         if style != Graphics.idBuffer:
             for sensorData in sensorGraphics:
                 if sensor.type == sensorData[0]:
-                    color = np.array([sensorData[1][0]/255., sensorData[1][1]/255., sensorData[1][2]/255., sensorData[1][3]/255.], dtype = np.float32)
+                    if sensor.tag == 'Zoi':
+                        color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
+                    else:
+                        color = np.array([sensorData[1][0]/255., sensorData[1][1]/255., sensorData[1][2]/255., sensorData[1][3]/255.], dtype = np.float32)
                     break
             if pack[Definitions.packID] == selectedSens:
                 color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)

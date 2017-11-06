@@ -395,9 +395,13 @@ def manage():
         while i <  len(StickMan.parts):
             if StickMan.selectedParts[j] == "Wrist" and StickMan.parts[i][StickMan.Data_id] == "Origin":
                 if reset == True:
+                    StickMan.virtuMan.parts[i][StickMan.Data_twist] = [1,0,0,0]
+                    StickMan.virtuMan.parts[i][StickMan.Data_swing] = [1,0,0,0]
                     StickMan.virtuMan.parts[i][StickMan.Data_angle] = [1,0,0,0]
             if StickMan.selectedParts[j] == StickMan.parts[i][StickMan.Data_id]:
                 if reset == True:
+                    StickMan.virtuMan.parts[i][StickMan.Data_twist] = [1,0,0,0]
+                    StickMan.virtuMan.parts[i][StickMan.Data_swing] = [1,0,0,0]
                     StickMan.virtuMan.parts[i][StickMan.Data_angle] = [1,0,0,0]
                 if prevNext != 0:
                     StickMan.selectedParts[j] = StickMan.parts[(i+prevNext+len(StickMan.parts) - 2)% (len(StickMan.parts)-1) + 1][StickMan.Data_id]

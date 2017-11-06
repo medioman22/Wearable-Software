@@ -171,7 +171,7 @@ def loadZOI(zoiFileName):
 
     file = open(pathZoi + zoiFileName[0] + '.txt', 'r')
     
-    color = (zoiFileName[1][0]/255.,zoiFileName[1][1]/255.,zoiFileName[1][2]/255.,zoiFileName[1][3]/255.)
+    color = (0.5,0.5,0.5,1)
     type = zoiFileName[0]
     while True:
         line = file.readline() # read sensor data
@@ -179,4 +179,5 @@ def loadZOI(zoiFileName):
             break
         parent, x, t, s = line.split(' ')
         Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
+        Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = 'Zoi'
     file.close()

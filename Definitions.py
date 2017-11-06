@@ -1,6 +1,6 @@
 import numpy as np
 import math
-
+import Events
 
 class vector4D(object):
     """
@@ -101,6 +101,11 @@ class vector4D(object):
         """ convert vector to quaternion """
         temp = vector4D()
         result = vector4D()
+        det = math.sqrt(self.x*self.x + self.y*self.y + self.z*self.z)
+        if det != 0 and det != 1:
+            self.x /= det
+            self.y /= det
+            self.z /= det
         if Conv2Rad == True:
             temp.o = math.pi/180.*self.o
         result.o = math.cos(0.5*temp.o)
@@ -167,69 +172,153 @@ class vector4D(object):
         return result
 
 
-    def QuatSat(self, saturation = (0, 0, 0, 0, 0, 0)):
-        """ apply angle constraints """
-        if math.fabs(self.o) > 0.0001:
-            """ isolate x rotation """
-            Q = self
-            result = Q
-            Dx = 1./math.sqrt(Q.o*Q.o + Q.x*Q.x)
-            Qx = vector4D((Q.o*Dx, Q.x*Dx, 0, 0))
-            if Qx.x < 0:
-                Qx = vector4D.QuatFlip(Qx)
-            """ determinate angle of rotation """
-            Vx = vector4D.Quat2Vec(Qx)
-            if Vx.o > 180:
-                Vx.o -= 360
-            """ apply constraint to x """
-            if Vx.o >= 0 and Vx.o > saturation[0]:
-                Vx.o = saturation[0]
-            elif Vx.o < 0 and Vx.o < saturation[1]:
-                Vx.o = saturation[1]
-            dQx = vector4D.Vec2Quat(Vx)
+    #def QuatSat(self, saturation = (0, 0, 0, 0, 0, 0)):
+    #    """ apply angle constraints """
+    #    if math.fabs(self.o) > 0.0001:
+    #        """ isolate x rotation """
+    #        Q = self
+    #        result = Q
+    #        Dx = 1./math.sqrt(Q.o*Q.o + Q.x*Q.x)
+    #        Qx = vector4D((Q.o*Dx, Q.x*Dx, 0, 0))
+    #        if Qx.x < 0:
+    #            Qx = vector4D.QuatFlip(Qx)
+    #        """ determinate angle of rotation """
+    #        Vx = vector4D.Quat2Vec(Qx)
+    #        if Vx.o > 180:
+    #            Vx.o -= 360
+    #        """ apply constraint to x """
+    #        if Vx.o >= 0 and Vx.o > saturation[0]:
+    #            Vx.o = saturation[0]
+    #        elif Vx.o < 0 and Vx.o < saturation[1]:
+    #            Vx.o = saturation[1]
+    #        dQx = vector4D.Vec2Quat(Vx)
+    #
+    #        Q = vector4D.QuatProd(Q, vector4D.QuatConj(Qx))
+    #        Dy = 1./math.sqrt(Q.o*Q.o + Q.y*Q.y)
+    #        Qy = vector4D((Q.o*Dy, 0, Q.y*Dy, 0))
+    #        if Qy.y < 0:
+    #            Qy = vector4D.QuatFlip(Qy)
+    #        """ determinate angle of rotation """
+    #        Vy = vector4D.Quat2Vec(Qy)
+    #        if Vy.o > 180:
+    #            Vy.o -= 360
+    #        """ apply constraint to x """
+    #        if Vy.o >= 0 and Vy.o > saturation[2]:
+    #            Vy.o = saturation[2]
+    #        elif Vy.o < 0 and Vy.o < saturation[3]:
+    #            Vy.o = saturation[3]
+    #        dQy = vector4D.Vec2Quat(Vy)
+    #
+    #        Q = vector4D.QuatProd(Q, vector4D.QuatConj(Qy))
+    #        Dz = 1./math.sqrt(Q.o*Q.o + Q.z*Q.z)
+    #        Qz = vector4D((Q.o*Dz, 0, 0, Q.z*Dz))
+    #        if Qz.z < 0:
+    #            Qz = vector4D.QuatFlip(Qz)
+    #        """ determinate angle of rotation """
+    #        Vz = vector4D.Quat2Vec(Qz)
+    #        if Vz.o > 180:
+    #            Vz.o -= 360
+    #        """ apply constraint to x """
+    #        if Vz.o >= 0 and Vz.o > saturation[4]:
+    #            Vz.o = saturation[4]
+    #        elif Vz.o < 0 and Vz.o < saturation[5]:
+    #            Vz.o = saturation[5]
+    #        dQz = vector4D.Vec2Quat(Vz)
+    #
+    #        """ build back quaternion """
+    #        result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qx)), dQx) # "replace old rotation (Qx) by new rotation (dQx)"
+    #        result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qy)), dQy) # "replace old rotation (Qy) by new rotation (dQy)"
+    #        result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qz)), dQz) # "replace old rotation (Qz) by new rotation (dQz)"
+    #        vector4D.QuatNorm(result)
+    #
+    #        return result
+    #    else:
+    #        return self
 
-            Q = vector4D.QuatProd(Q, vector4D.QuatConj(Qx))
-            Dy = 1./math.sqrt(Q.o*Q.o + Q.y*Q.y)
-            Qy = vector4D((Q.o*Dy, 0, Q.y*Dy, 0))
-            if Qy.y < 0:
-                Qy = vector4D.QuatFlip(Qy)
-            """ determinate angle of rotation """
-            Vy = vector4D.Quat2Vec(Qy)
-            if Vy.o > 180:
-                Vy.o -= 360
-            """ apply constraint to x """
-            if Vy.o >= 0 and Vy.o > saturation[2]:
-                Vy.o = saturation[2]
-            elif Vy.o < 0 and Vy.o < saturation[3]:
-                Vy.o = saturation[3]
-            dQy = vector4D.Vec2Quat(Vy)
+    
+    def Swing(swing, saturation = (0, 0, 0, 0, 0, 0)):
+        Qswing = swing
+        # swing saturation (ellipse)
+        Cy = 0.5*(saturation[2]+saturation[3])
+        Cz = 0.5*(saturation[4]+saturation[5])
+        Ey = 0.5*(saturation[2]-saturation[3])
+        Ez = 0.5*(saturation[4]-saturation[5])
 
-            Q = vector4D.QuatProd(Q, vector4D.QuatConj(Qy))
-            Dz = 1./math.sqrt(Q.o*Q.o + Q.z*Q.z)
-            Qz = vector4D((Q.o*Dz, 0, 0, Q.z*Dz))
-            if Qz.z < 0:
-                Qz = vector4D.QuatFlip(Qz)
-            """ determinate angle of rotation """
-            Vz = vector4D.Quat2Vec(Qz)
-            if Vz.o > 180:
-                Vz.o -= 360
-            """ apply constraint to x """
-            if Vz.o >= 0 and Vz.o > saturation[4]:
-                Vz.o = saturation[4]
-            elif Vz.o < 0 and Vz.o < saturation[5]:
-                Vz.o = saturation[5]
-            dQz = vector4D.Vec2Quat(Vz)
-
-            """ build back quaternion """
-            result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qx)), dQx) # "replace old rotation (Qx) by new rotation (dQx)"
-            result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qy)), dQy) # "replace old rotation (Qy) by new rotation (dQy)"
-            result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qz)), dQz) # "replace old rotation (Qz) by new rotation (dQz)"
-            vector4D.QuatNorm(result)
-
-            return result
+        if Ey == 0:
+            Vswing = vector4D.Quat2Vec(Qswing)
+            Vswing.o += Events.pivot[2]
+            Vswing.x = 0
+            Vswing.y = 0
+            Vswing.z = 1
+            if Vswing.o > saturation[4]:
+                Vswing.o = saturation[4]
+            elif Vswing.o < saturation[5]:
+                Vswing.o = saturation[5]
+            Qswing = vector4D.Vec2Quat(Vswing)
+        elif Ez == 0:
+            Vswing = vector4D.Quat2Vec(Qswing)
+            Vswing.o += Events.pivot[1]
+            Vswing.x = 0
+            Vswing.y = 1
+            Vswing.z = 0
+            if Vswing.o > saturation[2]:
+                Vswing.o = saturation[2]
+            elif Vswing.o < saturation[3]:
+                Vswing.o = saturation[3]
+            Qswing = vector4D.Vec2Quat(Vswing)
         else:
-            return self
+            Qoffset = vector4D.Eul2Quat(vector4D((0,0,Cy,Cz)))
+            Qswing = vector4D.QuatProd(Qswing, vector4D.QuatConj(Qoffset))
+            Vswing = vector4D.Quat2Vec(Qswing)
+            if Vswing.y == 0 and Vswing.z == 0:
+                if Events.pivot[1] != 0:
+                    Vswing.y = Events.pivot[1]
+                if Events.pivot[2] != 0:
+                    Vswing.z = Events.pivot[2]
 
+            # if out of saturation boundaries (ellipse form), find closest saturation point
+            theta = math.atan2(Vswing.z, Vswing.y)
+            yp = Vswing.o*math.cos(theta) + Events.pivot[1] #-math.pi/2
+            zp = Vswing.o*math.sin(theta) + Events.pivot[2] #-math.pi/2
+            theta = math.atan2(zp, yp)
+            k = 1./math.sqrt(Ez*Ez*math.cos(theta)*math.cos(theta) + Ey*Ey*math.sin(theta)*math.sin(theta))
+            ySat = k*Ey*Ez*math.cos(theta)
+            zSat = k*Ey*Ez*math.sin(theta)
+            if yp*yp/(Ey*Ey) + zp*zp/(Ez*Ez) > 1:
+                yp = ySat
+                zp = zSat
+                theta = math.atan2(zp, yp)
+            Vswing.o = math.sqrt(yp*yp + zp*zp)
+            Vswing.y = math.cos(theta) #+math.pi/2
+            Vswing.z = math.sin(theta) #+math.pi/2
+            Qswing = vector4D.Vec2Quat(Vswing)
+            Qswing = vector4D.QuatProd(Qswing, Qoffset)
+        return Qswing
+
+
+
+    def Twist(twist, saturation = (0, 0, 0, 0, 0, 0)):
+        Qtwist = twist
+        if Qtwist.x < 0:
+            Qtwist = vector4D.QuatFlip(Qtwist)
+        """ determinate angle of rotation """
+        Vtwist = vector4D.Quat2Vec(Qtwist)
+        Vtwist.o += Events.pivot[0]
+        Vtwist.x = 1
+        Vtwist.y = 0
+        Vtwist.z = 0
+        if Vtwist.o > 180:
+            Vtwist.o -= 360
+        elif Vtwist.o <= -180:
+            Vtwist.o += 360
+        """ apply constraint to x """
+        if Vtwist.o >= 0 and Vtwist.o > saturation[0]:
+            Vtwist.o = saturation[0]
+        elif Vtwist.o < 0 and Vtwist.o < saturation[1]:
+            Vtwist.o = saturation[1]
+        Qtwist = vector4D.Vec2Quat(Vtwist)
+        return Qtwist
+    
 
 
 

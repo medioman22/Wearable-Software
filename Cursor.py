@@ -64,6 +64,11 @@ def mouseManage():
                     break
             if Select == True:
                 StickMan.selectedParts += [StickMan.parts[ID][StickMan.Data_id],]
+            if GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
+                color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
+                color = (color[0]/255., color[1]/255., color[2]/255.)
+                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.parts[ID][StickMan.Data_id], Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (0.,90,90), color)]
+
         name = ' (' + StickMan.parts[ID][StickMan.Data_id] + ')'
     elif parent == 1:
         Sensors.overSensId = ID
@@ -72,9 +77,18 @@ def mouseManage():
                 Sensors.selectedSens = 0
             else:
                 Sensors.selectedSens = ID
+
+            
         for indices in Definitions.packageIndices[2]:
             pack = Definitions.packagePreprocess[indices[0]][indices[1]]
             if pack[Definitions.packID] == Sensors.overSensId:
+                
+                if Events.mouse_click == True:
+                    if GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
+                        color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
+                        color = (color[0]/255., color[1]/255., color[2]/255.)
+                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(pack[Definitions.entity].attach, Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (pack[Definitions.entity].x,pack[Definitions.entity].t,pack[Definitions.entity].s), color)]
+
 
                 if Events.deleteSens == True:
                     removeId = pack[Definitions.entity].id
@@ -86,6 +100,7 @@ def mouseManage():
                 name = ' (' + pack[Definitions.entity].type + ')'
                 info = [str(pack[Definitions.entity].x) + ' ' + str(pack[Definitions.entity].t) + ' ' + str(pack[Definitions.entity].s), str(pack[Definitions.entity].id), str(pack[Definitions.entity].tag)]
                 break
+        
     if parent == 2:
         GUI.overGuiId = ID
         if Events.mouse_click == True:
@@ -101,11 +116,11 @@ def mouseManage():
                 GUI.selectedGuiId = ID
                 if GUI.selectedGuiId-1 < len(Sensors.sensorGraphics):
                     State.loadZOI(Sensors.sensorGraphics[GUI.selectedGuiId-1])
-                    for part in StickMan.selectedParts:
-                        color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
-                        color = (color[0]/255., color[1]/255., color[2]/255.)
-                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (0.,90,90), color)]
-                        Sensors.selectedSens = 0 # remove when ID for sensor is well implemented, right now sensor selection may change by adding new ones
+                    #for part in StickMan.selectedParts:
+                    #    color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
+                    #    color = (color[0]/255., color[1]/255., color[2]/255.)
+                    #    Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (0.,90,90), color)]
+                    #    Sensors.selectedSens = 0 # remove when ID for sensor is well implemented, right now sensor selection may change by adding new ones
             else:
                 State.loadZOI([""])
                 GUI.selectedGuiId = 0
