@@ -203,11 +203,12 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
         p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,Qoffset))
         if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
             Definitions.modelMatrix.rotate(p.o, p.x, p.y, p.z)
-
         scale = entity.size*entity.parts[current_part][Data_dimensions][0]
         Definitions.modelMatrix.scale(scale,scale,scale)
-        Graphics.VBO_hypar((entity.parts[current_part][Data_saturation]))
-        Graphics.SaturationModelMatrix = Graphics.SaturationModelMatrix + [Definitions.modelMatrix.peek()]
+        
+        Graphics.SaturationModelMatrix = Graphics.SaturationModelMatrix + [[Definitions.modelMatrix.peek(),current_part]]
+        #Graphics.VBO_hypar((entity.parts[current_part][Data_saturation]))
+
         Definitions.modelMatrix.pop()
 
     """ total rotation to apply """
