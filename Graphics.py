@@ -309,6 +309,7 @@ def VBO_hypar(saturation = (0, 0, 0, 0, 0, 0)):
     
     i = 0
     iMax = 360
+    ####### BUG if Ey or Ez > 90
     while i <= iMax:
         swingAngle = math.pi/180.*i
         if Ey != 0 and Ez != 0:
