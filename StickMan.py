@@ -73,7 +73,8 @@ def drawBodySurface(style):
     vboId = -1
     for indices in Definitions.packageIndices[1]:
         pack = Definitions.packagePreprocess[indices[0]][indices[1]]
-
+        
+        drawSaturation = False
         if vboId != indices[0]:
             """ choose vbo """
             vboId = indices[0]
@@ -82,13 +83,13 @@ def drawBodySurface(style):
             Graphics.indexPositions[vboId][Graphics.vboSurfaces].bind()
             Graphics.vertexPositions[vboId].bind()
             glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-
         """ choose color """
         if style == Graphics.idBuffer:
             i = (pack[Definitions.packID])/float(len(parts)-1)
             color = np.array([i,0.,0.,1.], dtype = np.float32)
         elif pack[Definitions.selected] == True:
             color = np.array([0.,0.,0.5,0.3], dtype = np.float32)
+            drawSaturation = True
         elif pack[Definitions.packID] == overPartId:
             color = np.array([0.,0.,1.,0.3], dtype = np.float32)
         else:
@@ -165,7 +166,6 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
             partIsSelected = True
             break
 
-
     """ default orientation of part """
     l = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, entity.parts[current_part][Data_angleRepos][0], entity.parts[current_part][Data_angleRepos][1], entity.parts[current_part][Data_angleRepos][2])))
 
@@ -188,15 +188,32 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     
 
     """ Transformations """
-    glPushMatrix()
+    #glPushMatrix()
     Definitions.modelMatrix.push()
     """ offset to apply """
     glTranslatef(offset[0] + entity.size*entity.parts[current_part][Data_offset][0], offset[1] + entity.size*entity.parts[current_part][Data_offset][1], offset[2] + entity.size*entity.parts[current_part][Data_offset][2])
     Definitions.modelMatrix.translate(offset[0] + entity.size*entity.parts[current_part][Data_offset][0], offset[1] + entity.size*entity.parts[current_part][Data_offset][1], offset[2] + entity.size*entity.parts[current_part][Data_offset][2])
+    
+    if partIsSelected == True:
+        Definitions.modelMatrix.push()
+        
+        Cy = 0.5*(entity.parts[current_part][Data_saturation][2]+entity.parts[current_part][Data_saturation][3])
+        Cz = 0.5*(entity.parts[current_part][Data_saturation][4]+entity.parts[current_part][Data_saturation][5])
+        Qoffset = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0,0,Cy,Cz)))
+        p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,Qoffset))
+        if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
+            Definitions.modelMatrix.rotate(p.o, p.x, p.y, p.z)
+
+        scale = entity.size*entity.parts[current_part][Data_dimensions][0]
+        Definitions.modelMatrix.scale(scale,scale,scale)
+        Graphics.VBO_hypar((entity.parts[current_part][Data_saturation]))
+        Graphics.SaturationModelMatrix = Graphics.SaturationModelMatrix + [Definitions.modelMatrix.peek()]
+        Definitions.modelMatrix.pop()
+
     """ total rotation to apply """
     p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,q))
     if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
-        glRotatef(p.o, p.x, p.y, p.z)
+        #glRotatef(p.o, p.x, p.y, p.z)
         Definitions.modelMatrix.rotate(p.o, p.x, p.y, p.z)
         
         
@@ -225,7 +242,7 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     while part + 1 < len(entity.parts) and entity.parts[part+1][Data_layer] > entity.parts[current_part][Data_layer]:
         stick(entity, (x, 0, 0), (0,0,0,0))
 
-    glPopMatrix()
+    #glPopMatrix()
     Definitions.modelMatrix.pop()
 
 
@@ -266,7 +283,7 @@ parts = [
     ["Head",            [0, 0, 0],          [0.13, 0.08, 0.08],           [60, -60, 30, -30, 15, -15],         [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
     #["Hat",             [-0.06, 0, 0],      [0.07, 0.3, 0.3],             [0, 0, 0, 0, 0, 0],                  [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
     ["Shoulder_r",      [0, 0, 0],          [0.106, 0.04, 0.04],          [15, -15, 15, -15, 15, -45],         [0, 0, 90],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
-    ["Arm_r",           [0, 0, 0],          [0.136, 0.06, 0.06],          [0, -90, 60, -60, 90, -30],          [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Arm_r",           [0, 0, 0],          [0.136, 0.06, 0.06],          [90, -90, 60, -60, 90, -30],          [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
     ["Forearm_r",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, -150, 0, 0],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
     ["Hand_r",          [0, 0, 0],          [0.0588, 0.06, 0.02],         [0, 0, 90, -90, 60, -15],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          5],
     ["Finger_r_1a",     [-0.04, -0.03, 0],  [fi_a, 0.01, 0.01],           [0, 0, 0, -60, 30, -30],             [0, 0, -30],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          6],
@@ -285,7 +302,7 @@ parts = [
     ["Finger_r_5b",     [0, 0, 0],          [fi_b, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          7],
     ["Finger_r_5c",     [0, 0, 0],          [fi_c, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          8],
     ["Shoulder_l",      [0, 0, 0],          [0.106, 0.04, 0.04],          [15, -15, 15, -15, 45, -15],         [0, 0, -90],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
-    ["Arm_l",           [0, 0, 0],          [0.136, 0.06, 0.06],          [90, 0, 60, -60, 30, -90],           [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Arm_l",           [0, 0, 0],          [0.136, 0.06, 0.06],          [90, -90, 60, -60, 30, -90],           [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
     ["Forearm_l",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, -150, 0, 0],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
     ["Hand_l",          [0, 0, 0],          [0.0588, 0.06, 0.02],         [0, 0, 90, -90, 15, -60],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          5],
     ["Finger_l_1a",     [-0.04, 0.03, 0],   [fi_a, 0.01, 0.01],           [0, 0, 0, -60, 30, -30],             [0, 0, 30],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          6],

@@ -285,6 +285,72 @@ def VBO_circle(iMax = 8):
     
     styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
 
+SaturationVertexPositions = []
+SaturationIndexPositions = []
+SaturationNbIndex = []
+SaturationStyleIndex = []
+SaturationModelMatrix = []
+def VBO_hypar(saturation = (0, 0, 0, 0, 0, 0)):
+    """ Create the "sphere" VBO & EBO """
+    global SaturationVertexPositions
+    global SaturationIndexPositions
+    global SaturationNbIndex
+    global SaturationStyleIndex
+
+
+    vertices = []
+    edgeIndices = []
+    surfIndices = []
+    
+    Cy = 0.5*(saturation[2]+saturation[3])
+    Cz = 0.5*(saturation[4]+saturation[5])
+    Ey = 0.5*(saturation[2]-saturation[3])
+    Ez = 0.5*(saturation[4]-saturation[5])
+    
+    i = 0
+    iMax = 360
+    while i <= iMax:
+        swingAngle = math.pi/180.*i
+        if Ey != 0 and Ez != 0:
+            k = 1./math.sqrt(Ez*Ez*math.cos(swingAngle)*math.cos(swingAngle) + Ey*Ey*math.sin(swingAngle)*math.sin(swingAngle))
+            theta = k*Ey*Ez*math.sin(swingAngle)
+            phi = k*Ey*Ez*math.cos(swingAngle)
+        elif Ey != 0:
+            phi = -Ey + 2*Ey*i/360.
+            theta = 0
+        elif Ez != 0:
+            phi = 0
+            theta = -Ez + 2*Ez*i/360.
+        else:
+            phi = 0
+            theta = 0
+        theta *= math.pi/180.
+        phi *= math.pi/180.
+        x = math.cos(phi)*math.cos(theta)
+        y = math.cos(phi)*math.sin(theta)
+        z = math.sin(phi)
+        vertices = vertices + [x, y, z]
+        if i != iMax:
+            edgeIndices = edgeIndices + [i, i+1]
+            surfIndices = surfIndices + [i, i+1, (iMax+1)]
+        i +=1
+
+    vertices = vertices + [0., 0., 0.]
+
+    vertices = np.array([vertices],    dtype='f')
+
+    edgeIndices = np.array([edgeIndices], dtype=np.int32)
+
+    surfIndices = np.array([surfIndices], dtype=np.int32)
+
+    SaturationVertexPositions = SaturationVertexPositions + [vbo.VBO(vertices),]
+
+    SaturationIndexPositions = SaturationIndexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
+
+    SaturationNbIndex = SaturationNbIndex + [[edgeIndices.size, surfIndices.size],]
+
+    SaturationStyleIndex = SaturationStyleIndex + [[GL_LINES, GL_TRIANGLES],]
+
 def VBO_init():
     global vertexPositions
     global indexPositions

@@ -266,6 +266,11 @@ def main():
         Definitions.modelMatrix.translate(-StickMan.lookingAt[0][0],-StickMan.lookingAt[0][1],-StickMan.lookingAt[0][2])
         StickMan.part = -1 # initialize the recursivity here
         Sensors.countID = 0
+        Graphics.SaturationModelMatrix = []
+        Graphics.SaturationVertexPositions = []
+        Graphics.SaturationIndexPositions = []
+        Graphics.SaturationNbIndex = []
+        Graphics.SaturationStyleIndex = []
         StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
         Ground.preprocessGround(math.fabs(Events.rMax))
 
@@ -345,6 +350,22 @@ def main():
         Graphics.modelView(Events.style)
         StickMan.drawBodySurface(Events.style)
         StickMan.drawBodyEdge(Events.style)
+        
+        # draw saturations
+        Graphics.modelView(Graphics.opaque)
+        if Events.style != Graphics.idBuffer:
+            
+            vboId = 0
+            for saturation in Graphics.SaturationModelMatrix:
+                color = np.array([0.,1.,0.,0.3], dtype = np.float32)
+                glUniform4fv(Shaders.setColor_loc, 1, color)
+                glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, saturation)
+                Graphics.SaturationIndexPositions[vboId][0].bind()
+                Graphics.SaturationVertexPositions[vboId].bind()
+                glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+                glDrawElements(Graphics.SaturationStyleIndex[vboId][0], Graphics.SaturationNbIndex[vboId][0], GL_UNSIGNED_INT, None)
+                vboId += 1
+            vboId = -1
 
         # draw sensors
         Graphics.modelView(Graphics.opaque)

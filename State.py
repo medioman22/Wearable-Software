@@ -62,8 +62,14 @@ def saveModel(entity):
     for part in entity.parts:
         file.write(part[StickMan.Data_id])
         file.write("\n")
-        wat = " ".join(str(e) for e in part[StickMan.Data_angle])
-        file.write(wat)
+        angle = " ".join(str(e) for e in part[StickMan.Data_angle])
+        file.write(angle)
+        file.write("\n")
+        swing = " ".join(str(e) for e in part[StickMan.Data_swing])
+        file.write(swing)
+        file.write("\n")
+        twist = " ".join(str(e) for e in part[StickMan.Data_twist])
+        file.write(twist)
         file.write("\n")
     file.close()
 
@@ -79,11 +85,17 @@ def loadModel(entity):
             break
         ID = ID[:-1] # remove end of line character
         line = file.readline() # read part orientations
-        values = map(float, line.split())
+        angle = map(float, line.split())
+        line = file.readline() # read part orientations
+        swing = map(float, line.split())
+        line = file.readline() # read part orientations
+        twist = map(float, line.split())
         for part in entity.parts:
             #print(part[StickMan.Data_id])
             if part[StickMan.Data_id] == ID:
-                part[StickMan.Data_angle] = values
+                part[StickMan.Data_angle] = angle
+                part[StickMan.Data_swing] = swing
+                part[StickMan.Data_twist] = twist
                 break
     file.close()
 

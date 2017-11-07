@@ -245,22 +245,38 @@ class vector4D(object):
         Ez = 0.5*(saturation[4]-saturation[5])
 
         if Ey == 0:
+            if Qswing.z < 0:
+                Qswing = vector4D.QuatFlip(Qswing)
             Vswing = vector4D.Quat2Vec(Qswing)
             Vswing.o += Events.pivot[2]
             Vswing.x = 0
             Vswing.y = 0
             Vswing.z = 1
+            
+            if Vswing.o > 180:
+                Vswing.o -= 360
+            elif Vswing.o <= -180:
+                Vswing.o += 360
+
             if Vswing.o > saturation[4]:
                 Vswing.o = saturation[4]
             elif Vswing.o < saturation[5]:
                 Vswing.o = saturation[5]
             Qswing = vector4D.Vec2Quat(Vswing)
         elif Ez == 0:
+            if Qswing.y < 0:
+                Qswing = vector4D.QuatFlip(Qswing)
             Vswing = vector4D.Quat2Vec(Qswing)
             Vswing.o += Events.pivot[1]
             Vswing.x = 0
             Vswing.y = 1
             Vswing.z = 0
+            
+            if Vswing.o > 180:
+                Vswing.o -= 360
+            elif Vswing.o <= -180:
+                Vswing.o += 360
+
             if Vswing.o > saturation[2]:
                 Vswing.o = saturation[2]
             elif Vswing.o < saturation[3]:
