@@ -345,6 +345,8 @@ def main():
         Ground.drawGround()
         
         # draw saturations
+        Graphics.modelView(Graphics.blending)
+        Saturations.drawSaturationsBall()
         Graphics.modelView(Graphics.opaque)
         Saturations.drawSaturations()
 

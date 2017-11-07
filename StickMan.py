@@ -188,7 +188,6 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     
 
     """ Transformations """
-    #glPushMatrix()
     Definitions.modelMatrix.push()
     """ offset to apply """
     glTranslatef(offset[0] + entity.size*entity.parts[current_part][Data_offset][0], offset[1] + entity.size*entity.parts[current_part][Data_offset][1], offset[2] + entity.size*entity.parts[current_part][Data_offset][2])
@@ -203,18 +202,16 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
         p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,Qoffset))
         if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
             Definitions.modelMatrix.rotate(p.o, p.x, p.y, p.z)
-        scale = entity.size*entity.parts[current_part][Data_dimensions][0]
+        scale = 2*entity.size*entity.parts[current_part][Data_dimensions][0]
         Definitions.modelMatrix.scale(scale,scale,scale)
         
         Graphics.SaturationModelMatrix = Graphics.SaturationModelMatrix + [[Definitions.modelMatrix.peek(),current_part]]
-        #Graphics.VBO_hypar((entity.parts[current_part][Data_saturation]))
 
         Definitions.modelMatrix.pop()
 
     """ total rotation to apply """
     p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,q))
     if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
-        #glRotatef(p.o, p.x, p.y, p.z)
         Definitions.modelMatrix.rotate(p.o, p.x, p.y, p.z)
         
         
@@ -243,7 +240,6 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     while part + 1 < len(entity.parts) and entity.parts[part+1][Data_layer] > entity.parts[current_part][Data_layer]:
         stick(entity, (x, 0, 0), (0,0,0,0))
 
-    #glPopMatrix()
     Definitions.modelMatrix.pop()
 
 
