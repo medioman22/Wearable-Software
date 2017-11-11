@@ -15,7 +15,6 @@ import StickMan
 import Definitions
 
 
-display = [1550, 900] # window size
 
 lastTime = 0 # for time between frames
 
@@ -71,7 +70,6 @@ rMax = 0 # ground radius
 
 
 def manage():
-    global display
 
     global lastTime
 
@@ -140,7 +138,11 @@ def manage():
 
         """ Window resize """
         if event.type == VIDEORESIZE:
-            display = event.size
+            GUI.display[0] = event.size[0]
+            GUI.display[1] = event.size[1]
+            GUI.resize()
+            #GUI.screen=pygame.display.set_mode(event.dict['size'],pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE)
+            #pygame.display.flip()
             # not sure what to do after...
 
         """ mouse controller """

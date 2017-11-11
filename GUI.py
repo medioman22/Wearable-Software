@@ -1,3 +1,23 @@
+class subwindow(object):
+    """
+        characteristics
+        .x      attachment distance
+        .t      attachment angle
+    """
+
+
+    def __init__(self, x, y, dx, dy, tx, ty, e, borderColor, backgroundColor): # add orientation sometime...
+        """ constructor """
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.tx = tx
+        self.ty = ty
+        self.e = e
+        self.borderColor = borderColor
+        self.backgroundColor = backgroundColor
+
 import pygame
 from pygame.locals import *
 
@@ -10,6 +30,7 @@ import time
 import numpy as np
 
 import Definitions
+import Events
 import Sensors
 import Shaders
 import State
@@ -36,8 +57,34 @@ helpList = ['Arrows, page up/page dn = camera',
             'S,D = switch sensor group',
             'G   = change floor']
 
+
+display = [1550, 900] # window size
+screen = None
+
+border = 0.005*display[1]
+windowScene = subwindow(0,0,display[1],display[1],1,1,border,(0.5,0.5,0.5,1),(0,0,0,1))
+windowTemplates = subwindow(display[1],0,int(0.3*display[1]),int(0.6*display[1]),1/0.3,1/0.6,border,(0,1,0,1),(0.25,0.5,0.25,1))
+windowGroups = subwindow(int(display[1]+0.3*display[1]),0,int(0.3*display[1]),int(0.6*display[1]),1/0.3,1/0.6,border,(1,0,0,1),(0.5,0.25,0.25,1))
+windowData = subwindow(display[1],int(0.6*display[1]),int(0.7*display[1]),int(0.4*display[1]),1/0.7,1/0.4,border,(0,0,1,1),(0.25,0.25,0.5,1))
+windowSensor = subwindow(display[1],int(0.6*display[1]),int(0.4*display[1]),int(0.4*display[1]),1/0.7,1/0.4,border,(0,1,0,1),(1,1,1,1))
+
+def resize():
+    global windowScene
+    global windowTemplates
+    global windowGroups
+    global windowData
+    global windowSensor
+    windowScene = subwindow(0,0,display[1],display[1],1,1,border,(0.5,0.5,0.5,1),(0,0,0,1))
+    windowTemplates = subwindow(display[1],0,int(0.3*display[1]),int(0.6*display[1]),1/0.3,1/0.6,border,(0,1,0,1),(0.25,0.5,0.25,1))
+    windowGroups = subwindow(int(display[1]+0.3*display[1]),0,int(0.3*display[1]),int(0.6*display[1]),1/0.3,1/0.6,border,(1,0,0,1),(0.5,0.25,0.25,1))
+    windowData = subwindow(display[1],int(0.6*display[1]),int(0.7*display[1]),int(0.4*display[1]),1/0.7,1/0.4,border,(0,0,1,1),(0.25,0.25,0.5,1))
+    windowSensor = subwindow(display[1],int(0.6*display[1]),int(0.4*display[1]),int(0.4*display[1]),1/0.7,1/0.4,border,(0,1,0,1),(1,1,1,1))
+
+windowList = [windowScene, windowTemplates, windowGroups, windowData, windowSensor] #TODO : make it dynamic and implement it in ID buffer
+
 def lenGui():
-    return len(Sensors.sensorGraphics) + len(State.sensorFileName) + len(help)
+    return len(Sensors.sensorGraphics) + len(State.sensorFileName) + len(windowList) + len(help)
+
 
 TEX_TEXTURE = None
 """
@@ -50,11 +97,15 @@ TEX_TEXTURE = None
 overGuiId = 0
 selectedGuiId = 0
 newGuiPosDir = [0,0,1,1]
-def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, rx = 1, ry = 1, guiId = 9999):
+def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = windowScene, guiId = 9999):
     global newGuiPosDir
+    rx = window.tx
+    ry = window.ty
+    backgroundColor = (255*window.backgroundColor[0], 255*window.backgroundColor[1], 255*window.backgroundColor[2], 255*window.backgroundColor[3])
     x = x
     dy = ry*0.03
     y = y
+
     glUseProgram(0)
 
     font = pygame.font.Font('Fonts/UbuntuMono-R.ttf', 32)
@@ -68,19 +119,19 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, rx = 1, ry =
             if guiId-1 >= len(Sensors.sensorGraphics) and guiId-1 < len(Sensors.sensorGraphics) + len(State.sensorFileName):
                 if State.sensorFileName[guiId-1 - len(Sensors.sensorGraphics)][1] == True:
                     color = (0, 255, 0, 255)
-                    textSurface = font.render(txt, True, color, (0,0,0,0))
+                    textSurface = font.render(txt, True, color, backgroundColor)
                 elif overGuiId == guiId:
                     color = (0, 127, 0, 255)
-                    textSurface = font.render(txt, True, color, (0,0,0,0))
+                    textSurface = font.render(txt, True, color, backgroundColor)
                 else:
-                    textSurface = font.render(txt, True, (255,255,255,255), (0,0,0,0))
+                    textSurface = font.render(txt, True, (255,255,255,255), backgroundColor)
             elif selectedGuiId == guiId:
-                textSurface = font.render(txt, True, color, (0,0,0,0))
+                textSurface = font.render(txt, True, color, backgroundColor)
             elif overGuiId == guiId:
                 color = (0.5*color[0], 0.5*color[1], 0.5*color[2],255)
-                textSurface = font.render(txt, True, color, (0,0,0,0))
+                textSurface = font.render(txt, True, color, backgroundColor)
             else:
-                textSurface = font.render(txt, True, (255,255,255,255), (0,0,0,0))
+                textSurface = font.render(txt, True, (255,255,255,255), backgroundColor)
                 
         else:
             textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/lenGui(),0))
@@ -122,7 +173,14 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, rx = 1, ry =
     glUseProgram(Shaders.shader)
 
 
-def subWindow(x,y,dx,dy,e, drawBorder = True, color = (0.5,0.5,0.5,1)):
+def subWindow(window, drawBorder = True):
+    x = window.x
+    y = window.y
+    dx = window.dx
+    dy = window.dy
+    e = window.e
+    borderColor = window.borderColor
+    backgroundColor = window.backgroundColor
     if drawBorder == True:
         glViewport(x,y, dx, dy)
         
@@ -131,7 +189,7 @@ def subWindow(x,y,dx,dy,e, drawBorder = True, color = (0.5,0.5,0.5,1)):
         glLoadIdentity()
 
         glBegin(GL_QUADS)
-        glColor4f(color[0], color[1], color[2], color[3])
+        glColor4f(borderColor[0], borderColor[1], borderColor[2], borderColor[3])
         glVertex3f(-1,-1, 1)
         glVertex3f(1,-1, 1)
         glVertex3f(1,1, 1)
@@ -141,7 +199,7 @@ def subWindow(x,y,dx,dy,e, drawBorder = True, color = (0.5,0.5,0.5,1)):
         glViewport(int(x+e),int(y+e), int(dx-2*e), int(dy-2*e))
 
         glBegin(GL_QUADS)
-        glColor4f(0,0,0,1)
+        glColor4f(backgroundColor[0],backgroundColor[1],backgroundColor[2],backgroundColor[3])
         glVertex3f(-1,-1, 1)
         glVertex3f(1,-1, 1)
         glVertex3f(1,1, 1)
@@ -152,3 +210,4 @@ def subWindow(x,y,dx,dy,e, drawBorder = True, color = (0.5,0.5,0.5,1)):
         glEnable(GL_TEXTURE_2D)
     else:
         glViewport(int(x+e),int(y+e), int(dx-2*e), int(dy-2*e))
+

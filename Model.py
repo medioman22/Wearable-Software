@@ -161,7 +161,9 @@ def main():
 
     """ Create a window """
     pygame.init()
-    screen = pygame.display.set_mode(Events.display, pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE|NOFRAME)
+    State.importUserSettings()
+    GUI.resize()
+    GUI.screen = pygame.display.set_mode(GUI.display, pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE)#|NOFRAME)
     glClearColor(0.0, 0.0, 0.0, 0.0);
     
     """ texture for ID buffer """
@@ -175,7 +177,7 @@ def main():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Events.display[0], Events.display[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GUI.display[0], GUI.display[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
     glBindTexture(GL_TEXTURE_2D, 0)
 
 
@@ -183,7 +185,7 @@ def main():
     # create render buffer
     rbo = glGenRenderbuffers(1)
     glBindRenderbuffer(GL_RENDERBUFFER, rbo)
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Events.display[0], Events.display[1])
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, GUI.display[0], GUI.display[1])
     glBindRenderbuffer(GL_RENDERBUFFER, 0)
     
 
@@ -226,18 +228,12 @@ def main():
     Shaders.model_loc = glGetUniformLocation(Shaders.shader, "model")
     Shaders.setColor_loc = glGetUniformLocation(Shaders.shader, "setColor")
     
-    Definitions.projectionMatrix.perspectiveProjection(90, 0.5*Events.display[0]/Events.display[1], 0.1, 100.0)
+    Definitions.projectionMatrix.perspectiveProjection(90, 0.5*GUI.display[0]/GUI.display[1], 0.1, 100.0)
     glUniformMatrix4fv(Shaders.proj_loc, 1, GL_FALSE, Definitions.projectionMatrix.peek())
     glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
 
-    border = 0.01*Events.display[1]
-    windowScene = [0,0,Events.display[1],Events.display[1]]
-    windowGui = [Events.display[1],0,int(0.3*Events.display[1]),int(0.6*Events.display[1]),1/0.3,1/0.6]
-    windowGroups = [int(Events.display[1]+0.3*Events.display[1]),0,int(0.3*Events.display[1]),int(0.6*Events.display[1]),1/0.3,1/0.6]
-    windowData = [Events.display[1],int(0.6*Events.display[1]),int(0.7*Events.display[1]),int(0.4*Events.display[1]),1/0.7,1/0.4]
-    windowTemplate = [Events.display[1],int(0.6*Events.display[1]),int(0.4*Events.display[1]),int(0.4*Events.display[1]),1/0.7,1/0.4]
+
     """ >>> main loop <<< """
-    wut = 0
     while True:
         # keep track of loop frequency
         flagStart = time.clock()
@@ -256,6 +252,8 @@ def main():
             Events management.
             Most interactions between the user and the software is aknowledged here.
         """
+        #State.importUserSettings()
+        #GUI.resize()
         Events.manage()
         
         refreshId() # TODO : only when adding/removing sensors
@@ -303,21 +301,23 @@ def main():
             list = list + [file[0]]
         # fill ID buffer
 
-        GUI.subWindow(windowScene[0],windowScene[1],windowScene[2],windowScene[3],border,False)
+        window = GUI.windowScene
+        GUI.subWindow(window,False)
 
         Graphics.modelView(Graphics.opaque)
         StickMan.drawBodySurface(Graphics.idBuffer)
         Sensors.drawSensor(Graphics.idBuffer)
         
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
-        GUI.subWindow(windowGui[0],windowGui[1],windowGui[2],windowGui[3],border,False)
-        GUI.textTexture(sensorTypes, -1, 1-3*0.03*windowGui[5], 1, 1, True, windowGui[4], windowGui[5], 0)
-        
-        GUI.subWindow(windowGroups[0],windowGroups[1],windowGroups[2],windowGroups[3],border,False)
-        GUI.textTexture(list, -1, 1-3*0.05*windowGroups[5], 1, 1, True, windowGroups[4], windowGroups[5], len(sensorTypes))
-
-        GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,False)
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, windowData[4], windowData[5], len(sensorTypes) + len(list))
+        window = GUI.windowTemplates
+        GUI.subWindow(window,False)
+        GUI.textTexture(sensorTypes, -0.9, 1-3*0.03*window.ty, 1, 1, True, window, 0)
+        window = GUI.windowGroups
+        GUI.subWindow(window,False)
+        GUI.textTexture(list, -0.9, 1-3*0.05*window.ty, 1, 1, True, window, len(sensorTypes))
+        window = GUI.windowData
+        GUI.subWindow(window,False)
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, window, len(sensorTypes) + len(list) + len(GUI.windowList))
 
 
         """
@@ -337,23 +337,25 @@ def main():
         
         # clear the display buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-
-        GUI.subWindow(windowScene[0],windowScene[1],windowScene[2],windowScene[3],border,Events.style != Graphics.idBuffer,(0.5,0.5,0.5,1))
+        window = GUI.windowScene
+        GUI.subWindow(window,Events.style != Graphics.idBuffer)
 
         # draw scene
         Graphics.modelView(Graphics.blending)
         Ground.drawGround()
         
-        # draw saturations
+        # draw saturation balls
         Graphics.modelView(Graphics.blending)
-        Saturations.drawSaturationsBall()
-        Graphics.modelView(Graphics.opaque)
-        Saturations.drawSaturations()
+        Saturations.drawSaturationBalls()
 
         # draw body
         Graphics.modelView(Events.style)
         StickMan.drawBodySurface(Events.style)
         StickMan.drawBodyEdge(Events.style)
+
+        # draw saturation lines
+        Graphics.modelView(Graphics.opaque)
+        Saturations.drawSaturationLines()
 
         # draw sensors
         Graphics.modelView(Graphics.opaque)
@@ -365,65 +367,34 @@ def main():
         # draw GUI
         glClear(GL_DEPTH_BUFFER_BIT)
         Graphics.modelView(Graphics.opaque)
-
-        GUI.subWindow(windowGui[0],windowGui[1],windowGui[2],windowGui[3],border,Events.style != Graphics.idBuffer,(0,1,0,1))
+        window = GUI.windowTemplates
+        GUI.subWindow(window,Events.style != Graphics.idBuffer,)
         if Events.style != Graphics.idBuffer:
-            GUI.textTexture(['Wearable templates'], 0, 1, 0, 1, False, windowGui[4], windowGui[5])
-        GUI.textTexture(sensorTypes, -1, 1-3*0.03*windowGui[5], 1, 1, Events.style == Graphics.idBuffer, windowGui[4], windowGui[5], 0)
-        
-        GUI.subWindow(windowGroups[0],windowGroups[1],windowGroups[2],windowGroups[3],border,Events.style != Graphics.idBuffer,(1,0,0,1))
+            GUI.textTexture(['Wearable templates'], 0, 1, 0, 1, False, window)
+        GUI.textTexture(sensorTypes, -0.9, 1-3*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, 0)
+        window = GUI.windowGroups
+        GUI.subWindow(window,Events.style != Graphics.idBuffer)
         if Events.style != Graphics.idBuffer:
             GUI.textTexture(['Wearable groups',
-                             'Save in ' + State.saveGroupFile], 0, 1, 0, 1, False, windowGroups[4], windowGroups[5])
-        GUI.textTexture(list, -1, 1-5*0.03*windowGroups[5], 1, 1, Events.style == Graphics.idBuffer, windowGroups[4], windowGroups[5], len(sensorTypes))
-
-        GUI.subWindow(windowTemplate[0],windowTemplate[1],windowTemplate[2],windowTemplate[3],border,False)
+                             'Save in ' + State.saveGroupFile], 0, 1, 0, 1, False, window)
+        GUI.textTexture(list, -0.9, 1-5*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, len(sensorTypes))
+        window = GUI.windowSensor
+        GUI.subWindow(window,False)
 
         """ display selected template """
         if Events.style != Graphics.idBuffer and GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
-            glUseProgram(Shaders.shader)
-            """ choose vbo """
-            vboId = Sensors.sensorGraphics[GUI.selectedGuiId-1][2]
-            vboDraw = Graphics.vboEdges
-            """ bind surfaces vbo """
-            Graphics.indexPositions[vboId][vboDraw].bind()
-            Graphics.vertexPositions[vboId].bind()
-            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-            """ send color to shader """
-            r,g,b,a = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
-            color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
-            glUniform4fv(Shaders.setColor_loc, 1, color)
-            """ load matrix in shader """
-            I = np.array([[1, 0, 0, 0],
-                          [0, 1, 0, 0],
-                          [0, 0, 1, 0],
-                          [0, 0, 0, 1]])
-            Definitions.modelMatrix.push()
-            Definitions.modelMatrix.set(I)
-            u = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 0, 90))), Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, time.clock()*100, 0, 0)))))
-            Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
+            Sensors.displayTemplate()
+        window = GUI.windowData
+        GUI.subWindow(window,Events.style != Graphics.idBuffer)
 
-            glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
-            Definitions.modelMatrix.pop()
-            
-            Definitions.viewMatrix.push()
-            Definitions.viewMatrix.translate(0,0,-1.5)
-            glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
-            Definitions.viewMatrix.pop()
-            """ draw vbo """
-            glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
-            glUseProgram(0)
-
-        GUI.subWindow(windowData[0],windowData[1],windowData[2],windowData[3],border,Events.style != Graphics.idBuffer,(0,0,1,1))
-
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, windowData[4], windowData[5], len(sensorTypes) + len(list))
+        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, window, len(sensorTypes) + len(list) + len(GUI.windowList))
         if Events.style != Graphics.idBuffer:
-            GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile])], 0, 1, 0, 1, False, windowData[4], windowData[5])
+            GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile])], 0, 1, 0, 1, False, window)
             GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
-                            + Cursor.info, 1, -1, -1, -1, False, windowData[4], windowData[5])
+                            + Cursor.info, 1, -1, -1, -1, False, window)
             if GUI.selectedGuiId == GUI.lenGui():
-                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, 0.75*windowData[4], 0.75*windowData[5])
-            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, windowData[4], windowData[5])
+                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, window)
+            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, window)
         
         
 

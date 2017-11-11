@@ -24,7 +24,7 @@ def mouseManage():
     global name
     global info
 
-    color = glReadPixels( mouse[0] , Events.display[1] - mouse[1] - 1 , 1 , 1 , GL_RGBA , GL_FLOAT )
+    color = glReadPixels( mouse[0] , GUI.display[1] - mouse[1] - 1 , 1 , 1 , GL_RGBA , GL_FLOAT )
     ID = 0
     parent = -1
     name = ''

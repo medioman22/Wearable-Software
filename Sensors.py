@@ -46,6 +46,7 @@ import Cursor
 import Definitions
 import Events
 import Graphics
+import GUI
 import Shaders
 
 
@@ -228,3 +229,34 @@ def drawDashed(style):
             glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
         else:
             glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
+
+
+def displayTemplate():
+    glUseProgram(Shaders.shader)
+    """ choose vbo """
+    vboId = sensorGraphics[GUI.selectedGuiId-1][2]
+    vboDraw = Graphics.vboEdges
+    """ bind surfaces vbo """
+    Graphics.indexPositions[vboId][vboDraw].bind()
+    Graphics.vertexPositions[vboId].bind()
+    glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+    """ send color to shader """
+    r,g,b,a = sensorGraphics[GUI.selectedGuiId-1][1]
+    color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
+    glUniform4fv(Shaders.setColor_loc, 1, color)
+    """ load matrix in shader """
+    Definitions.modelMatrix.push()
+    Definitions.modelMatrix.set(Definitions.I)
+    u = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 0, 90))), Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, time.clock()*100, 0, 0)))))
+    Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
+
+    glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
+    Definitions.modelMatrix.pop()
+            
+    Definitions.viewMatrix.push()
+    Definitions.viewMatrix.translate(0,0,-1.5)
+    glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
+    Definitions.viewMatrix.pop()
+    """ draw vbo """
+    glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
+    glUseProgram(0)

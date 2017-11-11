@@ -1,12 +1,14 @@
 import os
 
 import Graphics
+import GUI
 import StickMan
 import Sensors
 
 pathModels = "States/Models/"
 pathSensors = "States/Sensors/"
 pathTemplates = "States/Templates/"
+pathUserSettings = "States/UserSettings/"
 pathZoi = "States/Zoi/"
 extension = ".txt"
 currentModelFile = 0
@@ -14,6 +16,14 @@ modelFileName = []
 currentSensorFile = 0
 saveGroupFile = "Default" + extension
 sensorFileName = []
+
+def importUserSettings():
+    file = open(pathUserSettings + "Resolution.txt", 'r')
+    line = file.readline()
+    x, y = line.split(' ')
+    GUI.display[0] = int(x)
+    GUI.display[1] = int(y)
+
 
 def createList():
     global modelFileName
