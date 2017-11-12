@@ -133,6 +133,12 @@ def manage():
             pygame.quit()
             quit()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            #pygame.quit()
+            #quit()
+            GUI.selectedTemplate = 0
+            GUI.selectedGroup = 0
+            GUI.selectedWindow = 0
+        elif GUI.selectedWindow == len(GUI.windowList):
             pygame.quit()
             quit()
 
@@ -141,9 +147,6 @@ def manage():
             GUI.display[0] = event.size[0]
             GUI.display[1] = event.size[1]
             GUI.resize()
-            #GUI.screen=pygame.display.set_mode(event.dict['size'],pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE)
-            #pygame.display.flip()
-            # not sure what to do after...
 
         """ mouse controller """
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left mouse button
@@ -281,13 +284,13 @@ def manage():
         if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
             State.loadSensors()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-            if GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
-                Sensors.sensorGraphics[GUI.selectedGuiId-1][2] = (Sensors.sensorGraphics[GUI.selectedGuiId-1][2]-1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
-                State.saveTemplates(Sensors.sensorGraphics[GUI.selectedGuiId-1])
+            if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
+                Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]-1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
+                State.saveTemplates(Sensors.sensorGraphics[GUI.selectedTemplate-1])
         if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-            if GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
-                Sensors.sensorGraphics[GUI.selectedGuiId-1][2] = (Sensors.sensorGraphics[GUI.selectedGuiId-1][2]+1) % len(Definitions.packagePreprocess)
-                State.saveTemplates(Sensors.sensorGraphics[GUI.selectedGuiId-1])
+            if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
+                Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]+1) % len(Definitions.packagePreprocess)
+                State.saveTemplates(Sensors.sensorGraphics[GUI.selectedTemplate-1])
         if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
             deleteSens = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_g:

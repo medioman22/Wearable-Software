@@ -56,18 +56,21 @@ def mouseManage():
     if parent == 0:
         StickMan.overPartId = ID
         if Events.mouse_click == True:
-            Select = True
-            for part in StickMan.selectedParts:
-                if part == StickMan.parts[ID][StickMan.Data_id]:
-                    Select = False
-                    StickMan.selectedParts.remove(part)
-                    break
-            if Select == True:
-                StickMan.selectedParts += [StickMan.parts[ID][StickMan.Data_id],]
-            if GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
-                color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
+            # place sensor on body
+            if GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:
+                color = Sensors.sensorGraphics[GUI.selectedTemplate-1][1]
                 color = (color[0]/255., color[1]/255., color[2]/255.)
-                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.parts[ID][StickMan.Data_id], Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (0.,90,90), color)]
+                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.parts[ID][StickMan.Data_id], Sensors.sensorGraphics[GUI.selectedTemplate-1][0], (0.,90,90), color)]
+            # select limb
+            else:
+                Select = True
+                for part in StickMan.selectedParts:
+                    if part == StickMan.parts[ID][StickMan.Data_id]:
+                        Select = False
+                        StickMan.selectedParts.remove(part)
+                        break
+                if Select == True:
+                    StickMan.selectedParts += [StickMan.parts[ID][StickMan.Data_id],]
 
         name = ' (' + StickMan.parts[ID][StickMan.Data_id] + ')'
     elif parent == 1:
@@ -84,10 +87,10 @@ def mouseManage():
             if pack[Definitions.packID] == Sensors.overSensId:
                 
                 if Events.mouse_click == True:
-                    if GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
-                        color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
+                    if GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:
+                        color = Sensors.sensorGraphics[GUI.selectedTemplate-1][1]
                         color = (color[0]/255., color[1]/255., color[2]/255.)
-                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(pack[Definitions.entity].attach, Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (pack[Definitions.entity].x,pack[Definitions.entity].t,pack[Definitions.entity].s), color)]
+                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(pack[Definitions.entity].attach, Sensors.sensorGraphics[GUI.selectedTemplate-1][0], (pack[Definitions.entity].x,pack[Definitions.entity].t,pack[Definitions.entity].s), color)]
 
 
                 if Events.deleteSens == True:
@@ -105,24 +108,32 @@ def mouseManage():
         GUI.overGuiId = ID
         if Events.mouse_click == True:
 
-            if GUI.overGuiId-1 >= len(Sensors.sensorGraphics) and GUI.overGuiId-1 < len(Sensors.sensorGraphics) + len(State.sensorFileName):
-                if State.sensorFileName[GUI.overGuiId-1 - len(Sensors.sensorGraphics)][1] == False:
-                    State.sensorFileName[GUI.overGuiId-1 - len(Sensors.sensorGraphics)][1] = True
+            # windows
+            if GUI.guiType(GUI.overGuiId) == GUI.guiWindow:
+                if GUI.selectedWindow != ID - GUI.guiOffsetId(GUI.guiWindow):
+                    GUI.selectedWindow = ID - GUI.guiOffsetId(GUI.guiWindow)
                 else:
-                    State.sensorFileName[GUI.overGuiId-1 - len(Sensors.sensorGraphics)][1] = False
+                    GUI.selectedWindow = 0
+               
+            # groupes
+            if GUI.guiType(GUI.overGuiId) == GUI.guiGroup:
+                if State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][1] == False:
+                    State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][1] = True
+                else:
+                    State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][1] = False
                 State.loadSensors()
+                if GUI.selectedGroup != ID:
+                    GUI.selectedGroup = ID
+                else:
+                    GUI.selectedGroup = 0
 
-            if GUI.selectedGuiId != ID:
-                GUI.selectedGuiId = ID
-                if GUI.selectedGuiId-1 < len(Sensors.sensorGraphics):
-                    State.loadZOI(Sensors.sensorGraphics[GUI.selectedGuiId-1])
-                    #for part in StickMan.selectedParts:
-                    #    color = Sensors.sensorGraphics[GUI.selectedGuiId-1][1]
-                    #    color = (color[0]/255., color[1]/255., color[2]/255.)
-                    #    Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(part, Sensors.sensorGraphics[GUI.selectedGuiId-1][0], (0.,90,90), color)]
-                    #    Sensors.selectedSens = 0 # remove when ID for sensor is well implemented, right now sensor selection may change by adding new ones
-            else:
-                State.loadZOI([""])
-                GUI.selectedGuiId = 0
+            # templates
+            if GUI.guiType(GUI.overGuiId) == GUI.guiTemplate:
+                if GUI.selectedTemplate != ID:
+                    GUI.selectedTemplate = ID
+                    State.loadZOI(Sensors.sensorGraphics[GUI.selectedTemplate-1])
+                else:
+                    State.loadZOI([""])
+                    GUI.selectedTemplate = 0
     else:
         pass

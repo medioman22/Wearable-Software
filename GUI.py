@@ -36,14 +36,12 @@ import Shaders
 import State
 
 
-help = ['Help : ']
-
 helpList = ['Arrows, page up/page dn = camera',
             'right mouse = lock camera on target',
             'Left mouse = (un)select entity',
-            'Q,W = rotate part around x axis',
-            'E,R = rotate part around y axis',
-            'T,Y = rotate part around z axis',
+            'Q,W = twist limb axis x',
+            'E,R = swing limb axis y',
+            'T,Y = swing limb axis z',
             'U   = reset part orientation',
             'I,O = switch selected part',
             'Z,X = translate sensor on x axis',
@@ -62,29 +60,63 @@ display = [1550, 900] # window size
 screen = None
 
 border = 0.005*display[1]
-windowScene = subwindow(0,0,display[1],display[1],1,1,border,(0.5,0.5,0.5,1),(0,0,0,1))
-windowTemplates = subwindow(display[1],0,int(0.3*display[1]),int(0.6*display[1]),1/0.3,1/0.6,border,(0,1,0,1),(0.25,0.5,0.25,1))
-windowGroups = subwindow(int(display[1]+0.3*display[1]),0,int(0.3*display[1]),int(0.6*display[1]),1/0.3,1/0.6,border,(1,0,0,1),(0.5,0.25,0.25,1))
-windowData = subwindow(display[1],int(0.6*display[1]),int(0.7*display[1]),int(0.4*display[1]),1/0.7,1/0.4,border,(0,0,1,1),(0.25,0.25,0.5,1))
-windowSensor = subwindow(display[1],int(0.6*display[1]),int(0.4*display[1]),int(0.4*display[1]),1/0.7,1/0.4,border,(0,1,0,1),(1,1,1,1))
+windowScene = None
+windowTemplates = None
+windowGroups = None
+windowPannel = None
+windowData = None
+windowSensor = None
+windowHelp = None
 
 def resize():
     global windowScene
     global windowTemplates
     global windowGroups
+    global windowPannel
     global windowData
     global windowSensor
-    windowScene = subwindow(0,0,display[1],display[1],1,1,border,(0.5,0.5,0.5,1),(0,0,0,1))
-    windowTemplates = subwindow(display[1],0,int(0.3*display[1]),int(0.6*display[1]),1/0.3,1/0.6,border,(0,1,0,1),(0.25,0.5,0.25,1))
-    windowGroups = subwindow(int(display[1]+0.3*display[1]),0,int(0.3*display[1]),int(0.6*display[1]),1/0.3,1/0.6,border,(1,0,0,1),(0.5,0.25,0.25,1))
-    windowData = subwindow(display[1],int(0.6*display[1]),int(0.7*display[1]),int(0.4*display[1]),1/0.7,1/0.4,border,(0,0,1,1),(0.25,0.25,0.5,1))
-    windowSensor = subwindow(display[1],int(0.6*display[1]),int(0.4*display[1]),int(0.4*display[1]),1/0.7,1/0.4,border,(0,1,0,1),(1,1,1,1))
+    global windowHelp
 
-windowList = [windowScene, windowTemplates, windowGroups, windowData, windowSensor] #TODO : make it dynamic and implement it in ID buffer
+    windowScene = subwindow(0,0,display[1],display[1],1,1,border,(0.5,0.5,0.5,1),(0,0,0,1))
+    windowTemplates = subwindow(display[1],0,int(0.6*display[1]),int(0.95*display[1]),1/0.6,1/0.95,border,(0,1,0,1),(0.25,0.5,0.25,1))
+    windowGroups = subwindow(display[1],0,int(0.6*display[1]),int(0.95*display[1]),1/0.6,1/0.95,border,(1,0,0,1),(0.5,0.25,0.25,1))
+    windowPannel = subwindow(display[1],int(0.95*display[1]),int(0.6*display[1]),int(0.05*display[1]),1/0.6,1/0.05,border,(0,0,1,1),(0.25,0.25,0.5,1))
+    windowData = subwindow(display[1],int(0.35*display[1]),int(0.6*display[1]),int(0.6*display[1]),1/0.6,1/0.6,border,(1,1,0,1),(0.5,0.5,0.25,1))
+    windowSensor = subwindow(int(1.2*display[1]),int(0.55*display[1]),int(0.4*display[1]),int(0.4*display[1]),1/0.4,1/0.4,border,(0,1,0,1),(1,1,1,1))
+    windowHelp = subwindow(display[1],int(0.35*display[1]),int(0.6*display[1]),int(0.6*display[1]),1.8,1.8,border,(1,1,1,1),(0,0,0,1))
+
+windowHelpId = 1
+windowTemplatesId = 2
+windowGroupsId = 3
+windowDataId = 4
+windowList = ['Help', 'Templates', 'Groups', 'Data', '----', 'Quit']
 
 def lenGui():
-    return len(Sensors.sensorGraphics) + len(State.sensorFileName) + len(windowList) + len(help)
+    return len(Sensors.sensorGraphics) + len(State.sensorFileName) + len(windowList)
 
+guiTemplate = 1
+guiGroup = 2
+guiWindow = 3
+def guiType(guiId):
+    if guiId > 0 and\
+       guiId <= len(Sensors.sensorGraphics):
+        return guiTemplate
+    elif guiId > len(Sensors.sensorGraphics) and\
+         guiId <= len(Sensors.sensorGraphics) + len(State.sensorFileName):
+        return guiGroup
+    elif guiId > len(Sensors.sensorGraphics) + len(State.sensorFileName) and\
+         guiId <= len(Sensors.sensorGraphics) + len(State.sensorFileName) + len(windowList):
+        return guiWindow
+    else:
+        return 0
+
+def guiOffsetId(guiType):
+    if guiType == guiTemplate:
+        return 0
+    elif guiType == guiGroup:
+        return len(Sensors.sensorGraphics)
+    elif guiType == guiWindow:
+        return len(Sensors.sensorGraphics) + len(State.sensorFileName)
 
 TEX_TEXTURE = None
 """
@@ -95,10 +127,10 @@ TEX_TEXTURE = None
 """
 
 overGuiId = 0
-selectedGuiId = 0
-newGuiPosDir = [0,0,1,1]
+selectedTemplate = 0
+selectedGroup = 0
+selectedWindow = 0
 def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = windowScene, guiId = 9999):
-    global newGuiPosDir
     rx = window.tx
     ry = window.ty
     backgroundColor = (255*window.backgroundColor[0], 255*window.backgroundColor[1], 255*window.backgroundColor[2], 255*window.backgroundColor[3])
@@ -112,36 +144,35 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
     for txt in text:
         guiId += 1
         if idDraw != True:
-            if guiId-1 < len(Sensors.sensorGraphics):
-                color = Sensors.sensorGraphics[guiId-1][1]
-            else:
-                color = (255, 0, 0, 255)
-            if guiId-1 >= len(Sensors.sensorGraphics) and guiId-1 < len(Sensors.sensorGraphics) + len(State.sensorFileName):
-                if State.sensorFileName[guiId-1 - len(Sensors.sensorGraphics)][1] == True:
+            if guiType(guiId) == guiTemplate:
+                if selectedTemplate == guiId:
+                    color = Sensors.sensorGraphics[guiId-1][1]
+                elif overGuiId == guiId:
+                    color = Sensors.sensorGraphics[guiId-1][1]
+                    color = (0.5*color[0], 0.5*color[1], 0.5*color[2],255)
+                else:
+                    color = (255,255,255,255)
+            elif guiType(guiId) == guiGroup:
+                if State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][1] == True:
                     color = (0, 255, 0, 255)
-                    textSurface = font.render(txt, True, color, backgroundColor)
                 elif overGuiId == guiId:
                     color = (0, 127, 0, 255)
-                    textSurface = font.render(txt, True, color, backgroundColor)
                 else:
-                    textSurface = font.render(txt, True, (255,255,255,255), backgroundColor)
-            elif selectedGuiId == guiId:
-                textSurface = font.render(txt, True, color, backgroundColor)
-            elif overGuiId == guiId:
-                color = (0.5*color[0], 0.5*color[1], 0.5*color[2],255)
-                textSurface = font.render(txt, True, color, backgroundColor)
+                    color = (255,255,255,255)
             else:
-                textSurface = font.render(txt, True, (255,255,255,255), backgroundColor)
-                
+                if selectedWindow + guiOffsetId(guiWindow) == guiId:
+                    color = (255, 0, 0, 255)
+                elif overGuiId == guiId:
+                    color = (127, 0, 0,255)
+                else:
+                    color = (255,255,255,255)
+            textSurface = font.render(txt, True, color, backgroundColor)
+        # id buffer
         else:
             textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/lenGui(),0))
+
         ix, iy = textSurface.get_width(), textSurface.get_height()
         dx = rx/ry*dy*ix/iy
-        if txt == help[0]:
-            newGuiPosDir[0] = x + 2*sx*dx
-            newGuiPosDir[1] = y
-            newGuiPosDir[2] = sx
-            newGuiPosDir[3] = sy
         image = pygame.image.tostring(textSurface, "RGBA", True)
         glPixelStorei(GL_UNPACK_ALIGNMENT,1)
         glBindTexture(GL_TEXTURE_2D, TEX_TEXTURE)
@@ -169,7 +200,10 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
             glTexCoord2f(0.0, 1.0)
         glVertex3f(-1.0,  1.0,  1.0)
         glEnd()
-        y -= 2*sy*dy
+        if sy != 0:
+            y -= 2*sy*dy
+        else:
+            x += 2*sx*(dx + 0.04)
     glUseProgram(Shaders.shader)
 
 

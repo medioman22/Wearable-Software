@@ -163,7 +163,7 @@ def main():
     pygame.init()
     State.importUserSettings()
     GUI.resize()
-    GUI.screen = pygame.display.set_mode(GUI.display, pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE)#|NOFRAME)
+    GUI.screen = pygame.display.set_mode(GUI.display, pygame.DOUBLEBUF|pygame.OPENGL|pygame.OPENGLBLIT|RESIZABLE|NOFRAME)
     glClearColor(0.0, 0.0, 0.0, 0.0);
     
     """ texture for ID buffer """
@@ -252,8 +252,6 @@ def main():
             Events management.
             Most interactions between the user and the software is aknowledged here.
         """
-        #State.importUserSettings()
-        #GUI.resize()
         Events.manage()
         
         refreshId() # TODO : only when adding/removing sensors
@@ -307,17 +305,19 @@ def main():
         Graphics.modelView(Graphics.opaque)
         StickMan.drawBodySurface(Graphics.idBuffer)
         Sensors.drawSensor(Graphics.idBuffer)
-        
+
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
-        window = GUI.windowTemplates
+        if GUI.selectedWindow == GUI.windowTemplatesId:
+            window = GUI.windowTemplates
+            GUI.subWindow(window,False)
+            GUI.textTexture(sensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, True, window, 0)
+        if GUI.selectedWindow == GUI.windowGroupsId:
+            window = GUI.windowGroups
+            GUI.subWindow(window,False)
+            GUI.textTexture(list, -0.95, 0.95-6*0.03*window.ty, 1, 1, True, window, len(sensorTypes))
+        window = GUI.windowPannel
         GUI.subWindow(window,False)
-        GUI.textTexture(sensorTypes, -0.9, 1-3*0.03*window.ty, 1, 1, True, window, 0)
-        window = GUI.windowGroups
-        GUI.subWindow(window,False)
-        GUI.textTexture(list, -0.9, 1-3*0.05*window.ty, 1, 1, True, window, len(sensorTypes))
-        window = GUI.windowData
-        GUI.subWindow(window,False)
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, True, window, len(sensorTypes) + len(list) + len(GUI.windowList))
+        GUI.textTexture(GUI.windowList, -0.95, 0, 1, 0, True, window, len(sensorTypes) + len(list))
 
 
         """
@@ -362,39 +362,62 @@ def main():
         Sensors.drawSensor(Events.style)
         Sensors.drawDashed(Events.style)
         
-        
 
         # draw GUI
         glClear(GL_DEPTH_BUFFER_BIT)
         Graphics.modelView(Graphics.opaque)
-        window = GUI.windowTemplates
-        GUI.subWindow(window,Events.style != Graphics.idBuffer,)
-        if Events.style != Graphics.idBuffer:
-            GUI.textTexture(['Wearable templates'], 0, 1, 0, 1, False, window)
-        GUI.textTexture(sensorTypes, -0.9, 1-3*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, 0)
-        window = GUI.windowGroups
-        GUI.subWindow(window,Events.style != Graphics.idBuffer)
-        if Events.style != Graphics.idBuffer:
-            GUI.textTexture(['Wearable groups',
-                             'Save in ' + State.saveGroupFile], 0, 1, 0, 1, False, window)
-        GUI.textTexture(list, -0.9, 1-5*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, len(sensorTypes))
-        window = GUI.windowSensor
-        GUI.subWindow(window,False)
+
+
+        """ display template window """
+        if GUI.selectedWindow == GUI.windowTemplatesId:
+            window = GUI.windowTemplates
+            GUI.subWindow(window,Events.style != Graphics.idBuffer,)
+            if Events.style != Graphics.idBuffer:
+                GUI.textTexture(['Wearable templates'], 0, 0.95, 0, 1, False, window)
+            GUI.textTexture(sensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, 0)
+
 
         """ display selected template """
-        if Events.style != Graphics.idBuffer and GUI.selectedGuiId <= len(Sensors.sensorGraphics) and GUI.selectedGuiId > 0:
-            Sensors.displayTemplate()
-        window = GUI.windowData
-        GUI.subWindow(window,Events.style != Graphics.idBuffer)
+        if GUI.selectedWindow == GUI.windowTemplatesId:
+            window = GUI.windowSensor
+            GUI.subWindow(window,False)
+            if Events.style != Graphics.idBuffer and GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:
+                Sensors.displayTemplate()
 
-        GUI.textTexture(GUI.help, -1, -1, 1, -1, Events.style == Graphics.idBuffer, window, len(sensorTypes) + len(list) + len(GUI.windowList))
-        if Events.style != Graphics.idBuffer:
-            GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile])], 0, 1, 0, 1, False, window)
-            GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
-                            + Cursor.info, 1, -1, -1, -1, False, window)
-            if GUI.selectedGuiId == GUI.lenGui():
-                GUI.textTexture(GUI.helpList, GUI.newGuiPosDir[0], GUI.newGuiPosDir[1], GUI.newGuiPosDir[2], GUI.newGuiPosDir[3], False, window)
-            GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 1, 1, -1, 1, False, window)
+
+        """ display groups window """
+        if GUI.selectedWindow == GUI.windowGroupsId:
+            window = GUI.windowGroups
+            GUI.subWindow(window,Events.style != Graphics.idBuffer)
+            if Events.style != Graphics.idBuffer:
+                GUI.textTexture(['Wearable groups',
+                                 'Save in ' + State.saveGroupFile], 0, 0.95, 0, 1, False, window)
+            GUI.textTexture(list, -0.95, 0.95-6*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, len(sensorTypes))
+            
+
+        """ display data window """
+        if GUI.selectedWindow == GUI.windowDataId:
+            window = GUI.windowData
+            GUI.subWindow(window,Events.style != Graphics.idBuffer)
+            if Events.style != Graphics.idBuffer:
+                GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile])], 0, 0.95, 0, 1, False, window)
+                GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
+                                + Cursor.info, 0.95, -0.95, -1, -1, False, window)
+                GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 0.95, 0.95, -1, 1, False, window)
+
+
+        """ display panel window """
+        window = GUI.windowPannel
+        GUI.subWindow(window,Events.style != Graphics.idBuffer)
+        GUI.textTexture(GUI.windowList, -0.95, 0, 1, 0, Events.style == Graphics.idBuffer, window, len(sensorTypes) + len(list))
+
+
+        """ display help window """
+        if GUI.selectedWindow == GUI.windowHelpId:
+            if Events.style != Graphics.idBuffer:
+                window = GUI.windowHelp
+                GUI.subWindow(window,Events.style != Graphics.idBuffer)
+                GUI.textTexture(GUI.helpList, -0.95,-0.95, 1, -1, False, window)
         
         
 

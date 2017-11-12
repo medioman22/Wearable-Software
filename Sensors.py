@@ -234,14 +234,14 @@ def drawDashed(style):
 def displayTemplate():
     glUseProgram(Shaders.shader)
     """ choose vbo """
-    vboId = sensorGraphics[GUI.selectedGuiId-1][2]
+    vboId = sensorGraphics[GUI.selectedTemplate-1][2]
     vboDraw = Graphics.vboEdges
     """ bind surfaces vbo """
     Graphics.indexPositions[vboId][vboDraw].bind()
     Graphics.vertexPositions[vboId].bind()
     glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
     """ send color to shader """
-    r,g,b,a = sensorGraphics[GUI.selectedGuiId-1][1]
+    r,g,b,a = sensorGraphics[GUI.selectedTemplate-1][1]
     color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
     glUniform4fv(Shaders.setColor_loc, 1, color)
     """ load matrix in shader """
