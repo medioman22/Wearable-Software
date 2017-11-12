@@ -1,12 +1,13 @@
 import os
 
+import Events
 import Graphics
 import GUI
 import StickMan
 import Sensors
 
 pathModels = "States/Models/"
-pathSensors = "States/Sensors/"
+pathGroups = "States/Groups/"
 pathTemplates = "States/Templates/"
 pathUserSettings = "States/UserSettings/"
 pathZoi = "States/Zoi/"
@@ -24,6 +25,30 @@ def importUserSettings():
     GUI.display[0] = int(x)
     GUI.display[1] = int(y)
 
+def renameFile(key):
+    if GUI.guiType(Events.rename) == GUI.guiTemplate:
+        fileName = Sensors.sensorGraphics[Events.rename-1 - GUI.guiOffsetId(GUI.guiTemplate)][0] + extension
+        if key == 'backspace' and len(fileName) >= 5:
+            os.rename(pathTemplates + fileName, pathTemplates + fileName[:-5] + extension)
+            os.rename(pathZoi + fileName, pathZoi + fileName[:-5] + extension)
+        elif key == 'space':
+            key = ' '
+        if Events.caps == True:
+            key = key.upper()
+        if len(key) == 1:
+            os.rename(pathTemplates + fileName, pathTemplates + fileName[:-4] + key + extension)
+            os.rename(pathZoi + fileName, pathZoi + fileName[:-4] + key + extension)
+
+    elif GUI.guiType(Events.rename) == GUI.guiGroup:
+        fileName = sensorFileName[Events.rename-1 - GUI.guiOffsetId(GUI.guiGroup)][0]
+        if key == 'backspace' and len(fileName) >= 5:
+            os.rename(pathGroups + fileName, pathGroups + fileName[:-5] + extension)
+        elif key == 'space':
+            key = ' '
+        if Events.caps == True:
+            key = key.upper()
+        if len(key) == 1:
+            os.rename(pathGroups + fileName, pathGroups + fileName[:-4] + key + extension)
 
 def createList():
     global modelFileName
@@ -31,7 +56,7 @@ def createList():
 
     modelFileName = os.listdir(pathModels)
 
-    listFiles = os.listdir(pathSensors)
+    listFiles = os.listdir(pathGroups)
     sensorFileName = []
     for file in listFiles:
         sensorFileName = sensorFileName + [[file, False]]
@@ -40,7 +65,7 @@ def createList():
     
 def updateTemplateList():
     global sensorFileName
-    listFiles = os.listdir(pathSensors)
+    listFiles = os.listdir(pathGroups)
     tempList = []
     for file in listFiles:
         tempList = tempList + [[file, False]]
@@ -133,7 +158,7 @@ def saveTemplates(template):
 def saveSensors():
     print("save sensor group : {}".format(saveGroupFile))
 
-    file = open(pathSensors + saveGroupFile, 'w')
+    file = open(pathGroups + saveGroupFile, 'w')
 
     for sensor in Sensors.virtuSens:
         file.write(sensor.attach)
@@ -155,7 +180,7 @@ def loadSensors():
         if file[1] == True:
             print("load sensor group : {}".format(file[0]))
 
-            file = open(pathSensors + file[0], 'r')
+            file = open(pathGroups + file[0], 'r')
     
             while True:
                 line = file.readline() # read sensor data

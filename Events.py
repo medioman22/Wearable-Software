@@ -21,6 +21,8 @@ lastTime = 0 # for time between frames
 """ mouse controls """
 mouse_click = False
 setLookAt = False
+rename = 0
+caps = False
 
 """ camera controls """
 leftRight_acceleration = 0.
@@ -75,6 +77,8 @@ def manage():
 
     global mouse_click
     global setLookAt
+    global rename
+    global caps
 
     global leftRight_acceleration
     global left_keyHold
@@ -151,8 +155,10 @@ def manage():
         """ mouse controller """
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left mouse button
             mouse_click = True
+            rename = 0
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right mouse button
             setLookAt = True
+            rename = 0
 
         """ Camera controller """
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
@@ -196,107 +202,120 @@ def manage():
         if event.type == pygame.KEYUP and event.key == pygame.K_PAGEDOWN:
             back_keyHold = False
         
-        """ Stickman controller """ # WARNING : pygame uses qwerty by default !
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-            q_keyHold = True
-            pivot[0] = pivotSpeed
-        elif event.type == pygame.KEYUP and event.key == pygame.K_q:
-            q_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
-            w_keyHold = True
-            pivot[0] = -pivotSpeed
-        elif event.type == pygame.KEYUP and event.key == pygame.K_w:
-            w_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-            e_keyHold = True
-            pivot[1] = pivotSpeed
-        elif event.type == pygame.KEYUP and event.key == pygame.K_e:
-            e_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-            r_keyHold = True
-            pivot[1] = -pivotSpeed
-        elif event.type == pygame.KEYUP and event.key == pygame.K_r:
-            r_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_t:
-            t_keyHold = True
-            pivot[2] = pivotSpeed
-        elif event.type == pygame.KEYUP and event.key == pygame.K_t:
-            t_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
-            y_keyHold = True
-            pivot[2] = -pivotSpeed
-        elif event.type == pygame.KEYUP and event.key == pygame.K_y:
-            y_keyHold = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_RSHIFT:
+            caps = True
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_LSHIFT:
+            caps = True
+        if event.type == pygame.KEYUP and event.key == pygame.K_RSHIFT:
+            caps = False
+        if event.type == pygame.KEYUP and event.key == pygame.K_LSHIFT:
+            caps = False
 
-        if event.type == pygame.KEYUP and event.key == pygame.K_z:
-            z_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-            z_keyHold = True
-            incSens[0] = 0.025
-        if event.type == pygame.KEYUP and event.key == pygame.K_x:
-            x_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-            x_keyHold = True
-            incSens[0] = -0.025
-        if event.type == pygame.KEYUP and event.key == pygame.K_c:
-            c_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-            c_keyHold = True
-            incSens[1] = 5
-        if event.type == pygame.KEYUP and event.key == pygame.K_v:
-            v_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
-            v_keyHold = True
-            incSens[1] = -5
-        if event.type == pygame.KEYUP and event.key == pygame.K_b:
-            b_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
-            b_keyHold = True
-            incSens[2] = 5
-        if event.type == pygame.KEYUP and event.key == pygame.K_n:
-            n_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
-            n_keyHold = True
-            incSens[2] = -5
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
-            resetSens = True
+        if rename != 0:
+            if event.type == pygame.KEYDOWN:
+                State.renameFile(pygame.key.name(event.key))
+        else:
+            """ Stickman controller """ # WARNING : pygame uses qwerty by default !
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                q_keyHold = True
+                pivot[0] = pivotSpeed
+            elif event.type == pygame.KEYUP and event.key == pygame.K_q:
+                q_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
+                w_keyHold = True
+                pivot[0] = -pivotSpeed
+            elif event.type == pygame.KEYUP and event.key == pygame.K_w:
+                w_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                e_keyHold = True
+                pivot[1] = pivotSpeed
+            elif event.type == pygame.KEYUP and event.key == pygame.K_e:
+                e_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                r_keyHold = True
+                pivot[1] = -pivotSpeed
+            elif event.type == pygame.KEYUP and event.key == pygame.K_r:
+                r_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_t:
+                t_keyHold = True
+                pivot[2] = pivotSpeed
+            elif event.type == pygame.KEYUP and event.key == pygame.K_t:
+                t_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
+                y_keyHold = True
+                pivot[2] = -pivotSpeed
+            elif event.type == pygame.KEYUP and event.key == pygame.K_y:
+                y_keyHold = False
 
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_u:
-            reset = True
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_i:
-            prevNext = 1
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
-            prevNext = -1
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-            style = (style + 1)%4
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
-            State.saveModel(StickMan.virtuMan)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-            State.loadModel(StickMan.virtuMan)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
-            State.currentModelFile = (State.currentModelFile - 1 + len(State.modelFileName))%len(State.modelFileName)
-            State.loadModel(StickMan.virtuMan)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
-            State.currentModelFile = (State.currentModelFile + 1)%len(State.modelFileName)
-            State.loadModel(StickMan.virtuMan)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-            State.saveSensors()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
-            State.loadSensors()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-            if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
-                Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]-1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
-                State.saveTemplates(Sensors.sensorGraphics[GUI.selectedTemplate-1])
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-            if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
-                Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]+1) % len(Definitions.packagePreprocess)
-                State.saveTemplates(Sensors.sensorGraphics[GUI.selectedTemplate-1])
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
-            deleteSens = True
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
-            rMax += 1
-            if rMax > 6:
-                rMax = -5
+            if event.type == pygame.KEYUP and event.key == pygame.K_z:
+                z_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                z_keyHold = True
+                incSens[0] = 0.025
+            if event.type == pygame.KEYUP and event.key == pygame.K_x:
+                x_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                x_keyHold = True
+                incSens[0] = -0.025
+            if event.type == pygame.KEYUP and event.key == pygame.K_c:
+                c_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+                c_keyHold = True
+                incSens[1] = 5
+            if event.type == pygame.KEYUP and event.key == pygame.K_v:
+                v_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
+                v_keyHold = True
+                incSens[1] = -5
+            if event.type == pygame.KEYUP and event.key == pygame.K_b:
+                b_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+                b_keyHold = True
+                incSens[2] = 5
+            if event.type == pygame.KEYUP and event.key == pygame.K_n:
+                n_keyHold = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+                n_keyHold = True
+                incSens[2] = -5
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+                resetSens = True
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_u:
+                reset = True
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_i:
+                prevNext = 1
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+                prevNext = -1
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                style = (style + 1)%4
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
+                State.saveModel(StickMan.virtuMan)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
+                State.loadModel(StickMan.virtuMan)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                State.currentModelFile = (State.currentModelFile - 1 + len(State.modelFileName))%len(State.modelFileName)
+                State.loadModel(StickMan.virtuMan)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
+                State.currentModelFile = (State.currentModelFile + 1)%len(State.modelFileName)
+                State.loadModel(StickMan.virtuMan)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+                State.saveSensors()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+                State.loadSensors()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+                if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
+                    Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]-1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
+                    State.saveTemplates(Sensors.sensorGraphics[GUI.selectedTemplate-1])
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+                if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
+                    Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]+1) % len(Definitions.packagePreprocess)
+                    State.saveTemplates(Sensors.sensorGraphics[GUI.selectedTemplate-1])
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
+                deleteSens = True
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+                rMax += 1
+                if rMax > 6:
+                    rMax = -5
 
 
     """ Camera update - left / right """

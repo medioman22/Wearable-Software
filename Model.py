@@ -375,10 +375,8 @@ def main():
             if Events.style != Graphics.idBuffer:
                 GUI.textTexture(['Wearable templates'], 0, 0.95, 0, 1, False, window)
             GUI.textTexture(sensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, 0)
-
-
-        """ display selected template """
-        if GUI.selectedWindow == GUI.windowTemplatesId:
+            
+            """ display selected template """
             window = GUI.windowSensor
             GUI.subWindow(window,False)
             if Events.style != Graphics.idBuffer and GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:

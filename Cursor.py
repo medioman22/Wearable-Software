@@ -106,17 +106,18 @@ def mouseManage():
         
     if parent == 2:
         GUI.overGuiId = ID
-        if Events.mouse_click == True:
 
-            # windows
-            if GUI.guiType(GUI.overGuiId) == GUI.guiWindow:
+        # windows
+        if GUI.guiType(GUI.overGuiId) == GUI.guiWindow:
+            if Events.mouse_click == True:
                 if GUI.selectedWindow != ID - GUI.guiOffsetId(GUI.guiWindow):
                     GUI.selectedWindow = ID - GUI.guiOffsetId(GUI.guiWindow)
                 else:
                     GUI.selectedWindow = 0
                
-            # groupes
-            if GUI.guiType(GUI.overGuiId) == GUI.guiGroup:
+        # groupes
+        if GUI.guiType(GUI.overGuiId) == GUI.guiGroup:
+            if Events.mouse_click == True:
                 if State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][1] == False:
                     State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][1] = True
                 else:
@@ -126,14 +127,19 @@ def mouseManage():
                     GUI.selectedGroup = ID
                 else:
                     GUI.selectedGroup = 0
+            elif Events.setLookAt == True:
+                Events.rename = GUI.overGuiId
 
-            # templates
-            if GUI.guiType(GUI.overGuiId) == GUI.guiTemplate:
+        # templates
+        if GUI.guiType(GUI.overGuiId) == GUI.guiTemplate:
+            if Events.mouse_click == True:
                 if GUI.selectedTemplate != ID:
                     GUI.selectedTemplate = ID
                     State.loadZOI(Sensors.sensorGraphics[GUI.selectedTemplate-1])
                 else:
                     State.loadZOI([""])
                     GUI.selectedTemplate = 0
+            elif Events.setLookAt == True:
+                Events.rename = GUI.overGuiId
     else:
         pass

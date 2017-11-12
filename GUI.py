@@ -133,7 +133,6 @@ selectedWindow = 0
 def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = windowScene, guiId = 9999):
     rx = window.tx
     ry = window.ty
-    backgroundColor = (255*window.backgroundColor[0], 255*window.backgroundColor[1], 255*window.backgroundColor[2], 255*window.backgroundColor[3])
     x = x
     dy = ry*0.03
     y = y
@@ -142,9 +141,12 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
 
     font = pygame.font.Font('Fonts/UbuntuMono-R.ttf', 32)
     for txt in text:
+        backgroundColor = (255*window.backgroundColor[0], 255*window.backgroundColor[1], 255*window.backgroundColor[2], 255*window.backgroundColor[3])
         guiId += 1
         if idDraw != True:
             if guiType(guiId) == guiTemplate:
+                if Events.rename == guiId:
+                    backgroundColor = (0, 0, 0, 255)
                 if selectedTemplate == guiId:
                     color = Sensors.sensorGraphics[guiId-1][1]
                 elif overGuiId == guiId:
@@ -153,6 +155,8 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                 else:
                     color = (255,255,255,255)
             elif guiType(guiId) == guiGroup:
+                if Events.rename == guiId:
+                    backgroundColor = (0, 0, 0, 255)
                 if State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][1] == True:
                     color = (0, 255, 0, 255)
                 elif overGuiId == guiId:
