@@ -15,7 +15,7 @@ extension = ".txt"
 currentModelFile = 0
 modelFileName = []
 currentSensorFile = 0
-saveGroupFile = "Default" + extension
+saveGroupFile = ''
 sensorFileName = []
 
 def importUserSettings():
@@ -26,31 +26,59 @@ def importUserSettings():
     GUI.display[1] = int(y)
 
 def renameFile(key):
-    if Events.renameType == GUI.guiTemplate:
-        if key == 'backspace' and len(Events.rename) >= 5:
-            os.rename(pathTemplates + Events.rename, pathTemplates + Events.rename[:-5] + extension)
-            os.rename(pathZoi + Events.rename, pathZoi + Events.rename[:-5] + extension)
-            Events.rename = Events.rename[:-5] + extension
-        elif key == 'space':
-            key = ' '
-        if Events.caps == True:
-            key = key.upper()
-        if len(key) == 1:
-            os.rename(pathTemplates + Events.rename, pathTemplates + Events.rename[:-4] + key + extension)
-            os.rename(pathZoi + Events.rename, pathZoi + Events.rename[:-4] + key + extension)
-            Events.rename = Events.rename[:-4] + key + extension
+    newName = Events.rename
 
-    elif Events.renameType == GUI.guiGroup:
-        if key == 'backspace' and len(Events.rename) >= 5:
-            os.rename(pathGroups + Events.rename, pathGroups + Events.rename[:-5] + extension)
-            Events.rename = Events.rename[:-5] + extension
-        elif key == 'space':
-            key = ' '
-        if Events.caps == True:
-            key = key.upper()
-        if len(key) == 1:
-            os.rename(pathGroups + Events.rename, pathGroups + Events.rename[:-4] + key + extension)
-            Events.rename = Events.rename[:-4] + key + extension
+    # define new name
+    if key == 'backspace' and len(newName) >= 5:
+        newName = newName[:-5] + extension
+    elif key == 'space':
+        key = '_'
+    if Events.caps == True:
+        key = key.upper()
+    if len(key) == 1:
+        newName = newName[:-4] + key + extension
+
+
+    if newName != Events.rename:
+        # rename files
+        if Events.renameType == GUI.guiTemplate:
+            os.rename(pathTemplates + Events.rename, pathTemplates + newName)
+            os.rename(pathZoi + Events.rename, pathZoi + newName)
+            # change sensor name in group files to match with new template name
+            for fileName in sensorFileName:
+                # read file
+                print("read : ",fileName[0])
+                file = open(pathGroups + fileName[0] + extension, 'r')
+                fileData = []
+                while True:
+                    line = file.readline() # read sensor data
+                    if line == "":
+                        break
+                    parent, type, x, t, s = line.split(' ')
+                    if type == Events.rename[:-4]:
+                        print("found : ", type)
+                        type = newName[:-4]
+                    fileData = fileData + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
+                file.close()
+                # rewrite file
+                print("write : ",fileName[0])
+                file = open(pathGroups + fileName[0] + extension, 'w')
+                for sensor in fileData:
+                    file.write(sensor.attach)
+                    file.write(" ")
+                    file.write(sensor.type)
+                    file.write(" ")
+                    file.write(str(sensor.x))
+                    file.write(" ")
+                    file.write(str(sensor.t))
+                    file.write(" ")
+                    file.write(str(sensor.s))
+                    file.write("\n")
+                file.close()
+        elif Events.renameType == GUI.guiGroup:
+            os.rename(pathGroups + Events.rename, pathGroups + newName)
+
+        Events.rename = newName
 
 def createList():
     global modelFileName
@@ -61,7 +89,7 @@ def createList():
     listFiles = os.listdir(pathGroups)
     sensorFileName = []
     for file in listFiles:
-        sensorFileName = sensorFileName + [[file, False]]
+        sensorFileName = sensorFileName + [[file[:-4], False]]
     
     zoiFileName = os.listdir(pathZoi)
     
@@ -70,7 +98,7 @@ def updateTemplateList():
     listFiles = os.listdir(pathGroups)
     tempList = []
     for file in listFiles:
-        tempList = tempList + [[file, False]]
+        tempList = tempList + [[file[:-4], False]]
     for fileName in sensorFileName:
         for i in range(0,len(tempList)):
             if fileName[0] == tempList[i][0]:
@@ -157,10 +185,10 @@ def saveTemplates(template):
 """
     Sensors files
 """
-def saveSensors():
+def saveGroups():
     print("save sensor group : {}".format(saveGroupFile))
 
-    file = open(pathGroups + saveGroupFile, 'w')
+    file = open(pathGroups + saveGroupFile + extension, 'w')
 
     for sensor in Sensors.virtuSens:
         file.write(sensor.attach)
@@ -175,14 +203,14 @@ def saveSensors():
         file.write("\n")
     file.close()
 
-def loadSensors():
+def loadGroups():
     Sensors.virtuSens = []
 
     for file in sensorFileName:
         if file[1] == True:
             print("load sensor group : {}".format(file[0]))
 
-            file = open(pathGroups + file[0], 'r')
+            file = open(pathGroups + file[0] + extension, 'r')
     
             while True:
                 line = file.readline() # read sensor data

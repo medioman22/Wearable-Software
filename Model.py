@@ -157,7 +157,7 @@ def main():
                          Sensors.sensors("Head", "EEG", (0.,180-72,90), color),         #FT10
                          ]"""
     
-    State.loadSensors()
+    State.loadGroups()
 
     """ Create a window """
     pygame.init()
@@ -389,7 +389,7 @@ def main():
             GUI.subWindow(window,Events.style != Graphics.idBuffer)
             if Events.style != Graphics.idBuffer:
                 GUI.textTexture(['Wearable groups',
-                                 'Save in ' + State.saveGroupFile], 0, 0.95, 0, 1, False, window)
+                                 'Save in ~'], 0, 0.95, 0, 1, False, window)
             GUI.textTexture(list, -0.95, 0.95-6*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, len(sensorTypes))
             
 

@@ -155,7 +155,7 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                 else:
                     color = (255,255,255,255)
             elif guiType(guiId) == guiGroup:
-                if Events.rename == State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][0]:
+                if Events.rename == State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][0] + State.extension:
                     backgroundColor = (0, 0, 0, 255)
                 if State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][1] == True:
                     color = (0, 255, 0, 255)
@@ -170,9 +170,13 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                     color = (127, 0, 0,255)
                 else:
                     color = (255,255,255,255)
+            if txt == '':
+                txt = '~'
             textSurface = font.render(txt, True, color, backgroundColor)
         # id buffer
         else:
+            if txt == '':
+                txt = '~'
             textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/lenGui(),0))
 
         ix, iy = textSurface.get_width(), textSurface.get_height()

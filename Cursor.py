@@ -122,13 +122,13 @@ def mouseManage():
                     State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][1] = True
                 else:
                     State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][1] = False
-                State.loadSensors()
+                State.loadGroups()
                 if GUI.selectedGroup != ID:
                     GUI.selectedGroup = ID
                 else:
                     GUI.selectedGroup = 0
             elif Events.setLookAt == True:
-                Events.rename = State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][0]
+                Events.rename = State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][0] + State.extension
                 Events.renameType = GUI.guiGroup
                 print(Events.rename, Events.renameType)
 
@@ -142,6 +142,8 @@ def mouseManage():
                     State.loadZOI([""])
                     GUI.selectedTemplate = 0
             elif Events.setLookAt == True:
+                State.loadZOI([""])
+                GUI.selectedTemplate = 0
                 Events.rename = Sensors.sensorGraphics[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiTemplate)][0] + State.extension
                 Events.renameType = GUI.guiTemplate
                 print(Events.rename, Events.renameType)

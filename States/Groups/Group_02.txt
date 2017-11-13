@@ -3,8 +3,8 @@ Finger_r_2c Pressure 0.0 90.0 0.0
 Finger_r_3c Pressure 0.0 90.0 0.0
 Finger_r_4c Pressure 0.0 90.0 0.0
 Finger_r_5c Pressure 0.0 90.0 0.0
-Finger_l_1c Pressure 0.0 90 0
-Finger_l_2c Pressure 0.0 90 0
-Finger_l_3c Pressure 0.0 90 0
-Finger_l_4c Pressure 0.0 90 0
-Finger_l_5c Pressure 0.0 90 0
+Finger_l_1c Pressure 0.0 90.0 0.0
+Finger_l_2c Pressure 0.0 90.0 0.0
+Finger_l_3c Pressure 0.0 90.0 0.0
+Finger_l_4c Pressure 0.0 90.0 0.0
+Finger_l_5c Pressure 0.0 90.0 0.0

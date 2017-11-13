@@ -302,9 +302,9 @@ def manage():
                 State.currentModelFile = (State.currentModelFile + 1)%len(State.modelFileName)
                 State.loadModel(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-                State.saveSensors()
+                State.saveGroups()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
-                State.loadSensors()
+                State.loadGroups()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                 if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
                     Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]-1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
