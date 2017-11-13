@@ -238,6 +238,7 @@ def main():
         # keep track of loop frequency
         flagStart = time.clock()
 
+        
         """
             Update ZOI & template lists.
             you can edit / add / remove ZOI & template files without closing software (as long as syntax is respected)
@@ -255,6 +256,7 @@ def main():
         Events.manage()
         
         refreshId() # TODO : only when adding/removing sensors
+        
 
 
         """

@@ -73,6 +73,12 @@ def renameFile(key):
                         file.write(str(sensor.s))
                         file.write("\n")
                     file.close()
+                for i in range(0, len(Sensors.sensorGraphics)):
+                    if Sensors.sensorGraphics[i][0] == Events.rename[:-4]:
+                        print(Sensors.sensorGraphics[i][0], Events.rename[:-4])
+                        Sensors.sensorGraphics[i][0] = newName[:-4]
+                        break
+                loadGroups()
             elif Events.renameType == GUI.guiGroup:
                 os.rename(pathGroups + Events.rename, pathGroups + newName)
 
@@ -112,8 +118,8 @@ def updateTemplateList():
         line = file.readline()
         if line == "":
             continue
-        r, g, b, a, shape = line.split(' ')
-        Sensors.sensorGraphics = Sensors.sensorGraphics + [[template[:-len(extension)], (int(r),int(g),int(b),int(a)), int(shape)]]
+        r, g, b, a, shape, scale = line.split(' ')
+        Sensors.sensorGraphics = Sensors.sensorGraphics + [[template[:-len(extension)], (int(r),int(g),int(b),int(a)), int(shape), float(scale)]]
         file.close()
 
 """
@@ -174,6 +180,8 @@ def saveTemplates(template):
     file.write(str(template[1][3]))
     file.write(" ")
     file.write(str(template[2]))
+    file.write(" ")
+    file.write(str(template[3]))
 
     file.close()
 

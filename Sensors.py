@@ -50,15 +50,15 @@ import GUI
 import Shaders
 
 
-sensorGraphics = [  ['EEG',         (255, 0, 0, 255),       Graphics.vboCircle],
-                    ['EMG',         (255, 127, 0, 255),     Graphics.vboHexagon],
-                    ['ECG',         (255, 255, 0, 255),     Graphics.vboCone],
-                    ['IMU',         (127, 255, 0, 255),     Graphics.vboCube],
-                    ['Strain',      (0, 255, 0, 255),       Graphics.vboPyramide],
-                    ['Pressure',    (0, 255, 127, 255),     Graphics.vboPyramide],
-                    ['Marker',      (0, 255, 255, 255),     Graphics.vboPyramide],
-                    ['Eye',         (0, 127, 255, 255),     Graphics.vboSphere],
-                    ['Custom',      (127, 127, 127, 255),   Graphics.vboPyramide]]
+sensorGraphics = [  ['EEG',         (255, 0, 0, 255),       Graphics.vboCircle,     0.01],
+                    ['EMG',         (255, 127, 0, 255),     Graphics.vboHexagon,    0.03],
+                    ['ECG',         (255, 255, 0, 255),     Graphics.vboCone,       0.03],
+                    ['IMU',         (127, 255, 0, 255),     Graphics.vboCube,       0.03],
+                    ['Strain',      (0, 255, 0, 255),       Graphics.vboPyramide,   0.03],
+                    ['Pressure',    (0, 255, 127, 255),     Graphics.vboPyramide,   0.03],
+                    ['Marker',      (0, 255, 255, 255),     Graphics.vboPyramide,   0.03],
+                    ['Eye',         (0, 127, 255, 255),     Graphics.vboSphere,     0.03],
+                    ['Custom',      (127, 127, 127, 255),   Graphics.vboPyramide,   0.03]]
 
 virtuSens = []
 zoiSens = []
@@ -102,10 +102,11 @@ def preprocessSensor(sensor, x, y, z):
     Definitions.modelMatrix.scale(1/x,1/y,1/z)
     Definitions.modelMatrix.rotate(t.o, t.x, t.y, t.z)
     
-    if sensor.type == "EEG":
-        Definitions.modelMatrix.scale(0.01,0.01,0.01)
-    else:
-        Definitions.modelMatrix.scale(0.03,0.03,0.03)
+    for sensorData in sensorGraphics:
+        if sensor.type == sensorData[0]:
+            scale = sensorData[3]
+            break
+    Definitions.modelMatrix.scale(scale, scale, scale)
 
     Definitions.modelMatrix.translate(0.5, 0, 0)
     
