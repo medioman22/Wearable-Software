@@ -26,59 +26,59 @@ def importUserSettings():
     GUI.display[1] = int(y)
 
 def renameFile(key):
-    newName = Events.rename
+    try:
+        newName = Events.rename
 
-    # define new name
-    if key == 'backspace' and len(newName) >= 5:
-        newName = newName[:-5] + extension
-    elif key == 'space':
-        key = '_'
-    if Events.caps == True:
-        key = key.upper()
-    if len(key) == 1:
-        newName = newName[:-4] + key + extension
+        # define new name
+        if key == 'backspace' and len(newName) >= 5:
+            newName = newName[:-5] + extension
+        elif key == 'space':
+            key = '_'
+        if Events.caps == True:
+            key = key.upper()
+        if len(key) == 1:
+            newName = newName[:-4] + key + extension
 
 
-    if newName != Events.rename:
-        # rename files
-        if Events.renameType == GUI.guiTemplate:
-            os.rename(pathTemplates + Events.rename, pathTemplates + newName)
-            os.rename(pathZoi + Events.rename, pathZoi + newName)
-            # change sensor name in group files to match with new template name
-            for fileName in sensorFileName:
-                # read file
-                print("read : ",fileName[0])
-                file = open(pathGroups + fileName[0] + extension, 'r')
-                fileData = []
-                while True:
-                    line = file.readline() # read sensor data
-                    if line == "":
-                        break
-                    parent, type, x, t, s = line.split(' ')
-                    if type == Events.rename[:-4]:
-                        print("found : ", type)
-                        type = newName[:-4]
-                    fileData = fileData + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
-                file.close()
-                # rewrite file
-                print("write : ",fileName[0])
-                file = open(pathGroups + fileName[0] + extension, 'w')
-                for sensor in fileData:
-                    file.write(sensor.attach)
-                    file.write(" ")
-                    file.write(sensor.type)
-                    file.write(" ")
-                    file.write(str(sensor.x))
-                    file.write(" ")
-                    file.write(str(sensor.t))
-                    file.write(" ")
-                    file.write(str(sensor.s))
-                    file.write("\n")
-                file.close()
-        elif Events.renameType == GUI.guiGroup:
-            os.rename(pathGroups + Events.rename, pathGroups + newName)
+        if newName != Events.rename:
+            # rename files
+            if Events.renameType == GUI.guiTemplate:
+                os.rename(pathTemplates + Events.rename, pathTemplates + newName)
+                os.rename(pathZoi + Events.rename, pathZoi + newName)
+                # change sensor name in group files to match with new template name
+                for fileName in sensorFileName:
+                    # read file
+                    file = open(pathGroups + fileName[0] + extension, 'r')
+                    fileData = []
+                    while True:
+                        line = file.readline() # read sensor data
+                        if line == "":
+                            break
+                        parent, type, x, t, s = line.split(' ')
+                        if type == Events.rename[:-4]:
+                            type = newName[:-4]
+                        fileData = fileData + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
+                    file.close()
+                    # rewrite file
+                    file = open(pathGroups + fileName[0] + extension, 'w')
+                    for sensor in fileData:
+                        file.write(sensor.attach)
+                        file.write(" ")
+                        file.write(sensor.type)
+                        file.write(" ")
+                        file.write(str(sensor.x))
+                        file.write(" ")
+                        file.write(str(sensor.t))
+                        file.write(" ")
+                        file.write(str(sensor.s))
+                        file.write("\n")
+                    file.close()
+            elif Events.renameType == GUI.guiGroup:
+                os.rename(pathGroups + Events.rename, pathGroups + newName)
 
-        Events.rename = newName
+            Events.rename = newName
+    except:
+        pass
 
 def createList():
     global modelFileName
@@ -120,8 +120,6 @@ def updateTemplateList():
     Human model files
 """
 def saveModel(entity):
-    print("save model : {}".format(modelFileName[currentModelFile]))
-
     file = open(pathModels + modelFileName[currentModelFile], 'w')
 
     for part in entity.parts:
@@ -140,8 +138,6 @@ def saveModel(entity):
 
     
 def loadModel(entity):
-    print("load model : {}".format(modelFileName[currentModelFile]))
-
     file = open(pathModels + modelFileName[currentModelFile], 'r')
 
     while True:
@@ -156,7 +152,6 @@ def loadModel(entity):
         line = file.readline() # read part orientations
         twist = map(float, line.split())
         for part in entity.parts:
-            #print(part[StickMan.Data_id])
             if part[StickMan.Data_id] == ID:
                 part[StickMan.Data_angle] = angle
                 part[StickMan.Data_swing] = swing
@@ -186,8 +181,6 @@ def saveTemplates(template):
     Sensors files
 """
 def saveGroups():
-    print("save sensor group : {}".format(saveGroupFile))
-
     file = open(pathGroups + saveGroupFile + extension, 'w')
 
     for sensor in Sensors.virtuSens:
@@ -208,8 +201,6 @@ def loadGroups():
 
     for file in sensorFileName:
         if file[1] == True:
-            print("load sensor group : {}".format(file[0]))
-
             file = open(pathGroups + file[0] + extension, 'r')
     
             while True:
@@ -224,27 +215,12 @@ def loadGroups():
 """
     Zones of interest files
 """
-#def saveZoi(sensor):
-#    print("save sensor group : {}".format(sensorFileName[currentSensorFile][0]))
-#
-#    file = open(pathZoi + sensor.type + extension, 'w')
-#    
-#    file.write(str(sensor.color[0]))
-#    file.write(" ")
-#    file.write(str(sensor.color[1]))
-#    file.write(" ")
-#    file.write(str(sensor.color[2]))
-#    file.write(" 255 ")
-#    file.write(sensor.type) #string here, int when read. fix it.
-#    file.close()
 
 def loadZOI(zoiFileName):
     Sensors.zoiSens = []
 
     if zoiFileName[0] == "":
         return
-
-    print("load zoi : {}".format(zoiFileName[0]))
 
     file = open(pathZoi + zoiFileName[0] + '.txt', 'r')
     

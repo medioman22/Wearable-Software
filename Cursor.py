@@ -130,7 +130,6 @@ def mouseManage():
             elif Events.setLookAt == True:
                 Events.rename = State.sensorFileName[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiGroup)][0] + State.extension
                 Events.renameType = GUI.guiGroup
-                print(Events.rename, Events.renameType)
 
         # templates
         if GUI.guiType(GUI.overGuiId) == GUI.guiTemplate:
@@ -146,6 +145,5 @@ def mouseManage():
                 GUI.selectedTemplate = 0
                 Events.rename = Sensors.sensorGraphics[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiTemplate)][0] + State.extension
                 Events.renameType = GUI.guiTemplate
-                print(Events.rename, Events.renameType)
     else:
         pass
