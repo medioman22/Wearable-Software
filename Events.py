@@ -21,7 +21,8 @@ lastTime = 0 # for time between frames
 """ mouse controls """
 mouse_click = False
 setLookAt = False
-rename = 0
+rename = None
+renameType = 0
 caps = False
 
 """ camera controls """
@@ -155,10 +156,12 @@ def manage():
         """ mouse controller """
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left mouse button
             mouse_click = True
-            rename = 0
+            rename = None
+            renameType = 0
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right mouse button
             setLookAt = True
-            rename = 0
+            rename = None
+            renameType = 0
 
         """ Camera controller """
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
@@ -211,7 +214,7 @@ def manage():
         if event.type == pygame.KEYUP and event.key == pygame.K_LSHIFT:
             caps = False
 
-        if rename != 0:
+        if rename != None:
             if event.type == pygame.KEYDOWN:
                 State.renameFile(pygame.key.name(event.key))
         else:

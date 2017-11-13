@@ -26,29 +26,31 @@ def importUserSettings():
     GUI.display[1] = int(y)
 
 def renameFile(key):
-    if GUI.guiType(Events.rename) == GUI.guiTemplate:
-        fileName = Sensors.sensorGraphics[Events.rename-1 - GUI.guiOffsetId(GUI.guiTemplate)][0] + extension
-        if key == 'backspace' and len(fileName) >= 5:
-            os.rename(pathTemplates + fileName, pathTemplates + fileName[:-5] + extension)
-            os.rename(pathZoi + fileName, pathZoi + fileName[:-5] + extension)
+    if Events.renameType == GUI.guiTemplate:
+        if key == 'backspace' and len(Events.rename) >= 5:
+            os.rename(pathTemplates + Events.rename, pathTemplates + Events.rename[:-5] + extension)
+            os.rename(pathZoi + Events.rename, pathZoi + Events.rename[:-5] + extension)
+            Events.rename = Events.rename[:-5] + extension
         elif key == 'space':
             key = ' '
         if Events.caps == True:
             key = key.upper()
         if len(key) == 1:
-            os.rename(pathTemplates + fileName, pathTemplates + fileName[:-4] + key + extension)
-            os.rename(pathZoi + fileName, pathZoi + fileName[:-4] + key + extension)
+            os.rename(pathTemplates + Events.rename, pathTemplates + Events.rename[:-4] + key + extension)
+            os.rename(pathZoi + Events.rename, pathZoi + Events.rename[:-4] + key + extension)
+            Events.rename = Events.rename[:-4] + key + extension
 
-    elif GUI.guiType(Events.rename) == GUI.guiGroup:
-        fileName = sensorFileName[Events.rename-1 - GUI.guiOffsetId(GUI.guiGroup)][0]
-        if key == 'backspace' and len(fileName) >= 5:
-            os.rename(pathGroups + fileName, pathGroups + fileName[:-5] + extension)
+    elif Events.renameType == GUI.guiGroup:
+        if key == 'backspace' and len(Events.rename) >= 5:
+            os.rename(pathGroups + Events.rename, pathGroups + Events.rename[:-5] + extension)
+            Events.rename = Events.rename[:-5] + extension
         elif key == 'space':
             key = ' '
         if Events.caps == True:
             key = key.upper()
         if len(key) == 1:
-            os.rename(pathGroups + fileName, pathGroups + fileName[:-4] + key + extension)
+            os.rename(pathGroups + Events.rename, pathGroups + Events.rename[:-4] + key + extension)
+            Events.rename = Events.rename[:-4] + key + extension
 
 def createList():
     global modelFileName

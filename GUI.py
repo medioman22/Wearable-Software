@@ -145,7 +145,7 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
         guiId += 1
         if idDraw != True:
             if guiType(guiId) == guiTemplate:
-                if Events.rename == guiId:
+                if Events.rename == Sensors.sensorGraphics[guiId-1][0] + State.extension:
                     backgroundColor = (0, 0, 0, 255)
                 if selectedTemplate == guiId:
                     color = Sensors.sensorGraphics[guiId-1][1]
@@ -155,7 +155,7 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                 else:
                     color = (255,255,255,255)
             elif guiType(guiId) == guiGroup:
-                if Events.rename == guiId:
+                if Events.rename == State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][0]:
                     backgroundColor = (0, 0, 0, 255)
                 if State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][1] == True:
                     color = (0, 255, 0, 255)
