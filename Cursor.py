@@ -35,7 +35,7 @@ def mouseManage():
         ID = color[0][0][0]*(len(Muscles.muscles))
     elif color[0][0][0] != 0: # RED channel for parts ID
         parent = 0
-        ID = color[0][0][0]*(len(StickMan.parts)-1)
+        ID = color[0][0][0]*(len(StickMan.parts))
     elif color[0][0][1] != 0: # GREEN channel for sensors ID
         parent = 1
         ID = color[0][0][1]*Sensors.countID
@@ -49,7 +49,7 @@ def mouseManage():
         ID = int(ID + 0.5)
     else:
         ID = int(ID)
-    
+    print(ID)
     if Events.setLookAt == True:
         if parent == 0 or parent == -1:
             StickMan.lookingAtID = ID
@@ -65,19 +65,19 @@ def mouseManage():
             if GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:
                 color = Sensors.sensorGraphics[GUI.selectedTemplate-1][1]
                 color = (color[0]/255., color[1]/255., color[2]/255.)
-                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.parts[ID][StickMan.Data_id], Sensors.sensorGraphics[GUI.selectedTemplate-1][0], (0.,90,90), color)]
+                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.parts[ID-1][StickMan.Data_id], Sensors.sensorGraphics[GUI.selectedTemplate-1][0], (0.,90,90), color)]
             # select limb
             else:
                 Select = True
                 for part in StickMan.selectedParts:
-                    if part == StickMan.parts[ID][StickMan.Data_id]:
+                    if part == StickMan.parts[ID-1][StickMan.Data_id]:
                         Select = False
                         StickMan.selectedParts.remove(part)
                         break
                 if Select == True:
-                    StickMan.selectedParts += [StickMan.parts[ID][StickMan.Data_id],]
+                    StickMan.selectedParts += [StickMan.parts[ID-1][StickMan.Data_id],]
 
-        name = ' (' + StickMan.parts[ID][StickMan.Data_id] + ')'
+        name = ' (' + StickMan.parts[ID-1][StickMan.Data_id] + ')'
     elif parent == 1:
         Sensors.overSensId = ID
         if Events.mouse_click == True:

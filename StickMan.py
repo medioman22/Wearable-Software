@@ -59,16 +59,16 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
     Definitions.modelMatrix.translate(dx,dy,dz)
     Definitions.modelMatrix.scale(x,y,z)
     """ store transformation in package """
-    if parts[ID][Data_id] == "Head":
+    if parts[ID-1][Data_id] == "Head":
         Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
     else:
         Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
 
     """ preprocess muscles attachment points """
     for i in range(0,len(Muscles.muscles)):
-        if Muscles.muscles[i][Muscles.A][Muscles.Attach_tag] == parts[ID][Data_id]:
+        if Muscles.muscles[i][Muscles.A][Muscles.Attach_tag] == parts[ID-1][Data_id]:
             Muscles.muscles[i][Muscles.A][Muscles.Attach_world] = np.dot(np.array([Muscles.muscles[i][Muscles.A][Muscles.Attach_local]]), Definitions.modelMatrix.peek())
-        if Muscles.muscles[i][Muscles.B][Muscles.Attach_tag] == parts[ID][Data_id]:
+        if Muscles.muscles[i][Muscles.B][Muscles.Attach_tag] == parts[ID-1][Data_id]:
             Muscles.muscles[i][Muscles.B][Muscles.Attach_world] = np.dot(np.array([Muscles.muscles[i][Muscles.B][Muscles.Attach_local]]), Definitions.modelMatrix.peek())
 
 
@@ -91,7 +91,7 @@ def drawBodySurface(style):
             glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         """ choose color """
         if style == Graphics.idBuffer:
-            i = (pack[Definitions.packID])/float(len(parts)-1)
+            i = (pack[Definitions.packID])/float(len(parts))
             color = np.array([i,0.,0.,1.], dtype = np.float32)
         elif pack[Definitions.selected] == True:
             color = np.array([0.,0.,0.5,0.3], dtype = np.float32)
@@ -168,9 +168,6 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
         if selectedPart == entity.parts[current_part][Data_id]:
             partIsSelected = True
             break
-        if selectedPart == 'Wrist' and entity.parts[current_part][Data_id] == "Origin":
-            partIsSelected = True
-            break
 
     """ default orientation of part """
     l = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, entity.parts[current_part][Data_angleRepos][0], entity.parts[current_part][Data_angleRepos][1], entity.parts[current_part][Data_angleRepos][2])))
@@ -228,7 +225,7 @@ def stick(entity = characteristics(), offset = (0,0,0), rotation = (0,0,0,0)):
     dx = 0.5*entity.size*entity.parts[current_part][Data_dimensions][0]
     dy = 0
     dz = 0
-    preprocessPart(x,y,z,dx,dy,dz,partIsSelected, part)
+    preprocessPart(x,y,z,dx,dy,dz,partIsSelected, part + 1) #hack to change someday (+1)
 
     """ preprocess sensors """
     for sensor in Sensors.virtuSens + Sensors.zoiSens:
@@ -273,20 +270,19 @@ Data_swing = 6
 Data_angle = 7
 Data_layer = 8
 parts = [
-    ["Origin",          [0, 0, 0],          [0., 0., 0.],                 [180, -180, 180, -180, 180, -180],   [0, 0, 90],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          0],
-    ["Wrist",           [0, 0, 0],          [0.191, 0.15, 0.05],          [0, 0, 0, 0, 0, 0],                  [0, 0, 180],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          1],
-    ["Upp_leg_r",       [0, 0.075, 0],      [0.195, 0.08, 0.08],          [45, -45, 90, -60, 45, -30],         [0, -90, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
-    ["Low_leg_r",       [0, 0, 0],          [0.246, 0.08, 0.08],          [45, -45, 150, 0, 0, 0],             [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
-    ["Feet_r",          [0, 0, 0],          [0.0882, 0.0588, 0.02],       [5, -15, 60, -15, 0, 0],             [0, -90, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
-    ["Upp_leg_l",       [0, -0.075, 0],     [0.195, 0.08, 0.08],          [45, -45, 90, -60, 30, -45],         [0, -90, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
-    ["Low_leg_l",       [0, 0, 0],          [0.246, 0.08, 0.08],          [45, -45, 150, 0, 0, 0],             [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
-    ["Feet_l",          [0, 0, 0],          [0.0882, 0.0588, 0.02],       [15, -5, 60, -15, 0, 0],             [0, -90, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
-    ["Torse",           [0, 0, 0],          [0.169, 0.15, 0.05],          [15, -15, 30, -60, 45, -45],         [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          1],
+    ["Wrist",           [0, 0, 0],          [0.191, 0.2, 0.1],            [360, -360, 360, -360, 360, -360],   [0, 0, -90],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          0],
+    ["Upp_leg_r",       [0, 0.075, 0],      [0.195, 0.08, 0.08],          [45, -45, 90, -60, 45, -30],         [0, -90, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          1],
+    ["Low_leg_r",       [0, 0, 0],          [0.246, 0.08, 0.08],          [45, -45, 150, 0, 0, 0],             [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
+    ["Feet_r",          [0, 0, 0],          [0.13, 0.0588, 0.02],         [5, -15, 60, -15, 0, 0],             [0, -90, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Upp_leg_l",       [0, -0.075, 0],     [0.195, 0.08, 0.08],          [45, -45, 90, -60, 30, -45],         [0, -90, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          1],
+    ["Low_leg_l",       [0, 0, 0],          [0.246, 0.08, 0.08],          [45, -45, 150, 0, 0, 0],             [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
+    ["Feet_l",          [0, 0, 0],          [0.13, 0.0588, 0.02],         [15, -5, 60, -15, 0, 0],             [0, -90, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Torse",           [-0.191, 0, 0],     [0.169, 0.2, 0.1],            [15, -15, 30, -60, 45, -45],         [0, 0, 180],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          1],
     ["Neck",            [0, 0, 0],          [0.052, 0.03, 0.03],          [0, 0, 15, -60, 30, -30],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
     ["Head",            [0, 0, 0],          [0.13, 0.08, 0.08],           [60, -60, 30, -30, 15, -15],         [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
-    ["Shoulder_r",      [0, 0, 0],          [0.106, 0.04, 0.04],          [0, 0, 15, -15, 15, -60],            [0, 0, 90],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
-    ["Arm_r",           [0, 0, 0],          [0.136, 0.04, 0.04],          [90, -90, 60, -60, 90, -45],         [-90, 0, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
-    ["Forearm_r",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, 0, 0, -150],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
+    ["Shoulder_r",      [0, 0, 0],          [0.106, 0.05, 0.05],          [0, 0, 15, -15, 15, -60],            [0, 0, 90],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
+    ["Arm_r",           [0, 0, 0],          [0.136, 0.05, 0.05],          [90, -90, 60, -60, 90, -45],         [-90, 0, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Forearm_r",       [0, 0, 0],          [0.146, 0.05, 0.05],          [90, -90, 0, 0, 0, -150],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
     ["Hand_r",          [0, 0, 0],          [0.0588, 0.06, 0.02],         [0, 0, 90, -90, 60, -15],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          5],
     ["Finger_r_1a",     [-0.04, -0.03, 0],  [fi_a, 0.01, 0.01],           [0, 0, 45, -60, 30, -30],            [0, 0, -30],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          6],
     ["Finger_r_1b",     [0, 0, 0],          [fi_b, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [-90, 0, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          7],
@@ -303,9 +299,9 @@ parts = [
     ["Finger_r_5a",     [0, 0.03, 0],       [fi_a, 0.01, 0.01],           [0, 0, 45, -90, 25, -25],            [0, 0, 15],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          6],
     ["Finger_r_5b",     [0, 0, 0],          [fi_b, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          7],
     ["Finger_r_5c",     [0, 0, 0],          [fi_c, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          8],
-    ["Shoulder_l",      [0, 0, 0],          [0.106, 0.04, 0.04],          [0, 0, 15, -15, 60, -15],            [0, 0, -90],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
-    ["Arm_l",           [0, 0, 0],          [0.136, 0.04, 0.04],          [90, -90, 60, -60, 45, -90],         [90, 0, 0],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
-    ["Forearm_l",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, 0, 150, 0],             [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
+    ["Shoulder_l",      [0, 0, 0],          [0.106, 0.05, 0.05],          [0, 0, 15, -15, 60, -15],            [0, 0, -90],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
+    ["Arm_l",           [0, 0, 0],          [0.136, 0.05, 0.05],          [90, -90, 60, -60, 45, -90],         [90, 0, 0],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
+    ["Forearm_l",       [0, 0, 0],          [0.146, 0.05, 0.05],          [90, -90, 0, 0, 150, 0],             [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
     ["Hand_l",          [0, 0, 0],          [0.0588, 0.06, 0.02],         [0, 0, 90, -90, 15, -60],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          5],
     ["Finger_l_1a",     [-0.04, 0.03, 0],   [fi_a, 0.01, 0.01],           [0, 0, 45, -60, 30, -30],            [0, 0, 30],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          6],
     ["Finger_l_1b",     [0, 0, 0],          [fi_b, 0.01, 0.01],           [0, 0, 0, -90, 0, 0],                [90, 0, 0],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          7],
