@@ -5,6 +5,7 @@ import numpy as np
 
 import Definitions
 import Graphics
+import Sensors
 import Shaders
 
 def preprocessMuscle():
@@ -29,6 +30,16 @@ def preprocessMuscle():
         Definitions.modelMatrix.scale(scale,0.03,0.03)
         
         muscles[i][modelMatrix] = Definitions.modelMatrix.peek()
+
+        
+        for sensor in Sensors.virtuSens + Sensors.zoiSens:
+            if sensor.attach == muscles[i][Tag]:
+                sensor.h = 0.6
+                if sensor.type == 'Eye':
+                    sensor.h = 0.4
+                if sensor.tag == 'Zoi':
+                    sensor.h = 0.55
+                Sensors.preprocessSensor(sensor, scale, 0.03, 0.03)
         Definitions.modelMatrix.pop()
 
 OverMuscId = 0
@@ -56,12 +67,11 @@ def drawMuscleSurface(style):
             j = (i+1)/float(len(muscles))
             color = np.array([j,j,j,1.], dtype = np.float32)
         elif i+1 == SelectedMuscId:
-            color = np.array([0.5,0,0.5,0.3], dtype = np.float32)
+            color = np.array([0.5,0,0.,0.3], dtype = np.float32)
         elif i+1 == OverMuscId:
-            color = np.array([1,0,1,0.3], dtype = np.float32)
+            color = np.array([1,0,0,0.3], dtype = np.float32)
         else:
-            r,g,b,a = [255,182,193, 75]
-            color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
+            color = np.array([1.,0.7,0.7,0.3], dtype = np.float32)
 
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)
@@ -94,8 +104,15 @@ def drawMuscleEdge(style):
         glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
 
         """ choose color """
-        r,g,b,a = [127, 127, 127, 75]
-        color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
+        if style == Graphics.opaque:
+            color = np.array([0.5,0.5,0.5,1.], dtype = np.float32)
+        elif style == Graphics.blending:
+            if i+1 == SelectedMuscId:
+                color = np.array([0.5,0.,0.,0.3], dtype = np.float32)
+            elif i+1 == OverMuscId:
+                color = np.array([1.,0.,0.,0.3], dtype = np.float32)
+            else:
+                color = np.array([0.5,0.7,0.7,0.3], dtype = np.float32)
 
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)

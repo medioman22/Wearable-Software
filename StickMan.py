@@ -61,8 +61,6 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
     """ store transformation in package """
     if parts[ID][Data_id] == "Head":
         Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
-    elif parts[ID][Data_id] == "Hat":
-        Definitions.packagePreprocess[Graphics.vboCone] = Definitions.packagePreprocess[Graphics.vboCone] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
     else:
         Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
 
@@ -286,7 +284,6 @@ parts = [
     ["Torse",           [0, 0, 0],          [0.169, 0.15, 0.05],          [15, -15, 30, -60, 45, -45],         [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          1],
     ["Neck",            [0, 0, 0],          [0.052, 0.03, 0.03],          [0, 0, 15, -60, 30, -30],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
     ["Head",            [0, 0, 0],          [0.13, 0.08, 0.08],           [60, -60, 30, -30, 15, -15],         [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
-    #["Hat",             [-0.06, 0, 0],      [0.07, 0.3, 0.3],             [0, 0, 0, 0, 0, 0],                  [0, 0, 0],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],
     ["Shoulder_r",      [0, 0, 0],          [0.106, 0.04, 0.04],          [0, 0, 15, -15, 15, -60],            [0, 0, 90],         [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          2],
     ["Arm_r",           [0, 0, 0],          [0.136, 0.04, 0.04],          [90, -90, 60, -60, 90, -45],         [-90, 0, 0],        [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          3],
     ["Forearm_r",       [0, 0, 0],          [0.146, 0.04, 0.04],          [90, -90, 0, 0, 0, -150],            [0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          [1, 0, 0, 0],          4],

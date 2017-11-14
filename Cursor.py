@@ -153,9 +153,16 @@ def mouseManage():
     if parent == 3:
         Muscles.OverMuscId = ID
         if Events.mouse_click == True:
-            if Muscles.SelectedMuscId != ID:
-                Muscles.SelectedMuscId = ID
+            # place sensor on body
+            if GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:
+                color = Sensors.sensorGraphics[GUI.selectedTemplate-1][1]
+                color = (color[0]/255., color[1]/255., color[2]/255.)
+                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(Muscles.muscles[Muscles.OverMuscId-1][Muscles.Tag], Sensors.sensorGraphics[GUI.selectedTemplate-1][0], (0.,90,90), color)]
+            # select limb
             else:
-                Muscles.SelectedMuscId = 0
+                if Muscles.SelectedMuscId != ID:
+                    Muscles.SelectedMuscId = ID
+                else:
+                    Muscles.SelectedMuscId = 0
     else:
         pass
