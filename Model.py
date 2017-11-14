@@ -46,10 +46,6 @@ def refreshId():
         #TODO : do it with body & GUI as well, change ID buffer also ?
 
 def main():
-    v1 = Definitions.vector4D((0, 1, 0, 0))
-    v2 = Definitions.vector4D((0, 0, 1, 0))
-    v = Definitions.vector4D.AngleAxisBetween2Vec(v1,v2)
-    v.values()
     """ Create list of models """
     State.createList()
     State.updateTemplateList()
@@ -313,7 +309,7 @@ def main():
         Graphics.modelView(Graphics.opaque)
         StickMan.drawBodySurface(Graphics.idBuffer)
         Sensors.drawSensor(Graphics.idBuffer)
-        Muscles.drawMuscle(Graphics.idBuffer)
+        Muscles.drawMuscleSurface(Graphics.idBuffer)
 
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
         if GUI.selectedWindow == GUI.windowTemplatesId:
@@ -364,7 +360,8 @@ def main():
 
         # draw muscles
         Graphics.modelView(Events.style)
-        Muscles.drawMuscle(Events.style)
+        Muscles.drawMuscleSurface(Events.style)
+        Muscles.drawMuscleEdge(Events.style)
 
         # draw saturation lines
         Graphics.modelView(Graphics.opaque)
