@@ -3,9 +3,10 @@ import numpy as np
 import math
 
 import Cursor
+import Definitions
 import Events
 import Graphics
-import Definitions
+import Muscles
 import Sensors
 import Shaders
 
@@ -64,6 +65,13 @@ def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
         Definitions.packagePreprocess[Graphics.vboCone] = Definitions.packagePreprocess[Graphics.vboCone] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
     else:
         Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
+
+    """ preprocess muscles attachment points """
+    for i in range(0,len(Muscles.muscles)):
+        if Muscles.muscles[i][Muscles.A][Muscles.Attach_tag] == parts[ID][Data_id]:
+            Muscles.muscles[i][Muscles.A][Muscles.Attach_world] = np.dot(np.array([Muscles.muscles[i][Muscles.A][Muscles.Attach_local]]), Definitions.modelMatrix.peek())
+        if Muscles.muscles[i][Muscles.B][Muscles.Attach_tag] == parts[ID][Data_id]:
+            Muscles.muscles[i][Muscles.B][Muscles.Attach_world] = np.dot(np.array([Muscles.muscles[i][Muscles.B][Muscles.Attach_local]]), Definitions.modelMatrix.peek())
 
 
 

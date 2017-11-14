@@ -24,6 +24,7 @@ import Events
 import Graphics
 import Ground
 import GUI
+import Muscles
 import Saturations
 import Sensors
 import Shaders
@@ -45,6 +46,10 @@ def refreshId():
         #TODO : do it with body & GUI as well, change ID buffer also ?
 
 def main():
+    v1 = Definitions.vector4D((0, 1, 0, 0))
+    v2 = Definitions.vector4D((0, 0, 1, 0))
+    v = Definitions.vector4D.AngleAxisBetween2Vec(v1,v2)
+    v.values()
     """ Create list of models """
     State.createList()
     State.updateTemplateList()
@@ -355,6 +360,10 @@ def main():
         StickMan.drawBodySurface(Events.style)
         StickMan.drawBodyEdge(Events.style)
 
+        # draw muscles
+        Graphics.modelView(Events.style)
+        Muscles.drawMuscle(Events.style)
+
         # draw saturation lines
         Graphics.modelView(Graphics.opaque)
         Saturations.drawSaturationLines()
@@ -383,6 +392,8 @@ def main():
             GUI.subWindow(window,False)
             if Events.style != Graphics.idBuffer and GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:
                 Sensors.displayTemplate()
+                GUI.textTexture(['Color : ' + str(Sensors.sensorGraphics[GUI.selectedTemplate-1][1]),
+                                 'Scale : ' + str(Sensors.sensorGraphics[GUI.selectedTemplate-1][3])], 0.95, -0.95, -1, -1, False, window)
 
 
         """ display groups window """

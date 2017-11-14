@@ -82,7 +82,7 @@ def resize():
     windowGroups = subwindow(display[1],0,int(0.6*display[1]),int(0.95*display[1]),1/0.6,1/0.95,border,(1,0,0,1),(0.5,0.25,0.25,1))
     windowPannel = subwindow(display[1],int(0.95*display[1]),int(0.6*display[1]),int(0.05*display[1]),1/0.6,1/0.05,border,(0,0,1,1),(0.25,0.25,0.5,1))
     windowData = subwindow(display[1],int(0.35*display[1]),int(0.6*display[1]),int(0.6*display[1]),1/0.6,1/0.6,border,(1,1,0,1),(0.5,0.5,0.25,1))
-    windowSensor = subwindow(int(1.2*display[1]),int(0.55*display[1]),int(0.4*display[1]),int(0.4*display[1]),1/0.4,1/0.4,border,(0,1,0,1),(1,1,1,1))
+    windowSensor = subwindow(int(1.2*display[1]),int(0.55*display[1]),int(0.4*display[1]),int(0.4*display[1]),1/0.4,1/0.4,border,(0,1,0,1),(0.25,0.5,0.25,1))
     windowHelp = subwindow(display[1],int(0.35*display[1]),int(0.6*display[1]),int(0.6*display[1]),1.8,1.8,border,(1,1,1,1),(0,0,0,1))
 
 windowHelpId = 1

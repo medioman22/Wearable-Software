@@ -39,7 +39,6 @@ class vector4D(object):
     def QuatNorm(self):
         """ normalize quaternion """
         norm = math.sqrt(self.o*self.o + self.x*self.x + self.y*self.y + self.z*self.z)
-        #print("norm : {}".format(norm))
         if norm > 0.0001:
             self.o /= norm
             self.x /= norm
@@ -96,6 +95,31 @@ class vector4D(object):
         result = vector4D.QuatProd(vector4D.QuatProd(q,v),vector4D.QuatConj(q))
         return result
 
+    def VecDot(v1, v2):
+        """ vector dot product """
+        result = v1.x*v2.x + v1.y*v2.y + v1.z*v2.z
+        return result
+    
+    def VecCross(v1, v2):
+        """ vector dot product """
+        result = vector4D()
+        result.o = 0
+        result.x = v1.y*v2.z - v1.z*v2.y
+        result.y = v1.z*v2.x - v1.x*v2.z
+        result.z = v1.x*v2.y - v1.y*v2.x
+        return result
+
+    def AngleAxisBetween2Vec(v1, v2):
+        v1.QuatNorm()
+        v2.QuatNorm()
+        result = vector4D()
+        angle = 180/math.pi*math.acos(vector4D.VecDot(v1, v2))
+        axis = vector4D.VecCross(v1, v2)
+        result.o = angle
+        result.x = axis.x
+        result.y = axis.y
+        result.z = axis.z
+        return result
 
     def Vec2Quat(self, Conv2Rad = True):
         """ convert vector to quaternion """
@@ -170,70 +194,6 @@ class vector4D(object):
             result.y *= 180./math.pi
             result.z *= 180./math.pi
         return result
-
-
-    #def QuatSat(self, saturation = (0, 0, 0, 0, 0, 0)):
-    #    """ apply angle constraints """
-    #    if math.fabs(self.o) > 0.0001:
-    #        """ isolate x rotation """
-    #        Q = self
-    #        result = Q
-    #        Dx = 1./math.sqrt(Q.o*Q.o + Q.x*Q.x)
-    #        Qx = vector4D((Q.o*Dx, Q.x*Dx, 0, 0))
-    #        if Qx.x < 0:
-    #            Qx = vector4D.QuatFlip(Qx)
-    #        """ determinate angle of rotation """
-    #        Vx = vector4D.Quat2Vec(Qx)
-    #        if Vx.o > 180:
-    #            Vx.o -= 360
-    #        """ apply constraint to x """
-    #        if Vx.o >= 0 and Vx.o > saturation[0]:
-    #            Vx.o = saturation[0]
-    #        elif Vx.o < 0 and Vx.o < saturation[1]:
-    #            Vx.o = saturation[1]
-    #        dQx = vector4D.Vec2Quat(Vx)
-    #
-    #        Q = vector4D.QuatProd(Q, vector4D.QuatConj(Qx))
-    #        Dy = 1./math.sqrt(Q.o*Q.o + Q.y*Q.y)
-    #        Qy = vector4D((Q.o*Dy, 0, Q.y*Dy, 0))
-    #        if Qy.y < 0:
-    #            Qy = vector4D.QuatFlip(Qy)
-    #        """ determinate angle of rotation """
-    #        Vy = vector4D.Quat2Vec(Qy)
-    #        if Vy.o > 180:
-    #            Vy.o -= 360
-    #        """ apply constraint to x """
-    #        if Vy.o >= 0 and Vy.o > saturation[2]:
-    #            Vy.o = saturation[2]
-    #        elif Vy.o < 0 and Vy.o < saturation[3]:
-    #            Vy.o = saturation[3]
-    #        dQy = vector4D.Vec2Quat(Vy)
-    #
-    #        Q = vector4D.QuatProd(Q, vector4D.QuatConj(Qy))
-    #        Dz = 1./math.sqrt(Q.o*Q.o + Q.z*Q.z)
-    #        Qz = vector4D((Q.o*Dz, 0, 0, Q.z*Dz))
-    #        if Qz.z < 0:
-    #            Qz = vector4D.QuatFlip(Qz)
-    #        """ determinate angle of rotation """
-    #        Vz = vector4D.Quat2Vec(Qz)
-    #        if Vz.o > 180:
-    #            Vz.o -= 360
-    #        """ apply constraint to x """
-    #        if Vz.o >= 0 and Vz.o > saturation[4]:
-    #            Vz.o = saturation[4]
-    #        elif Vz.o < 0 and Vz.o < saturation[5]:
-    #            Vz.o = saturation[5]
-    #        dQz = vector4D.Vec2Quat(Vz)
-    #
-    #        """ build back quaternion """
-    #        result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qx)), dQx) # "replace old rotation (Qx) by new rotation (dQx)"
-    #        result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qy)), dQy) # "replace old rotation (Qy) by new rotation (dQy)"
-    #        result = vector4D.QuatProd(vector4D.QuatProd(result, vector4D.QuatConj(Qz)), dQz) # "replace old rotation (Qz) by new rotation (dQz)"
-    #        vector4D.QuatNorm(result)
-    #
-    #        return result
-    #    else:
-    #        return self
 
     
     def Swing(swing, saturation = (0, 0, 0, 0, 0, 0)):
