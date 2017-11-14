@@ -31,6 +31,7 @@ import numpy as np
 
 import Definitions
 import Events
+import Muscles
 import Sensors
 import Shaders
 import State

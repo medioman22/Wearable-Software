@@ -9,6 +9,7 @@ import Definitions
 import Events
 import Graphics
 import GUI
+import Muscles
 import Sensors
 import State
 import StickMan
@@ -29,7 +30,10 @@ def mouseManage():
     parent = -1
     name = ''
     info = []
-    if color[0][0][0] != 0: # RED channel for parts ID
+    if color[0][0][0] != 0 and color[0][0][1] != 0 and color[0][0][2] != 0: # GREY channel for parts ID
+        parent = 3
+        ID = color[0][0][0]*(len(Muscles.muscles))
+    elif color[0][0][0] != 0: # RED channel for parts ID
         parent = 0
         ID = color[0][0][0]*(len(StickMan.parts)-1)
     elif color[0][0][1] != 0: # GREEN channel for sensors ID
@@ -53,6 +57,7 @@ def mouseManage():
     GUI.overGuiId = 0
     StickMan.overPartId = 0
     Sensors.overSensId = 0
+    Muscles.OverMuscId = 0
     if parent == 0:
         StickMan.overPartId = ID
         if Events.mouse_click == True:
@@ -145,5 +150,12 @@ def mouseManage():
                 GUI.selectedTemplate = 0
                 Events.rename = Sensors.sensorGraphics[GUI.overGuiId-1 - GUI.guiOffsetId(GUI.guiTemplate)][0] + State.extension
                 Events.renameType = GUI.guiTemplate
+    if parent == 3:
+        Muscles.OverMuscId = ID
+        if Events.mouse_click == True:
+            if Muscles.SelectedMuscId != ID:
+                Muscles.SelectedMuscId = ID
+            else:
+                Muscles.SelectedMuscId = 0
     else:
         pass

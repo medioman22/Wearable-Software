@@ -273,6 +273,7 @@ def main():
         Sensors.countID = 0
         Graphics.SaturationModelMatrix = []
         StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
+        Muscles.preprocessMuscle()
         Ground.preprocessGround(math.fabs(Events.rMax))
 
         i = 0
@@ -312,6 +313,7 @@ def main():
         Graphics.modelView(Graphics.opaque)
         StickMan.drawBodySurface(Graphics.idBuffer)
         Sensors.drawSensor(Graphics.idBuffer)
+        Muscles.drawMuscle(Graphics.idBuffer)
 
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
         if GUI.selectedWindow == GUI.windowTemplatesId:
