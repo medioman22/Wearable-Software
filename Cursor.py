@@ -49,7 +49,7 @@ def mouseManage():
         ID = int(ID + 0.5)
     else:
         ID = int(ID)
-    print(ID)
+
     if Events.setLookAt == True:
         if parent == 0 or parent == -1:
             StickMan.lookingAtID = ID
@@ -152,6 +152,7 @@ def mouseManage():
                 Events.renameType = GUI.guiTemplate
     if parent == 3:
         Muscles.OverMuscId = ID
+        name = ' (' + Muscles.muscles[ID-1][Muscles.Tag] + ')'
         if Events.mouse_click == True:
             # place sensor on body
             if GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:

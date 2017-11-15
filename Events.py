@@ -68,6 +68,10 @@ resetSens = False
 deleteSens = False
 
 style = 0 # model visualization style
+showBody = True
+showMuscles = True
+showSensors = True
+showSaturations = True
 
 rMax = 0 # ground radius
 
@@ -116,6 +120,10 @@ def manage():
     global deleteSens
 
     global style
+    global showBody
+    global showMuscles
+    global showSensors
+    global showSaturations
     global rMax
 
     dt = time.clock() - lastTime
@@ -291,6 +299,14 @@ def manage():
                 prevNext = -1
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 style = (style + 1)%4
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
+                showBody = not showBody
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_2:
+                showMuscles = not showMuscles
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_3:
+                showSensors = not showSensors
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_4:
+                showSaturations = not showSaturations
             if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
                 State.saveModel(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_l:

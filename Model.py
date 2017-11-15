@@ -307,9 +307,13 @@ def main():
         GUI.subWindow(window,False)
 
         Graphics.modelView(Graphics.opaque)
-        StickMan.drawBodySurface(Graphics.idBuffer)
-        Sensors.drawSensor(Graphics.idBuffer)
-        Muscles.drawMuscleSurface(Graphics.idBuffer)
+        
+        if Events.showBody == True:
+            StickMan.drawBodySurface(Graphics.idBuffer)
+        if Events.showMuscles == True:
+            Muscles.drawMuscleSurface(Graphics.idBuffer)
+        if Events.showSensors == True:
+            Sensors.drawSensor(Graphics.idBuffer)
 
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
         if GUI.selectedWindow == GUI.windowTemplatesId:
@@ -348,29 +352,33 @@ def main():
         # draw scene
         Graphics.modelView(Graphics.blending)
         Ground.drawGround()
+
+        if Events.showSaturations == True:
+            # draw saturation balls
+            Graphics.modelView(Graphics.blending)
+            Saturations.drawSaturationBalls()
         
-        # draw saturation balls
-        Graphics.modelView(Graphics.blending)
-        Saturations.drawSaturationBalls()
-
-        # draw body
-        Graphics.modelView(Events.style)
-        StickMan.drawBodySurface(Events.style)
-        StickMan.drawBodyEdge(Events.style)
-
-        # draw muscles
-        Graphics.modelView(Events.style)
-        Muscles.drawMuscleSurface(Events.style)
-        Muscles.drawMuscleEdge(Events.style)
-
-        # draw saturation lines
-        Graphics.modelView(Graphics.opaque)
-        Saturations.drawSaturationLines()
-
-        # draw sensors
-        Graphics.modelView(Graphics.opaque)
-        Sensors.drawSensor(Events.style)
-        Sensors.drawDashed(Events.style)
+        if Events.showMuscles == True:
+            # draw muscles
+            Graphics.modelView(Events.style)
+            Muscles.drawMuscleSurface(Events.style)
+            Muscles.drawMuscleEdge(Events.style)
+        if Events.showBody == True:
+            # draw body
+            Graphics.modelView(Events.style)
+            StickMan.drawBodySurface(Events.style)
+            StickMan.drawBodyEdge(Events.style)
+            
+        if Events.showSaturations == True:
+            # draw saturation lines
+            Graphics.modelView(Graphics.opaque)
+            Saturations.drawSaturationLines()
+        
+        if Events.showSensors == True:
+            # draw sensors
+            Graphics.modelView(Graphics.opaque)
+            Sensors.drawSensor(Events.style)
+            Sensors.drawDashed(Events.style)
         
 
         # draw GUI

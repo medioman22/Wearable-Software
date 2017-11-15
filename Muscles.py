@@ -71,7 +71,7 @@ def drawMuscleSurface(style):
         elif i+1 == OverMuscId:
             color = np.array([1,0,0,0.3], dtype = np.float32)
         else:
-            color = np.array([1.,0.7,0.7,0.3], dtype = np.float32)
+            color = np.array([1.,0.4,0.7,0.3], dtype = np.float32)
 
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)
@@ -131,9 +131,16 @@ modelMatrix = 3
 Attach_tag = 0
 Attach_local = 1
 Attach_world = 2
-muscles = [["Biceps_r",       ["Shoulder_r",    [0.45, 0, 0.5, 1],         []],    ["Forearm_r",       [-0.1, -0.5, 0, 1],          []],    []],
-           ["Triceps_r",      ["Shoulder_r",    [0.45, 0, -0.5, 1],        []],    ["Forearm_r",       [-0.45, 0.5, 0, 1],          []],    []],
-           ["Biceps_l",       ["Shoulder_l",    [0.45, 0, 0.5, 1],         []],    ["Forearm_l",       [-0.1, 0.5, 0, 1],           []],    []],
-           ["Triceps_l",      ["Shoulder_l",    [0.45, 0, -0.5, 1],        []],    ["Forearm_l",       [-0.45, -0.5, 0, 1],         []],    []],
-           ["Achille_r",      ["Upp_leg_r",     [0.45, 0, -0.5, 1],        []],    ["Feet_r",          [-0.45, 0, -0.5, 1],         []],    []],
-           ["Achille_l",      ["Upp_leg_l",     [0.45, 0, -0.5, 1],        []],    ["Feet_l",          [-0.45, 0, -0.5, 1],         []],    []]]
+muscles = [
+           ["Biceps_r",       ["Arm_r",    [0.45, 0.5, 0, 1],         []],    ["Arm_r",       [-0.45, 0.5, 0, 1],          []],    []],
+           ["Triceps_r",      ["Arm_r",    [0.45, -0.5, 0, 1],        []],    ["Arm_r",       [-0.45, -0.5, 0, 1],         []],    []],
+           ["Biceps_l",       ["Arm_l",    [0.45, 0.5, 0, 1],         []],    ["Arm_l",       [-0.45, 0.5, 0, 1],          []],    []],
+           ["Triceps_l",      ["Arm_l",    [0.45, -0.5, 0, 1],        []],    ["Arm_l",       [-0.45, -0.5, 0, 1],         []],    []],
+           
+           ["TAG",            ["Forearm_r",         [0.45, 0, 0.5, 1],         []],    ["Forearm_r",          [-0.45, 0, 0.5, 1],          []],    []],
+           ["TAG",            ["Forearm_r",         [0.45, 0, -0.5, 1],        []],    ["Forearm_r",          [-0.45, 0, -0.5, 1],         []],    []],
+           ["TAG",            ["Forearm_l",         [0.45, 0, 0.5, 1],         []],    ["Forearm_l",          [-0.45, 0, 0.5, 1],          []],    []],
+           ["TAG",            ["Forearm_l",         [0.45, 0, -0.5, 1],        []],    ["Forearm_l",          [-0.45, 0, -0.5, 1],         []],    []],
+
+           ["Achille_r",      ["Low_leg_r",     [0.45, 0, -0.5, 1],        []],    ["Low_leg_r",          [-0.45, 0, -0.5, 1],         []],    []],
+           ["Achille_l",      ["Low_leg_l",     [0.45, 0, -0.5, 1],        []],    ["Low_leg_l",          [-0.45, 0, -0.5, 1],         []],    []]]
