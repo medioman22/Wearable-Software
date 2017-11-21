@@ -96,7 +96,8 @@ def mouseManage():
                         color = Sensors.sensorGraphics[GUI.selectedTemplate-1][1]
                         color = (color[0]/255., color[1]/255., color[2]/255.)
                         Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(pack[Definitions.entity].attach, Sensors.sensorGraphics[GUI.selectedTemplate-1][0], (pack[Definitions.entity].x,pack[Definitions.entity].t,pack[Definitions.entity].s), color)]
-
+                        
+                        Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = pack[Definitions.entity].tag
 
                 if Events.deleteSens == True:
                     removeId = pack[Definitions.entity].id

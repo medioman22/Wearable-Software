@@ -53,110 +53,6 @@ def main():
     StickMan.virtuMan = StickMan.characteristics(1.7, (0,0,0), StickMan.parts)
     State.loadModel(StickMan.virtuMan)
     Saturations.preprocessSaturations(StickMan.virtuMan)
-    """Sensors.virtuSens = [Sensors.sensors("Head", "Eye", (0.,160,90), (1,0,0.5)),
-                         Sensors.sensors("Head", "Eye", (0.,200,90), (1,0,0.5))]
-    # EEG ZOI
-    color = (0.5, 0.5, 0.)
-    Sensors.virtuSens = Sensors.virtuSens + [
-
-                         ##### 10/20 System Position
-
-                         Sensors.sensors("Head", "EEG", (0.,0,0), color),               #Cz
-                         
-                         Sensors.sensors("Head", "EEG", (0.,0,36), color),              #Pz
-                         Sensors.sensors("Head", "EEG", (0.,-90,36), color),            #C3
-                         Sensors.sensors("Head", "EEG", (0.,90,36), color),             #C4
-                         Sensors.sensors("Head", "EEG", (0.,180,36), color),            #Fz
-                         
-                         Sensors.sensors("Head", "EEG", (0.,0,72), color),              #Oz
-                         Sensors.sensors("Head", "EEG", (0.,-90,72), color),            #T3
-                         Sensors.sensors("Head", "EEG", (0.,90,72), color),             #T4
-                         Sensors.sensors("Head", "EEG", (0.,180,72), color),            #Fpz
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-18,72), color),            #O1
-                         Sensors.sensors("Head", "EEG", (0.,18,72), color),             #O2
-                         Sensors.sensors("Head", "EEG", (0.,-(180-18),72), color),      #Fp1
-                         Sensors.sensors("Head", "EEG", (0.,180-18,72), color),         #Fp2
-
-                         Sensors.sensors("Head", "EEG", (0.,-54,72), color),            #T5
-                         Sensors.sensors("Head", "EEG", (0.,54,72), color),             #T6
-                         Sensors.sensors("Head", "EEG", (0.,-(180-54),72), color),      #F7
-                         Sensors.sensors("Head", "EEG", (0.,180-54,72), color),         #F8
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-33.86,51), color),         #P3
-                         Sensors.sensors("Head", "EEG", (0.,33.86,51), color),          #P4
-                         Sensors.sensors("Head", "EEG", (0.,-(180-33.86),51), color),   #F3
-                         Sensors.sensors("Head", "EEG", (0.,180-33.86,51), color),      #F4
-                         
-                         
-                         ##### 10/10 System Position
-                         
-                         Sensors.sensors("Head", "EEG", (0.,0,18), color),              #CPz
-                         Sensors.sensors("Head", "EEG", (0.,-90,18), color),            #C1
-                         Sensors.sensors("Head", "EEG", (0.,90,18), color),             #C2
-                         Sensors.sensors("Head", "EEG", (0.,180,18), color),            #FCz
-
-                         Sensors.sensors("Head", "EEG", (0.,0,54), color),              #POz
-                         Sensors.sensors("Head", "EEG", (0.,-90,54), color),            #C5
-                         Sensors.sensors("Head", "EEG", (0.,90,54), color),             #C6
-                         Sensors.sensors("Head", "EEG", (0.,180,54), color),            #AFz
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-36,72), color),            #PO7
-                         Sensors.sensors("Head", "EEG", (0.,36,72), color),             #PO8
-                         Sensors.sensors("Head", "EEG", (0.,-(180-36),72), color),      #AF7
-                         Sensors.sensors("Head", "EEG", (0.,180-36,72), color),         #AF8
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-72,72), color),            #TP7
-                         Sensors.sensors("Head", "EEG", (0.,72,72), color),             #TP8
-                         Sensors.sensors("Head", "EEG", (0.,-(180-72),72), color),      #FT7
-                         Sensors.sensors("Head", "EEG", (0.,180-72,72), color),         #FT8
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-25.13,61.27), color),          #PO3
-                         Sensors.sensors("Head", "EEG", (0.,25.13,61.27), color),           #PO4
-                         Sensors.sensors("Head", "EEG", (0.,-(180-25.13),61.27), color),    #AF3
-                         Sensors.sensors("Head", "EEG", (0.,180-25.13,61.27), color),       #AF4
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-19.35,42.26), color),          #P1
-                         Sensors.sensors("Head", "EEG", (0.,19.35,42.26), color),           #P2
-                         Sensors.sensors("Head", "EEG", (0.,-(180-19.35),42.26), color),    #F1
-                         Sensors.sensors("Head", "EEG", (0.,180-19.35,42.26), color),       #F2
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-44.95,61.13), color),          #P5
-                         Sensors.sensors("Head", "EEG", (0.,44.95,61.13), color),           #P6
-                         Sensors.sensors("Head", "EEG", (0.,-(180-44.95),61.13), color),    #F5
-                         Sensors.sensors("Head", "EEG", (0.,180-44.95,61.13), color),       #F6
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-56.31,40.78), color),          #CP3
-                         Sensors.sensors("Head", "EEG", (0.,56.31,40.78), color),           #CP4
-                         Sensors.sensors("Head", "EEG", (0.,-(180-56.31),40.78), color),    #FC3
-                         Sensors.sensors("Head", "EEG", (0.,180-56.31,40.78), color),       #FC4
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-38.99,26.82), color),          #CP1
-                         Sensors.sensors("Head", "EEG", (0.,38.99,26.82), color),           #CP2
-                         Sensors.sensors("Head", "EEG", (0.,-(180-38.99),26.82), color),    #FC1
-                         Sensors.sensors("Head", "EEG", (0.,180-38.99,26.82), color),       #FC2
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-65.62,56.15), color),          #CP5
-                         Sensors.sensors("Head", "EEG", (0.,65.62,56.15), color),           #CP6
-                         Sensors.sensors("Head", "EEG", (0.,-(180-65.62),56.15), color),    #FC5
-                         Sensors.sensors("Head", "EEG", (0.,180-65.62,56.15), color),       #FC6
-
-                         # all spher 90
-                         Sensors.sensors("Head", "EEG", (0.,0,90), color),              #Iz
-                         Sensors.sensors("Head", "EEG", (0.,-90,90), color),            #T9
-                         Sensors.sensors("Head", "EEG", (0.,90,90), color),             #T10
-                         Sensors.sensors("Head", "EEG", (0.,180,90), color),            #Nzn
-
-                         Sensors.sensors("Head", "EEG", (0.,-54,90), color),            #P9
-                         Sensors.sensors("Head", "EEG", (0.,54,90), color),             #P10
-                         Sensors.sensors("Head", "EEG", (0.,-(180-54),90), color),      #F9
-                         Sensors.sensors("Head", "EEG", (0.,180-54,90), color),         #F10
-                         
-                         Sensors.sensors("Head", "EEG", (0.,-72,90), color),            #TP9
-                         Sensors.sensors("Head", "EEG", (0.,72,90), color),             #TP10
-                         Sensors.sensors("Head", "EEG", (0.,-(180-72),90), color),      #FT9
-                         Sensors.sensors("Head", "EEG", (0.,180-72,90), color),         #FT10
-                         ]"""
     
     State.loadGroups()
 
@@ -348,10 +244,11 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         window = GUI.windowScene
         GUI.subWindow(window,Events.style != Graphics.idBuffer)
-
-        # draw scene
-        Graphics.modelView(Graphics.blending)
-        Ground.drawGround()
+        
+        if Events.showGround == True:
+            # draw scene
+            Graphics.modelView(Graphics.blending)
+            Ground.drawGround()
 
         if Events.showSaturations == True:
             # draw saturation balls

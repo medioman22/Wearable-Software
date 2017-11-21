@@ -72,7 +72,7 @@ showBody = True
 showMuscles = True
 showSensors = True
 showSaturations = True
-
+showGround = True
 rMax = 0 # ground radius
 
 
@@ -124,6 +124,7 @@ def manage():
     global showMuscles
     global showSensors
     global showSaturations
+    global showGround
     global rMax
 
     dt = time.clock() - lastTime
@@ -307,6 +308,8 @@ def manage():
                 showSensors = not showSensors
             if event.type == pygame.KEYDOWN and event.key == pygame.K_4:
                 showSaturations = not showSaturations
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
+                showGround = not showGround
             if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
                 State.saveModel(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_l:

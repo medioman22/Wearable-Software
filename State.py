@@ -192,6 +192,8 @@ def saveGroups():
     file = open(pathGroups + saveGroupFile + extension, 'w')
 
     for sensor in Sensors.virtuSens:
+        file.write(sensor.tag)
+        file.write(" ")
         file.write(sensor.attach)
         file.write(" ")
         file.write(sensor.type)
@@ -215,8 +217,9 @@ def loadGroups():
                 line = file.readline() # read sensor data
                 if line == "":
                     break
-                parent, type, x, t, s = line.split(' ')
+                name, parent, type, x, t, s = line.split(' ')
                 Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
+                Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = name
             file.close()
 
 
@@ -238,7 +241,8 @@ def loadZOI(zoiFileName):
         line = file.readline() # read sensor data
         if line == "":
             break
-        parent, x, t, s = line.split(' ')
+        name, parent, x, t, s = line.split(' ')
         Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
-        Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = 'Zoi'
+        Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = name
+        Sensors.zoiSens[len(Sensors.zoiSens)-1].zoi = True
     file.close()

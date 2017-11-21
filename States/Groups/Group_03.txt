@@ -1,3 +1,0 @@
-Arm_r Marker 0.0 330.0 90.0
-Arm_r Marker 0.0 210.0 90.0
-Arm_r Marker 0.0 90.0 90.0
