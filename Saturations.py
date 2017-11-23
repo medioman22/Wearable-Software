@@ -21,7 +21,7 @@ def preprocessSaturations(entity):
     Graphics.SaturationNbIndex = []
     Graphics.SaturationStyleIndex = []
     for part in entity.parts:
-        Graphics.VBO_hypar((part[StickMan.Data_saturation]))
+        Graphics.VBO_hypar((part.saturations))
         
 
 def drawSaturationLines():

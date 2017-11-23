@@ -1,16 +1,12 @@
 class sensors(object):
     """
-        characteristics
+        sensors
         .x      attachment distance
         .t      attachment angle
     """
-    __name__ = "sensors"
-    nb__init__ = 0 # keeps track of how many creations there are
-
 
     def __init__(self, attach = "Origin", type = "Custom", coord = (0, 0, 0), color = (1,0,0)): # add orientation sometime...
         """ constructor """
-        sensors.nb__init__ += 1
         self.attach = attach
         self.type = type
         self.id = 0
@@ -21,15 +17,6 @@ class sensors(object):
         self.s = coord[2]
         self.h = 0.
         self.color = color
-
-    @classmethod
-    def feedback(cls,reset = False):
-        """ print feedback on class calls """
-        print("nb__init__ : {}".format(sensors.nb__init__))
-        if reset == True:
-            sensors.nb__init__ = 0
-            print("reset for {} is done".format(cls.__name__))
-        print("\n")
         
 
     def values(self):

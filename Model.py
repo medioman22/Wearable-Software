@@ -47,14 +47,16 @@ def refreshId():
 
 def main():
     """ Create list of models """
-    State.createList()
-    State.updateTemplateList()
+    State.updateFilesLists()
     """ Create Entities """
-    StickMan.virtuMan = StickMan.characteristics(1.7, (0,0,0), StickMan.parts)
-    State.loadModel(StickMan.virtuMan)
+    StickMan.virtuMan = StickMan.characteristics(1.7)
+    State.loadAvatar(StickMan.virtuMan)
+    State.loadPosture(StickMan.virtuMan)
     Saturations.preprocessSaturations(StickMan.virtuMan)
     
     State.loadGroups()
+
+    #State.saveAvatar()
 
     """ Create a window """
     pygame.init()
@@ -137,10 +139,10 @@ def main():
 
         
         """
-            Update ZOI & template lists.
-            you can edit / add / remove ZOI & template files without closing software (as long as syntax is respected)
+            Update files lists.
+            you can edit / add / remove groupe & template files without closing software (as long as syntax is respected)
         """
-        State.updateTemplateList()
+        State.updateFilesLists()
         sensorTypes = []
         for sensorType in Sensors.sensorGraphics:
             sensorTypes = sensorTypes + [sensorType[0]]
@@ -164,7 +166,7 @@ def main():
         StickMan.part = -1 # initialize the recursivity here
         Sensors.countID = 0
         Graphics.SaturationModelMatrix = []
-        StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.x, StickMan.virtuMan.y, StickMan.virtuMan.z))
+        StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.position))
         Muscles.preprocessMuscle()
         Ground.preprocessGround(math.fabs(Events.rMax))
 
@@ -315,7 +317,7 @@ def main():
             window = GUI.windowData
             GUI.subWindow(window,Events.style != Graphics.idBuffer)
             if Events.style != Graphics.idBuffer:
-                GUI.textTexture(['Model : ' + str(State.modelFileName[State.currentModelFile])], 0, 0.95, 0, 1, False, window)
+                GUI.textTexture(['Posture : ' + str(State.postureFileName[State.currentPostureFile])], 0, 0.95, 0, 1, False, window)
                 GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
                                 + Cursor.info, 0.95, -0.95, -1, -1, False, window)
                 GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 0.95, 0.95, -1, 1, False, window)

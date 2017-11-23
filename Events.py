@@ -67,7 +67,7 @@ n_keyHold = False
 resetSens = False
 deleteSens = False
 
-style = 0 # model visualization style
+style = 0 # rendering style
 showBody = True
 showMuscles = True
 showSensors = True
@@ -311,15 +311,15 @@ def manage():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
                 showGround = not showGround
             if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
-                State.saveModel(StickMan.virtuMan)
+                State.savePosture(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-                State.loadModel(StickMan.virtuMan)
+                State.loadPosture(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
-                State.currentModelFile = (State.currentModelFile - 1 + len(State.modelFileName))%len(State.modelFileName)
-                State.loadModel(StickMan.virtuMan)
+                State.currentPostureFile = (State.currentPostureFile - 1 + len(State.postureFileName))%len(State.postureFileName)
+                State.loadPosture(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
-                State.currentModelFile = (State.currentModelFile + 1)%len(State.modelFileName)
-                State.loadModel(StickMan.virtuMan)
+                State.currentPostureFile = (State.currentPostureFile + 1)%len(State.postureFileName)
+                State.loadPosture(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                 State.saveGroups()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
@@ -438,14 +438,14 @@ def manage():
     j = 0
     while j <  len(StickMan.selectedParts):
         i = 0
-        while i <  len(StickMan.parts):
-            if StickMan.selectedParts[j] == StickMan.parts[i][StickMan.Data_id]:
+        while i <  len(StickMan.virtuMan.parts):
+            if StickMan.selectedParts[j] == StickMan.virtuMan.parts[i].tag:
                 if reset == True:
-                    StickMan.virtuMan.parts[i][StickMan.Data_twist] = [1,0,0,0]
-                    StickMan.virtuMan.parts[i][StickMan.Data_swing] = [1,0,0,0]
-                    StickMan.virtuMan.parts[i][StickMan.Data_angle] = [1,0,0,0]
+                    StickMan.virtuMan.parts[i].twist = [1,0,0,0]
+                    StickMan.virtuMan.parts[i].swing = [1,0,0,0]
+                    StickMan.virtuMan.parts[i].angle = [1,0,0,0]
                 if prevNext != 0:
-                    StickMan.selectedParts[j] = StickMan.parts[(i+prevNext+len(StickMan.parts))% (len(StickMan.parts))][StickMan.Data_id]
+                    StickMan.selectedParts[j] = StickMan.virtuMan.parts[(i+prevNext+len(StickMan.virtuMan.parts))% (len(StickMan.virtuMan.parts))].tag
                 break
             i += 1
         j += 1

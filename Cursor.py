@@ -35,7 +35,7 @@ def mouseManage():
         ID = color[0][0][0]*(len(Muscles.muscles))
     elif color[0][0][0] != 0: # RED channel for parts ID
         parent = 0
-        ID = color[0][0][0]*(len(StickMan.parts))
+        ID = color[0][0][0]*(len(StickMan.virtuMan.parts))
     elif color[0][0][1] != 0: # GREEN channel for sensors ID
         parent = 1
         ID = color[0][0][1]*Sensors.countID
@@ -65,19 +65,19 @@ def mouseManage():
             if GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:
                 color = Sensors.sensorGraphics[GUI.selectedTemplate-1][1]
                 color = (color[0]/255., color[1]/255., color[2]/255.)
-                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.parts[ID-1][StickMan.Data_id], Sensors.sensorGraphics[GUI.selectedTemplate-1][0], (0.,90,90), color)]
+                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.virtuMan.parts[ID-1].tag, Sensors.sensorGraphics[GUI.selectedTemplate-1][0], (0.,90,90), color)]
             # select limb
             else:
                 Select = True
                 for part in StickMan.selectedParts:
-                    if part == StickMan.parts[ID-1][StickMan.Data_id]:
+                    if part == StickMan.virtuMan.parts[ID-1].tag:
                         Select = False
                         StickMan.selectedParts.remove(part)
                         break
                 if Select == True:
-                    StickMan.selectedParts += [StickMan.parts[ID-1][StickMan.Data_id],]
+                    StickMan.selectedParts += [StickMan.virtuMan.parts[ID-1].tag,]
 
-        name = ' (' + StickMan.parts[ID-1][StickMan.Data_id] + ')'
+        name = ' (' + StickMan.virtuMan.parts[ID-1].tag + ')'
     elif parent == 1:
         Sensors.overSensId = ID
         if Events.mouse_click == True:
