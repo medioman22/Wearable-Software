@@ -56,7 +56,6 @@ def main():
     
     State.loadGroups()
 
-    #State.saveAvatar()
 
     """ Create a window """
     pygame.init()

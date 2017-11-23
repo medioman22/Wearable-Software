@@ -18,9 +18,9 @@ class characteristics(object):
         print(self.size, self.position, len(self.parts))
 
 
-class limbs(object):
+class limb(object):
     """
-        limbs
+        limb
     """
 
     def __init__(self): # add orientation sometime...

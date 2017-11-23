@@ -296,7 +296,7 @@ def loadAvatar(entity):
             break
 
         l, t, o1, o2, o3, d1, d2, d3, s1, s2, s3, s4, s5, s6, r1, r2, r3 = line.split(' ')
-        newLimb = StickMan.limbs()
+        newLimb = StickMan.limb()
         newLimb.layer = int(l)
         newLimb.tag = t
         newLimb.offset = [float(o1), float(o2), float(o3)]
