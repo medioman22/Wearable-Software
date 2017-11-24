@@ -75,9 +75,9 @@ def renameFile(key):
                         file.write("\n")
                     file.close()
                 for i in range(0, len(Sensors.sensorGraphics)):
-                    if Sensors.sensorGraphics[i][0] == Events.rename[:-4]:
-                        print(Sensors.sensorGraphics[i][0], Events.rename[:-4])
-                        Sensors.sensorGraphics[i][0] = newName[:-4]
+                    if Sensors.sensorGraphics[i].type == Events.rename[:-4]:
+                        print(Sensors.sensorGraphics[i].type, Events.rename[:-4])
+                        Sensors.sensorGraphics[i].type = newName[:-4]
                         break
                 loadGroups()
             elif Events.renameType == GUI.guiGroup:
@@ -121,7 +121,7 @@ def updateFilesLists():
         if line == "":
             continue
         r, g, b, a, shape, scale = line.split(' ')
-        Sensors.sensorGraphics = Sensors.sensorGraphics + [[template[:-len(extension)], (int(r),int(g),int(b),int(a)), int(shape), float(scale)]]
+        Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template[:-len(extension)], [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
         file.close()
 
 
@@ -172,19 +172,19 @@ def loadPosture(entity):
     Template files
 """
 def saveTemplates(template):
-    file = open(pathTemplates + template[0] + extension, 'w')
+    file = open(pathTemplates + template.type + extension, 'w')
 
-    file.write(str(template[1][0]))
+    file.write(str(template.color[0]))
     file.write(" ")
-    file.write(str(template[1][1]))
+    file.write(str(template.color[1]))
     file.write(" ")
-    file.write(str(template[1][2]))
+    file.write(str(template.color[2]))
     file.write(" ")
-    file.write(str(template[1][3]))
+    file.write(str(template.color[3]))
     file.write(" ")
-    file.write(str(template[2]))
+    file.write(str(template.shape))
     file.write(" ")
-    file.write(str(template[3]))
+    file.write(str(template.scale))
 
     file.close()
 
@@ -233,13 +233,13 @@ def loadGroups():
 def loadZOI(zoiFileName):
     Sensors.zoiSens = []
 
-    if zoiFileName[0] == "":
+    if zoiFileName == "":
         return
 
-    file = open(pathZoi + zoiFileName[0] + '.txt', 'r')
+    file = open(pathZoi + zoiFileName + '.txt', 'r')
     
     color = (0.5,0.5,0.5,1)
-    type = zoiFileName[0]
+    type = zoiFileName
     while True:
         line = file.readline() # read sensor data
         if line == "":

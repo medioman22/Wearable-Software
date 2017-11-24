@@ -406,6 +406,7 @@ class matrix44:
         self.items[len(self.items)-1] = np.dot(P, self.items[len(self.items)-1])
         
 
+
 """
     The model, view and projection matrices are three separate matrices.
     Model maps from an object's local coordinate space into world space, view from world space to camera space, projection from camera to screen.

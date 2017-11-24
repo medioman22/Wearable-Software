@@ -18,6 +18,22 @@ class subwindow(object):
         self.borderColor = borderColor
         self.backgroundColor = backgroundColor
 
+class textTex(object):
+    """
+        texTex
+    """
+
+
+    def __init__(self, text = ""):
+        """ constructor """
+        self.id = 0
+        self.text = text
+
+
+    def values(self):
+        """ print characteristics values """
+        print(self.size, self.position, len(self.parts))
+
 import pygame
 from pygame.locals import *
 
@@ -29,32 +45,16 @@ import math
 import time
 import numpy as np
 
+import Cursor
 import Definitions
 import Events
+import ID
 import Muscles
 import Sensors
 import Shaders
 import State
 
 
-helpList = ['Arrows, page up/page dn = camera',
-            'right mouse = lock camera on target',
-            'Left mouse = (un)select entity',
-            'Q,W = twist limb axis x',
-            'E,R = swing limb axis y',
-            'T,Y = swing limb axis z',
-            'U   = reset part orientation',
-            'I,O = switch selected part',
-            'Z,X = translate sensor on x axis',
-            'C,V = rotate sensor around cylinder',
-            'B,N = rotate sensor around sphere',
-            'M   = reset sensor orientation',
-            'P   = switch view mode',
-            'H,L = save/load model',
-            'J,K = switch model',
-            'A,F = save/load sensor group',
-            'S,D = switch sensor group',
-            'G   = change floor']
 
 
 display = [1550, 900] # window size
@@ -90,34 +90,58 @@ windowHelpId = 1
 windowTemplatesId = 2
 windowGroupsId = 3
 windowDataId = 4
-windowList = ['Help', 'Templates', 'Groups', 'Data', '----', 'Quit']
+quitButton = 6
 
-def lenGui():
-    return len(Sensors.sensorGraphics) + len(State.sensorFileName) + len(windowList)
+"""
+    ALL GUI TEXTS HERE
+"""
 
-guiTemplate = 1
-guiGroup = 2
-guiWindow = 3
-def guiType(guiId):
-    if guiId > 0 and\
-       guiId <= len(Sensors.sensorGraphics):
-        return guiTemplate
-    elif guiId > len(Sensors.sensorGraphics) and\
-         guiId <= len(Sensors.sensorGraphics) + len(State.sensorFileName):
-        return guiGroup
-    elif guiId > len(Sensors.sensorGraphics) + len(State.sensorFileName) and\
-         guiId <= len(Sensors.sensorGraphics) + len(State.sensorFileName) + len(windowList):
-        return guiWindow
-    else:
-        return 0
+guiPannel = [textTex('Help'), textTex('Templates'), textTex('Groups'), textTex('Data'), textTex('----'), textTex('Quit')]
+guiSensorTypes = []
+guiSensorGroups = []
+guiTitleTemplates = [textTex('Wearable templates')]
+guiTitleGroups = [textTex('Wearable groups'), textTex('Save in ~')]
+guiFrequence = [textTex()]
+guiPosture = [textTex()]
+guiCursorInfo = []
+guiHelp = [ textTex('Arrows, page up/page dn = camera'),
+            textTex('right mouse = lock camera on target'),
+            textTex('Left mouse = (un)select entity'),
+            textTex('Q,W = twist limb axis x'),
+            textTex('E,R = swing limb axis y'),
+            textTex('T,Y = swing limb axis z'),
+            textTex('U   = reset part orientation'),
+            textTex('I,O = switch selected part'),
+            textTex('Z,X = translate sensor on x axis'),
+            textTex('C,V = rotate sensor around cylinder'),
+            textTex('B,N = rotate sensor around sphere'),
+            textTex('M   = reset sensor orientation'),
+            textTex('P   = switch view mode'),
+            textTex('H,L = save/load model'),
+            textTex('J,K = switch model'),
+            textTex('A,F = save/load sensor group'),
+            textTex('S,D = switch sensor group'),
+            textTex('G   = change floor')]
+def updateGuiLists():
+    global guiSensorTypes
+    global guiSensorGroups
+    global guiCursorInfo
 
-def guiOffsetId(guiType):
-    if guiType == guiTemplate:
-        return 0
-    elif guiType == guiGroup:
-        return len(Sensors.sensorGraphics)
-    elif guiType == guiWindow:
-        return len(Sensors.sensorGraphics) + len(State.sensorFileName)
+    guiSensorTypes = []
+    for sensorType in Sensors.sensorGraphics:
+        guiSensorTypes = guiSensorTypes + [textTex()]
+        guiSensorTypes[len(guiSensorTypes)-1].text = sensorType.type
+
+    guiSensorGroups = []
+    for file in State.sensorFileName:
+        guiSensorGroups = guiSensorGroups + [textTex()]
+        guiSensorGroups[len(guiSensorGroups)-1].text = file[0]
+
+    guiCursorInfo = []
+    for info in ['ID : ' + str(Cursor.overID) + str(Cursor.name)] + Cursor.info:
+        guiCursorInfo = guiCursorInfo + [textTex()]
+        guiCursorInfo[len(guiCursorInfo)-1].text = info
+
 
 TEX_TEXTURE = None
 """
@@ -128,10 +152,10 @@ TEX_TEXTURE = None
 """
 
 overGuiId = 0
-selectedTemplate = 0
+selectedTemplate = ""
 selectedGroup = 0
 selectedWindow = 0
-def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = windowScene, guiId = 9999):
+def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = windowScene):
     rx = window.tx
     ry = window.ty
     x = x
@@ -143,42 +167,46 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
     font = pygame.font.Font('Fonts/UbuntuMono-R.ttf', 32)
     for txt in text:
         backgroundColor = (255*window.backgroundColor[0], 255*window.backgroundColor[1], 255*window.backgroundColor[2], 255*window.backgroundColor[3])
-        guiId += 1
         if idDraw != True:
-            if guiType(guiId) == guiTemplate:
-                if Events.rename == Sensors.sensorGraphics[guiId-1][0] + State.extension:
+            if txt.id == 0:
+                color = (255,255,255,255)
+            elif ID.idCategory(txt.id) == ID.TEMPLATE:
+                if Events.rename == Sensors.sensorGraphics[txt.id-1 - ID.offsetId(ID.TEMPLATE)].type + State.extension:
                     backgroundColor = (0, 0, 0, 255)
-                if selectedTemplate == guiId:
-                    color = Sensors.sensorGraphics[guiId-1][1]
-                elif overGuiId == guiId:
-                    color = Sensors.sensorGraphics[guiId-1][1]
+                if selectedTemplate == txt.text:
+                    color = Sensors.sensorGraphics[txt.id-1 - ID.offsetId(ID.TEMPLATE)].color
+                elif overGuiId == txt.id:
+                    color = Sensors.sensorGraphics[txt.id-1 - ID.offsetId(ID.TEMPLATE)].color
                     color = (0.5*color[0], 0.5*color[1], 0.5*color[2],255)
                 else:
                     color = (255,255,255,255)
-            elif guiType(guiId) == guiGroup:
-                if Events.rename == State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][0] + State.extension:
+            elif ID.idCategory(txt.id) == ID.GROUPE:
+                if Events.rename == State.sensorFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][0] + State.extension:
                     backgroundColor = (0, 0, 0, 255)
-                if State.sensorFileName[guiId-1 - guiOffsetId(guiGroup)][1] == True:
+                if State.sensorFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][1] == True:
                     color = (0, 255, 0, 255)
-                elif overGuiId == guiId:
+                elif overGuiId == txt.id:
                     color = (0, 127, 0, 255)
                 else:
                     color = (255,255,255,255)
             else:
-                if selectedWindow + guiOffsetId(guiWindow) == guiId:
+                if selectedWindow + ID.offsetId(ID.PANNEL) == txt.id:
                     color = (255, 0, 0, 255)
-                elif overGuiId == guiId:
+                elif overGuiId == txt.id:
                     color = (127, 0, 0,255)
                 else:
                     color = (255,255,255,255)
-            if txt == '':
-                txt = '~'
-            textSurface = font.render(txt, True, color, backgroundColor)
+            if txt.text == '':
+                textSurface = font.render('~', True, color, backgroundColor)
+            else:
+                textSurface = font.render(txt.text, True, color, backgroundColor)
         # id buffer
         else:
-            if txt == '':
-                txt = '~'
-            textSurface = font.render(txt, True, (255,255,255,255), (0,0,255*guiId/lenGui(),0))
+            r, g, b = ID.id2color(txt.id)
+            if txt.text == '':
+                textSurface = font.render('~', True, (255,255,255,255), (r,g,b,0))
+            else:
+                textSurface = font.render(txt.text, True, (255,255,255,255), (r,g,b,0))
 
         ix, iy = textSurface.get_width(), textSurface.get_height()
         dx = rx/ry*dy*ix/iy
@@ -194,7 +222,8 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
         glTranslatef(x + sx*dx,y - sy*dy,0.0)
         glScalef(dx,dy,1.)
         glBindTexture(GL_TEXTURE_2D, TEX_TEXTURE)
-        glColor4f(0,0,guiId/lenGui(),0)
+        r, g, b = ID.id2color(txt.id)
+        glColor4f(r,g,b,0)
         glBegin(GL_QUADS)
         if idDraw != True:
             glTexCoord2f(0.0, 0.0)

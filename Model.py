@@ -24,6 +24,7 @@ import Events
 import Graphics
 import Ground
 import GUI
+import ID
 import Muscles
 import Saturations
 import Sensors
@@ -33,17 +34,6 @@ import StickMan
 
 
 
-
-
-def refreshId():
-    id = 0
-    for i in range(0, len(Sensors.virtuSens)):
-        Sensors.virtuSens[i].id = id
-        id += 1
-    for i in range(0, len(Sensors.zoiSens)):
-        Sensors.zoiSens[i].id = id
-        id += 1
-        #TODO : do it with body & GUI as well, change ID buffer also ?
 
 def main():
     """ Create list of models """
@@ -129,8 +119,6 @@ def main():
     Definitions.projectionMatrix.perspectiveProjection(90, 0.5*GUI.display[0]/GUI.display[1], 0.1, 100.0)
     glUniformMatrix4fv(Shaders.proj_loc, 1, GL_FALSE, Definitions.projectionMatrix.peek())
     glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
-
-
     """ >>> main loop <<< """
     while True:
         # keep track of loop frequency
@@ -142,9 +130,7 @@ def main():
             you can edit / add / remove groupe & template files without closing software (as long as syntax is respected)
         """
         State.updateFilesLists()
-        sensorTypes = []
-        for sensorType in Sensors.sensorGraphics:
-            sensorTypes = sensorTypes + [sensorType[0]]
+        GUI.updateGuiLists()
 
 
         """
@@ -153,7 +139,7 @@ def main():
         """
         Events.manage()
         
-        refreshId() # TODO : only when adding/removing sensors
+        ID.setId([StickMan.virtuMan.parts, Sensors.virtuSens, Sensors.zoiSens, GUI.guiPannel, GUI.guiSensorTypes, GUI.guiSensorGroups])
         
 
 
@@ -195,9 +181,6 @@ def main():
         # clear the ID buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-        list = []
-        for file in State.sensorFileName:
-            list = list + [file[0]]
         # fill ID buffer
 
         window = GUI.windowScene
@@ -216,14 +199,14 @@ def main():
         if GUI.selectedWindow == GUI.windowTemplatesId:
             window = GUI.windowTemplates
             GUI.subWindow(window,False)
-            GUI.textTexture(sensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, True, window, 0)
+            GUI.textTexture(GUI.guiSensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, True, window)
         if GUI.selectedWindow == GUI.windowGroupsId:
             window = GUI.windowGroups
             GUI.subWindow(window,False)
-            GUI.textTexture(list, -0.95, 0.95-6*0.03*window.ty, 1, 1, True, window, len(sensorTypes))
+            GUI.textTexture(GUI.guiSensorGroups, -0.95, 0.95-6*0.03*window.ty, 1, 1, True, window)
         window = GUI.windowPannel
         GUI.subWindow(window,False)
-        GUI.textTexture(GUI.windowList, -0.95, 0, 1, 0, True, window, len(sensorTypes) + len(list))
+        GUI.textTexture(GUI.guiPannel, -0.95, 0, 1, 0, True, window)
 
 
         """
@@ -289,16 +272,14 @@ def main():
             window = GUI.windowTemplates
             GUI.subWindow(window,Events.style != Graphics.idBuffer,)
             if Events.style != Graphics.idBuffer:
-                GUI.textTexture(['Wearable templates'], 0, 0.95, 0, 1, False, window)
-            GUI.textTexture(sensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, 0)
+                GUI.textTexture(GUI.guiTitleTemplates, 0, 0.95, 0, 1, False, window)
+            GUI.textTexture(GUI.guiSensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window)
             
             """ display selected template """
             window = GUI.windowSensor
             GUI.subWindow(window,False)
-            if Events.style != Graphics.idBuffer and GUI.guiType(GUI.selectedTemplate) == GUI.guiTemplate:
+            if Events.style != Graphics.idBuffer and GUI.selectedTemplate != "":
                 Sensors.displayTemplate()
-                GUI.textTexture(['Color : ' + str(Sensors.sensorGraphics[GUI.selectedTemplate-1][1]),
-                                 'Scale : ' + str(Sensors.sensorGraphics[GUI.selectedTemplate-1][3])], 0.95, -0.95, -1, -1, False, window)
 
 
         """ display groups window """
@@ -306,9 +287,8 @@ def main():
             window = GUI.windowGroups
             GUI.subWindow(window,Events.style != Graphics.idBuffer)
             if Events.style != Graphics.idBuffer:
-                GUI.textTexture(['Wearable groups',
-                                 'Save in ~'], 0, 0.95, 0, 1, False, window)
-            GUI.textTexture(list, -0.95, 0.95-6*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window, len(sensorTypes))
+                GUI.textTexture(GUI.guiTitleGroups, 0, 0.95, 0, 1, False, window)
+            GUI.textTexture(GUI.guiSensorGroups, -0.95, 0.95-6*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window)
             
 
         """ display data window """
@@ -316,16 +296,18 @@ def main():
             window = GUI.windowData
             GUI.subWindow(window,Events.style != Graphics.idBuffer)
             if Events.style != Graphics.idBuffer:
-                GUI.textTexture(['Posture : ' + str(State.postureFileName[State.currentPostureFile])], 0, 0.95, 0, 1, False, window)
-                GUI.textTexture(['ID : ' + str(int(Cursor.ID)) + str(Cursor.name),]
-                                + Cursor.info, 0.95, -0.95, -1, -1, False, window)
-                GUI.textTexture([str(int(1./(time.clock()-flagStart))) + ' Hz'], 0.95, 0.95, -1, 1, False, window)
+                GUI.guiPosture[0].text = 'Posture : ' + str(State.postureFileName[State.currentPostureFile])
+                GUI.textTexture(GUI.guiPosture, 0, 0.95, 0, 1, False, window)
+                GUI.textTexture(GUI.guiCursorInfo, 0.95, -0.95, -1, -1, False, window)
+                print(Cursor.info)
+                GUI.guiFrequence[0].text = str(int(1./(time.clock()-flagStart))) + ' Hz'
+                GUI.textTexture(GUI.guiFrequence, 0.95, 0.95, -1, 1, False, window)
 
 
         """ display panel window """
         window = GUI.windowPannel
         GUI.subWindow(window,Events.style != Graphics.idBuffer)
-        GUI.textTexture(GUI.windowList, -0.95, 0, 1, 0, Events.style == Graphics.idBuffer, window, len(sensorTypes) + len(list))
+        GUI.textTexture(GUI.guiPannel, -0.95, 0, 1, 0, Events.style == Graphics.idBuffer, window)
 
 
         """ display help window """
@@ -333,7 +315,7 @@ def main():
             if Events.style != Graphics.idBuffer:
                 window = GUI.windowHelp
                 GUI.subWindow(window,Events.style != Graphics.idBuffer)
-                GUI.textTexture(GUI.helpList, -0.95,-0.95, 1, -1, False, window)
+                GUI.textTexture(GUI.guiHelp, -0.95,-0.95, 1, -1, False, window)
         
         
 

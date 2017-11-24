@@ -1,3 +1,23 @@
+class templates(object):
+    """
+        templates
+        .x      attachment distance
+        .t      attachment angle
+    """
+
+    def __init__(self, type, color, shape, scale): # add orientation sometime...
+        """ constructor """
+        self.type = type
+        self.color = color
+        self.shape = shape
+        self.scale = scale
+        
+
+    def values(self):
+        """ print characteristics values """
+        print(self.type, self.color, self.shape, self.scale)
+
+
 class sensors(object):
     """
         sensors
@@ -7,9 +27,9 @@ class sensors(object):
 
     def __init__(self, attach = "Origin", type = "Custom", coord = (0, 0, 0), color = (1,0,0)): # add orientation sometime...
         """ constructor """
+        self.id = 0
         self.attach = attach
         self.type = type
-        self.id = 0
         self.tag = 'Tag'
         self.zoi = False
         self.x = coord[0]
@@ -35,18 +55,11 @@ import Definitions
 import Events
 import Graphics
 import GUI
+import ID
 import Shaders
 
 
-sensorGraphics = [  ['EEG',         (255, 0, 0, 255),       Graphics.vboCircle,     0.01],
-                    ['EMG',         (255, 127, 0, 255),     Graphics.vboHexagon,    0.03],
-                    ['ECG',         (255, 255, 0, 255),     Graphics.vboCone,       0.03],
-                    ['IMU',         (127, 255, 0, 255),     Graphics.vboCube,       0.03],
-                    ['Strain',      (0, 255, 0, 255),       Graphics.vboPyramide,   0.03],
-                    ['Pressure',    (0, 255, 127, 255),     Graphics.vboPyramide,   0.03],
-                    ['Marker',      (0, 255, 255, 255),     Graphics.vboPyramide,   0.03],
-                    ['Eye',         (0, 127, 255, 255),     Graphics.vboSphere,     0.03],
-                    ['Custom',      (127, 127, 127, 255),   Graphics.vboPyramide,   0.03]]
+sensorGraphics = []
 
 virtuSens = []
 zoiSens = []
@@ -54,10 +67,7 @@ overSensId = 0
 selectedSens = []
 
 
-countID = 0
 def preprocessSensor(sensor, x, y, z):
-    global countID
-    countID += 1
     Definitions.modelMatrix.push()
 
     """ sensor orientation """
@@ -80,7 +90,7 @@ def preprocessSensor(sensor, x, y, z):
         Definitions.modelMatrix.translate(0.5, 0, 0)
         
         """ store modelMatrix in package """
-        Definitions.packagePreprocess[Graphics.vboDashed] = Definitions.packagePreprocess[Graphics.vboDashed] + [[Definitions.modelMatrix.peek(), "Link", countID, sensor],]
+        Definitions.packagePreprocess[Graphics.vboDashed] = Definitions.packagePreprocess[Graphics.vboDashed] + [[Definitions.modelMatrix.peek(), "Link", sensor.id, sensor],]
         
         Definitions.modelMatrix.pop()
         
@@ -91,8 +101,8 @@ def preprocessSensor(sensor, x, y, z):
     Definitions.modelMatrix.rotate(t.o, t.x, t.y, t.z)
     
     for sensorData in sensorGraphics:
-        if sensor.type == sensorData[0]:
-            scale = sensorData[3]
+        if sensor.type == sensorData.type:
+            scale = sensorData.scale
             break
     Definitions.modelMatrix.scale(scale, scale, scale)
 
@@ -100,9 +110,9 @@ def preprocessSensor(sensor, x, y, z):
     
     
     """ store modelMatrix in package """
-    for type in sensorGraphics:
-        if sensor.type == type[0]:
-            Definitions.packagePreprocess[type[2]] = Definitions.packagePreprocess[type[2]] + [[Definitions.modelMatrix.peek(), "Sensor", countID, sensor],]
+    for sensorData in sensorGraphics:
+        if sensor.type == sensorData.type:
+            Definitions.packagePreprocess[sensorData.shape] = Definitions.packagePreprocess[sensorData.shape] + [[Definitions.modelMatrix.peek(), "Sensor", sensor.id, sensor],]
             break
 
     Definitions.modelMatrix.pop()
@@ -118,12 +128,12 @@ def drawSensor(style):
         """ choose color """
         if style != Graphics.idBuffer:
             for sensorData in sensorGraphics:
-                if sensor.type == sensorData[0]:
+                if sensor.type == sensorData.type:
                     if sensor.zoi == True:
                         color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
                         vboDraw = Graphics.vboSurfaces
                     else:
-                        color = np.array([sensorData[1][0]/255., sensorData[1][1]/255., sensorData[1][2]/255., sensorData[1][3]/255.], dtype = np.float32)
+                        color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)
                     break
             if pack[Definitions.packID] == selectedSens:
                 if sensor.zoi == False:
@@ -149,8 +159,8 @@ def drawSensor(style):
                 vboDraw = Graphics.vboEdges
         else:
             vboDraw = Graphics.vboSurfaces
-            i = pack[Definitions.packID]/float(countID)
-            color = np.array([0, i, 0, 1.], dtype = np.float32)
+            r, g, b = ID.id2color(pack[Definitions.packID])
+            color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
 
         """ choose vbo """
         vboId = indices[0]
@@ -195,17 +205,17 @@ def drawDashed(style):
         sensor = pack[Definitions.entity]
         if style != Graphics.idBuffer:
             for sensorData in sensorGraphics:
-                if sensor.type == sensorData[0]:
+                if sensor.type == sensorData.type:
                     if sensor.zoi == True:
                         color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
                     else:
-                        color = np.array([sensorData[1][0]/255., sensorData[1][1]/255., sensorData[1][2]/255., sensorData[1][3]/255.], dtype = np.float32)
+                        color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)
                     break
             if pack[Definitions.packID] == selectedSens:
                 color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
         else:
-            i = pack[Definitions.packID]/float(countID)
-            color = np.array([0, i, 0, 1.], dtype = np.float32)
+            r, g, b = ID.id2color(pack[Definitions.packID])
+            color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
             
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)
@@ -223,14 +233,18 @@ def drawDashed(style):
 def displayTemplate():
     glUseProgram(Shaders.shader)
     """ choose vbo """
-    vboId = sensorGraphics[GUI.selectedTemplate-1][2]
+    for sensorData in sensorGraphics:
+        if GUI.selectedTemplate == sensorData.type:
+            vboId = sensorData.shape
     vboDraw = Graphics.vboEdges
     """ bind surfaces vbo """
     Graphics.indexPositions[vboId][vboDraw].bind()
     Graphics.vertexPositions[vboId].bind()
     glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
     """ send color to shader """
-    r,g,b,a = sensorGraphics[GUI.selectedTemplate-1][1]
+    for sensorData in sensorGraphics:
+        if GUI.selectedTemplate == sensorData.type:
+            r,g,b,a = sensorData.color
     color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
     glUniform4fv(Shaders.setColor_loc, 1, color)
     """ load matrix in shader """

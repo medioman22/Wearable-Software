@@ -52,6 +52,7 @@ import Cursor
 import Definitions
 import Events
 import Graphics
+import ID
 import Muscles
 import Sensors
 import Shaders
@@ -66,22 +67,22 @@ selectedParts = []
 virtuMan = None
 lookingAt = np.array([[0, 0, 0, 1]])
 lookingAtID = 0
-def preprocessPart(x,y,z,dx,dy,dz,partIsSelected, ID):
+def preprocessPart(entity,x,y,z,dx,dy,dz,partIsSelected, current_part):
     """ part transformations """
     Definitions.modelMatrix.push()
     Definitions.modelMatrix.translate(dx,dy,dz)
     Definitions.modelMatrix.scale(x,y,z)
     """ store transformation in package """
-    if virtuMan.parts[ID-1].tag == "Head":
-        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
+    if entity.parts[current_part].tag == "Head":
+        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Body", entity.parts[current_part].id, partIsSelected],]
     else:
-        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.modelMatrix.peek(), "Body", ID, partIsSelected],]
+        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.modelMatrix.peek(), "Body", entity.parts[current_part].id, partIsSelected],]
 
     """ preprocess muscles attachment points """
     for i in range(0,len(Muscles.muscles)):
-        if Muscles.muscles[i][Muscles.A][Muscles.Attach_tag] == virtuMan.parts[ID-1].tag:
+        if Muscles.muscles[i][Muscles.A][Muscles.Attach_tag] == entity.parts[current_part].tag:
             Muscles.muscles[i][Muscles.A][Muscles.Attach_world] = np.dot(np.array([Muscles.muscles[i][Muscles.A][Muscles.Attach_local]]), Definitions.modelMatrix.peek())
-        if Muscles.muscles[i][Muscles.B][Muscles.Attach_tag] == virtuMan.parts[ID-1].tag:
+        if Muscles.muscles[i][Muscles.B][Muscles.Attach_tag] == entity.parts[current_part].tag:
             Muscles.muscles[i][Muscles.B][Muscles.Attach_world] = np.dot(np.array([Muscles.muscles[i][Muscles.B][Muscles.Attach_local]]), Definitions.modelMatrix.peek())
 
 
@@ -104,8 +105,8 @@ def drawBodySurface(style):
             glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         """ choose color """
         if style == Graphics.idBuffer:
-            i = (pack[Definitions.packID])/float(len(virtuMan.parts))
-            color = np.array([i,0.,0.,1.], dtype = np.float32)
+            r, g, b = ID.id2color(pack[Definitions.packID])
+            color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
         elif pack[Definitions.selected] == True:
             color = np.array([0.,0.,0.5,0.3], dtype = np.float32)
             drawSaturation = True
@@ -238,7 +239,7 @@ def stick(entity, offset = (0,0,0), rotation = (0,0,0,0)):
     dx = 0.5*entity.size*entity.parts[current_part].dimensions[0]
     dy = 0
     dz = 0
-    preprocessPart(x,y,z,dx,dy,dz,partIsSelected, part + 1) #hack to change someday (+1)
+    preprocessPart(entity,x,y,z,dx,dy,dz,partIsSelected, current_part) #hack to change someday (+1)
 
     """ preprocess sensors """
     for sensor in Sensors.virtuSens + Sensors.zoiSens:

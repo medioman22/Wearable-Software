@@ -149,10 +149,10 @@ def manage():
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             #pygame.quit()
             #quit()
-            GUI.selectedTemplate = 0
+            GUI.selectedTemplate = ""
             GUI.selectedGroup = 0
             GUI.selectedWindow = 0
-        elif GUI.selectedWindow == len(GUI.windowList):
+        elif GUI.selectedWindow == GUI.quitButton:
             pygame.quit()
             quit()
 
@@ -325,13 +325,17 @@ def manage():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
                 State.loadGroups()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
-                    Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]-1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
-                    State.saveTemplates(Sensors.sensorGraphics[GUI.selectedTemplate-1])
+                if GUI.selectedTemplate != "":
+                    for sensorData in Sensors.sensorGraphics:
+                        if GUI.selectedTemplate == sensorData.type:
+                            sensorData.shape = (sensorData.shape - 1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
+                            State.saveTemplates(sensorData)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-                if GUI.selectedTemplate <= len(Sensors.sensorGraphics) and GUI.selectedTemplate > 0:
-                    Sensors.sensorGraphics[GUI.selectedTemplate-1][2] = (Sensors.sensorGraphics[GUI.selectedTemplate-1][2]+1) % len(Definitions.packagePreprocess)
-                    State.saveTemplates(Sensors.sensorGraphics[GUI.selectedTemplate-1])
+                if GUI.selectedTemplate != "":
+                    for sensorData in Sensors.sensorGraphics:
+                        if GUI.selectedTemplate == sensorData.type:
+                            sensorData.shape = (sensorData.shape + 1) % len(Definitions.packagePreprocess)
+                            State.saveTemplates(sensorData)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
                 deleteSens = True
             if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
