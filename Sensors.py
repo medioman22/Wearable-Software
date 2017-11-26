@@ -13,10 +13,6 @@ class templates(object):
         self.scale = scale
         
 
-    def values(self):
-        """ print characteristics values """
-        print(self.type, self.color, self.shape, self.scale)
-
 
 class sensors(object):
     """
@@ -31,17 +27,12 @@ class sensors(object):
         self.attach = attach
         self.type = type
         self.tag = 'Tag'
-        self.zoi = False
         self.x = coord[0]
         self.t = coord[1]
         self.s = coord[2]
         self.h = 0.
         self.color = color
         
-
-    def values(self):
-        """ print characteristics values """
-        print(self.attach, self.x, self.t)
 
 
 from OpenGL.GL import *
@@ -50,7 +41,6 @@ import math
 import time
 import numpy as np
 
-import Cursor
 import Definitions
 import Events
 import Graphics
@@ -129,14 +119,14 @@ def drawSensor(style):
         if style != Graphics.idBuffer:
             for sensorData in sensorGraphics:
                 if sensor.type == sensorData.type:
-                    if sensor.zoi == True:
+                    if ID.idCategory(sensor.id) == ID.ZOI:
                         color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
                         vboDraw = Graphics.vboSurfaces
                     else:
                         color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)
                     break
             if pack[Definitions.packID] == selectedSens:
-                if sensor.zoi == False:
+                if ID.idCategory(sensor.id) != ID.ZOI:
                     color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
                 pack[Definitions.entity].x += Events.incSens[0]
                 if pack[Definitions.entity].x < -0.5:
@@ -152,7 +142,7 @@ def drawSensor(style):
                     pack[Definitions.entity].s = 90
                 vboDraw = Graphics.vboSurfaces
             elif pack[Definitions.packID] == overSensId:
-                if sensor.zoi == True:
+                if ID.idCategory(sensor.id) == ID.ZOI:
                     color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
                 vboDraw = Graphics.vboSurfaces
             else:
@@ -164,7 +154,7 @@ def drawSensor(style):
 
         """ choose vbo """
         vboId = indices[0]
-        if sensor.zoi == True:
+        if ID.idCategory(sensor.id) == ID.ZOI:
             vboId = Graphics.vboCircle
             vboDraw = Graphics.vboSurfaces
 
@@ -206,7 +196,7 @@ def drawDashed(style):
         if style != Graphics.idBuffer:
             for sensorData in sensorGraphics:
                 if sensor.type == sensorData.type:
-                    if sensor.zoi == True:
+                    if ID.idCategory(sensor.id) == ID.ZOI:
                         color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
                     else:
                         color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)

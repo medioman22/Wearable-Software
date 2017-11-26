@@ -5,6 +5,7 @@ import Muscles
 import Sensors
 import StickMan
 
+NONE = 0
 LIMB = 1
 MUSCLE = 2
 SENSOR = 3
@@ -16,9 +17,7 @@ GROUPE = 7
 
 def setId(list):
     id = 0
-    #print(len(list))
     for entity in list:
-        #print(len(entity))
         for part in entity:
             id += 1
             part.id = id
@@ -33,12 +32,14 @@ def color2id(r,g,b):
     return int(r*math.pow(2,16) + g*math.pow(2,8) + b)
 
 def idCategory(ID):
-    if ID >= StickMan.virtuMan.parts[0].id and\
-        ID <= StickMan.virtuMan.parts[len(StickMan.virtuMan.parts)-1].id:
+    if StickMan.virtuMan.limbs != [] and\
+        ID >= StickMan.virtuMan.limbs[0].id and\
+        ID <= StickMan.virtuMan.limbs[len(StickMan.virtuMan.limbs)-1].id:
             return LIMB
-    #if ID >= Muscles.~~~~.id and\
-    #    ID <= Muscles.~~~~[len(Muscles.~~~~)-1].id:
-    #        return MUSCLE
+    if StickMan.virtuMan.muscles != [] and\
+        ID >= StickMan.virtuMan.muscles[0].id and\
+        ID <= StickMan.virtuMan.muscles[len(StickMan.virtuMan.muscles)-1].id:
+            return MUSCLE
     if Sensors.virtuSens != [] and\
         ID >= Sensors.virtuSens[0].id and\
         ID <= Sensors.virtuSens[len(Sensors.virtuSens)-1].id:
@@ -47,19 +48,25 @@ def idCategory(ID):
         ID >= Sensors.zoiSens[0].id and\
         ID <= Sensors.zoiSens[len(Sensors.zoiSens)-1].id:
             return ZOI
-    if ID >= GUI.guiPannel[0].id and\
+    if GUI.guiPannel != [] and\
+        ID >= GUI.guiPannel[0].id and\
         ID <= GUI.guiPannel[len(GUI.guiPannel)-1].id:
             return PANNEL
-    if ID >= GUI.guiSensorTypes[0].id and\
+    if GUI.guiSensorTypes != [] and\
+        ID >= GUI.guiSensorTypes[0].id and\
         ID <= GUI.guiSensorTypes[len(GUI.guiSensorTypes)-1].id:
             return TEMPLATE
-    if ID >= GUI.guiSensorGroups[0].id and\
+    if GUI.guiSensorGroups != [] and\
+        ID >= GUI.guiSensorGroups[0].id and\
         ID <= GUI.guiSensorGroups[len(GUI.guiSensorGroups)-1].id:
             return GROUPE
+    return NONE
 
 def offsetId(type):
     if type == LIMB:
-        return StickMan.virtuMan.parts[0].id
+        return StickMan.virtuMan.limbs[0].id
+    if type == MUSCLE:
+        return StickMan.virtuMan.muscles[0].id
     if type == SENSOR:
         return Sensors.virtuSens[0].id
     if type == ZOI:

@@ -422,7 +422,7 @@ def manage():
     glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
     Definitions.viewMatrix.pop()
 
-    """ parts control """
+    """ limbs control """
     if q_keyHold == False and w_keyHold == False:
         pivot[0] = 0
     if e_keyHold == False and r_keyHold == False:
@@ -439,19 +439,15 @@ def manage():
         incSens[2] = 0
     
     """ StickMan Events """
-    j = 0
-    while j <  len(StickMan.selectedParts):
-        i = 0
-        while i <  len(StickMan.virtuMan.parts):
-            if StickMan.selectedParts[j] == StickMan.virtuMan.parts[i].tag:
+    for j in range (0, len(StickMan.selectedLimbs)):
+        for i in range (0,len(StickMan.virtuMan.limbs)):
+            if StickMan.selectedLimbs[j] == StickMan.virtuMan.limbs[i].tag:
                 if reset == True:
-                    StickMan.virtuMan.parts[i].twist = [1,0,0,0]
-                    StickMan.virtuMan.parts[i].swing = [1,0,0,0]
-                    StickMan.virtuMan.parts[i].angle = [1,0,0,0]
+                    StickMan.virtuMan.limbs[i].twist = [1,0,0,0]
+                    StickMan.virtuMan.limbs[i].swing = [1,0,0,0]
+                    StickMan.virtuMan.limbs[i].angle = [1,0,0,0]
                 if prevNext != 0:
-                    StickMan.selectedParts[j] = StickMan.virtuMan.parts[(i+prevNext+len(StickMan.virtuMan.parts))% (len(StickMan.virtuMan.parts))].tag
+                    StickMan.selectedLimbs[j] = StickMan.virtuMan.limbs[(i+prevNext+len(StickMan.virtuMan.limbs))% (len(StickMan.virtuMan.limbs))].tag
                 break
-            i += 1
-        j += 1
 
         

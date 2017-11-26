@@ -30,10 +30,6 @@ class textTex(object):
         self.text = text
 
 
-    def values(self):
-        """ print characteristics values """
-        print(self.size, self.position, len(self.parts))
-
 import pygame
 from pygame.locals import *
 
@@ -42,14 +38,11 @@ from OpenGL.GLU import *
 from OpenGL.arrays import vbo
 
 import math
-import time
 import numpy as np
 
 import Cursor
-import Definitions
 import Events
 import ID
-import Muscles
 import Sensors
 import Shaders
 import State
@@ -97,12 +90,13 @@ quitButton = 6
 """
 
 guiPannel = [textTex('Help'), textTex('Templates'), textTex('Groups'), textTex('Data'), textTex('----'), textTex('Quit')]
+guiAvatars = []
 guiSensorTypes = []
 guiSensorGroups = []
 guiTitleTemplates = [textTex('Wearable templates')]
 guiTitleGroups = [textTex('Wearable groups'), textTex('Save in ~')]
 guiFrequence = [textTex()]
-guiPosture = [textTex()]
+guiAvatar = [textTex(), textTex()]
 guiCursorInfo = []
 guiHelp = [ textTex('Arrows, page up/page dn = camera'),
             textTex('right mouse = lock camera on target'),
@@ -123,9 +117,15 @@ guiHelp = [ textTex('Arrows, page up/page dn = camera'),
             textTex('S,D = switch sensor group'),
             textTex('G   = change floor')]
 def updateGuiLists():
+    global guiAvatars
     global guiSensorTypes
     global guiSensorGroups
     global guiCursorInfo
+
+    guiAvatars = []
+    for file in State.avatarFileName:
+        guiAvatars = guiAvatars + [textTex()]
+        guiAvatars[len(guiAvatars)-1].text = file
 
     guiSensorTypes = []
     for sensorType in Sensors.sensorGraphics:
@@ -171,7 +171,7 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
             if txt.id == 0:
                 color = (255,255,255,255)
             elif ID.idCategory(txt.id) == ID.TEMPLATE:
-                if Events.rename == Sensors.sensorGraphics[txt.id-1 - ID.offsetId(ID.TEMPLATE)].type + State.extension:
+                if Events.rename == Sensors.sensorGraphics[txt.id-1 - ID.offsetId(ID.TEMPLATE)].type:
                     backgroundColor = (0, 0, 0, 255)
                 if selectedTemplate == txt.text:
                     color = Sensors.sensorGraphics[txt.id-1 - ID.offsetId(ID.TEMPLATE)].color

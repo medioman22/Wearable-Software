@@ -25,6 +25,7 @@ import Graphics
 import Ground
 import GUI
 import ID
+import Limbs
 import Muscles
 import Saturations
 import Sensors
@@ -40,7 +41,8 @@ def main():
     State.updateFilesLists()
     """ Create Entities """
     StickMan.virtuMan = StickMan.characteristics(1.7)
-    State.loadAvatar(StickMan.virtuMan)
+    State.loadLimbs(StickMan.virtuMan)
+    State.loadMuscles(StickMan.virtuMan)
     State.loadPosture(StickMan.virtuMan)
     Saturations.preprocessSaturations(StickMan.virtuMan)
     
@@ -133,13 +135,19 @@ def main():
         GUI.updateGuiLists()
 
 
+
         """
             Events management.
-            Most interactions between the user and the software is aknowledged here.
+            Keyboard interactions between the user and the software are done here.
         """
         Events.manage()
         
-        ID.setId([StickMan.virtuMan.parts, Sensors.virtuSens, Sensors.zoiSens, GUI.guiPannel, GUI.guiSensorTypes, GUI.guiSensorGroups])
+
+
+        """
+            Update all entities ID
+        """
+        ID.setId([StickMan.virtuMan.limbs, StickMan.virtuMan.muscles, Sensors.virtuSens, Sensors.zoiSens, GUI.guiPannel, GUI.guiSensorTypes, GUI.guiSensorGroups])
         
 
 
@@ -147,12 +155,15 @@ def main():
             Preprocess entities.
             Store all needed transformations to significantly lower calculation cost when rendering (redundancy otherwise between display buffer, ID buffer and bindings)
         """
-        Definitions.modelMatrix.translate(-StickMan.lookingAt[0][0],-StickMan.lookingAt[0][1],-StickMan.lookingAt[0][2])
-        StickMan.part = -1 # initialize the recursivity here
+        if Limbs.lookingAtID != 0:
+            Definitions.modelMatrix.translate(-Limbs.lookingAt[0][0],-Limbs.lookingAt[0][1],-Limbs.lookingAt[0][2])
+        else:
+            Definitions.modelMatrix.set(np.identity(4))
+        StickMan.limb = -1 # initialize the recursivity here
         Sensors.countID = 0
         Graphics.SaturationModelMatrix = []
         StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.position))
-        Muscles.preprocessMuscle()
+        Muscles.preprocessMuscle(StickMan.virtuMan)
         Ground.preprocessGround(math.fabs(Events.rMax))
 
         i = 0
@@ -171,9 +182,10 @@ def main():
             i += 1
 
 
+
         """ 
             Draw on the ID buffer.
-            The ID BUFFER is used for the mouse implementation, to know which body/sensor/gui part is targeted with the cursor.
+            The ID BUFFER is used for the mouse implementation, to know which body/sensor/gui limb is targeted with the cursor.
         """
         # bind the ID buffer
         glBindFramebuffer(GL_FRAMEBUFFER, FBO)
@@ -189,9 +201,9 @@ def main():
         Graphics.modelView(Graphics.opaque)
         
         if Events.showBody == True:
-            StickMan.drawBodySurface(Graphics.idBuffer)
+            Limbs.drawBodySurface(Graphics.idBuffer)
         if Events.showMuscles == True:
-            Muscles.drawMuscleSurface(Graphics.idBuffer)
+            Muscles.drawMuscleSurface(StickMan.virtuMan, Graphics.idBuffer)
         if Events.showSensors == True:
             Sensors.drawSensor(Graphics.idBuffer)
 
@@ -207,6 +219,7 @@ def main():
         window = GUI.windowPannel
         GUI.subWindow(window,False)
         GUI.textTexture(GUI.guiPannel, -0.95, 0, 1, 0, True, window)
+
 
 
         """
@@ -242,13 +255,13 @@ def main():
         if Events.showMuscles == True:
             # draw muscles
             Graphics.modelView(Events.style)
-            Muscles.drawMuscleSurface(Events.style)
-            Muscles.drawMuscleEdge(Events.style)
+            Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style)
+            Muscles.drawMuscleEdge(StickMan.virtuMan, Events.style)
         if Events.showBody == True:
             # draw body
             Graphics.modelView(Events.style)
-            StickMan.drawBodySurface(Events.style)
-            StickMan.drawBodyEdge(Events.style)
+            Limbs.drawBodySurface(Events.style)
+            Limbs.drawBodyEdge(Events.style)
             
         if Events.showSaturations == True:
             # draw saturation lines
@@ -265,6 +278,7 @@ def main():
         # draw GUI
         glClear(GL_DEPTH_BUFFER_BIT)
         Graphics.modelView(Graphics.opaque)
+
 
 
         """ display template window """
@@ -296,12 +310,13 @@ def main():
             window = GUI.windowData
             GUI.subWindow(window,Events.style != Graphics.idBuffer)
             if Events.style != Graphics.idBuffer:
-                GUI.guiPosture[0].text = 'Posture : ' + str(State.postureFileName[State.currentPostureFile])
-                GUI.textTexture(GUI.guiPosture, 0, 0.95, 0, 1, False, window)
+                GUI.guiAvatar[0].text = 'Avatar : ' + str(State.avatarFileName[State.currentAvatarFile])
+                GUI.guiAvatar[1].text = 'Posture : ' + str(State.postureFileName[State.currentPostureFile])
+                GUI.textTexture(GUI.guiAvatar, 0, 0.95, 0, 1, False, window)
                 GUI.textTexture(GUI.guiCursorInfo, 0.95, -0.95, -1, -1, False, window)
-                print(Cursor.info)
                 GUI.guiFrequence[0].text = str(int(1./(time.clock()-flagStart))) + ' Hz'
                 GUI.textTexture(GUI.guiFrequence, 0.95, 0.95, -1, 1, False, window)
+            GUI.textTexture(GUI.guiAvatars, -0.95, 0.95-6*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window)
 
 
         """ display panel window """

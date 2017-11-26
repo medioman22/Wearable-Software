@@ -1,3 +1,21 @@
+class muscle(object):
+    """
+        muscle
+    """
+
+    def __init__(self): # add orientation sometime...
+        """ constructor """
+        self.id = 0
+        self.tag = ''
+        self.A = ""
+        self.Alocal = []
+        self.Aworld = []
+        self.B = ""
+        self.Blocal = []
+        self.Bworld = []
+        self.modelMatrix = []
+
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import math
@@ -5,14 +23,15 @@ import numpy as np
 
 import Definitions
 import Graphics
+import ID
 import Sensors
 import Shaders
 
-def preprocessMuscle():
-    for i in range(0,len(muscles)):
+def preprocessMuscle(entity):
+    for i in range(0,len(entity.muscles)):
 
-        P1 = muscles[i][A][Attach_world]
-        P2 = muscles[i][B][Attach_world]
+        P1 = entity.muscles[i].Aworld
+        P2 = entity.muscles[i].Bworld
         if P1 == [] or P2 == []:
             continue
 
@@ -29,15 +48,15 @@ def preprocessMuscle():
         Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
         Definitions.modelMatrix.scale(scale,0.03,0.03)
         
-        muscles[i][modelMatrix] = Definitions.modelMatrix.peek()
+        entity.muscles[i].modelMatrix = Definitions.modelMatrix.peek()
 
         
         for sensor in Sensors.virtuSens + Sensors.zoiSens:
-            if sensor.attach == muscles[i][Tag]:
+            if sensor.attach == entity.muscles[i].tag:
                 sensor.h = 0.6
                 if sensor.type == 'Eye':
                     sensor.h = 0.4
-                if sensor.tag == 'Zoi':
+                if ID.idCategory(sensor.id) == ID.ZOI:
                     sensor.h = 0.55
                 Sensors.preprocessSensor(sensor, scale, 0.03, 0.03)
         Definitions.modelMatrix.pop()
@@ -45,12 +64,12 @@ def preprocessMuscle():
 OverMuscId = 0
 SelectedMuscId = 0
 
-def drawMuscleSurface(style):
+def drawMuscleSurface(entity, style):
 
-    for i in range(0,len(muscles)):
+    for i in range(0,len(entity.muscles)):
 
         """ verify matrix validity """
-        if muscles[i][modelMatrix] == []:
+        if entity.muscles[i].modelMatrix == []:
             continue
 
 
@@ -64,11 +83,11 @@ def drawMuscleSurface(style):
         
         """ choose color """
         if style == Graphics.idBuffer:
-            j = (i+1)/float(len(muscles))
-            color = np.array([j,j,j,1.], dtype = np.float32)
-        elif i+1 == SelectedMuscId:
+            r, g, b = ID.id2color(entity.muscles[i].id)
+            color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
+        elif i+ID.offsetId(ID.MUSCLE) == SelectedMuscId:
             color = np.array([0.5,0,0.,0.3], dtype = np.float32)
-        elif i+1 == OverMuscId:
+        elif i+ID.offsetId(ID.MUSCLE) == OverMuscId:
             color = np.array([1,0,0,0.3], dtype = np.float32)
         else:
             color = np.array([1.,0.4,0.7,0.3], dtype = np.float32)
@@ -77,21 +96,21 @@ def drawMuscleSurface(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
             
         """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, muscles[i][modelMatrix])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, entity.muscles[i].modelMatrix)
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
 
         
-def drawMuscleEdge(style):
+def drawMuscleEdge(entity, style):
         
     if style != Graphics.opaque and style != Graphics.blending:
         return
 
-    for i in range(0,len(muscles)):
+    for i in range(0,len(entity.muscles)):
 
         """ verify matrix validity """
-        if muscles[i][modelMatrix] == []:
+        if entity.muscles[i].modelMatrix == []:
             continue
 
 
@@ -107,9 +126,9 @@ def drawMuscleEdge(style):
         if style == Graphics.opaque:
             color = np.array([0.5,0.5,0.5,1.], dtype = np.float32)
         elif style == Graphics.blending:
-            if i+1 == SelectedMuscId:
+            if i+ID.offsetId(ID.MUSCLE) == SelectedMuscId:
                 color = np.array([0.5,0.,0.,0.3], dtype = np.float32)
-            elif i+1 == OverMuscId:
+            elif i+ID.offsetId(ID.MUSCLE) == OverMuscId:
                 color = np.array([1.,0.,0.,0.3], dtype = np.float32)
             else:
                 color = np.array([0.5,0.7,0.7,0.3], dtype = np.float32)
@@ -118,29 +137,7 @@ def drawMuscleEdge(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
         
         """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, muscles[i][modelMatrix])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, entity.muscles[i].modelMatrix)
             
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
-
-
-Tag = 0
-A = 1
-B = 2
-modelMatrix = 3
-Attach_tag = 0
-Attach_local = 1
-Attach_world = 2
-muscles = [
-           ["Biceps_r",       ["Arm_r",             [0.5, 0.5, 0, 1],         []],    ["Arm_r",                [-0.5, 0.5, 0, 1],          []],    []],
-           ["Triceps_r",      ["Arm_r",             [0.5, -0.5, 0, 1],        []],    ["Arm_r",                [-0.5, -0.5, 0, 1],         []],    []],
-           ["Biceps_l",       ["Arm_l",             [0.5, 0.5, 0, 1],         []],    ["Arm_l",                [-0.5, 0.5, 0, 1],          []],    []],
-           ["Triceps_l",      ["Arm_l",             [0.5, -0.5, 0, 1],        []],    ["Arm_l",                [-0.5, -0.5, 0, 1],         []],    []],
-           
-           ["TAG",            ["Forearm_r",         [0.5, 0, 0.5, 1],         []],    ["Forearm_r",            [-0.5, 0, 0.5, 1],          []],    []],
-           ["TAG",            ["Forearm_r",         [0.5, 0, -0.5, 1],        []],    ["Forearm_r",            [-0.5, 0, -0.5, 1],         []],    []],
-           ["TAG",            ["Forearm_l",         [0.5, 0, 0.5, 1],         []],    ["Forearm_l",            [-0.5, 0, 0.5, 1],          []],    []],
-           ["TAG",            ["Forearm_l",         [0.5, 0, -0.5, 1],        []],    ["Forearm_l",            [-0.5, 0, -0.5, 1],         []],    []],
-
-           ["Achille_r",      ["Low_leg_r",         [0.5, 0, -0.5, 1],        []],    ["Low_leg_r",            [-0.5, 0, -0.5, 1],         []],    []],
-           ["Achille_l",      ["Low_leg_l",         [0.5, 0, -0.5, 1],        []],    ["Low_leg_l",            [-0.5, 0, -0.5, 1],         []],    []]]

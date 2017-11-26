@@ -3,20 +3,27 @@ import os
 import Events
 import Graphics
 import GUI
-import StickMan
+import ID
+import Limbs
+import Muscles
 import Sensors
 
-pathAvatars = "States/Avatars/"
-pathPostures = "States/Postures/"
-pathGroups = "States/Groups/"
-pathTemplates = "States/Templates/"
 pathUserSettings = "States/UserSettings/"
-pathZoi = "States/Zoi/"
 extension = ".txt"
+
+pathAvatars = "States/Avatars/"
+currentAvatarFile = 0
+avatarFileName = []
+
+pathPostures = "Postures/"
 currentPostureFile = 0
 postureFileName = []
-currentSensorFile = 0
+
+pathGroups = "States/Groups/"
 saveGroupFile = ''
+
+pathTemplates = "States/Templates/"
+currentSensorFile = 0
 sensorFileName = []
 
 def importUserSettings():
@@ -31,21 +38,20 @@ def renameFile(key):
         newName = Events.rename
 
         # define new name
-        if key == 'backspace' and len(newName) >= 5:
-            newName = newName[:-5] + extension
+        if key == 'backspace' and len(newName) >= 1:
+            newName = newName[:-1]
         elif key == 'space':
             key = '_'
         if Events.caps == True:
             key = key.upper()
         if len(key) == 1:
-            newName = newName[:-4] + key + extension
+            newName = newName + key
 
 
         if newName != Events.rename:
             # rename files
-            if Events.renameType == GUI.guiTemplate:
+            if Events.renameType == ID.TEMPLATE:
                 os.rename(pathTemplates + Events.rename, pathTemplates + newName)
-                os.rename(pathZoi + Events.rename, pathZoi + newName)
                 # change sensor name in group files to match with new template name
                 for fileName in sensorFileName:
                     # read file
@@ -56,8 +62,8 @@ def renameFile(key):
                         if line == "":
                             break
                         parent, type, x, t, s = line.split(' ')
-                        if type == Events.rename[:-4]:
-                            type = newName[:-4]
+                        if type == Events.rename:
+                            type = newName
                         fileData = fileData + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
                     file.close()
                     # rewrite file
@@ -75,12 +81,12 @@ def renameFile(key):
                         file.write("\n")
                     file.close()
                 for i in range(0, len(Sensors.sensorGraphics)):
-                    if Sensors.sensorGraphics[i].type == Events.rename[:-4]:
-                        print(Sensors.sensorGraphics[i].type, Events.rename[:-4])
-                        Sensors.sensorGraphics[i].type = newName[:-4]
+                    if Sensors.sensorGraphics[i].type == Events.rename:
+                        print(Sensors.sensorGraphics[i].type, Events.rename)
+                        Sensors.sensorGraphics[i].type = newName
                         break
                 loadGroups()
-            elif Events.renameType == GUI.guiGroup:
+            elif Events.renameType == ID.GROUPE:
                 os.rename(pathGroups + Events.rename, pathGroups + newName)
 
             Events.rename = newName
@@ -89,15 +95,19 @@ def renameFile(key):
 
 
 """
-    Generate lists of files for postures / groups / templates
+    Generate lists of files for avatar / postures / groups / templates
 """
 def updateFilesLists():
+    global avatarFileName
     global postureFileName
     global sensorFileName
 
+    
+    """ Update list of avatar files """
+    avatarFileName = os.listdir(pathAvatars)
 
-    """ Update list of postures files """
-    postureFileName = os.listdir(pathPostures)
+    """ Update list of posture files """
+    postureFileName = os.listdir(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures)
     
 
     """ Update list of groupe files """
@@ -116,22 +126,77 @@ def updateFilesLists():
     templateFileName = os.listdir(pathTemplates)
     Sensors.sensorGraphics = []
     for template in templateFileName:
-        file = open(pathTemplates + template, 'r')
+        file = open(pathTemplates + template + '/' + 'Template' + extension, 'r')
         line = file.readline()
         if line == "":
             continue
         r, g, b, a, shape, scale = line.split(' ')
-        Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template[:-len(extension)], [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
+        Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template, [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
         file.close()
 
 
+
+
+
 """
-    Human postures files
+    Limbs files
+"""
+def loadLimbs(entity):
+
+    file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + 'Limbs' + extension, 'r')
+
+    entity.limbs = []
+    
+    while True:
+        line = file.readline()
+        if line == "":
+            break
+
+        l, t, o1, o2, o3, d1, d2, d3, s1, s2, s3, s4, s5, s6, r1, r2, r3 = line.split(' ')
+        newLimb = Limbs.limb()
+        newLimb.layer = int(l)
+        newLimb.tag = t
+        newLimb.offset = [float(o1), float(o2), float(o3)]
+        newLimb.dimensions = [float(d1), float(d2), float(d3)]
+        newLimb.saturations = [float(s1), float(s2), float(s3), float(s4), float(s5), float(s6)]
+        newLimb.angleRepos = [float(r1), float(r2), float(r3)]
+        entity.limbs = entity.limbs + [newLimb]
+
+    file.close()
+
+
+"""
+    Muscles files
+"""
+def loadMuscles(entity):
+
+    file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + 'Muscles' + extension, 'r')
+
+    entity.muscles = []
+    
+    while True:
+        line = file.readline()
+        if line == "":
+            break
+
+        tag, A, Al1, Al2, Al3, B, Bl1, Bl2, Bl3 = line.split(' ')
+        newMuscle = Muscles.muscle()
+        newMuscle.tag = tag
+        newMuscle.A = A
+        newMuscle.Alocal = [float(Al1), float(Al2), float(Al3), 1]
+        newMuscle.B = B
+        newMuscle.Blocal = [float(Bl1), float(Bl2), float(Bl3), 1]
+        entity.muscles = entity.muscles + [newMuscle]
+
+    file.close()
+
+"""
+    Postures files
 """
 def savePosture(entity):
-    file = open(pathPostures + postureFileName[currentPostureFile], 'w')
+    file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[currentPostureFile], 'w')
 
-    for part in entity.parts:
+    for part in entity.limbs:
         file.write(part.tag)
         file.write("\n")
         angle = " ".join(str(e) for e in part.angle)
@@ -147,7 +212,7 @@ def savePosture(entity):
 
     
 def loadPosture(entity):
-    file = open(pathPostures + postureFileName[currentPostureFile], 'r')
+    file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[currentPostureFile], 'r')
 
     while True:
         ID = file.readline() # read part name
@@ -160,7 +225,7 @@ def loadPosture(entity):
         swing = map(float, line.split())
         line = file.readline() # read part orientations
         twist = map(float, line.split())
-        for part in entity.parts:
+        for part in entity.limbs:
             if part.tag == ID:
                 part.angle = angle
                 part.swing = swing
@@ -168,11 +233,14 @@ def loadPosture(entity):
                 break
     file.close()
 
+
+
+
 """
     Template files
 """
 def saveTemplates(template):
-    file = open(pathTemplates + template.type + extension, 'w')
+    file = open(pathTemplates + template.type + '/' + 'Template' + extension, 'w')
 
     file.write(str(template.color[0]))
     file.write(" ")
@@ -236,7 +304,7 @@ def loadZOI(zoiFileName):
     if zoiFileName == "":
         return
 
-    file = open(pathZoi + zoiFileName + '.txt', 'r')
+    file = open(pathTemplates + zoiFileName + '/' + 'ZOI' + extension, 'r')
     
     color = (0.5,0.5,0.5,1)
     type = zoiFileName
@@ -247,62 +315,6 @@ def loadZOI(zoiFileName):
         name, parent, x, t, s = line.split(' ')
         Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
         Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = name
-        Sensors.zoiSens[len(Sensors.zoiSens)-1].zoi = True
     file.close()
 
 
-"""
-    Avatars files
-"""
-def saveAvatar():
-    file = open(pathAvatars + 'Human' + extension, 'w')
-
-    for limb in StickMan.virtuMan.parts:
-        
-        file.write(str(limb[StickMan.Data_layer]))
-        file.write(" ")
-
-        file.write(limb[StickMan.Data_id])
-        file.write(" ")
-
-        values = " ".join(str(e) for e in limb[StickMan.Data_offset])
-        file.write(values)
-        file.write(" ")
-
-        values = " ".join(str(e) for e in limb[StickMan.Data_dimensions])
-        file.write(values)
-        file.write(" ")
-
-        values = " ".join(str(e) for e in limb[StickMan.Data_saturation])
-        file.write(values)
-        file.write(" ")
-
-        values = " ".join(str(e) for e in limb[StickMan.Data_angleRepos])
-        file.write(values)
-
-        file.write("\n")
-
-    file.close()
-
-def loadAvatar(entity):
-
-    file = open(pathAvatars + 'Human' + extension, 'r')
-
-    entity.parts = []
-    
-    while True:
-        line = file.readline()
-        if line == "":
-            break
-
-        l, t, o1, o2, o3, d1, d2, d3, s1, s2, s3, s4, s5, s6, r1, r2, r3 = line.split(' ')
-        newLimb = StickMan.limb()
-        newLimb.layer = int(l)
-        newLimb.tag = t
-        newLimb.offset = [float(o1), float(o2), float(o3)]
-        newLimb.dimensions = [float(d1), float(d2), float(d3)]
-        newLimb.saturations = [float(s1), float(s2), float(s3), float(s4), float(s5), float(s6)]
-        newLimb.angleRepos = [float(r1), float(r2), float(r3)]
-        entity.parts = entity.parts + [newLimb]
-
-    file.close()

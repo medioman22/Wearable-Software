@@ -1,2 +1,0 @@
-rassembler chaque avatar avec ses postures dans des dossiers sous "Avatars"
-rassembler les templates et zoi de la même façon
