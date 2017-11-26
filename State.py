@@ -36,15 +36,16 @@ def importUserSettings():
 def renameFile(key):
     try:
         newName = Events.rename
-
         # define new name
         if key == 'backspace' and len(newName) >= 1:
             newName = newName[:-1]
+        elif key == 'space':
+            key = ' '
         if Events.caps == True:
             key = key.upper()
         if len(key) == 1:
             newName = newName + key
-
+            
 
         if newName != Events.rename:
             # rename files
@@ -59,14 +60,18 @@ def renameFile(key):
                         line = file.readline() # read sensor data
                         if line == "":
                             break
-                        parent, type, x, t, s = line.split(';')
+                        tag, parent, type, x, t, s = line.split(';')
                         if type == Events.rename:
                             type = newName
                         fileData = fileData + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
+                        fileData[len(fileData)-1].tag = tag
                     file.close()
+                    
                     # rewrite file
                     file = open(pathGroups + fileName[0] + extension, 'w')
                     for sensor in fileData:
+                        file.write(sensor.tag)
+                        file.write(";")
                         file.write(sensor.attach)
                         file.write(";")
                         file.write(sensor.type)
@@ -78,14 +83,16 @@ def renameFile(key):
                         file.write(str(sensor.s))
                         file.write("\n")
                     file.close()
-                for i in range(0, len(Sensors.sensorGraphics)):
-                    if Sensors.sensorGraphics[i].type == Events.rename:
-                        print(Sensors.sensorGraphics[i].type, Events.rename)
-                        Sensors.sensorGraphics[i].type = newName
+                for sensorData in Sensors.sensorGraphics:
+                    if Events.rename == sensorData.type:
+                        sensorData.type = newName
                         break
+                
                 loadGroups()
             elif Events.renameType == ID.GROUPE:
-                os.rename(pathGroups + Events.rename, pathGroups + newName)
+                os.rename(pathGroups + Events.rename + extension, pathGroups + newName + extension)
+            elif Events.renameType == ID.POSTURE:
+                os.rename(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + Events.rename + extension, pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + newName + extension)
 
             Events.rename = newName
     except:
@@ -106,7 +113,8 @@ def updateFilesLists():
 
     """ Update list of posture files """
     postureFileName = os.listdir(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures)
-    
+    for i in range(0,len(postureFileName)):
+        postureFileName[i] = postureFileName[i][:-len(extension)]
 
     """ Update list of groupe files """
     listFiles = os.listdir(pathGroups)
@@ -193,7 +201,7 @@ def loadMuscles(entity):
 """
 def savePosture(entity):
     if GUI.selectedPosture != 0:
-        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1], 'w')
+        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1] + extension, 'w')
 
         for part in entity.limbs:
             file.write(part.tag)
@@ -212,7 +220,7 @@ def savePosture(entity):
     
 def loadPosture(entity):
     if GUI.selectedPosture != 0:
-        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1], 'r')
+        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1] + extension, 'r')
         while True:
             ID = file.readline() # read part name
             if ID == "":

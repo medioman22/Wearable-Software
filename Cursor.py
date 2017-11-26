@@ -133,7 +133,7 @@ def mouseManage():
                 else:
                     GUI.selectedGroup = 0
             elif Events.setLookAt == True:
-                Events.rename = State.sensorFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][0] + State.extension
+                Events.rename = State.sensorFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][0]
                 Events.renameType = ID.GROUPE
 
         # templates
@@ -157,6 +157,9 @@ def mouseManage():
                     State.loadPosture(StickMan.virtuMan)
                 else:
                     GUI.selectedPosture = 0
+            elif Events.setLookAt == True:
+                Events.rename = State.postureFileName[GUI.overGuiId-1 - ID.offsetId(ID.POSTURE)]
+                Events.renameType = ID.POSTURE
 
     if parent == 3:
         Muscles.OverMuscId = overID

@@ -182,7 +182,7 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                 else:
                     color = (255,255,255,255)
             elif ID.idCategory(txt.id) == ID.GROUPE:
-                if Events.rename == State.sensorFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][0] + State.extension:
+                if Events.rename == State.sensorFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][0]:
                     backgroundColor = (0, 0, 0, 255)
                 if State.sensorFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][1] == True:
                     color = (0, 255, 0, 255)
@@ -191,6 +191,8 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                 else:
                     color = (255,255,255,255)
             elif ID.idCategory(txt.id) == ID.POSTURE:
+                if Events.rename == State.postureFileName[txt.id-1 - ID.offsetId(ID.POSTURE)]:
+                    backgroundColor = (0, 0, 0, 255)
                 if selectedPosture + ID.offsetId(ID.POSTURE) == txt.id:
                     color = (255, 0, 0, 255)
                 elif overGuiId == txt.id:
