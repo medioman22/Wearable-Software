@@ -314,12 +314,6 @@ def manage():
                 State.savePosture(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
                 State.loadPosture(StickMan.virtuMan)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
-                State.currentPostureFile = (State.currentPostureFile - 1 + len(State.postureFileName))%len(State.postureFileName)
-                State.loadPosture(StickMan.virtuMan)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
-                State.currentPostureFile = (State.currentPostureFile + 1)%len(State.postureFileName)
-                State.loadPosture(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                 State.saveGroups()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_f:

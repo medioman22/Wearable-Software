@@ -90,13 +90,13 @@ quitButton = 6
 """
 
 guiPannel = [textTex('Help'), textTex('Templates'), textTex('Groups'), textTex('Data'), textTex('----'), textTex('Quit')]
-guiAvatars = []
+guiPostures = []
 guiSensorTypes = []
 guiSensorGroups = []
 guiTitleTemplates = [textTex('Wearable templates')]
 guiTitleGroups = [textTex('Wearable groups'), textTex('Save in ~')]
 guiFrequence = [textTex()]
-guiAvatar = [textTex(), textTex()]
+guiAvatar = [textTex()]
 guiCursorInfo = []
 guiHelp = [ textTex('Arrows, page up/page dn = camera'),
             textTex('right mouse = lock camera on target'),
@@ -117,15 +117,15 @@ guiHelp = [ textTex('Arrows, page up/page dn = camera'),
             textTex('S,D = switch sensor group'),
             textTex('G   = change floor')]
 def updateGuiLists():
-    global guiAvatars
+    global guiPostures
     global guiSensorTypes
     global guiSensorGroups
     global guiCursorInfo
 
-    guiAvatars = []
-    for file in State.avatarFileName:
-        guiAvatars = guiAvatars + [textTex()]
-        guiAvatars[len(guiAvatars)-1].text = file
+    guiPostures = []
+    for file in State.postureFileName:
+        guiPostures = guiPostures + [textTex()]
+        guiPostures[len(guiPostures)-1].text = file
 
     guiSensorTypes = []
     for sensorType in Sensors.sensorGraphics:
@@ -154,6 +154,7 @@ TEX_TEXTURE = None
 overGuiId = 0
 selectedTemplate = ""
 selectedGroup = 0
+selectedPosture = 1
 selectedWindow = 0
 def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = windowScene):
     rx = window.tx
@@ -189,7 +190,14 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                     color = (0, 127, 0, 255)
                 else:
                     color = (255,255,255,255)
-            else:
+            elif ID.idCategory(txt.id) == ID.POSTURE:
+                if selectedPosture + ID.offsetId(ID.POSTURE) == txt.id:
+                    color = (255, 0, 0, 255)
+                elif overGuiId == txt.id:
+                    color = (127, 0, 0,255)
+                else:
+                    color = (255,255,255,255)
+            elif ID.idCategory(txt.id) == ID.PANNEL:
                 if selectedWindow + ID.offsetId(ID.PANNEL) == txt.id:
                     color = (255, 0, 0, 255)
                 elif overGuiId == txt.id:

@@ -121,6 +121,10 @@ def main():
     Definitions.projectionMatrix.perspectiveProjection(90, 0.5*GUI.display[0]/GUI.display[1], 0.1, 100.0)
     glUniformMatrix4fv(Shaders.proj_loc, 1, GL_FALSE, Definitions.projectionMatrix.peek())
     glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
+
+
+
+
     """ >>> main loop <<< """
     while True:
         # keep track of loop frequency
@@ -147,7 +151,7 @@ def main():
         """
             Update all entities ID
         """
-        ID.setId([StickMan.virtuMan.limbs, StickMan.virtuMan.muscles, Sensors.virtuSens, Sensors.zoiSens, GUI.guiPannel, GUI.guiSensorTypes, GUI.guiSensorGroups])
+        ID.setId([StickMan.virtuMan.limbs, StickMan.virtuMan.muscles, Sensors.virtuSens, Sensors.zoiSens, GUI.guiPannel, GUI.guiSensorTypes, GUI.guiSensorGroups, GUI.guiPostures])
         
 
 
@@ -216,6 +220,10 @@ def main():
             window = GUI.windowGroups
             GUI.subWindow(window,False)
             GUI.textTexture(GUI.guiSensorGroups, -0.95, 0.95-6*0.03*window.ty, 1, 1, True, window)
+        if GUI.selectedWindow == GUI.windowDataId:
+            window = GUI.windowData
+            GUI.subWindow(window,False)
+            GUI.textTexture(GUI.guiPostures, -0.95, 0.95-3*0.03*window.ty, 1, 1, True, window)
         window = GUI.windowPannel
         GUI.subWindow(window,False)
         GUI.textTexture(GUI.guiPannel, -0.95, 0, 1, 0, True, window)
@@ -311,12 +319,11 @@ def main():
             GUI.subWindow(window,Events.style != Graphics.idBuffer)
             if Events.style != Graphics.idBuffer:
                 GUI.guiAvatar[0].text = 'Avatar : ' + str(State.avatarFileName[State.currentAvatarFile])
-                GUI.guiAvatar[1].text = 'Posture : ' + str(State.postureFileName[State.currentPostureFile])
                 GUI.textTexture(GUI.guiAvatar, 0, 0.95, 0, 1, False, window)
                 GUI.textTexture(GUI.guiCursorInfo, 0.95, -0.95, -1, -1, False, window)
                 GUI.guiFrequence[0].text = str(int(1./(time.clock()-flagStart))) + ' Hz'
                 GUI.textTexture(GUI.guiFrequence, 0.95, 0.95, -1, 1, False, window)
-            GUI.textTexture(GUI.guiAvatars, -0.95, 0.95-6*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window)
+            GUI.textTexture(GUI.guiPostures, -0.95, 0.95-3*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window)
 
 
         """ display panel window """

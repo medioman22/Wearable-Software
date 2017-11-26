@@ -146,10 +146,18 @@ def mouseManage():
                     State.loadZOI("")
                     GUI.selectedTemplate = ""
             elif Events.setLookAt == True:
-                #State.loadZOI("")
-                #GUI.selectedTemplate = ""
                 Events.rename = Sensors.sensorGraphics[GUI.overGuiId-1 - ID.offsetId(ID.TEMPLATE)].type
                 Events.renameType = ID.TEMPLATE
+        
+        # postures
+        if ID.idCategory(GUI.overGuiId) == ID.POSTURE:
+            if Events.mouse_click == True:
+                if GUI.selectedPosture != overID - ID.offsetId(ID.POSTURE):
+                    GUI.selectedPosture = overID - ID.offsetId(ID.POSTURE)
+                    State.loadPosture(StickMan.virtuMan)
+                else:
+                    GUI.selectedPosture = 0
+
     if parent == 3:
         Muscles.OverMuscId = overID
         name = ' (' + StickMan.virtuMan.muscles[overID - ID.offsetId(ID.MUSCLE)].tag + ')'

@@ -1,4 +1,5 @@
 import os
+#import csv
 
 import Events
 import Graphics
@@ -9,14 +10,13 @@ import Muscles
 import Sensors
 
 pathUserSettings = "States/UserSettings/"
-extension = ".txt"
+extension = ".csv"
 
 pathAvatars = "States/Avatars/"
 currentAvatarFile = 0
 avatarFileName = []
 
 pathPostures = "Postures/"
-currentPostureFile = 0
 postureFileName = []
 
 pathGroups = "States/Groups/"
@@ -27,9 +27,9 @@ currentSensorFile = 0
 sensorFileName = []
 
 def importUserSettings():
-    file = open(pathUserSettings + "Resolution.txt", 'r')
+    file = open(pathUserSettings + "Resolution" + extension, 'r')
     line = file.readline()
-    x, y = line.split(' ')
+    x, y = line.split(';')
     GUI.display[0] = int(x)
     GUI.display[1] = int(y)
 
@@ -40,8 +40,6 @@ def renameFile(key):
         # define new name
         if key == 'backspace' and len(newName) >= 1:
             newName = newName[:-1]
-        elif key == 'space':
-            key = '_'
         if Events.caps == True:
             key = key.upper()
         if len(key) == 1:
@@ -61,7 +59,7 @@ def renameFile(key):
                         line = file.readline() # read sensor data
                         if line == "":
                             break
-                        parent, type, x, t, s = line.split(' ')
+                        parent, type, x, t, s = line.split(';')
                         if type == Events.rename:
                             type = newName
                         fileData = fileData + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
@@ -70,13 +68,13 @@ def renameFile(key):
                     file = open(pathGroups + fileName[0] + extension, 'w')
                     for sensor in fileData:
                         file.write(sensor.attach)
-                        file.write(" ")
+                        file.write(";")
                         file.write(sensor.type)
-                        file.write(" ")
+                        file.write(";")
                         file.write(str(sensor.x))
-                        file.write(" ")
+                        file.write(";")
                         file.write(str(sensor.t))
-                        file.write(" ")
+                        file.write(";")
                         file.write(str(sensor.s))
                         file.write("\n")
                     file.close()
@@ -130,7 +128,7 @@ def updateFilesLists():
         line = file.readline()
         if line == "":
             continue
-        r, g, b, a, shape, scale = line.split(' ')
+        r, g, b, a, shape, scale = line.split(';')
         Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template, [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
         file.close()
 
@@ -152,7 +150,7 @@ def loadLimbs(entity):
         if line == "":
             break
 
-        l, t, o1, o2, o3, d1, d2, d3, s1, s2, s3, s4, s5, s6, r1, r2, r3 = line.split(' ')
+        l, t, o1, o2, o3, d1, d2, d3, s1, s2, s3, s4, s5, s6, r1, r2, r3 = line.split(';')
         newLimb = Limbs.limb()
         newLimb.layer = int(l)
         newLimb.tag = t
@@ -179,7 +177,7 @@ def loadMuscles(entity):
         if line == "":
             break
 
-        tag, A, Al1, Al2, Al3, B, Bl1, Bl2, Bl3 = line.split(' ')
+        tag, A, Al1, Al2, Al3, B, Bl1, Bl2, Bl3 = line.split(';')
         newMuscle = Muscles.muscle()
         newMuscle.tag = tag
         newMuscle.A = A
@@ -194,44 +192,45 @@ def loadMuscles(entity):
     Postures files
 """
 def savePosture(entity):
-    file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[currentPostureFile], 'w')
+    if GUI.selectedPosture != 0:
+        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1], 'w')
 
-    for part in entity.limbs:
-        file.write(part.tag)
-        file.write("\n")
-        angle = " ".join(str(e) for e in part.angle)
-        file.write(angle)
-        file.write("\n")
-        swing = " ".join(str(e) for e in part.swing)
-        file.write(swing)
-        file.write("\n")
-        twist = " ".join(str(e) for e in part.twist)
-        file.write(twist)
-        file.write("\n")
-    file.close()
+        for part in entity.limbs:
+            file.write(part.tag)
+            file.write("\n")
+            angle = ";".join(str(e) for e in part.angle)
+            file.write(angle)
+            file.write("\n")
+            swing = ";".join(str(e) for e in part.swing)
+            file.write(swing)
+            file.write("\n")
+            twist = ";".join(str(e) for e in part.twist)
+            file.write(twist)
+            file.write("\n")
+        file.close()
 
     
 def loadPosture(entity):
-    file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[currentPostureFile], 'r')
-
-    while True:
-        ID = file.readline() # read part name
-        if ID == "":
-            break
-        ID = ID[:-1] # remove end of line character
-        line = file.readline() # read part orientations
-        angle = map(float, line.split())
-        line = file.readline() # read part orientations
-        swing = map(float, line.split())
-        line = file.readline() # read part orientations
-        twist = map(float, line.split())
-        for part in entity.limbs:
-            if part.tag == ID:
-                part.angle = angle
-                part.swing = swing
-                part.twist = twist
+    if GUI.selectedPosture != 0:
+        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1], 'r')
+        while True:
+            ID = file.readline() # read part name
+            if ID == "":
                 break
-    file.close()
+            ID = ID[:-1] # remove end of line character
+            line = file.readline() # read part orientations
+            angle = map(float, line.split(";"))
+            line = file.readline() # read part orientations
+            swing = map(float, line.split(";"))
+            line = file.readline() # read part orientations
+            twist = map(float, line.split(";"))
+            for part in entity.limbs:
+                if part.tag == ID:
+                    part.angle = angle
+                    part.swing = swing
+                    part.twist = twist
+                    break
+        file.close()
 
 
 
@@ -243,15 +242,15 @@ def saveTemplates(template):
     file = open(pathTemplates + template.type + '/' + 'Template' + extension, 'w')
 
     file.write(str(template.color[0]))
-    file.write(" ")
+    file.write(";")
     file.write(str(template.color[1]))
-    file.write(" ")
+    file.write(";")
     file.write(str(template.color[2]))
-    file.write(" ")
+    file.write(";")
     file.write(str(template.color[3]))
-    file.write(" ")
+    file.write(";")
     file.write(str(template.shape))
-    file.write(" ")
+    file.write(";")
     file.write(str(template.scale))
 
     file.close()
@@ -264,15 +263,15 @@ def saveGroups():
 
     for sensor in Sensors.virtuSens:
         file.write(sensor.tag)
-        file.write(" ")
+        file.write(";")
         file.write(sensor.attach)
-        file.write(" ")
+        file.write(";")
         file.write(sensor.type)
-        file.write(" ")
+        file.write(";")
         file.write(str(sensor.x))
-        file.write(" ")
+        file.write(";")
         file.write(str(sensor.t))
-        file.write(" ")
+        file.write(";")
         file.write(str(sensor.s))
         file.write("\n")
     file.close()
@@ -288,7 +287,7 @@ def loadGroups():
                 line = file.readline() # read sensor data
                 if line == "":
                     break
-                name, parent, type, x, t, s = line.split(' ')
+                name, parent, type, x, t, s = line.split(';')
                 Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
                 Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = name
             file.close()
@@ -312,7 +311,7 @@ def loadZOI(zoiFileName):
         line = file.readline() # read sensor data
         if line == "":
             break
-        name, parent, x, t, s = line.split(' ')
+        name, parent, x, t, s = line.split(';')
         Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
         Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = name
     file.close()
