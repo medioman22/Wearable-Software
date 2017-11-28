@@ -10,6 +10,7 @@ class characteristics(object):
         """ constructor """
         self.size = ini # change to a 3D scale after ?
         self.position = [0, 0, 0]
+        self.orientation = [1, 0, 0, 0]
         self.limbs = []
         self.muscles = []
 
@@ -36,7 +37,7 @@ limb = -1 # global helps through recursivity
 selectedLimbs = []
 
 """ recursive function that generates limbs by layers """
-def stick(entity, offset = (0,0,0), rotation = (0,0,0,0)):
+def stick(entity, offset = (0,0,0)):
     global limb
     global selectedLimb
     if limb + 1 >= len(entity.limbs):
@@ -76,7 +77,6 @@ def stick(entity, offset = (0,0,0), rotation = (0,0,0,0)):
     """ Transformations """
     Definitions.modelMatrix.push()
     """ offset to apply """
-    glTranslatef(offset[0] + entity.size*entity.limbs[current_limb].offset[0], offset[1] + entity.size*entity.limbs[current_limb].offset[1], offset[2] + entity.size*entity.limbs[current_limb].offset[2])
     Definitions.modelMatrix.translate(offset[0] + entity.size*entity.limbs[current_limb].offset[0], offset[1] + entity.size*entity.limbs[current_limb].offset[1], offset[2] + entity.size*entity.limbs[current_limb].offset[2])
     
     if limbIsSelected == True:
@@ -115,6 +115,6 @@ def stick(entity, offset = (0,0,0), rotation = (0,0,0,0)):
 
     """ recursive call for all limbs children to the current one """
     while limb + 1 < len(entity.limbs) and entity.limbs[limb+1].layer > entity.limbs[current_limb].layer:
-        stick(entity, (x, 0, 0), (0,0,0,0))
+        stick(entity, (x, 0, 0))
 
     Definitions.modelMatrix.pop()

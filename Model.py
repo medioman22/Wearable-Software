@@ -163,10 +163,17 @@ def main():
             Definitions.modelMatrix.translate(-Limbs.lookingAt[0][0],-Limbs.lookingAt[0][1],-Limbs.lookingAt[0][2])
         else:
             Definitions.modelMatrix.set(np.identity(4))
+
+        Definitions.modelMatrix.push()
+        Definitions.modelMatrix.translate(StickMan.virtuMan.position[0],StickMan.virtuMan.position[1],StickMan.virtuMan.position[2])
+        R = Definitions.vector4D.Quat2Vec(Definitions.vector4D((StickMan.virtuMan.orientation)))
+        Definitions.modelMatrix.rotate(R.o,R.x,R.y,R.z)
         StickMan.limb = -1 # initialize the recursivity here
         Sensors.countID = 0
         Graphics.SaturationModelMatrix = []
-        StickMan.stick(StickMan.virtuMan, (StickMan.virtuMan.position))
+        StickMan.stick(StickMan.virtuMan)
+        Definitions.modelMatrix.pop()
+
         Muscles.preprocessMuscle(StickMan.virtuMan)
         Ground.preprocessGround(math.fabs(Events.rMax))
 

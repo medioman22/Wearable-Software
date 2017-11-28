@@ -202,30 +202,43 @@ def loadMuscles(entity):
 def savePosture(entity):
     if GUI.selectedPosture != 0:
         file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1] + extension, 'w')
-
-        for part in entity.limbs:
-            file.write(part.tag)
-            file.write("\n")
-            angle = ";".join(str(e) for e in part.angle)
-            file.write(angle)
-            file.write("\n")
-            swing = ";".join(str(e) for e in part.swing)
-            file.write(swing)
-            file.write("\n")
-            twist = ";".join(str(e) for e in part.twist)
-            file.write(twist)
-            file.write("\n")
-        file.close()
+    else:
+        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + "" + extension, 'w')
+    position = ";".join(str(e) for e in entity.position) + ";"
+    file.write(position)
+    file.write("\n")
+    orientation = ";".join(str(e) for e in entity.orientation)
+    file.write(orientation)
+    file.write("\n")
+    for part in entity.limbs:
+        file.write(part.tag + ";;;")
+        file.write("\n")
+        angle = ";".join(str(e) for e in part.angle)
+        file.write(angle)
+        file.write("\n")
+        swing = ";".join(str(e) for e in part.swing)
+        file.write(swing)
+        file.write("\n")
+        twist = ";".join(str(e) for e in part.twist)
+        file.write(twist)
+        file.write("\n")
+    file.close()
 
     
 def loadPosture(entity):
     if GUI.selectedPosture != 0:
         file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1] + extension, 'r')
+        line = file.readline() # read entity position
+        px, py, pz, trash = line.split(";")
+        line = file.readline() # read entity position
+        orientation = map(float, line.split(";"))
+        entity.position = [float(px), float(py), float(pz)]
+        entity.orientation = orientation
         while True:
-            ID = file.readline() # read part name
-            if ID == "":
+            line = file.readline() # read part name
+            if line == "":
                 break
-            ID = ID[:-1] # remove end of line character
+            ID, a,b,c = map(str, line.split(";"))
             line = file.readline() # read part orientations
             angle = map(float, line.split(";"))
             line = file.readline() # read part orientations

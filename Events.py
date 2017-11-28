@@ -24,25 +24,29 @@ setLookAt = False
 rename = None
 renameType = 0
 caps = False
+ctrl = False
 
-""" camera controls """
-leftRight_acceleration = 0.
-left_keyHold = False
-right_keyHold = False
+""" camera/position/orientation controls """
+leftRight_acceleration = 0
+leftRight_keyHold = 0
 leftRight_cam = 0
-leftRight_cap = 5.
+leftRight_cam_cap = 5
+leftRight_pos_cap = 0.1
+leftRight_ori_cap = 5
 
-upDown_acceleration = 0.
-up_keyHold = False
-down_keyHold = False
+upDown_acceleration = 0
+upDown_keyHold = 0
 upDown_cam = 0
-upDown_cap = 5.
+upDown_cam_cap = 5
+upDown_pos_cap = 0.1
+upDown_ori_cap = 5
 
-frontBack_acceleration = 0.
-front_keyHold = False
-back_keyHold = False
+frontBack_acceleration = 0
+frontBack_keyHold = 0
 frontBack_cam = -1.5
-frontBack_cap = 0.1
+frontBack_cam_cap = 0.1
+frontBack_pos_cap = 0.1
+frontBack_ori_cap = 5
 
 """ parts control """
 pivot = [0,0,0]
@@ -84,20 +88,18 @@ def manage():
     global setLookAt
     global rename
     global caps
+    global ctrl
 
     global leftRight_acceleration
-    global left_keyHold
-    global right_keyHold
+    global leftRight_keyHold
     global leftRight_cam
 
     global upDown_acceleration
-    global up_keyHold
-    global down_keyHold
+    global upDown_keyHold
     global upDown_cam
     
     global frontBack_acceleration
-    global front_keyHold
-    global back_keyHold
+    global frontBack_keyHold
     global frontBack_cam
 
     global q_keyHold
@@ -161,6 +163,29 @@ def manage():
             GUI.display[0] = event.size[0]
             GUI.display[1] = event.size[1]
             GUI.resize()
+            
+        """ Special keys """
+        if event.type == pygame.KEYDOWN and (event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT):
+            caps = True
+            upDown_acceleration = 0
+            leftRight_acceleration = 0
+            frontBack_acceleration = 0
+        if event.type == pygame.KEYUP and (event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT):
+            caps = False
+            upDown_acceleration = 0
+            leftRight_acceleration = 0
+            frontBack_acceleration = 0
+            
+        if event.type == pygame.KEYDOWN and (event.key == pygame.K_RCTRL or event.key == pygame.K_LCTRL):
+            ctrl = True
+            upDown_acceleration = 0
+            leftRight_acceleration = 0
+            frontBack_acceleration = 0
+        if event.type == pygame.KEYUP and (event.key == pygame.K_RCTRL or event.key == pygame.K_LCTRL):
+            ctrl = False
+            upDown_acceleration = 0
+            leftRight_acceleration = 0
+            frontBack_acceleration = 0
 
         """ mouse controller """
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left mouse button
@@ -172,56 +197,41 @@ def manage():
             rename = None
             renameType = 0
 
-        """ Camera controller """
+        """ Camera/position/orientation controller """
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            left_keyHold = True
-            if leftRight_acceleration < 0.2*leftRight_cap:
-                leftRight_acceleration = 0.2*leftRight_cap
-        if event.type == pygame.KEYUP and event.key == pygame.K_LEFT:
-            left_keyHold = False
+            leftRight_keyHold = 1
+            if leftRight_acceleration < 0.2:
+                leftRight_acceleration = 0.2
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            right_keyHold = True
-            if leftRight_acceleration > -0.2*leftRight_cap:
-                leftRight_acceleration = -0.2*leftRight_cap
-        if event.type == pygame.KEYUP and event.key == pygame.K_RIGHT:
-            right_keyHold = False
+            leftRight_keyHold = -1
+            if leftRight_acceleration > -0.2:
+                leftRight_acceleration = -0.2
+        if event.type == pygame.KEYUP and (event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT):
+            leftRight_keyHold = 0
 
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-            up_keyHold = True
-            if upDown_acceleration < 0.2*upDown_cap:
-                upDown_acceleration = 0.2*upDown_cap
-        if event.type == pygame.KEYUP and event.key == pygame.K_UP:
-            up_keyHold = False
+            upDown_keyHold = 1
+            if upDown_acceleration < 0.2:
+                upDown_acceleration = 0.2
         if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-            down_keyHold = True
-            if upDown_acceleration > -0.2*upDown_cap:
-                upDown_acceleration = -0.2*upDown_cap
-        if event.type == pygame.KEYUP and event.key == pygame.K_DOWN:
-            down_keyHold = False
+            upDown_keyHold = -1
+            if upDown_acceleration > -0.2:
+                upDown_acceleration = -0.2
+        if event.type == pygame.KEYUP and (event.key == pygame.K_UP or event.key == pygame.K_DOWN):
+            upDown_keyHold = 0
 
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_PAGEUP:
-            front_keyHold = True
-            if frontBack_acceleration < 0.2*frontBack_cap:
-                frontBack_acceleration = 0.2*frontBack_cap
-        if event.type == pygame.KEYUP and event.key == pygame.K_PAGEUP:
-            front_keyHold = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_PAGEDOWN:
-            back_keyHold = True
-            if frontBack_acceleration > -0.2*frontBack_cap:
-                frontBack_acceleration = -0.2*frontBack_cap
-        if event.type == pygame.KEYUP and event.key == pygame.K_PAGEDOWN:
-            back_keyHold = False
-        
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RSHIFT:
-            caps = True
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_LSHIFT:
-            caps = True
-        if event.type == pygame.KEYUP and event.key == pygame.K_RSHIFT:
-            caps = False
-        if event.type == pygame.KEYUP and event.key == pygame.K_LSHIFT:
-            caps = False
+            frontBack_keyHold = 1
+            if frontBack_acceleration < 0.2:
+                frontBack_acceleration = 0.2
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_PAGEDOWN:
+            frontBack_keyHold = -1
+            if frontBack_acceleration > -0.2:
+                frontBack_acceleration = -0.2
+        if event.type == pygame.KEYUP and (event.key == pygame.K_PAGEUP or event.key == pygame.K_PAGEDOWN):
+            frontBack_keyHold = 0
 
         if rename != None:
             if event.type == pygame.KEYDOWN:
@@ -338,83 +348,86 @@ def manage():
                     rMax = -5
 
 
-    """ Camera update - left / right """
-    if left_keyHold is False and right_keyHold is False:
-        if leftRight_acceleration > 0.05*leftRight_cap*k:
-            leftRight_acceleration -= 0.1*leftRight_cap*k
-        elif leftRight_acceleration < -0.05*leftRight_cap*k:
-            leftRight_acceleration += 0.1*leftRight_cap*k
+    """ Controller acceleration update - left / right """
+    if leftRight_keyHold == 0:
+        if leftRight_acceleration > 0.1:
+            leftRight_acceleration -= 0.1
+        elif leftRight_acceleration < -0.1:
+            leftRight_acceleration += 0.1
         else:
             leftRight_acceleration = 0.
-    elif left_keyHold is True and right_keyHold is True:
-        leftRight_acceleration = 0.
-    else:
-        if left_keyHold is True:
-            if leftRight_acceleration < leftRight_cap*k:
-                leftRight_acceleration += 0.1*leftRight_cap*k
-            else:
-                leftRight_acceleration = leftRight_cap*k
-        elif right_keyHold is True:
-            if leftRight_acceleration > -leftRight_cap*k:
-                leftRight_acceleration -= 0.1*leftRight_cap*k
-            else:
-                leftRight_acceleration = -leftRight_cap*k
+    elif leftRight_keyHold == 1:
+        if leftRight_acceleration < 0.9:
+            leftRight_acceleration += 0.1
+        else:
+            leftRight_acceleration = 1
+    elif leftRight_keyHold == -1:
+        if leftRight_acceleration > -0.9:
+            leftRight_acceleration -= 0.1
+        else:
+            leftRight_acceleration = -1
             
-    """ Camera update - up / down """
-    if up_keyHold is False and down_keyHold is False:
-        if upDown_acceleration > 0.05*upDown_cap*k:
-            upDown_acceleration -= 0.1*upDown_cap*k
-        elif upDown_acceleration < -0.05*upDown_cap*k:
-            upDown_acceleration += 0.1*upDown_cap*k
+    """ Controller acceleration update - up / down """
+    if upDown_keyHold == 0:
+        if upDown_acceleration > 0.1:
+            upDown_acceleration -= 0.1
+        elif upDown_acceleration < -0.1:
+            upDown_acceleration += 0.1
         else:
             upDown_acceleration = 0.
-    elif up_keyHold is True and down_keyHold is True:
-        upDown_acceleration = 0.
-    else:
-        if up_keyHold is True:
-            if upDown_acceleration < upDown_cap*k:
-                upDown_acceleration += 0.1*upDown_cap*k
-            else:
-                upDown_acceleration = upDown_cap*k
-        elif down_keyHold is True:
-            if upDown_acceleration > -upDown_cap*k:
-                upDown_acceleration -= 0.1*upDown_cap*k
-            else:
-                upDown_acceleration = -upDown_cap*k
+    elif upDown_keyHold == 1:
+        if upDown_acceleration < 0.9:
+            upDown_acceleration += 0.1
+        else:
+            upDown_acceleration = 1
+    elif upDown_keyHold == -1:
+        if upDown_acceleration > -0.9:
+            upDown_acceleration -= 0.1
+        else:
+            upDown_acceleration = -1
 
-    """ Camera update - front / back """
-    if front_keyHold is False and back_keyHold is False:
-        if frontBack_acceleration > 0.05*frontBack_cap*k:
-            frontBack_acceleration -= 0.1*frontBack_cap*k
-        elif frontBack_acceleration < -0.05*frontBack_cap*k:
-            frontBack_acceleration += 0.1*frontBack_cap*k
+    """ Controller acceleration update - front / back """
+    if frontBack_keyHold == 0:
+        if frontBack_acceleration > 0.1:
+            frontBack_acceleration -= 0.1
+        elif frontBack_acceleration < -0.1:
+            frontBack_acceleration += 0.1
         else:
             frontBack_acceleration = 0.
-    elif front_keyHold is True and back_keyHold is True:
-        frontBack_acceleration = 0.
-    else:
-        if front_keyHold is True:
-            if frontBack_acceleration < frontBack_cap*k:
-                frontBack_acceleration += 0.1*frontBack_cap*k
-            else:
-                frontBack_acceleration = frontBack_cap*k
-        elif back_keyHold is True:
-            if frontBack_acceleration > -frontBack_cap*k:
-                frontBack_acceleration -= 0.1*frontBack_cap*k
-            else:
-                frontBack_acceleration = -frontBack_cap*k
+    elif frontBack_keyHold == 1:
+        if frontBack_acceleration < 0.9:
+            frontBack_acceleration += 0.1
+        else:
+            frontBack_acceleration = 1
+    elif frontBack_keyHold == -1:
+        if frontBack_acceleration > -0.9:
+            frontBack_acceleration -= 0.1
+        else:
+            frontBack_acceleration = -1
 
-    """ Apply camera control """
-    frontBack_cam += frontBack_acceleration
-    leftRight_cam += leftRight_acceleration
-    upDown_cam += upDown_acceleration
-    
-    Definitions.viewMatrix.push()
-    Definitions.viewMatrix.translate(0,0,frontBack_cam)
-    Definitions.viewMatrix.rotate(upDown_cam, 1, 0, 0)
-    Definitions.viewMatrix.rotate(leftRight_cam, 0, 1, 0)
-    glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
-    Definitions.viewMatrix.pop()
+    """ Apply camera/position/orientation control """
+    if caps == True:
+        StickMan.virtuMan.position[2] += frontBack_acceleration*frontBack_pos_cap*k
+        StickMan.virtuMan.position[0] += leftRight_acceleration*leftRight_pos_cap*k
+        StickMan.virtuMan.position[1] += upDown_acceleration*upDown_pos_cap*k
+    elif ctrl == True:
+        Q = Definitions.vector4D((StickMan.virtuMan.orientation))
+        Qdelta = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0,upDown_acceleration*upDown_ori_cap*k,
+                                                                     frontBack_acceleration*frontBack_ori_cap*k,
+                                                                     leftRight_acceleration*leftRight_ori_cap*k)))
+        Q = Definitions.vector4D.QuatProd(Q, Qdelta)
+        StickMan.virtuMan.orientation = [Q.o, Q.x, Q.y, Q.z]
+    else:
+        frontBack_cam += frontBack_acceleration*frontBack_cam_cap*k
+        leftRight_cam += leftRight_acceleration*upDown_cam_cap*k
+        upDown_cam += upDown_acceleration*leftRight_cam_cap*k
+        # update camera in shader
+        Definitions.viewMatrix.push()
+        Definitions.viewMatrix.translate(0,0,frontBack_cam)
+        Definitions.viewMatrix.rotate(upDown_cam, 1, 0, 0)
+        Definitions.viewMatrix.rotate(leftRight_cam, 0, 1, 0)
+        glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
+        Definitions.viewMatrix.pop()
 
     """ limbs control """
     if q_keyHold == False and w_keyHold == False:
@@ -432,7 +445,7 @@ def manage():
     if b_keyHold == False and n_keyHold == False:
         incSens[2] = 0
     
-    """ StickMan Events """
+    """ Limbs Events """
     for j in range (0, len(StickMan.selectedLimbs)):
         for i in range (0,len(StickMan.virtuMan.limbs)):
             if StickMan.selectedLimbs[j] == StickMan.virtuMan.limbs[i].tag:
