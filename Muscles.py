@@ -14,6 +14,8 @@ class muscle(object):
         self.Blocal = []
         self.Bworld = []
         self.modelMatrix = []
+        self.selected = False
+        self.show = Events.SHOW
 
 
 from OpenGL.GL import *
@@ -22,12 +24,14 @@ import math
 import numpy as np
 
 import Definitions
+import Events
 import Graphics
 import ID
 import Sensors
 import Shaders
 
 def preprocessMuscle(entity):
+
     for i in range(0,len(entity.muscles)):
 
         P1 = entity.muscles[i].Aworld
@@ -64,9 +68,15 @@ def preprocessMuscle(entity):
 OverMuscId = 0
 SelectedMuscId = 0
 
-def drawMuscleSurface(entity, style):
+def drawMuscleSurface(entity, style, show):
+    if Events.showMuscles == False:
+        return
+
 
     for i in range(0,len(entity.muscles)):
+        if entity.muscles[i].show == Events.HIDE\
+        or entity.muscles[i].show == Events.SHOW and show == 0:
+            continue
 
         """ verify matrix validity """
         if entity.muscles[i].modelMatrix == []:
@@ -103,6 +113,8 @@ def drawMuscleSurface(entity, style):
 
         
 def drawMuscleEdge(entity, style):
+    if Events.showMuscles == False:
+        return
         
     if style != Graphics.opaque and style != Graphics.blending:
         return
@@ -141,3 +153,13 @@ def drawMuscleEdge(entity, style):
             
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
+
+
+def setMusclesShow(entity, show):
+    for part in entity.muscles:
+        part.show = show
+
+def showMuscle(entity, tag):
+    for part in entity.muscles:
+        if part.tag == tag:
+            part.show = Events.SHOW 

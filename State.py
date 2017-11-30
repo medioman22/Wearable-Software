@@ -8,6 +8,7 @@ import ID
 import Limbs
 import Muscles
 import Sensors
+import StickMan
 
 pathUserSettings = "States/UserSettings/"
 extension = ".csv"
@@ -20,11 +21,17 @@ pathPostures = "Postures/"
 postureFileName = []
 
 pathGroups = "States/Groups/"
+currentSensorFile = 0
+sensorFileName = []
 saveGroupFile = ''
 
 pathTemplates = "States/Templates/"
-currentSensorFile = 0
-sensorFileName = []
+currentTemplateFile = 0
+templateFileName = []
+
+pathZoi = "Zoi/"
+currentZoiFile = 0
+zoiFileName = []
 
 def importUserSettings():
     file = open(pathUserSettings + "Resolution" + extension, 'r')
@@ -106,6 +113,8 @@ def updateFilesLists():
     global avatarFileName
     global postureFileName
     global sensorFileName
+    global templateFileName
+    global zoiFileName
 
     
     """ Update list of avatar files """
@@ -141,6 +150,14 @@ def updateFilesLists():
         file.close()
 
 
+    """ Update list of zoi files """
+    if GUI.selectedTemplate != "":
+        zoiFileName = os.listdir(pathTemplates + GUI.selectedTemplate + '/' + pathZoi)
+        for i in range(0,len(zoiFileName)):
+            zoiFileName[i] = zoiFileName[i][:-len(extension)]
+    else:
+        zoiFileName = []
+
 
 
 
@@ -162,6 +179,10 @@ def loadLimbs(entity):
         newLimb = Limbs.limb()
         newLimb.layer = int(l)
         newLimb.tag = t
+        if newLimb.tag == "Head":
+            newLimb.vbo = Graphics.vboSphere
+        else:
+            newLimb.vbo = Graphics.vboCylindre
         newLimb.offset = [float(o1), float(o2), float(o3)]
         newLimb.dimensions = [float(d1), float(d2), float(d3)]
         newLimb.saturations = [float(s1), float(s2), float(s3), float(s4), float(s5), float(s6)]
@@ -322,12 +343,17 @@ def loadZOI(zoiFileName):
     Sensors.zoiSens = []
 
     if zoiFileName == "":
+        Limbs.setLimbsShow(StickMan.virtuMan, Events.SHOW)
+        Muscles.setMusclesShow(StickMan.virtuMan, Events.SHOW)
         return
+    
+    Limbs.setLimbsShow(StickMan.virtuMan, Events.FADE)
+    Muscles.setMusclesShow(StickMan.virtuMan, Events.HIDE)
 
-    file = open(pathTemplates + zoiFileName + '/' + 'ZOI' + extension, 'r')
+    file = open(pathTemplates + GUI.selectedTemplate + '/' + pathZoi + zoiFileName + extension, 'r')
     
     color = (0.5,0.5,0.5,1)
-    type = zoiFileName
+    type = GUI.selectedTemplate
     while True:
         line = file.readline() # read sensor data
         if line == "":
@@ -335,6 +361,6 @@ def loadZOI(zoiFileName):
         name, parent, x, t, s = line.split(';')
         Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
         Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = name
+        Limbs.showLimb(StickMan.virtuMan, parent)
+        Muscles.showMuscle(StickMan.virtuMan, parent)
     file.close()
-
-

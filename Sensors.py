@@ -32,6 +32,9 @@ class sensors(object):
         self.s = coord[2]
         self.h = 0.
         self.color = color
+        self.modelMatrix = []
+        self.selected = False
+        self.show = True
         
 
 
@@ -109,6 +112,10 @@ def preprocessSensor(sensor, x, y, z):
     Definitions.modelMatrix.pop()
 
 def drawSensor(style):
+    if Events.showSensors == False:
+        return
+
+
     vboId = -1
     for indices in Definitions.packageIndices[2]:
         pack = Definitions.packagePreprocess[indices[0]][indices[1]]
@@ -175,6 +182,9 @@ def drawSensor(style):
 
 
 def drawDashed(style):
+    if Events.showSensors == False:
+        return
+
     vboId = -1
     for indices in Definitions.packageIndices[3]:
         pack = Definitions.packagePreprocess[indices[0]][indices[1]]

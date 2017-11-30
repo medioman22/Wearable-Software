@@ -23,6 +23,10 @@ def preprocessSaturations(entity):
         
 
 def drawSaturationLines():
+    if Events.showSaturations == Events.HIDE:
+        return
+    
+
     if Events.style != Graphics.idBuffer:
         vboId = 0
         edgeSurf = 0
@@ -39,6 +43,10 @@ def drawSaturationLines():
 
             
 def drawSaturationBalls():
+    if Events.showSaturations == Events.HIDE or Events.showSaturations == Events.FADE:
+        return
+    
+
     if Events.style != Graphics.idBuffer:
         vboId = 0
         edgeSurf = 0

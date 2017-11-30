@@ -40,6 +40,9 @@ def preprocessGround(rMax = 5):
 def drawGround():
     if Events.style == Graphics.idBuffer:
         return
+    if Events.showGround == False:
+        return
+    
 
     vboId = -1
     for indices in Definitions.packageIndices[0]:

@@ -15,6 +15,10 @@ class limb(object):
         self.swing = [1,0,0,0]
         self.angle = [1,0,0,0]
         self.layer = 0
+        self.modelMatrix = []
+        self.vbo = 0
+        self.selected = False
+        self.show = Events.SHOW
 
 
 
@@ -23,6 +27,7 @@ import numpy as np
 import math
 
 import Definitions
+import Events
 import Graphics
 import ID
 import Muscles
@@ -40,11 +45,10 @@ def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
     Definitions.modelMatrix.push()
     Definitions.modelMatrix.translate(dx,dy,dz)
     Definitions.modelMatrix.scale(x,y,z)
-    """ store transformation in package """
-    if entity.limbs[current_limb].tag == "Head":
-        Definitions.packagePreprocess[Graphics.vboSphere] = Definitions.packagePreprocess[Graphics.vboSphere] + [[Definitions.modelMatrix.peek(), "Body", entity.limbs[current_limb].id, limbIsSelected],]
-    else:
-        Definitions.packagePreprocess[Graphics.vboCylindre] = Definitions.packagePreprocess[Graphics.vboCylindre] + [[Definitions.modelMatrix.peek(), "Body", entity.limbs[current_limb].id, limbIsSelected],]
+    entity.limbs[current_limb].modelMatrix = Definitions.modelMatrix.peek()
+
+    """ limb is selected ? """
+    entity.limbs[current_limb].selected = limbIsSelected
 
     """ preprocess muscles attachment points """
     for i in range(0,len(entity.muscles)):
@@ -64,59 +68,73 @@ def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
             Sensors.preprocessSensor(sensor, x, y, z)
 
 
+            # TODO : do all same vbo together !!
+def drawBodySurface(entity, style, show):
+    if Events.showBody == Events.HIDE or Events.showBody == Events.FADE and style == Graphics.idBuffer:
+        return
 
-def drawBodySurface(style):
+
     global lookingAt
 
     vboId = -1
-    for indices in Definitions.packageIndices[1]:
-        pack = Definitions.packagePreprocess[indices[0]][indices[1]]
-        
+    for part in entity.limbs:
+        if part.show == Events.FADE and show == 1\
+        or part.show == Events.SHOW and show == 0\
+        or part.show == Events.FADE and style == Graphics.idBuffer:
+            continue
+
         drawSaturation = False
-        if vboId != indices[0]:
+        if vboId != part.vbo:
             """ choose vbo """
-            vboId = indices[0]
+            vboId = part.vbo
                     
             """ bind surfaces vbo """
             Graphics.indexPositions[vboId][Graphics.vboSurfaces].bind()
             Graphics.vertexPositions[vboId].bind()
             glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         """ choose color """
+        alpha = 0.3
+        if Events.showBody == Events.FADE or part.show == Events.FADE:
+            alpha = 0.1
         if style == Graphics.idBuffer:
-            r, g, b = ID.id2color(pack[Definitions.packID])
+            r, g, b = ID.id2color(part.id)
             color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
-        elif pack[Definitions.selected] == True:
-            color = np.array([0.,0.,0.5,0.3], dtype = np.float32)
+        elif part.selected == True:
+            color = np.array([0.,0.,0.5,alpha], dtype = np.float32)
             drawSaturation = True
-        elif pack[Definitions.packID] == overLimbId:
-            color = np.array([0.,0.,1.,0.3], dtype = np.float32)
+        elif part.id == overLimbId:
+            color = np.array([0.,0.,1.,alpha], dtype = np.float32)
         else:
-            color = np.array([1.,1.,1.,0.3], dtype = np.float32)
+            color = np.array([1.,1.,1.,alpha], dtype = np.float32)
 
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, part.modelMatrix)
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
         
-        if pack[Definitions.packID] == lookingAtID:
-            lookingAt = np.dot(np.array([[0, 0, 0, 1]]), pack[Definitions.packModel])
+        if part.id == lookingAtID:
+            lookingAt = np.dot(np.array([[0, 0, 0, 1]]), part.modelMatrix)
 
     
-def drawBodyEdge(style):
-    if style != Graphics.opaque and style != Graphics.blending:
+def drawBodyEdge(entity, style):
+    if Events.showBody == Events.HIDE or Events.showBody == Events.FADE:
         return
 
+    if style != Graphics.opaque and style != Graphics.blending:
+        return
+    
+
     vboId = -1
-    for indices in Definitions.packageIndices[1]:
-        pack = Definitions.packagePreprocess[indices[0]][indices[1]]
-                
-        if vboId != indices[0]:
+    for part in entity.limbs:
+        if part.show == Events.FADE or part.show == Events.HIDE:
+            continue
+        if vboId != part.vbo:
             """ choose vbo """
-            vboId = indices[0]
+            vboId = part.vbo
                     
             """ bind surfaces vbo """
             Graphics.indexPositions[vboId][Graphics.vboEdges].bind()
@@ -127,9 +145,9 @@ def drawBodyEdge(style):
         if style == Graphics.opaque:
             color = np.array([0.5,0.5,0.5,1.], dtype = np.float32)
         elif style == Graphics.blending:
-            if pack[Definitions.selected] == True:
+            if part.selected == True:
                 color = np.array([0.,0.,0.5,0.3], dtype = np.float32)
-            elif pack[Definitions.packID] == overLimbId:
+            elif part.id == overLimbId:
                 color = np.array([0.,0.,1.,0.3], dtype = np.float32)
             else:
                 color = np.array([1.,1.,1.,1.], dtype = np.float32)
@@ -138,7 +156,17 @@ def drawBodyEdge(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
     
         """ send matrix to shader """
-        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, part.modelMatrix)
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
+
+
+def setLimbsShow(entity, show):
+    for part in entity.limbs:
+        part.show = show
+
+def showLimb(entity, tag):
+    for part in entity.limbs:
+        if part.tag == tag:
+            part.show = Events.SHOW 

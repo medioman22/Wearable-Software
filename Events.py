@@ -72,10 +72,13 @@ resetSens = False
 deleteSens = False
 
 style = 0 # rendering style
-showBody = True
+SHOW = 0
+FADE = 1
+HIDE = 2
+showBody = SHOW
 showMuscles = True
 showSensors = True
-showSaturations = True
+showSaturations = SHOW
 showGround = True
 rMax = 0 # ground radius
 
@@ -149,8 +152,6 @@ def manage():
             pygame.quit()
             quit()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            #pygame.quit()
-            #quit()
             GUI.selectedTemplate = ""
             GUI.selectedGroup = 0
             GUI.selectedWindow = 0
@@ -233,6 +234,7 @@ def manage():
         if event.type == pygame.KEYUP and (event.key == pygame.K_PAGEUP or event.key == pygame.K_PAGEDOWN):
             frontBack_keyHold = 0
 
+
         if rename != None:
             if event.type == pygame.KEYDOWN:
                 State.renameFile(pygame.key.name(event.key))
@@ -240,32 +242,32 @@ def manage():
             """ Stickman controller """ # WARNING : pygame uses qwerty by default !
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 q_keyHold = True
-                pivot[0] = pivotSpeed
+                pivot[0] = pivotSpeed*k
             elif event.type == pygame.KEYUP and event.key == pygame.K_q:
                 q_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
                 w_keyHold = True
-                pivot[0] = -pivotSpeed
+                pivot[0] = -pivotSpeed*k
             elif event.type == pygame.KEYUP and event.key == pygame.K_w:
                 w_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
                 e_keyHold = True
-                pivot[1] = pivotSpeed
+                pivot[1] = pivotSpeed*k
             elif event.type == pygame.KEYUP and event.key == pygame.K_e:
                 e_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 r_keyHold = True
-                pivot[1] = -pivotSpeed
+                pivot[1] = -pivotSpeed*k
             elif event.type == pygame.KEYUP and event.key == pygame.K_r:
                 r_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_t:
                 t_keyHold = True
-                pivot[2] = pivotSpeed
+                pivot[2] = pivotSpeed*k
             elif event.type == pygame.KEYUP and event.key == pygame.K_t:
                 t_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
                 y_keyHold = True
-                pivot[2] = -pivotSpeed
+                pivot[2] = -pivotSpeed*k
             elif event.type == pygame.KEYUP and event.key == pygame.K_y:
                 y_keyHold = False
 
@@ -273,32 +275,32 @@ def manage():
                 z_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                 z_keyHold = True
-                incSens[0] = 0.025
+                incSens[0] = 0.025*k
             if event.type == pygame.KEYUP and event.key == pygame.K_x:
                 x_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                 x_keyHold = True
-                incSens[0] = -0.025
+                incSens[0] = -0.025*k
             if event.type == pygame.KEYUP and event.key == pygame.K_c:
                 c_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
                 c_keyHold = True
-                incSens[1] = 5
+                incSens[1] = 5*k
             if event.type == pygame.KEYUP and event.key == pygame.K_v:
                 v_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
                 v_keyHold = True
-                incSens[1] = -5
+                incSens[1] = -5*k
             if event.type == pygame.KEYUP and event.key == pygame.K_b:
                 b_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                 b_keyHold = True
-                incSens[2] = 5
+                incSens[2] = 5*k
             if event.type == pygame.KEYUP and event.key == pygame.K_n:
                 n_keyHold = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
                 n_keyHold = True
-                incSens[2] = -5
+                incSens[2] = -5*k
             if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
                 resetSens = True
 
@@ -311,13 +313,13 @@ def manage():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 style = (style + 1)%4
             if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
-                showBody = not showBody
+                showBody = (showBody+1)%3
             if event.type == pygame.KEYDOWN and event.key == pygame.K_2:
                 showMuscles = not showMuscles
             if event.type == pygame.KEYDOWN and event.key == pygame.K_3:
                 showSensors = not showSensors
             if event.type == pygame.KEYDOWN and event.key == pygame.K_4:
-                showSaturations = not showSaturations
+                showSaturations = (showSaturations+1)%3
             if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
                 showGround = not showGround
             if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
@@ -405,11 +407,12 @@ def manage():
         else:
             frontBack_acceleration = -1
 
+
     """ Apply camera/position/orientation control """
     if caps == True:
-        StickMan.virtuMan.position[2] += frontBack_acceleration*frontBack_pos_cap*k
         StickMan.virtuMan.position[0] += leftRight_acceleration*leftRight_pos_cap*k
         StickMan.virtuMan.position[1] += upDown_acceleration*upDown_pos_cap*k
+        StickMan.virtuMan.position[2] += frontBack_acceleration*frontBack_pos_cap*k
     elif ctrl == True:
         Q = Definitions.vector4D((StickMan.virtuMan.orientation))
         Qdelta = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0,upDown_acceleration*upDown_ori_cap*k,
@@ -428,6 +431,7 @@ def manage():
         Definitions.viewMatrix.rotate(leftRight_cam, 0, 1, 0)
         glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
         Definitions.viewMatrix.pop()
+
 
     """ limbs control """
     if q_keyHold == False and w_keyHold == False:

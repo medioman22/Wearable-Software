@@ -92,6 +92,7 @@ quitButton = 6
 guiPannel = [textTex('Help'), textTex('Templates'), textTex('Groups'), textTex('Data'), textTex('----'), textTex('Quit')]
 guiPostures = []
 guiSensorTypes = []
+guiSensorZoi = []
 guiSensorGroups = []
 guiTitleTemplates = [textTex('Wearable templates')]
 guiTitleGroups = [textTex('Wearable groups'), textTex('Save in ~')]
@@ -119,6 +120,7 @@ guiHelp = [ textTex('Arrows, page up/page dn = camera'),
 def updateGuiLists():
     global guiPostures
     global guiSensorTypes
+    global guiSensorZoi
     global guiSensorGroups
     global guiCursorInfo
 
@@ -131,6 +133,11 @@ def updateGuiLists():
     for sensorType in Sensors.sensorGraphics:
         guiSensorTypes = guiSensorTypes + [textTex()]
         guiSensorTypes[len(guiSensorTypes)-1].text = sensorType.type
+
+    guiSensorZoi = []
+    for file in State.zoiFileName:
+        guiSensorZoi = guiSensorZoi + [textTex()]
+        guiSensorZoi[len(guiSensorZoi)-1].text = file
 
     guiSensorGroups = []
     for file in State.sensorFileName:
@@ -153,6 +160,7 @@ TEX_TEXTURE = None
 
 overGuiId = 0
 selectedTemplate = ""
+selectedZoi = ""
 selectedGroup = 0
 selectedPosture = 1
 selectedWindow = 0
@@ -179,6 +187,15 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                 elif overGuiId == txt.id:
                     color = Sensors.sensorGraphics[txt.id-1 - ID.offsetId(ID.TEMPLATE)].color
                     color = (0.5*color[0], 0.5*color[1], 0.5*color[2],255)
+                else:
+                    color = (255,255,255,255)
+            elif ID.idCategory(txt.id) == ID.ZOILIST:
+                #if Events.rename == Sensors.sensorGraphics[txt.id-1 - ID.offsetId(ID.ZOILIST)].type:
+                #    backgroundColor = (0, 0, 0, 255)
+                if selectedZoi == txt.text:
+                    color = (255, 0, 0, 255)
+                elif overGuiId == txt.id:
+                    color = (127, 0, 0, 255)
                 else:
                     color = (255,255,255,255)
             elif ID.idCategory(txt.id) == ID.GROUPE:

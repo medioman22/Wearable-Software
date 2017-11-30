@@ -141,13 +141,25 @@ def mouseManage():
             if Events.mouse_click == True:
                 if GUI.selectedTemplate != Sensors.sensorGraphics[overID-1 - ID.offsetId(ID.TEMPLATE)].type:
                     GUI.selectedTemplate = Sensors.sensorGraphics[overID-1 - ID.offsetId(ID.TEMPLATE)].type
-                    State.loadZOI(GUI.selectedTemplate)
                 else:
-                    State.loadZOI("")
                     GUI.selectedTemplate = ""
+                GUI.selectedZoi = ""
+                State.loadZOI(GUI.selectedZoi)
             elif Events.setLookAt == True:
                 Events.rename = Sensors.sensorGraphics[GUI.overGuiId-1 - ID.offsetId(ID.TEMPLATE)].type
                 Events.renameType = ID.TEMPLATE
+
+        # zoi
+        if ID.idCategory(GUI.overGuiId) == ID.ZOILIST:
+            if Events.mouse_click == True:
+                if GUI.selectedZoi != State.zoiFileName[overID-1 - ID.offsetId(ID.ZOILIST)]:
+                    GUI.selectedZoi = State.zoiFileName[overID-1 - ID.offsetId(ID.ZOILIST)]
+                else:
+                    GUI.selectedZoi = ""
+                State.loadZOI(GUI.selectedZoi)
+            elif Events.setLookAt == True:
+                Events.rename = GUI.selectedZoi
+                Events.renameType = ID.ZOILIST
         
         # postures
         if ID.idCategory(GUI.overGuiId) == ID.POSTURE:

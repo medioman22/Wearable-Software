@@ -124,8 +124,9 @@ def main():
 
 
 
-
-    """ >>> main loop <<< """
+    """  -----------------  """
+    """  >>> main loop <<<  """
+    """  -----------------  """
     while True:
         # keep track of loop frequency
         flagStart = time.clock()
@@ -151,7 +152,7 @@ def main():
         """
             Update all entities ID
         """
-        ID.setId([StickMan.virtuMan.limbs, StickMan.virtuMan.muscles, Sensors.virtuSens, Sensors.zoiSens, GUI.guiPannel, GUI.guiSensorTypes, GUI.guiSensorGroups, GUI.guiPostures])
+        ID.setId([StickMan.virtuMan.limbs, StickMan.virtuMan.muscles, Sensors.virtuSens, Sensors.zoiSens, GUI.guiPannel, GUI.guiSensorTypes, GUI.guiSensorZoi, GUI.guiSensorGroups, GUI.guiPostures])
         
 
 
@@ -183,8 +184,8 @@ def main():
             for pack in package:
                 if pack[Definitions.packParent] == "Ground":
                     Definitions.packageIndices[0] = Definitions.packageIndices[0] + [[i, j],]
-                elif pack[Definitions.packParent] == "Body":
-                    Definitions.packageIndices[1] = Definitions.packageIndices[1] + [[i, j],]
+                #elif pack[Definitions.packParent] == "Body":
+                #    Definitions.packageIndices[1] = Definitions.packageIndices[1] + [[i, j],]
                 elif pack[Definitions.packParent] == "Sensor":
                     Definitions.packageIndices[2] = Definitions.packageIndices[2] + [[i, j],]
                 elif pack[Definitions.packParent] == "Link":
@@ -211,18 +212,16 @@ def main():
 
         Graphics.modelView(Graphics.opaque)
         
-        if Events.showBody == True:
-            Limbs.drawBodySurface(Graphics.idBuffer)
-        if Events.showMuscles == True:
-            Muscles.drawMuscleSurface(StickMan.virtuMan, Graphics.idBuffer)
-        if Events.showSensors == True:
-            Sensors.drawSensor(Graphics.idBuffer)
+        Limbs.drawBodySurface(StickMan.virtuMan, Graphics.idBuffer, 1)
+        Muscles.drawMuscleSurface(StickMan.virtuMan, Graphics.idBuffer, 1)
+        Sensors.drawSensor(Graphics.idBuffer)
 
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
         if GUI.selectedWindow == GUI.windowTemplatesId:
             window = GUI.windowTemplates
             GUI.subWindow(window,False)
             GUI.textTexture(GUI.guiSensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, True, window)
+            GUI.textTexture(GUI.guiSensorZoi, 0, 0, 1, 1, True, window)
         if GUI.selectedWindow == GUI.windowGroupsId:
             window = GUI.windowGroups
             GUI.subWindow(window,False)
@@ -257,37 +256,38 @@ def main():
         window = GUI.windowScene
         GUI.subWindow(window,Events.style != Graphics.idBuffer)
         
-        if Events.showGround == True:
-            # draw scene
-            Graphics.modelView(Graphics.blending)
-            Ground.drawGround()
+        # draw scene
+        Graphics.modelView(Graphics.blending)
+        Ground.drawGround()
 
-        if Events.showSaturations == True:
-            # draw saturation balls
-            Graphics.modelView(Graphics.blending)
-            Saturations.drawSaturationBalls()
+        # draw saturation balls
+        Graphics.modelView(Graphics.blending)
+        Saturations.drawSaturationBalls()
         
-        if Events.showMuscles == True:
-            # draw muscles
-            Graphics.modelView(Events.style)
-            Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style)
-            Muscles.drawMuscleEdge(StickMan.virtuMan, Events.style)
-        if Events.showBody == True:
-            # draw body
-            Graphics.modelView(Events.style)
-            Limbs.drawBodySurface(Events.style)
-            Limbs.drawBodyEdge(Events.style)
+        # draw fade body
+        Graphics.modelView(Graphics.blending)
+        Limbs.drawBodySurface(StickMan.virtuMan, Events.style, 0)
+        # draw fade muscles
+        Graphics.modelView(Events.style)
+        Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, 0)
+        
+        # draw body
+        Graphics.modelView(Events.style)
+        Limbs.drawBodySurface(StickMan.virtuMan, Events.style, 1)
+        Limbs.drawBodyEdge(StickMan.virtuMan, Events.style)
+        # draw muscles
+        Graphics.modelView(Events.style)
+        Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, 1)
+        Muscles.drawMuscleEdge(StickMan.virtuMan, Events.style)
             
-        if Events.showSaturations == True:
-            # draw saturation lines
-            Graphics.modelView(Graphics.opaque)
-            Saturations.drawSaturationLines()
+        # draw saturation lines
+        Graphics.modelView(Graphics.opaque)
+        Saturations.drawSaturationLines()
         
-        if Events.showSensors == True:
-            # draw sensors
-            Graphics.modelView(Graphics.opaque)
-            Sensors.drawSensor(Events.style)
-            Sensors.drawDashed(Events.style)
+        # draw sensors
+        Graphics.modelView(Graphics.opaque)
+        Sensors.drawSensor(Events.style)
+        Sensors.drawDashed(Events.style)
         
 
         # draw GUI
@@ -303,6 +303,7 @@ def main():
             if Events.style != Graphics.idBuffer:
                 GUI.textTexture(GUI.guiTitleTemplates, 0, 0.95, 0, 1, False, window)
             GUI.textTexture(GUI.guiSensorTypes, -0.95, 0.95-4*0.03*window.ty, 1, 1, Events.style == Graphics.idBuffer, window)
+            GUI.textTexture(GUI.guiSensorZoi, 0, 0, 1, 1, Events.style == Graphics.idBuffer, window)
             
             """ display selected template """
             window = GUI.windowSensor

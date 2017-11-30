@@ -12,8 +12,9 @@ SENSOR = 3
 ZOI = 4
 PANNEL = 5
 TEMPLATE = 6
-GROUPE = 7
-POSTURE = 8
+ZOILIST = 7
+GROUPE = 8
+POSTURE = 9
 
 
 def setId(list):
@@ -57,6 +58,10 @@ def idCategory(ID):
         ID >= GUI.guiSensorTypes[0].id and\
         ID <= GUI.guiSensorTypes[len(GUI.guiSensorTypes)-1].id:
             return TEMPLATE
+    if GUI.guiSensorZoi != [] and\
+        ID >= GUI.guiSensorZoi[0].id and\
+        ID <= GUI.guiSensorZoi[len(GUI.guiSensorZoi)-1].id:
+            return ZOILIST
     if GUI.guiSensorGroups != [] and\
         ID >= GUI.guiSensorGroups[0].id and\
         ID <= GUI.guiSensorGroups[len(GUI.guiSensorGroups)-1].id:
@@ -80,6 +85,8 @@ def offsetId(type):
         return GUI.guiPannel[0].id -1
     if type == TEMPLATE:
         return GUI.guiSensorTypes[0].id -1
+    if type == ZOILIST:
+        return GUI.guiSensorZoi[0].id -1
     if type == GROUPE:
         return GUI.guiSensorGroups[0].id -1
     if type == POSTURE:
