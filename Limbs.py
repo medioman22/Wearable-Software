@@ -70,7 +70,9 @@ def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
 
             # TODO : do all same vbo together !!
 def drawBodySurface(entity, style, show):
-    if Events.showBody == Events.HIDE or Events.showBody == Events.FADE and style == Graphics.idBuffer:
+    if Events.showBody == Events.HIDE\
+    or Events.showBody == Events.FADE and show != Events.FADE\
+    or Events.showBody == Events.FADE and style == Graphics.idBuffer:
         return
 
 
@@ -78,8 +80,8 @@ def drawBodySurface(entity, style, show):
 
     vboId = -1
     for part in entity.limbs:
-        if part.show == Events.FADE and show == 1\
-        or part.show == Events.SHOW and show == 0\
+        if part.show == Events.FADE and show == Events.SHOW\
+        or part.show == Events.SHOW and show == Events.FADE and Events.showBody != Events.FADE\
         or part.show == Events.FADE and style == Graphics.idBuffer:
             continue
 

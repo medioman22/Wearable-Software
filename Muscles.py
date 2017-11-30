@@ -75,7 +75,7 @@ def drawMuscleSurface(entity, style, show):
 
     for i in range(0,len(entity.muscles)):
         if entity.muscles[i].show == Events.HIDE\
-        or entity.muscles[i].show == Events.SHOW and show == 0:
+        or entity.muscles[i].show == Events.SHOW and show == Events.FADE:
             continue
 
         """ verify matrix validity """

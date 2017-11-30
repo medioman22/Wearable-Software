@@ -212,8 +212,8 @@ def main():
 
         Graphics.modelView(Graphics.opaque)
         
-        Limbs.drawBodySurface(StickMan.virtuMan, Graphics.idBuffer, 1)
-        Muscles.drawMuscleSurface(StickMan.virtuMan, Graphics.idBuffer, 1)
+        Limbs.drawBodySurface(StickMan.virtuMan, Graphics.idBuffer, Events.SHOW)
+        Muscles.drawMuscleSurface(StickMan.virtuMan, Graphics.idBuffer, Events.SHOW)
         Sensors.drawSensor(Graphics.idBuffer)
 
         glClear(GL_DEPTH_BUFFER_BIT) # clear depth to ensure gui in front of display
@@ -266,18 +266,18 @@ def main():
         
         # draw fade body
         Graphics.modelView(Graphics.blending)
-        Limbs.drawBodySurface(StickMan.virtuMan, Events.style, 0)
+        Limbs.drawBodySurface(StickMan.virtuMan, Events.style, Events.FADE)
         # draw fade muscles
         Graphics.modelView(Events.style)
-        Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, 0)
+        Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, Events.FADE)
         
         # draw body
         Graphics.modelView(Events.style)
-        Limbs.drawBodySurface(StickMan.virtuMan, Events.style, 1)
+        Limbs.drawBodySurface(StickMan.virtuMan, Events.style, Events.SHOW)
         Limbs.drawBodyEdge(StickMan.virtuMan, Events.style)
         # draw muscles
         Graphics.modelView(Events.style)
-        Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, 1)
+        Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, Events.SHOW)
         Muscles.drawMuscleEdge(StickMan.virtuMan, Events.style)
             
         # draw saturation lines
