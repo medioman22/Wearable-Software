@@ -82,6 +82,8 @@ showSaturations = SHOW
 showGround = True
 rMax = 0 # ground radius
 
+loadGroup = False
+loadZoi = False
 
 def manage():
 
@@ -132,6 +134,9 @@ def manage():
     global showGround
     global rMax
 
+    global loadGroup
+    global loadZoi
+
     dt = time.clock() - lastTime
     lastTime = time.clock()
     k = 18*dt # adjust speed to time instead of frame rate
@@ -144,6 +149,16 @@ def manage():
     resetSens = False
     deleteSens = False
     prevNext = 0
+    
+    if loadGroup == True:
+        State.loadGroups()
+        loadGroup = False
+    if loadZoi == True:
+        State.loadZOI(GUI.selectedZoi)
+        loadZoi = False
+    if Sensors.newSens != []:
+        Sensors.virtuSens = Sensors.virtuSens + Sensors.newSens
+        Sensors.newSens = []
 
     """ New events """
     for event in pygame.event.get():
@@ -327,7 +342,7 @@ def manage():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
                 State.loadPosture(StickMan.virtuMan)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-                State.saveGroups()
+                State.saveGroups(State.saveGroupFile)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
                 State.loadGroups()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_s:

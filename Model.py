@@ -165,6 +165,7 @@ def main():
         else:
             Definitions.modelMatrix.set(np.identity(4))
 
+        # Preprocess of limbs
         Definitions.modelMatrix.push()
         Definitions.modelMatrix.translate(StickMan.virtuMan.position[0],StickMan.virtuMan.position[1],StickMan.virtuMan.position[2])
         R = Definitions.vector4D.Quat2Vec(Definitions.vector4D((StickMan.virtuMan.orientation)))
@@ -184,15 +185,9 @@ def main():
             for pack in package:
                 if pack[Definitions.packParent] == "Ground":
                     Definitions.packageIndices[0] = Definitions.packageIndices[0] + [[i, j],]
-                #elif pack[Definitions.packParent] == "Body":
-                #    Definitions.packageIndices[1] = Definitions.packageIndices[1] + [[i, j],]
-                elif pack[Definitions.packParent] == "Sensor":
-                    Definitions.packageIndices[2] = Definitions.packageIndices[2] + [[i, j],]
-                elif pack[Definitions.packParent] == "Link":
-                    Definitions.packageIndices[3] = Definitions.packageIndices[3] + [[i, j],]
                 j += 1
             i += 1
-
+        print(len(Definitions.packagePreprocess))
 
 
         """ 
@@ -264,18 +259,18 @@ def main():
         Graphics.modelView(Graphics.blending)
         Saturations.drawSaturationBalls()
         
-        # draw fade body
+        # draw FADE body
         Graphics.modelView(Graphics.blending)
         Limbs.drawBodySurface(StickMan.virtuMan, Events.style, Events.FADE)
-        # draw fade muscles
+        # draw FADE muscles
         Graphics.modelView(Events.style)
         Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, Events.FADE)
         
-        # draw body
+        # draw SHOW body
         Graphics.modelView(Events.style)
         Limbs.drawBodySurface(StickMan.virtuMan, Events.style, Events.SHOW)
         Limbs.drawBodyEdge(StickMan.virtuMan, Events.style)
-        # draw muscles
+        # draw SHOW muscles
         Graphics.modelView(Events.style)
         Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, Events.SHOW)
         Muscles.drawMuscleEdge(StickMan.virtuMan, Events.style)

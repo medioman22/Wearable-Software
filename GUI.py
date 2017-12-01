@@ -140,7 +140,7 @@ def updateGuiLists():
         guiSensorZoi[len(guiSensorZoi)-1].text = file
 
     guiSensorGroups = []
-    for file in State.sensorFileName:
+    for file in State.groupFileName:
         guiSensorGroups = guiSensorGroups + [textTex()]
         guiSensorGroups[len(guiSensorGroups)-1].text = file[0]
 
@@ -199,9 +199,9 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
                 else:
                     color = (255,255,255,255)
             elif ID.idCategory(txt.id) == ID.GROUPE:
-                if Events.rename == State.sensorFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][0]:
+                if Events.rename == State.groupFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][0]:
                     backgroundColor = (0, 0, 0, 255)
-                if State.sensorFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][1] == True:
+                if State.groupFileName[txt.id-1 - ID.offsetId(ID.GROUPE)][1] == True:
                     color = (0, 255, 0, 255)
                 elif overGuiId == txt.id:
                     color = (0, 127, 0, 255)

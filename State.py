@@ -21,8 +21,7 @@ pathPostures = "Postures/"
 postureFileName = []
 
 pathGroups = "States/Groups/"
-currentSensorFile = 0
-sensorFileName = []
+groupFileName = []
 saveGroupFile = ''
 
 pathTemplates = "States/Templates/"
@@ -59,7 +58,7 @@ def renameFile(key):
             if Events.renameType == ID.TEMPLATE:
                 os.rename(pathTemplates + Events.rename, pathTemplates + newName)
                 # change sensor name in group files to match with new template name
-                for fileName in sensorFileName:
+                for fileName in groupFileName:
                     # read file
                     file = open(pathGroups + fileName[0] + extension, 'r')
                     fileData = []
@@ -112,7 +111,7 @@ def renameFile(key):
 def updateFilesLists():
     global avatarFileName
     global postureFileName
-    global sensorFileName
+    global groupFileName
     global templateFileName
     global zoiFileName
 
@@ -130,11 +129,11 @@ def updateFilesLists():
     tempList = []
     for file in listFiles:
         tempList = tempList + [[file[:-4], False]]
-    for fileName in sensorFileName:
+    for fileName in groupFileName:
         for i in range(0,len(tempList)):
             if fileName[0] == tempList[i][0]:
                 tempList[i][1] = fileName[1]
-    sensorFileName = tempList
+    groupFileName = tempList
     
 
     """ Update list of template files """
@@ -298,10 +297,10 @@ def saveTemplates(template):
     file.close()
 
 """
-    Sensors files
+    Group files
 """
-def saveGroups():
-    file = open(pathGroups + saveGroupFile + extension, 'w')
+def saveGroups(saveFile):
+    file = open(pathGroups + saveFile + extension, 'w')
 
     for sensor in Sensors.virtuSens:
         file.write(sensor.tag)
@@ -321,7 +320,7 @@ def saveGroups():
 def loadGroups():
     Sensors.virtuSens = []
 
-    for file in sensorFileName:
+    for file in groupFileName:
         if file[1] == True:
             file = open(pathGroups + file[0] + extension, 'r')
     

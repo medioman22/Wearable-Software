@@ -68,7 +68,7 @@ def mouseManage():
                     if GUI.selectedTemplate == sensorData.type:
                         r,g,b,a = sensorData.color
                         color = (r/255., g/255., b/255.)
-                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag, sensorData.type, (0.,90,90), color)]
+                        Sensors.newSens = [Sensors.sensors(StickMan.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag, sensorData.type, (0.,90,90), color)]
             # select limb
             else:
                 Select = True
@@ -90,26 +90,23 @@ def mouseManage():
                 Sensors.selectedSens = overID
 
             
-        for indices in Definitions.packageIndices[2]:
-            pack = Definitions.packagePreprocess[indices[0]][indices[1]]
-            if pack[Definitions.packID] == Sensors.overSensId:
-                
+        for sensor in Sensors.virtuSens + Sensors.zoiSens:
+            if sensor.id == Sensors.overSensId:
                 if Events.mouse_click == True:
-                    if GUI.selectedTemplate != "":
+                    if GUI.selectedTemplate != "" and ID.idCategory(sensor.id) == ID.ZOI:
                         for sensorData in Sensors.sensorGraphics:
                             if GUI.selectedTemplate == sensorData.type:
                                 r,g,b,a = sensorData.color
                                 color = (r/255., g/255., b/255.)
-                                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(pack[Definitions.entity].attach, sensorData.type, (pack[Definitions.entity].x,pack[Definitions.entity].t,pack[Definitions.entity].s), color)]
-                        
-                                Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = pack[Definitions.entity].tag
+                                Sensors.newSens = [Sensors.sensors(sensor.attach, sensorData.type, (sensor.x,sensor.t,sensor.s), color)]
+                                Sensors.newSens[0].tag = sensor.tag
 
                 if Events.deleteSens == True:
-                    if ID.idCategory(pack[Definitions.entity].id) == ID.SENSOR:
-                        del Sensors.virtuSens[pack[Definitions.entity].id - ID.offsetId(ID.SENSOR)]
+                    if ID.idCategory(sensor.id) == ID.SENSOR:
+                        del Sensors.virtuSens[sensor.id - ID.offsetId(ID.SENSOR)]
 
-                name = ' (' + pack[Definitions.entity].type + ')'
-                info = [str(pack[Definitions.entity].x) + ' ' + str(pack[Definitions.entity].t) + ' ' + str(pack[Definitions.entity].s), str(pack[Definitions.entity].id), str(pack[Definitions.entity].tag)]
+                name = ' (' + sensor.type + ')'
+                info = [str(sensor.x) + ' ' + str(sensor.t) + ' ' + str(sensor.s), str(sensor.id), str(sensor.tag)]
                 break
         
     if parent == 2:
@@ -126,14 +123,14 @@ def mouseManage():
         # groupes
         if ID.idCategory(GUI.overGuiId) == ID.GROUPE:
             if Events.mouse_click == True:
-                State.sensorFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][1] = not State.sensorFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][1]
-                State.loadGroups()
+                State.groupFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][1] = not State.groupFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][1]
+                Events.loadGroup = True
                 if GUI.selectedGroup != overID:
                     GUI.selectedGroup = overID
                 else:
                     GUI.selectedGroup = 0
             elif Events.setLookAt == True:
-                Events.rename = State.sensorFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][0]
+                Events.rename = State.groupFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][0]
                 Events.renameType = ID.GROUPE
 
         # templates
@@ -144,7 +141,7 @@ def mouseManage():
                 else:
                     GUI.selectedTemplate = ""
                 GUI.selectedZoi = ""
-                State.loadZOI(GUI.selectedZoi)
+                Events.loadZoi = True
             elif Events.setLookAt == True:
                 Events.rename = Sensors.sensorGraphics[GUI.overGuiId-1 - ID.offsetId(ID.TEMPLATE)].type
                 Events.renameType = ID.TEMPLATE
@@ -156,7 +153,7 @@ def mouseManage():
                     GUI.selectedZoi = State.zoiFileName[overID-1 - ID.offsetId(ID.ZOILIST)]
                 else:
                     GUI.selectedZoi = ""
-                State.loadZOI(GUI.selectedZoi)
+                Events.loadZoi = True
             elif Events.setLookAt == True:
                 Events.rename = GUI.selectedZoi
                 Events.renameType = ID.ZOILIST
@@ -183,7 +180,7 @@ def mouseManage():
                     if GUI.selectedTemplate == sensorData.type:
                         r,g,b,a = sensorData.color
                         color = (r/255., g/255., b/255.)
-                        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(StickMan.virtuMan.muscles[Muscles.OverMuscId - ID.offsetId(ID.MUSCLE)].tag, sensorData.type, (0.,90,90), color)]
+                        Sensors.newSens = [Sensors.sensors(StickMan.virtuMan.muscles[Muscles.OverMuscId - ID.offsetId(ID.MUSCLE)].tag, sensorData.type, (0.,90,90), color)]
             # select limb
             else:
                 if Muscles.SelectedMuscId != overID:

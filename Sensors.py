@@ -33,6 +33,8 @@ class sensors(object):
         self.h = 0.
         self.color = color
         self.modelMatrix = []
+        self.linkModelMatrix = []
+        self.vbo = 0
         self.selected = False
         self.show = True
         
@@ -53,7 +55,7 @@ import Shaders
 
 
 sensorGraphics = []
-
+newSens = []
 virtuSens = []
 zoiSens = []
 overSensId = 0
@@ -75,19 +77,17 @@ def preprocessSensor(sensor, x, y, z):
     Definitions.modelMatrix.translate(sensor.x, 0, 0)
 
     if math.sqrt(t.x*t.x + t.y*t.y + t.z*t.z) >= 0.0001:
-        """ model matrix update """
         Definitions.modelMatrix.rotate(t.o, t.x, t.y, t.z)
 
         Definitions.modelMatrix.push()
         Definitions.modelMatrix.scale(sensor.h,1,1)
         Definitions.modelMatrix.translate(0.5, 0, 0)
         
-        """ store modelMatrix in package """
-        Definitions.packagePreprocess[Graphics.vboDashed] = Definitions.packagePreprocess[Graphics.vboDashed] + [[Definitions.modelMatrix.peek(), "Link", sensor.id, sensor],]
-        
+        """ store linkModelMatrix in sensor """
+        sensor.linkModelMatrix = Definitions.modelMatrix.peek()
+
         Definitions.modelMatrix.pop()
         
-    """ model matrix update """
     Definitions.modelMatrix.translate(sensor.h, 0, 0)
     Definitions.modelMatrix.rotate(-t.o, t.x, t.y, t.z)
     Definitions.modelMatrix.scale(1/x,1/y,1/z)
@@ -101,15 +101,19 @@ def preprocessSensor(sensor, x, y, z):
 
     Definitions.modelMatrix.translate(0.5, 0, 0)
     
+    """ store modelMatrix in sensor """
+    sensor.modelMatrix = Definitions.modelMatrix.peek()
     
-    """ store modelMatrix in package """
+    """ choose and store vbo in sensor """
     for sensorData in sensorGraphics:
         if sensor.type == sensorData.type:
-            Definitions.packagePreprocess[sensorData.shape] = Definitions.packagePreprocess[sensorData.shape] + [[Definitions.modelMatrix.peek(), "Sensor", sensor.id, sensor],]
+            sensor.vbo = sensorData.shape
             break
 
     Definitions.modelMatrix.pop()
     Definitions.modelMatrix.pop()
+
+
 
 def drawSensor(style):
     if Events.showSensors == False:
@@ -117,10 +121,21 @@ def drawSensor(style):
 
 
     vboId = -1
-    for indices in Definitions.packageIndices[2]:
-        pack = Definitions.packagePreprocess[indices[0]][indices[1]]
-        sensor = pack[Definitions.entity]
+    for sensor in virtuSens + zoiSens:
         
+        """ update sensor coordinates """
+        if sensor.id == selectedSens:
+            sensor.x += Events.incSens[0]
+            if sensor.x < -0.5:
+                sensor.x = -0.5
+            elif sensor.x > 0.5:
+                sensor.x = 0.5
+            sensor.t += Events.incSens[1]
+            sensor.s += Events.incSens[2]
+            if Events.resetSens == True:
+                sensor.x = 0
+                sensor.t = 90
+                sensor.s = 90
 
         """ choose color """
         if style != Graphics.idBuffer:
@@ -132,23 +147,11 @@ def drawSensor(style):
                     else:
                         color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)
                     break
-            if pack[Definitions.packID] == selectedSens:
+            if sensor.id == selectedSens:
                 if ID.idCategory(sensor.id) != ID.ZOI:
                     color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
-                pack[Definitions.entity].x += Events.incSens[0]
-                if pack[Definitions.entity].x < -0.5:
-                    pack[Definitions.entity].x = -0.5
-                elif pack[Definitions.entity].x > 0.5:
-                    pack[Definitions.entity].x = 0.5
-
-                pack[Definitions.entity].t += Events.incSens[1]
-                pack[Definitions.entity].s += Events.incSens[2]
-                if Events.resetSens == True:
-                    pack[Definitions.entity].x = 0
-                    pack[Definitions.entity].t = 90
-                    pack[Definitions.entity].s = 90
                 vboDraw = Graphics.vboSurfaces
-            elif pack[Definitions.packID] == overSensId:
+            elif sensor.id == overSensId:
                 if ID.idCategory(sensor.id) == ID.ZOI:
                     color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
                 vboDraw = Graphics.vboSurfaces
@@ -156,11 +159,11 @@ def drawSensor(style):
                 vboDraw = Graphics.vboEdges
         else:
             vboDraw = Graphics.vboSurfaces
-            r, g, b = ID.id2color(pack[Definitions.packID])
+            r, g, b = ID.id2color(sensor.id)
             color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
 
         """ choose vbo """
-        vboId = indices[0]
+        vboId = sensor.vbo
         if ID.idCategory(sensor.id) == ID.ZOI:
             vboId = Graphics.vboCircle
             vboDraw = Graphics.vboSurfaces
@@ -175,7 +178,7 @@ def drawSensor(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ load matrix in shader """
-        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, sensor.modelMatrix)
 
         """ draw vbo """
         glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
@@ -186,12 +189,11 @@ def drawDashed(style):
         return
 
     vboId = -1
-    for indices in Definitions.packageIndices[3]:
-        pack = Definitions.packagePreprocess[indices[0]][indices[1]]
+    for sensor in virtuSens + zoiSens:
         
-        if vboId != indices[0]:
+        if vboId != Graphics.vboDashed:
             """ choose vbo """
-            vboId = indices[0]
+            vboId = Graphics.vboDashed
                     
             """ bind surfaces vbo """
             if style != Graphics.idBuffer:
@@ -202,7 +204,6 @@ def drawDashed(style):
             glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
             
         """ choose color """
-        sensor = pack[Definitions.entity]
         if style != Graphics.idBuffer:
             for sensorData in sensorGraphics:
                 if sensor.type == sensorData.type:
@@ -211,17 +212,17 @@ def drawDashed(style):
                     else:
                         color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)
                     break
-            if pack[Definitions.packID] == selectedSens:
+            if sensor.id == selectedSens:
                 color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
         else:
-            r, g, b = ID.id2color(pack[Definitions.packID])
+            r, g, b = ID.id2color(sensor.id)
             color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
             
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ load matrix in shader """
-        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack[Definitions.packModel])
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, sensor.linkModelMatrix)
         
         """ draw vbo """
         if style != Graphics.idBuffer:
