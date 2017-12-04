@@ -60,7 +60,7 @@ def renameFile(key):
                 # change sensor name in group files to match with new template name
                 for fileName in groupFileName:
                     # read file
-                    file = open(pathGroups + fileName[0] + extension, 'r')
+                    file = open(pathGroups + fileName + extension, 'r')
                     fileData = []
                     while True:
                         line = file.readline() # read sensor data
@@ -74,7 +74,7 @@ def renameFile(key):
                     file.close()
                     
                     # rewrite file
-                    file = open(pathGroups + fileName[0] + extension, 'w')
+                    file = open(pathGroups + fileName + extension, 'w')
                     for sensor in fileData:
                         file.write(sensor.tag)
                         file.write(";")
@@ -113,7 +113,6 @@ def updateFilesLists():
     global postureFileName
     global groupFileName
     global templateFileName
-    global zoiFileName
 
     
     """ Update list of avatar files """
@@ -128,11 +127,7 @@ def updateFilesLists():
     listFiles = os.listdir(pathGroups)
     tempList = []
     for file in listFiles:
-        tempList = tempList + [[file[:-4], False]]
-    for fileName in groupFileName:
-        for i in range(0,len(tempList)):
-            if fileName[0] == tempList[i][0]:
-                tempList[i][1] = fileName[1]
+        tempList = tempList + [file[:-4]]
     groupFileName = tempList
     
 
@@ -147,16 +142,6 @@ def updateFilesLists():
         r, g, b, a, shape, scale = line.split(';')
         Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template, [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
         file.close()
-
-
-    """ Update list of zoi files """
-    if GUI.selectedTemplate != "":
-        zoiFileName = os.listdir(pathTemplates + GUI.selectedTemplate + '/' + pathZoi)
-        for i in range(0,len(zoiFileName)):
-            zoiFileName[i] = zoiFileName[i][:-len(extension)]
-    else:
-        zoiFileName = []
-
 
 
 
@@ -245,9 +230,9 @@ def savePosture(entity):
     file.close()
 
     
-def loadPosture(entity):
-    if GUI.selectedPosture != 0:
-        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1] + extension, 'r')
+def loadPosture(entity, fileName):
+    if fileName != "":
+        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + fileName + extension, 'r')
         line = file.readline() # read entity position
         px, py, pz, trash = line.split(";")
         line = file.readline() # read entity position
@@ -317,26 +302,36 @@ def saveGroups(saveFile):
         file.write("\n")
     file.close()
 
-def loadGroups():
-    Sensors.virtuSens = []
+def loadGroups(fileName):
+    if fileName != "":
+        Sensors.virtuSens = []
 
-    for file in groupFileName:
-        if file[1] == True:
-            file = open(pathGroups + file[0] + extension, 'r')
-    
-            while True:
-                line = file.readline() # read sensor data
-                if line == "":
-                    break
-                name, parent, type, x, t, s = line.split(';')
-                Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
-                Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = name
-            file.close()
+        file = open(pathGroups + fileName + extension, 'r')
+
+        while True:
+            line = file.readline() # read sensor data
+            if line == "":
+                break
+            name, parent, type, x, t, s = line.split(';')
+            Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
+            Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = name
+        file.close()
 
 
 """
     Zones of interest files
 """
+
+def updateZoi():
+    global zoiFileName
+    """ Update list of zoi files """
+    if GUI.selectedTemplate != "":
+        zoiFileName = os.listdir(pathTemplates + GUI.selectedTemplate + '/' + pathZoi)
+        for i in range(0,len(zoiFileName)):
+            zoiFileName[i] = zoiFileName[i][:-len(extension)]
+    else:
+        zoiFileName = []
+
 
 def loadZOI(zoiFileName):
     Sensors.zoiSens = []

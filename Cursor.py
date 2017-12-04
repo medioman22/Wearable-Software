@@ -27,7 +27,6 @@ def mouseManage():
     global name
     global info
     
-
     color = glReadPixels( mouse[0] , GUI.display[1] - mouse[1] - 1 , 1 , 1 , GL_RGBA , GL_FLOAT )
     r,g,b,a = 255*color[0][0]
     r = int(r)
@@ -158,17 +157,6 @@ def mouseManage():
                 Events.rename = GUI.selectedZoi
                 Events.renameType = ID.ZOILIST
         
-        # postures
-        if ID.idCategory(GUI.overGuiId) == ID.POSTURE:
-            if Events.mouse_click == True:
-                if GUI.selectedPosture != overID - ID.offsetId(ID.POSTURE):
-                    GUI.selectedPosture = overID - ID.offsetId(ID.POSTURE)
-                    State.loadPosture(StickMan.virtuMan)
-                else:
-                    GUI.selectedPosture = 0
-            elif Events.setLookAt == True:
-                Events.rename = State.postureFileName[GUI.overGuiId-1 - ID.offsetId(ID.POSTURE)]
-                Events.renameType = ID.POSTURE
 
     if parent == 3:
         Muscles.OverMuscId = overID
@@ -189,3 +177,6 @@ def mouseManage():
                     Muscles.SelectedMuscId = 0
     else:
         pass
+    
+    Events.mouse_click = False
+    Events.setLookAt = False

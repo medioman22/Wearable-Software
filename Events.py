@@ -1,8 +1,6 @@
-import pygame
-from pygame.locals import *
-
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from PyQt5 import QtWidgets, QtGui, QtCore
 
 import time
 import Cursor
@@ -15,6 +13,9 @@ import StickMan
 import Definitions
 
 
+eventKey = None
+eventPress = None
+eventModifier = None
 
 lastTime = 0 # for time between frames
 
@@ -87,6 +88,10 @@ loadZoi = False
 
 def manage():
 
+    global eventKey
+    global eventPress
+    global eventModifier
+
     global lastTime
 
     global mouse_click
@@ -141,10 +146,7 @@ def manage():
     lastTime = time.clock()
     k = 18*dt # adjust speed to time instead of frame rate
 
-    Cursor.mouse = pygame.mouse.get_pos()
     
-    mouse_click = False
-    setLookAt = False
     reset = False
     resetSens = False
     deleteSens = False
@@ -161,209 +163,179 @@ def manage():
         Sensors.newSens = []
 
     """ New events """
-    for event in pygame.event.get():
-        """ Exit """
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            quit()
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            GUI.selectedTemplate = ""
-            GUI.selectedGroup = 0
-            GUI.selectedWindow = 0
-        elif GUI.selectedWindow == GUI.quitButton:
-            pygame.quit()
-            quit()
 
-        """ Window resize """
-        if event.type == VIDEORESIZE:
-            GUI.display[0] = event.size[0]
-            GUI.display[1] = event.size[1]
-            GUI.resize()
+    if eventKey != None:
+        """ Exit """
+        if eventKey == QtCore.Qt.Key_Escape:
+            quit()
             
         """ Special keys """
-        if event.type == pygame.KEYDOWN and (event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT):
-            caps = True
-            upDown_acceleration = 0
-            leftRight_acceleration = 0
-            frontBack_acceleration = 0
-        if event.type == pygame.KEYUP and (event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT):
-            caps = False
+        caps = (eventModifier == QtCore.Qt.ShiftModifier)
+        ctrl = (eventModifier == QtCore.Qt.ControlModifier)
+        if eventModifier == QtCore.Qt.ShiftModifier:
             upDown_acceleration = 0
             leftRight_acceleration = 0
             frontBack_acceleration = 0
             
-        if event.type == pygame.KEYDOWN and (event.key == pygame.K_RCTRL or event.key == pygame.K_LCTRL):
-            ctrl = True
+        if eventModifier == QtCore.Qt.ControlModifier:
             upDown_acceleration = 0
             leftRight_acceleration = 0
             frontBack_acceleration = 0
-        if event.type == pygame.KEYUP and (event.key == pygame.K_RCTRL or event.key == pygame.K_LCTRL):
-            ctrl = False
-            upDown_acceleration = 0
-            leftRight_acceleration = 0
-            frontBack_acceleration = 0
-
-        """ mouse controller """
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left mouse button
-            mouse_click = True
-            rename = None
-            renameType = 0
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right mouse button
-            setLookAt = True
-            rename = None
-            renameType = 0
 
         """ Camera/position/orientation controller """
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+        if eventPress == True and eventKey == QtCore.Qt.Key_Left:
             leftRight_keyHold = 1
             if leftRight_acceleration < 0.2:
                 leftRight_acceleration = 0.2
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+        if eventPress == True and eventKey == QtCore.Qt.Key_Right:
             leftRight_keyHold = -1
             if leftRight_acceleration > -0.2:
                 leftRight_acceleration = -0.2
-        if event.type == pygame.KEYUP and (event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT):
+        if eventPress == False and (eventKey == QtCore.Qt.Key_Left or eventKey == QtCore.Qt.Key_Right):
             leftRight_keyHold = 0
-
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+    
+    
+        if eventPress == True and eventKey == QtCore.Qt.Key_Up:
             upDown_keyHold = 1
             if upDown_acceleration < 0.2:
                 upDown_acceleration = 0.2
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+        if eventPress == True and eventKey == QtCore.Qt.Key_Down:
             upDown_keyHold = -1
             if upDown_acceleration > -0.2:
                 upDown_acceleration = -0.2
-        if event.type == pygame.KEYUP and (event.key == pygame.K_UP or event.key == pygame.K_DOWN):
+        if eventPress == False and (eventKey == QtCore.Qt.Key_Up or eventKey == QtCore.Qt.Key_Down):
             upDown_keyHold = 0
-
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_PAGEUP:
+    
+    
+        if eventPress == True and eventKey == QtCore.Qt.Key_PageUp:
             frontBack_keyHold = 1
             if frontBack_acceleration < 0.2:
                 frontBack_acceleration = 0.2
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_PAGEDOWN:
+        elif eventPress == True and eventKey == QtCore.Qt.Key_PageDown:
             frontBack_keyHold = -1
             if frontBack_acceleration > -0.2:
                 frontBack_acceleration = -0.2
-        if event.type == pygame.KEYUP and (event.key == pygame.K_PAGEUP or event.key == pygame.K_PAGEDOWN):
+        if eventPress == False and (eventKey == QtCore.Qt.Key_PageUp or eventKey == QtCore.Qt.Key_PageDown):
             frontBack_keyHold = 0
-
-
+    
+    
         if rename != None:
-            if event.type == pygame.KEYDOWN:
-                State.renameFile(pygame.key.name(event.key))
+            pass
+            #if eventPress == True:
+            #    State.renameFile(pygame.key.name(eventKey))
         else:
             """ Stickman controller """ # WARNING : pygame uses qwerty by default !
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+            if eventPress == True and eventKey == QtCore.Qt.Key_Q:
                 q_keyHold = True
                 pivot[0] = pivotSpeed*k
-            elif event.type == pygame.KEYUP and event.key == pygame.K_q:
+            elif eventPress == False and eventKey == QtCore.Qt.Key_Q:
                 q_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
+            if eventPress == True and eventKey == QtCore.Qt.Key_W:
                 w_keyHold = True
                 pivot[0] = -pivotSpeed*k
-            elif event.type == pygame.KEYUP and event.key == pygame.K_w:
+            elif eventPress == False and eventKey == QtCore.Qt.Key_W:
                 w_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+            if eventPress == True and eventKey == QtCore.Qt.Key_E:
                 e_keyHold = True
                 pivot[1] = pivotSpeed*k
-            elif event.type == pygame.KEYUP and event.key == pygame.K_e:
+            elif eventPress == False and eventKey == QtCore.Qt.Key_E:
                 e_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            if eventPress == True and eventKey == QtCore.Qt.Key_R:
                 r_keyHold = True
                 pivot[1] = -pivotSpeed*k
-            elif event.type == pygame.KEYUP and event.key == pygame.K_r:
+            elif eventPress == False and eventKey == QtCore.Qt.Key_R:
                 r_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_t:
+            if eventPress == True and eventKey == QtCore.Qt.Key_T:
                 t_keyHold = True
                 pivot[2] = pivotSpeed*k
-            elif event.type == pygame.KEYUP and event.key == pygame.K_t:
+            elif eventPress == False and eventKey == QtCore.Qt.Key_T:
                 t_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
+            if eventPress == True and eventKey == QtCore.Qt.Key_Z:
                 y_keyHold = True
                 pivot[2] = -pivotSpeed*k
-            elif event.type == pygame.KEYUP and event.key == pygame.K_y:
+            elif eventPress == False and eventKey == QtCore.Qt.Key_Z:
                 y_keyHold = False
-
-            if event.type == pygame.KEYUP and event.key == pygame.K_z:
+    
+            if eventPress == False and eventKey == QtCore.Qt.Key_Y:
                 z_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+            if eventPress == True and eventKey == QtCore.Qt.Key_Y:
                 z_keyHold = True
                 incSens[0] = 0.025*k
-            if event.type == pygame.KEYUP and event.key == pygame.K_x:
+            if eventPress == False and eventKey == QtCore.Qt.Key_X:
                 x_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+            if eventPress == True and eventKey == QtCore.Qt.Key_X:
                 x_keyHold = True
                 incSens[0] = -0.025*k
-            if event.type == pygame.KEYUP and event.key == pygame.K_c:
+            if eventPress == False and eventKey == QtCore.Qt.Key_C:
                 c_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+            if eventPress == True and eventKey == QtCore.Qt.Key_C:
                 c_keyHold = True
                 incSens[1] = 5*k
-            if event.type == pygame.KEYUP and event.key == pygame.K_v:
+            if eventPress == False and eventKey == QtCore.Qt.Key_V:
                 v_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
+            if eventPress == True and eventKey == QtCore.Qt.Key_V:
                 v_keyHold = True
                 incSens[1] = -5*k
-            if event.type == pygame.KEYUP and event.key == pygame.K_b:
+            if eventPress == False and eventKey == QtCore.Qt.Key_B:
                 b_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+            if eventPress == True and eventKey == QtCore.Qt.Key_B:
                 b_keyHold = True
                 incSens[2] = 5*k
-            if event.type == pygame.KEYUP and event.key == pygame.K_n:
+            if eventPress == False and eventKey == QtCore.Qt.Key_N:
                 n_keyHold = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+            if eventPress == True and eventKey == QtCore.Qt.Key_N:
                 n_keyHold = True
                 incSens[2] = -5*k
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+            if eventPress == True and eventKey == QtCore.Qt.Key_M:
                 resetSens = True
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_u:
+    
+            if eventPress == True and eventKey == QtCore.Qt.Key_U:
                 reset = True
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_i:
+            if eventPress == True and eventKey == QtCore.Qt.Key_I:
                 prevNext = 1
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+            if eventPress == True and eventKey == QtCore.Qt.Key_O:
                 prevNext = -1
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            if eventPress == True and eventKey == QtCore.Qt.Key_P:
                 style = (style + 1)%4
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
+            if eventPress == True and eventKey == QtCore.Qt.Key_1:
                 showBody = (showBody+1)%3
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_2:
+            if eventPress == True and eventKey == QtCore.Qt.Key_2:
                 showMuscles = not showMuscles
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_3:
+            if eventPress == True and eventKey == QtCore.Qt.Key_3:
                 showSensors = not showSensors
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_4:
+            if eventPress == True and eventKey == QtCore.Qt.Key_4:
                 showSaturations = (showSaturations+1)%3
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
+            if eventPress == True and eventKey == QtCore.Qt.Key_5:
                 showGround = not showGround
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
+            if eventPress == True and eventKey == QtCore.Qt.Key_H:
                 State.savePosture(StickMan.virtuMan)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-                State.loadPosture(StickMan.virtuMan)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+            if eventPress == True and eventKey == QtCore.Qt.Key_A:
                 State.saveGroups(State.saveGroupFile)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+            if eventPress == True and eventKey == QtCore.Qt.Key_F:
                 State.loadGroups()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+            if eventPress == True and eventKey == QtCore.Qt.Key_S:
                 if GUI.selectedTemplate != "":
                     for sensorData in Sensors.sensorGraphics:
                         if GUI.selectedTemplate == sensorData.type:
                             sensorData.shape = (sensorData.shape - 1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
                             State.saveTemplates(sensorData)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+            if eventPress == True and eventKey == QtCore.Qt.Key_D:
                 if GUI.selectedTemplate != "":
                     for sensorData in Sensors.sensorGraphics:
                         if GUI.selectedTemplate == sensorData.type:
                             sensorData.shape = (sensorData.shape + 1) % len(Definitions.packagePreprocess)
                             State.saveTemplates(sensorData)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
+            if eventPress == True and eventKey == QtCore.Qt.Key_Delete:
                 deleteSens = True
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+            if eventPress == True and eventKey == QtCore.Qt.Key_G:
                 rMax += 1
                 if rMax > 6:
                     rMax = -5
 
+
+    eventKey = None
+    eventPress = None
+    eventModifier = None
 
     """ Controller acceleration update - left / right """
     if leftRight_keyHold == 0:

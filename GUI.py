@@ -50,7 +50,7 @@ import State
 
 
 
-display = [1550, 900] # window size
+display = [800, 800] # window size
 screen = None
 
 border = 0.005*display[1]
@@ -139,10 +139,10 @@ def updateGuiLists():
         guiSensorZoi = guiSensorZoi + [textTex()]
         guiSensorZoi[len(guiSensorZoi)-1].text = file
 
-    guiSensorGroups = []
-    for file in State.groupFileName:
-        guiSensorGroups = guiSensorGroups + [textTex()]
-        guiSensorGroups[len(guiSensorGroups)-1].text = file[0]
+    #guiSensorGroups = []
+    #for file in State.groupFileName:
+    #    guiSensorGroups = guiSensorGroups + [textTex()]
+    #    guiSensorGroups[len(guiSensorGroups)-1].text = file[0]
 
     guiCursorInfo = []
     for info in ['ID : ' + str(Cursor.overID) + str(Cursor.name)] + Cursor.info:
@@ -164,7 +164,7 @@ selectedZoi = ""
 selectedGroup = 0
 selectedPosture = 1
 selectedWindow = 0
-def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = windowScene):
+"""def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = windowScene):
     rx = window.tx
     ry = window.ty
     x = x
@@ -269,7 +269,7 @@ def textTexture(text, x = 0, y = 0, sx = 1, sy = 1, idDraw = False, window = win
             y -= 2*sy*dy
         else:
             x += 2*sx*(dx + 0.04)
-    glUseProgram(Shaders.shader)
+    glUseProgram(Shaders.shader)"""
 
 
 def subWindow(window, drawBorder = True):
