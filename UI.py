@@ -29,16 +29,17 @@ import StickMan
 
 
 
-
+uiAvatars = None
 uiPostures = None
 uiTemplates = None
 uiZoi = None
 uiGroups = None
 
-ListPostures = 0
-ListTemplates = 1
-ListZoi = 2
-ListGroups = 3
+ListAvatars = 0
+ListPostures = 1
+ListTemplates = 2
+ListZoi = 3
+ListGroups = 4
 
 class uiList(QtWidgets.QWidget):
     
@@ -52,16 +53,23 @@ class uiList(QtWidgets.QWidget):
 
         self.listWidget = QtWidgets.QListWidget(self)
         
-        if self.listType == ListPostures:
+        if self.listType == ListAvatars:
+            State.updateAvatar()
+            self.listWidget.addItems(State.avatarFileName)
+            self.setWindowTitle('Avatars')
+        elif self.listType == ListPostures:
+            State.updatePosture(StickMan.virtuMan)
             self.listWidget.addItems(State.postureFileName)
             self.setWindowTitle('Postures')
-        if self.listType == ListTemplates:
+        elif self.listType == ListTemplates:
+            State.updateTemplate()
             self.listWidget.addItems(State.templateFileName)
             self.setWindowTitle('Templates')
-        if self.listType == ListZoi:
+        elif self.listType == ListZoi:
             self.listWidget.addItems(State.zoiFileName)
             self.setWindowTitle('Zoi')
         elif self.listType == ListGroups:
+            State.updateGroup()
             self.listWidget.addItems(State.groupFileName)
             self.setWindowTitle('Groups')
             
@@ -73,7 +81,7 @@ class uiList(QtWidgets.QWidget):
         
         pybutton = QtWidgets.QPushButton('Save', self)
         pybutton.resize(50,20)
-        pybutton.move(150, 10)        
+        pybutton.move(150, 10)
         pybutton.clicked.connect(self.handleButton)
 
 
@@ -86,7 +94,12 @@ class uiList(QtWidgets.QWidget):
             text = self.listWidget.currentItem().text()
         self.qle.setText(text)
         
-        if self.listType == ListPostures:
+        if self.listType == ListAvatars:
+            State.loadAvatar(StickMan.virtuMan, text)
+            uiPostures.listWidget.setCurrentItem(None)
+            uiPostures.listWidget.clear()
+            uiPostures.listWidget.addItems(State.postureFileName)
+        elif self.listType == ListPostures:
             State.loadPosture(StickMan.virtuMan, text)
         elif self.listType == ListTemplates:
             GUI.selectedTemplate = text
@@ -195,8 +208,8 @@ class mainWindow(QtWidgets.QMainWindow):
             Update files lists.
             you can edit / add / remove groupe & template files without closing software (as long as syntax is respected)
         """
-        State.updateFilesLists()
-        GUI.updateGuiLists()
+        #State.updateFilesLists(StickMan.virtuMan)
+        #GUI.updateGuiLists()
 
 
 
@@ -438,16 +451,10 @@ if __name__ == '__main__':
     global uiZoi
     global uiGroups
 
-    """ Create list of models """
-    State.updateFilesLists()
     """ Create Entities """
+    State.updateAvatar()
     StickMan.virtuMan = StickMan.characteristics(1.7)
-    State.loadLimbs(StickMan.virtuMan)
-    State.loadMuscles(StickMan.virtuMan)
-    State.loadPosture(StickMan.virtuMan, "Default")
-    Saturations.preprocessSaturations(StickMan.virtuMan)
-    
-    State.loadGroups("")
+    State.loadAvatar(StickMan.virtuMan, State.avatarFileName[0])
 
     """ window size """
     State.importUserSettings()
@@ -457,6 +464,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     
     """ UI """
+    uiAvatars = uiList(ListAvatars)
     uiPostures = uiList(ListPostures)
     uiTemplates = uiList(ListTemplates)
     uiZoi = uiList(ListZoi)

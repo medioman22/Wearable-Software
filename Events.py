@@ -311,8 +311,6 @@ def manage():
                 State.savePosture(StickMan.virtuMan)
             if eventPress == True and eventKey == QtCore.Qt.Key_A:
                 State.saveGroups(State.saveGroupFile)
-            if eventPress == True and eventKey == QtCore.Qt.Key_F:
-                State.loadGroups()
             if eventPress == True and eventKey == QtCore.Qt.Key_S:
                 if GUI.selectedTemplate != "":
                     for sensorData in Sensors.sensorGraphics:

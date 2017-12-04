@@ -8,29 +8,27 @@ import ID
 import Limbs
 import Muscles
 import Sensors
+import Saturations
 import StickMan
 
-pathUserSettings = "States/UserSettings/"
 extension = ".csv"
 
+pathUserSettings = "States/UserSettings/"
+
 pathAvatars = "States/Avatars/"
-currentAvatarFile = 0
 avatarFileName = []
 
 pathPostures = "Postures/"
 postureFileName = []
 
-pathGroups = "States/Groups/"
-groupFileName = []
-saveGroupFile = ''
-
 pathTemplates = "States/Templates/"
-currentTemplateFile = 0
 templateFileName = []
 
 pathZoi = "Zoi/"
-currentZoiFile = 0
 zoiFileName = []
+
+pathGroups = "States/Groups/"
+groupFileName = []
 
 def importUserSettings():
     file = open(pathUserSettings + "Resolution" + extension, 'r')
@@ -98,7 +96,7 @@ def renameFile(key):
             elif Events.renameType == ID.GROUPE:
                 os.rename(pathGroups + Events.rename + extension, pathGroups + newName + extension)
             elif Events.renameType == ID.POSTURE:
-                os.rename(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + Events.rename + extension, pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + newName + extension)
+                os.rename(pathAvatars + avatarFileName[0] + '/' + pathPostures + Events.rename + extension, pathAvatars + avatarFileName[0] + '/' + pathPostures + newName + extension)
 
             Events.rename = newName
     except:
@@ -106,42 +104,21 @@ def renameFile(key):
 
 
 """
-    Generate lists of files for avatar / postures / groups / templates
+    Avatar files
 """
-def updateFilesLists():
+def updateAvatar():
     global avatarFileName
-    global postureFileName
-    global groupFileName
-    global templateFileName
-
     
-    """ Update list of avatar files """
     avatarFileName = os.listdir(pathAvatars)
 
-    """ Update list of posture files """
-    postureFileName = os.listdir(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures)
-    for i in range(0,len(postureFileName)):
-        postureFileName[i] = postureFileName[i][:-len(extension)]
-
-    """ Update list of groupe files """
-    listFiles = os.listdir(pathGroups)
-    tempList = []
-    for file in listFiles:
-        tempList = tempList + [file[:-4]]
-    groupFileName = tempList
+def loadAvatar(entity, fileName):
+    entity.tag = fileName
+    loadLimbs(entity)
+    loadMuscles(entity)
+    updatePosture(entity)
+    loadPosture(entity, "Default")
+    Saturations.preprocessSaturations(entity)
     
-
-    """ Update list of template files """
-    templateFileName = os.listdir(pathTemplates)
-    Sensors.sensorGraphics = []
-    for template in templateFileName:
-        file = open(pathTemplates + template + '/' + 'Template' + extension, 'r')
-        line = file.readline()
-        if line == "":
-            continue
-        r, g, b, a, shape, scale = line.split(';')
-        Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template, [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
-        file.close()
 
 
 
@@ -150,7 +127,7 @@ def updateFilesLists():
 """
 def loadLimbs(entity):
 
-    file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + 'Limbs' + extension, 'r')
+    file = open(pathAvatars + entity.tag + '/' + 'Limbs' + extension, 'r')
 
     entity.limbs = []
     
@@ -181,7 +158,7 @@ def loadLimbs(entity):
 """
 def loadMuscles(entity):
 
-    file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + 'Muscles' + extension, 'r')
+    file = open(pathAvatars + entity.tag + '/' + 'Muscles' + extension, 'r')
 
     entity.muscles = []
     
@@ -201,14 +178,57 @@ def loadMuscles(entity):
 
     file.close()
 
+
+
+
+
 """
     Postures files
 """
+
+def updatePosture(entity):
+    global postureFileName
+
+    """ Update list of posture files """
+    postureFileName = os.listdir(pathAvatars + entity.tag + '/' + pathPostures)
+    for i in range(0,len(postureFileName)):
+        postureFileName[i] = postureFileName[i][:-len(extension)]
+        
+def loadPosture(entity, fileName):
+    if fileName == "":
+        return
+
+    file = open(pathAvatars + entity.tag + '/' + pathPostures + fileName + extension, 'r')
+    line = file.readline() # read entity position
+    px, py, pz, trash = line.split(";")
+    line = file.readline() # read entity position
+    orientation = map(float, line.split(";"))
+    entity.position = [float(px), float(py), float(pz)]
+    entity.orientation = orientation
+    while True:
+        line = file.readline() # read part name
+        if line == "":
+            break
+        ID, a,b,c = map(str, line.split(";"))
+        line = file.readline() # read part orientations
+        angle = map(float, line.split(";"))
+        line = file.readline() # read part orientations
+        swing = map(float, line.split(";"))
+        line = file.readline() # read part orientations
+        twist = map(float, line.split(";"))
+        for part in entity.limbs:
+            if part.tag == ID:
+                part.angle = angle
+                part.swing = swing
+                part.twist = twist
+                break
+    file.close()
+
 def savePosture(entity):
     if GUI.selectedPosture != 0:
-        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + postureFileName[GUI.selectedPosture-1] + extension, 'w')
+        file = open(pathAvatars + entity.tag + '/' + pathPostures + postureFileName[GUI.selectedPosture-1] + extension, 'w')
     else:
-        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + "" + extension, 'w')
+        file = open(pathAvatars + entity.tag + '/' + pathPostures + "" + extension, 'w')
     position = ";".join(str(e) for e in entity.position) + ";"
     file.write(position)
     file.write("\n")
@@ -230,40 +250,27 @@ def savePosture(entity):
     file.close()
 
     
-def loadPosture(entity, fileName):
-    if fileName != "":
-        file = open(pathAvatars + avatarFileName[currentAvatarFile] + '/' + pathPostures + fileName + extension, 'r')
-        line = file.readline() # read entity position
-        px, py, pz, trash = line.split(";")
-        line = file.readline() # read entity position
-        orientation = map(float, line.split(";"))
-        entity.position = [float(px), float(py), float(pz)]
-        entity.orientation = orientation
-        while True:
-            line = file.readline() # read part name
-            if line == "":
-                break
-            ID, a,b,c = map(str, line.split(";"))
-            line = file.readline() # read part orientations
-            angle = map(float, line.split(";"))
-            line = file.readline() # read part orientations
-            swing = map(float, line.split(";"))
-            line = file.readline() # read part orientations
-            twist = map(float, line.split(";"))
-            for part in entity.limbs:
-                if part.tag == ID:
-                    part.angle = angle
-                    part.swing = swing
-                    part.twist = twist
-                    break
-        file.close()
-
 
 
 
 """
     Template files
 """
+
+def updateTemplate():
+    global templateFileName
+
+    templateFileName = os.listdir(pathTemplates)
+    Sensors.sensorGraphics = []
+    for template in templateFileName:
+        file = open(pathTemplates + template + '/' + 'Template' + extension, 'r')
+        line = file.readline()
+        if line == "":
+            continue
+        r, g, b, a, shape, scale = line.split(';')
+        Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template, [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
+        file.close()
+
 def saveTemplates(template):
     file = open(pathTemplates + template.type + '/' + 'Template' + extension, 'w')
 
@@ -284,6 +291,14 @@ def saveTemplates(template):
 """
     Group files
 """
+
+def updateGroup():
+    global groupFileName
+
+    groupFileName = os.listdir(pathGroups)
+    for i in range(0,len(groupFileName)):
+        groupFileName[i] = groupFileName[i][:-len(extension)]
+
 def saveGroups(saveFile):
     file = open(pathGroups + saveFile + extension, 'w')
 
@@ -303,19 +318,21 @@ def saveGroups(saveFile):
     file.close()
 
 def loadGroups(fileName):
-    if fileName != "":
-        Sensors.virtuSens = []
+    Sensors.virtuSens = []
 
-        file = open(pathGroups + fileName + extension, 'r')
+    if fileName == "":
+        return
 
-        while True:
-            line = file.readline() # read sensor data
-            if line == "":
-                break
-            name, parent, type, x, t, s = line.split(';')
-            Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
-            Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = name
-        file.close()
+    file = open(pathGroups + fileName + extension, 'r')
+
+    while True:
+        line = file.readline() # read sensor data
+        if line == "":
+            break
+        name, parent, type, x, t, s = line.split(';')
+        Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
+        Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = name
+    file.close()
 
 
 """
@@ -324,19 +341,20 @@ def loadGroups(fileName):
 
 def updateZoi():
     global zoiFileName
-    """ Update list of zoi files """
-    if GUI.selectedTemplate != "":
-        zoiFileName = os.listdir(pathTemplates + GUI.selectedTemplate + '/' + pathZoi)
-        for i in range(0,len(zoiFileName)):
-            zoiFileName[i] = zoiFileName[i][:-len(extension)]
-    else:
-        zoiFileName = []
+    zoiFileName = []
+
+    if GUI.selectedTemplate == "":
+        return
+
+    zoiFileName = os.listdir(pathTemplates + GUI.selectedTemplate + '/' + pathZoi)
+    for i in range(0,len(zoiFileName)):
+        zoiFileName[i] = zoiFileName[i][:-len(extension)]
 
 
-def loadZOI(zoiFileName):
+def loadZOI(fileName):
     Sensors.zoiSens = []
 
-    if zoiFileName == "":
+    if fileName == "":
         Limbs.setLimbsShow(StickMan.virtuMan, Events.SHOW)
         Muscles.setMusclesShow(StickMan.virtuMan, Events.SHOW)
         return
@@ -344,7 +362,7 @@ def loadZOI(zoiFileName):
     Limbs.setLimbsShow(StickMan.virtuMan, Events.FADE)
     Muscles.setMusclesShow(StickMan.virtuMan, Events.HIDE)
 
-    file = open(pathTemplates + GUI.selectedTemplate + '/' + pathZoi + zoiFileName + extension, 'r')
+    file = open(pathTemplates + GUI.selectedTemplate + '/' + pathZoi + fileName + extension, 'r')
     
     color = (0.5,0.5,0.5,1)
     type = GUI.selectedTemplate

@@ -8,6 +8,7 @@ class characteristics(object):
 
     def __init__(self, ini = 1.70): # add orientation here or keep it on origin limb ?
         """ constructor """
+        self.tag = ""
         self.size = ini # change to a 3D scale after ?
         self.position = [0, 0, 0]
         self.orientation = [1, 0, 0, 0]
