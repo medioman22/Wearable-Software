@@ -27,7 +27,7 @@ templateFileName = []
 pathZoi = "Zoi/"
 zoiFileName = []
 
-pathGroups = "States/Groups/"
+pathGroups = "Groups/"
 groupFileName = []
 
 def importUserSettings():
@@ -36,71 +36,6 @@ def importUserSettings():
     x, y = line.split(';')
     GUI.display[0] = int(x)
     GUI.display[1] = int(y)
-
-def renameFile(key):
-    try:
-        newName = Events.rename
-        # define new name
-        if key == 'backspace' and len(newName) >= 1:
-            newName = newName[:-1]
-        elif key == 'space':
-            key = ' '
-        if Events.caps == True:
-            key = key.upper()
-        if len(key) == 1:
-            newName = newName + key
-            
-
-        if newName != Events.rename:
-            # rename files
-            if Events.renameType == ID.TEMPLATE:
-                os.rename(pathTemplates + Events.rename, pathTemplates + newName)
-                # change sensor name in group files to match with new template name
-                for fileName in groupFileName:
-                    # read file
-                    file = open(pathGroups + fileName + extension, 'r')
-                    fileData = []
-                    while True:
-                        line = file.readline() # read sensor data
-                        if line == "":
-                            break
-                        tag, parent, type, x, t, s = line.split(';')
-                        if type == Events.rename:
-                            type = newName
-                        fileData = fileData + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
-                        fileData[len(fileData)-1].tag = tag
-                    file.close()
-                    
-                    # rewrite file
-                    file = open(pathGroups + fileName + extension, 'w')
-                    for sensor in fileData:
-                        file.write(sensor.tag)
-                        file.write(";")
-                        file.write(sensor.attach)
-                        file.write(";")
-                        file.write(sensor.type)
-                        file.write(";")
-                        file.write(str(sensor.x))
-                        file.write(";")
-                        file.write(str(sensor.t))
-                        file.write(";")
-                        file.write(str(sensor.s))
-                        file.write("\n")
-                    file.close()
-                for sensorData in Sensors.sensorGraphics:
-                    if Events.rename == sensorData.type:
-                        sensorData.type = newName
-                        break
-                
-                loadGroups()
-            elif Events.renameType == ID.GROUPE:
-                os.rename(pathGroups + Events.rename + extension, pathGroups + newName + extension)
-            elif Events.renameType == ID.POSTURE:
-                os.rename(pathAvatars + avatarFileName[0] + '/' + pathPostures + Events.rename + extension, pathAvatars + avatarFileName[0] + '/' + pathPostures + newName + extension)
-
-            Events.rename = newName
-    except:
-        pass
 
 
 """
@@ -116,9 +51,16 @@ def loadAvatar(entity, fileName):
     loadLimbs(entity)
     loadMuscles(entity)
     updatePosture(entity)
-    loadPosture(entity, "Default")
+    loadPosture(entity, postureFileName[0])
+    updateGroup(entity)
     Saturations.preprocessSaturations(entity)
     
+def renameAvatar(entity, oldName, newName):
+    try:
+        os.rename(pathAvatars + oldName, pathAvatars + newName)
+        entity.tag = newName
+    except:
+        pass
 
 
 
@@ -224,11 +166,9 @@ def loadPosture(entity, fileName):
                 break
     file.close()
 
-def savePosture(entity):
-    if GUI.selectedPosture != 0:
-        file = open(pathAvatars + entity.tag + '/' + pathPostures + postureFileName[GUI.selectedPosture-1] + extension, 'w')
-    else:
-        file = open(pathAvatars + entity.tag + '/' + pathPostures + "" + extension, 'w')
+def savePosture(entity, fileName):
+    file = open(pathAvatars + entity.tag + '/' + pathPostures + fileName + extension, 'w')
+
     position = ";".join(str(e) for e in entity.position) + ";"
     file.write(position)
     file.write("\n")
@@ -249,8 +189,14 @@ def savePosture(entity):
         file.write("\n")
     file.close()
 
-    
+def removePosture(entity, fileName):
+    os.remove(pathAvatars + entity.tag + '/' + pathPostures + fileName + extension)
 
+def renamePosture(entity, oldName, newName):
+    try:
+        os.rename(pathAvatars + entity.tag + '/' + pathPostures + oldName + extension, pathAvatars + entity.tag + '/' + pathPostures + newName + extension)
+    except:
+        pass
 
 
 """
@@ -288,19 +234,61 @@ def saveTemplates(template):
 
     file.close()
 
+def renameTemplate(oldName, newName):
+    try:
+        os.rename(pathTemplates + oldName, pathTemplates + newName)
+        # change sensor name in group files to match with new template name
+        for fileName in groupFileName:
+            # read file
+            file = open(pathAvatars + entity.tag + '/' + pathGroups + fileName + extension, 'r')
+            fileData = []
+            while True:
+                line = file.readline() # read sensor data
+                if line == "":
+                    break
+                tag, parent, type, x, t, s = line.split(';')
+                if type == oldName:
+                    type = newName
+                fileData = fileData + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
+                fileData[len(fileData)-1].tag = tag
+            file.close()
+                    
+            # rewrite file
+            file = open(pathAvatars + entity.tag + '/' + pathGroups + fileName + extension, 'w')
+            for sensor in fileData:
+                file.write(sensor.tag)
+                file.write(";")
+                file.write(sensor.attach)
+                file.write(";")
+                file.write(sensor.type)
+                file.write(";")
+                file.write(str(sensor.x))
+                file.write(";")
+                file.write(str(sensor.t))
+                file.write(";")
+                file.write(str(sensor.s))
+                file.write("\n")
+            file.close()
+        for sensorData in Sensors.sensorGraphics:
+            if sensorData.type == oldName:
+                sensorData.type = newName
+                break
+    except:
+        pass
+
 """
     Group files
 """
 
-def updateGroup():
+def updateGroup(entity):
     global groupFileName
 
-    groupFileName = os.listdir(pathGroups)
+    groupFileName = os.listdir(pathAvatars + entity.tag + '/' + pathGroups)
     for i in range(0,len(groupFileName)):
         groupFileName[i] = groupFileName[i][:-len(extension)]
 
-def saveGroups(saveFile):
-    file = open(pathGroups + saveFile + extension, 'w')
+def saveGroups(entity, fileName):
+    file = open(pathAvatars + entity.tag + '/' + pathGroups + fileName + extension, 'w')
 
     for sensor in Sensors.virtuSens:
         file.write(sensor.tag)
@@ -317,13 +305,13 @@ def saveGroups(saveFile):
         file.write("\n")
     file.close()
 
-def loadGroups(fileName):
+def loadGroups(entity, fileName):
     Sensors.virtuSens = []
 
     if fileName == "":
         return
 
-    file = open(pathGroups + fileName + extension, 'r')
+    file = open(pathAvatars + entity.tag + '/' + pathGroups + fileName + extension, 'r')
 
     while True:
         line = file.readline() # read sensor data
@@ -333,7 +321,15 @@ def loadGroups(fileName):
         Sensors.virtuSens = Sensors.virtuSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)))]
         Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = name
     file.close()
+    
+def removeGroups(entity, fileName):
+    os.remove(pathAvatars + entity.tag + '/' + pathGroups + fileName + extension)
 
+def renameGroup(entity, oldName, newName):
+    try:
+        os.rename(pathAvatars + entity.tag + '/' + pathGroups + oldName + extension, pathAvatars + entity.tag + '/' + pathGroups + newName + extension)
+    except:
+        pass
 
 """
     Zones of interest files
@@ -376,3 +372,9 @@ def loadZOI(fileName):
         Limbs.showLimb(StickMan.virtuMan, parent)
         Muscles.showMuscle(StickMan.virtuMan, parent)
     file.close()
+
+def renameZoi(oldName, newName):
+    try:
+        os.rename(pathTemplates + GUI.selectedTemplate + '/' + pathZoi + oldName + extension, pathTemplates + GUI.selectedTemplate + '/' + pathZoi + newName + extension)
+    except:
+        pass

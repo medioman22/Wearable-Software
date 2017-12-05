@@ -28,6 +28,11 @@ import State
 import StickMan
 
 
+iconSave  = None
+iconLoad  = None
+iconFace  = None
+iconDelete = None
+iconRename = None
 
 uiAvatars = None
 uiPostures = None
@@ -41,6 +46,7 @@ ListTemplates = 2
 ListZoi = 3
 ListGroups = 4
 
+
 class uiList(QtWidgets.QWidget):
     
     def __init__(self, listType):
@@ -48,42 +54,70 @@ class uiList(QtWidgets.QWidget):
         self.listType = listType
         self.initUI()
         
-        
-    def initUI(self):      
+    def initUI(self):
+    
+        self.setWindowIcon(iconFace)
 
-        self.listWidget = QtWidgets.QListWidget(self)
-        
-        if self.listType == ListAvatars:
-            State.updateAvatar()
-            self.listWidget.addItems(State.avatarFileName)
-            self.setWindowTitle('Avatars')
-        elif self.listType == ListPostures:
-            State.updatePosture(StickMan.virtuMan)
-            self.listWidget.addItems(State.postureFileName)
-            self.setWindowTitle('Postures')
-        elif self.listType == ListTemplates:
-            State.updateTemplate()
-            self.listWidget.addItems(State.templateFileName)
-            self.setWindowTitle('Templates')
-        elif self.listType == ListZoi:
-            self.listWidget.addItems(State.zoiFileName)
-            self.setWindowTitle('Zoi')
-        elif self.listType == ListGroups:
-            State.updateGroup()
-            self.listWidget.addItems(State.groupFileName)
-            self.setWindowTitle('Groups')
-            
         self.qle = QtWidgets.QLineEdit(self)
         self.qle.move(10, 10)
-        self.listWidget.move(10, 40)
-        self.listWidget.selectionModel().selectionChanged.connect(self.itemSelect)
 
         
-        pybutton = QtWidgets.QPushButton('Save', self)
-        pybutton.resize(50,20)
-        pybutton.move(150, 10)
-        pybutton.clicked.connect(self.handleButton)
+        saveButton = QtWidgets.QPushButton('', self)
+        saveButton.resize(30,30)
+        saveButton.move(150, 5)
+        saveButton.clicked.connect(self.save)
+        saveButton.setIcon(iconSave)
 
+        reloadButton = QtWidgets.QPushButton('', self)
+        reloadButton.resize(30,30)
+        reloadButton.move(180, 5)
+        reloadButton.clicked.connect(self.reload)
+        reloadButton.setIcon(iconLoad)
+        
+        deleteButton = QtWidgets.QPushButton('', self)
+        deleteButton.resize(30,30)
+        deleteButton.move(210, 5)
+        deleteButton.clicked.connect(self.delete)
+        deleteButton.setIcon(iconDelete)
+
+        renameButton = QtWidgets.QPushButton('', self)
+        renameButton.resize(30,30)
+        renameButton.move(240, 5)
+        renameButton.clicked.connect(self.rename)
+        renameButton.setIcon(iconRename)
+
+
+        self.listWidget = QtWidgets.QListWidget(self)
+        self.listWidget.move(10, 40)
+        self.listWidget.selectionModel().selectionChanged.connect(self.itemSelect)
+        #self.listWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+
+        if self.listType == ListAvatars:
+            self.setWindowTitle('Avatars')
+            State.updateAvatar()
+            self.listWidget.addItems(State.avatarFileName)
+            saveButton.setEnabled(False)
+            deleteButton.setEnabled(False)
+        elif self.listType == ListPostures:
+            self.setWindowTitle('Postures')
+            State.updatePosture(StickMan.virtuMan)
+            self.listWidget.addItems(State.postureFileName)
+        elif self.listType == ListTemplates:
+            self.setWindowTitle('Templates')
+            State.updateTemplate()
+            self.listWidget.addItems(State.templateFileName)
+            saveButton.setEnabled(False)
+            deleteButton.setEnabled(False)
+        elif self.listType == ListZoi:
+            self.setWindowTitle('Zoi')
+            self.listWidget.addItems(State.zoiFileName)
+            saveButton.setEnabled(False)
+            deleteButton.setEnabled(False)
+        elif self.listType == ListGroups:
+            self.setWindowTitle('Groups')
+            State.updateGroup(StickMan.virtuMan)
+            self.listWidget.addItems(State.groupFileName)
+            
 
         self.setGeometry(900, 200, 300, 400)
         self.show()
@@ -95,10 +129,15 @@ class uiList(QtWidgets.QWidget):
         self.qle.setText(text)
         
         if self.listType == ListAvatars:
+            if self.listWidget.currentItem() == None:
+                return
             State.loadAvatar(StickMan.virtuMan, text)
             uiPostures.listWidget.setCurrentItem(None)
             uiPostures.listWidget.clear()
             uiPostures.listWidget.addItems(State.postureFileName)
+            uiGroups.listWidget.setCurrentItem(None)
+            uiGroups.listWidget.clear()
+            uiGroups.listWidget.addItems(State.groupFileName)
         elif self.listType == ListPostures:
             State.loadPosture(StickMan.virtuMan, text)
         elif self.listType == ListTemplates:
@@ -110,56 +149,82 @@ class uiList(QtWidgets.QWidget):
         elif self.listType == ListZoi:
             State.loadZOI(text)
         elif self.listType == ListGroups:
-            State.loadGroups(text)
+            State.loadGroups(StickMan.virtuMan, text)
         
-    def handleButton(self):
+    def save(self):
+
+        text = self.qle.text()
+
+        if self.listType == ListPostures:
+            State.savePosture(StickMan.virtuMan, text)
+            State.updatePosture(StickMan.virtuMan)
+            self.listWidget.setCurrentItem(None)
+            self.listWidget.clear()
+            self.listWidget.addItems(State.postureFileName)
+        elif self.listType == ListGroups:
+            State.saveGroups(StickMan.virtuMan, text)
+            State.updateGroup(StickMan.virtuMan)
+            self.listWidget.setCurrentItem(None)
+            self.listWidget.clear()
+            self.listWidget.addItems(State.groupFileName)
+            
+
+    def reload(self):
         if self.listWidget.currentItem() == None:
-            print("no selection")
+            return
+
+        self.listWidget.setCurrentItem(None)
+        
+    def delete(self):
+        if self.listWidget.currentItem() == None:
             return
 
         text = self.listWidget.currentItem().text()
-        print ("Save : ", text)
-        
+        self.listWidget.setCurrentItem(None)
+        self.listWidget.clear()
+        if self.listType == ListAvatars:
+            State.updateAvatar()
+            self.listWidget.addItems(State.avatarFileName)
+        elif self.listType == ListPostures:
+            State.removePosture(StickMan.virtuMan, text)
+            State.updatePosture(StickMan.virtuMan)
+            self.listWidget.addItems(State.postureFileName)
+        elif self.listType == ListGroups:
+            State.removeGroups(StickMan.virtuMan, text)
+            State.updateGroup(StickMan.virtuMan)
+            self.listWidget.addItems(State.groupFileName)
 
-class Example(QtWidgets.QWidget):
-    
-    def __init__(self):
-        super(Example, self).__init__()
-        
-        self.initUI()
-        
-        
-    def initUI(self):      
+    def rename(self):
+        if self.listWidget.currentItem() == None:
+            return
 
-        self.lbl = QtWidgets.QLabel(self)
-        qle = QtWidgets.QLineEdit(self)
+        oldName = self.listWidget.currentItem().text()
+        newName = self.qle.text()
+        self.listWidget.setCurrentItem(None)
+        self.listWidget.clear()
         
-        qle.move(60, 100)
-        self.lbl.move(60, 40)
+        if self.listType == ListAvatars: #setCurrentItem needed, or crash
+            State.renameAvatar(StickMan.virtuMan, oldName, newName)
+            State.updateAvatar()
+            self.listWidget.addItems(State.avatarFileName)
+        elif self.listType == ListPostures:
+            State.renamePosture(StickMan.virtuMan, oldName, newName)
+            State.updatePosture(StickMan.virtuMan)
+            self.listWidget.addItems(State.postureFileName)
+        elif self.listType == ListTemplates:
+            uiGroups.listWidget.setCurrentItem(None)
+            State.renameTemplate(oldName, newName)
+            State.updateTemplate()
+            self.listWidget.addItems(State.templateFileName)
+        elif self.listType == ListZoi:
+            State.renameZoi(oldName, newName)
+            State.updateZoi()
+            self.listWidget.addItems(State.zoiFileName)
+        elif self.listType == ListGroups:
+            State.renameGroup(StickMan.virtuMan, oldName, newName)
+            State.updateGroup(StickMan.virtuMan)
+            self.listWidget.addItems(State.groupFileName)
 
-        qle.textChanged[str].connect(self.onChanged)
-        
-        self.setGeometry(300, 300, 280, 170)
-        self.setWindowTitle('QLineEdit')
-        self.show()
-        
-        
-    def onChanged(self, text):
-        
-        self.lbl.setText(text)
-        self.lbl.adjustSize()
-
-class uiWindow(QtWidgets.QWidget):
-
-    def __init__(self):
-        super(uiWindow, self).__init__()
-        pybutton = QtWidgets.QPushButton('Click me', self)
-        pybutton.resize(100,32)
-        pybutton.move(50, 50)        
-        pybutton.clicked.connect(self.handleButton)
-
-    def handleButton(self):
-        print ("Hello World\n")
 
 
 class mainWindow(QtWidgets.QMainWindow):
@@ -174,7 +239,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def setupUI(self):
         self.setWindowTitle('Wearable Sensors')
-        self.setWindowIcon(QtGui.QIcon('Textures/awesomeface.png'))
+        self.setWindowIcon(iconFace)
         self.openGLWidget.initializeGL()
         self.openGLWidget.resizeGL(1500,800)
         self.openGLWidget.paintGL = self.paintGL
@@ -451,6 +516,11 @@ if __name__ == '__main__':
     global uiZoi
     global uiGroups
 
+    global iconSave
+    global iconLoad
+    global iconFace
+    global iconDelete
+
     """ Create Entities """
     State.updateAvatar()
     StickMan.virtuMan = StickMan.characteristics(1.7)
@@ -463,6 +533,12 @@ if __name__ == '__main__':
     """ Application """
     app = QtWidgets.QApplication(sys.argv)
     
+    iconSave  = QtGui.QIcon("Textures/Save.png")
+    iconLoad  = QtGui.QIcon("Textures/Load.png")
+    iconFace  = QtGui.QIcon("Textures/Face.png")
+    iconDelete = QtGui.QIcon("Textures/Delete.png")
+    iconRename = QtGui.QIcon("Textures/Rename.png")
+
     """ UI """
     uiAvatars = uiList(ListAvatars)
     uiPostures = uiList(ListPostures)
@@ -470,7 +546,6 @@ if __name__ == '__main__':
     uiZoi = uiList(ListZoi)
     uiGroups = uiList(ListGroups)
     
-
     """ 3D Scene """
     window = mainWindow()
     window.setupUI()

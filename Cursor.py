@@ -41,10 +41,8 @@ def mouseManage():
     if ID.idCategory(overID) == ID.LIMB:
         parent = 0
     elif ID.idCategory(overID) == ID.MUSCLE:
-        parent = 3
-    elif ID.idCategory(overID) == ID.SENSOR or ID.idCategory(overID) == ID.ZOI:
         parent = 1
-    elif ID.idCategory(overID) != 0:
+    elif ID.idCategory(overID) == ID.SENSOR or ID.idCategory(overID) == ID.ZOI:
         parent = 2
         
     if Events.setLookAt == True:
@@ -80,7 +78,26 @@ def mouseManage():
                     StickMan.selectedLimbs += [StickMan.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag,]
 
         name = ' (' + StickMan.virtuMan.limbs[overID-1].tag + ')'
+
     elif parent == 1:
+        Muscles.OverMuscId = overID
+        name = ' (' + StickMan.virtuMan.muscles[overID - ID.offsetId(ID.MUSCLE)].tag + ')'
+        if Events.mouse_click == True:
+            # place sensor on body
+            if GUI.selectedTemplate != "":
+                for sensorData in Sensors.sensorGraphics:
+                    if GUI.selectedTemplate == sensorData.type:
+                        r,g,b,a = sensorData.color
+                        color = (r/255., g/255., b/255.)
+                        Sensors.newSens = [Sensors.sensors(StickMan.virtuMan.muscles[Muscles.OverMuscId - ID.offsetId(ID.MUSCLE)].tag, sensorData.type, (0.,90,90), color)]
+            # select limb
+            else:
+                if Muscles.SelectedMuscId != overID:
+                    Muscles.SelectedMuscId = overID
+                else:
+                    Muscles.SelectedMuscId = 0
+
+    elif parent == 2:
         Sensors.overSensId = overID
         if Events.mouse_click == True:
             if Sensors.selectedSens == overID:
@@ -107,76 +124,6 @@ def mouseManage():
                 name = ' (' + sensor.type + ')'
                 info = [str(sensor.x) + ' ' + str(sensor.t) + ' ' + str(sensor.s), str(sensor.id), str(sensor.tag)]
                 break
-        
-    if parent == 2:
-        GUI.overGuiId = overID
 
-        # windows
-        if ID.idCategory(GUI.overGuiId) == ID.PANNEL:
-            if Events.mouse_click == True:
-                if GUI.selectedWindow != overID - ID.offsetId(ID.PANNEL):
-                    GUI.selectedWindow = overID - ID.offsetId(ID.PANNEL)
-                else:
-                    GUI.selectedWindow = 0
-               
-        # groupes
-        if ID.idCategory(GUI.overGuiId) == ID.GROUPE:
-            if Events.mouse_click == True:
-                State.groupFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][1] = not State.groupFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][1]
-                Events.loadGroup = True
-                if GUI.selectedGroup != overID:
-                    GUI.selectedGroup = overID
-                else:
-                    GUI.selectedGroup = 0
-            elif Events.setLookAt == True:
-                Events.rename = State.groupFileName[GUI.overGuiId-1 - ID.offsetId(ID.GROUPE)][0]
-                Events.renameType = ID.GROUPE
-
-        # templates
-        if ID.idCategory(GUI.overGuiId) == ID.TEMPLATE:
-            if Events.mouse_click == True:
-                if GUI.selectedTemplate != Sensors.sensorGraphics[overID-1 - ID.offsetId(ID.TEMPLATE)].type:
-                    GUI.selectedTemplate = Sensors.sensorGraphics[overID-1 - ID.offsetId(ID.TEMPLATE)].type
-                else:
-                    GUI.selectedTemplate = ""
-                GUI.selectedZoi = ""
-                Events.loadZoi = True
-            elif Events.setLookAt == True:
-                Events.rename = Sensors.sensorGraphics[GUI.overGuiId-1 - ID.offsetId(ID.TEMPLATE)].type
-                Events.renameType = ID.TEMPLATE
-
-        # zoi
-        if ID.idCategory(GUI.overGuiId) == ID.ZOILIST:
-            if Events.mouse_click == True:
-                if GUI.selectedZoi != State.zoiFileName[overID-1 - ID.offsetId(ID.ZOILIST)]:
-                    GUI.selectedZoi = State.zoiFileName[overID-1 - ID.offsetId(ID.ZOILIST)]
-                else:
-                    GUI.selectedZoi = ""
-                Events.loadZoi = True
-            elif Events.setLookAt == True:
-                Events.rename = GUI.selectedZoi
-                Events.renameType = ID.ZOILIST
-        
-
-    if parent == 3:
-        Muscles.OverMuscId = overID
-        name = ' (' + StickMan.virtuMan.muscles[overID - ID.offsetId(ID.MUSCLE)].tag + ')'
-        if Events.mouse_click == True:
-            # place sensor on body
-            if GUI.selectedTemplate != "":
-                for sensorData in Sensors.sensorGraphics:
-                    if GUI.selectedTemplate == sensorData.type:
-                        r,g,b,a = sensorData.color
-                        color = (r/255., g/255., b/255.)
-                        Sensors.newSens = [Sensors.sensors(StickMan.virtuMan.muscles[Muscles.OverMuscId - ID.offsetId(ID.MUSCLE)].tag, sensorData.type, (0.,90,90), color)]
-            # select limb
-            else:
-                if Muscles.SelectedMuscId != overID:
-                    Muscles.SelectedMuscId = overID
-                else:
-                    Muscles.SelectedMuscId = 0
-    else:
-        pass
-    
     Events.mouse_click = False
     Events.setLookAt = False
