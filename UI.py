@@ -55,6 +55,8 @@ class uiCustomize(QtWidgets.QWidget):
         self.lg.move(100, 50)
         self.lb = QtWidgets.QLabel("B : 127", self)
         self.lb.move(100, 90)
+        self.lscale = QtWidgets.QLabel("Scale : 0.03", self)
+        self.lscale.move(100, 140)
 
         self.r = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.r.move(10, 10)
@@ -76,6 +78,13 @@ class uiCustomize(QtWidgets.QWidget):
         self.b.setMaximum(255)
         self.b.setValue(127)
         self.b.valueChanged.connect(self.valuechangeB)
+        
+        self.scale = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.scale.move(10, 140)
+        self.scale.setMinimum(0)
+        self.scale.setMaximum(100)
+        self.scale.setValue(30)
+        self.scale.valueChanged.connect(self.valuechangeScale)
 
         self.show()
 
@@ -102,7 +111,14 @@ class uiCustomize(QtWidgets.QWidget):
         
         State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
         State.updateTemplate(StickMan.virtuMan)
-
+        
+    def valuechangeScale(self):
+        value = self.scale.value()
+        self.lscale.setText("Size : " + str(value/1000.))
+        Sensors.customTemplate.scale = value/1000.
+        
+        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(StickMan.virtuMan)
 
 
 uiAvatars = None
@@ -225,11 +241,11 @@ class uiList(QtWidgets.QWidget):
             uiZoi.listWidget.setCurrentItem(None)
             uiZoi.listWidget.clear()
             uiZoi.listWidget.addItems(State.zoiFileName)
-            #for sensorData in Sensors.sensorGraphics:
-            #    if text == sensorData.type:
-            #        uiCustom.r = sensorData.color[0]
-            #        uiCustom.g = sensorData.color[1]
-            #        uiCustom.b = sensorData.color[2]
+            for sensorData in Sensors.sensorGraphics:
+                if text == sensorData.type:
+                    uiCustom.r.setValue(sensorData.color[0])
+                    uiCustom.g.setValue(sensorData.color[1])
+                    uiCustom.b.setValue(sensorData.color[2])
         elif self.listType == ListZoi:
             State.loadZOI(StickMan.virtuMan, text)
         elif self.listType == ListGroups:
