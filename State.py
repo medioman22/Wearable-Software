@@ -1,4 +1,5 @@
 import os
+import shutil
 #import csv
 
 import Events
@@ -21,7 +22,7 @@ avatarFileName = []
 pathPostures = "Postures/"
 postureFileName = []
 
-pathTemplates = "States/Templates/"
+pathTemplates = "Templates/"
 templateFileName = []
 
 pathZoi = "Zoi/"
@@ -53,6 +54,9 @@ def loadAvatar(entity, fileName):
     updatePosture(entity)
     loadPosture(entity, postureFileName[0])
     updateGroup(entity)
+    updateTemplate(entity)
+    GUI.selectedTemplate = ""
+    updateZoi(entity)
     Saturations.preprocessSaturations(entity)
     
 def renameAvatar(entity, oldName, newName):
@@ -203,13 +207,13 @@ def renamePosture(entity, oldName, newName):
     Template files
 """
 
-def updateTemplate():
+def updateTemplate(entity):
     global templateFileName
 
-    templateFileName = os.listdir(pathTemplates)
+    templateFileName = os.listdir(pathAvatars + entity.tag + '/' + pathTemplates)
     Sensors.sensorGraphics = []
     for template in templateFileName:
-        file = open(pathTemplates + template + '/' + 'Template' + extension, 'r')
+        file = open(pathAvatars + entity.tag + '/' + pathTemplates + template + '/' + 'Template' + extension, 'r')
         line = file.readline()
         if line == "":
             continue
@@ -217,26 +221,38 @@ def updateTemplate():
         Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template, [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
         file.close()
 
-def saveTemplates(template):
-    file = open(pathTemplates + template.type + '/' + 'Template' + extension, 'w')
+def saveTemplate(entity, fileName):
 
-    file.write(str(template.color[0]))
-    file.write(";")
-    file.write(str(template.color[1]))
-    file.write(";")
-    file.write(str(template.color[2]))
-    file.write(";")
-    file.write(str(template.color[3]))
-    file.write(";")
-    file.write(str(template.shape))
-    file.write(";")
-    file.write(str(template.scale))
+    if not os.path.exists(pathAvatars + entity.tag + '/' + pathTemplates + fileName):
+        os.makedirs(pathAvatars + entity.tag + '/' + pathTemplates + fileName)
+        os.makedirs(pathAvatars + entity.tag + '/' + pathTemplates + fileName + '/' + 'Zoi')
+
+    file = open(pathAvatars + entity.tag + '/' + pathTemplates + fileName + '/' + 'Template' + extension, 'w')
+
+    for sensorData in Sensors.sensorGraphics:
+        if fileName == sensorData.type:
+
+            file.write(str(sensorData.color[0]))
+            file.write(";")
+            file.write(str(sensorData.color[1]))
+            file.write(";")
+            file.write(str(sensorData.color[2]))
+            file.write(";")
+            file.write(str(sensorData.color[3]))
+            file.write(";")
+            file.write(str(sensorData.shape))
+            file.write(";")
+            file.write(str(sensorData.scale))
+            break;
 
     file.close()
 
-def renameTemplate(oldName, newName):
+def removeTemplate(entity, fileName):
+    shutil.rmtree(pathAvatars + entity.tag + '/' + pathTemplates + fileName)
+
+def renameTemplate(entity, oldName, newName):
     try:
-        os.rename(pathTemplates + oldName, pathTemplates + newName)
+        os.rename(pathAvatars + entity.tag + '/' + pathTemplates + oldName, pathAvatars + entity.tag + '/' + pathTemplates + newName)
         # change sensor name in group files to match with new template name
         for fileName in groupFileName:
             # read file
@@ -276,6 +292,56 @@ def renameTemplate(oldName, newName):
     except:
         pass
 
+
+"""
+    Zones of interest files
+"""
+
+def updateZoi(entity):
+    global zoiFileName
+    zoiFileName = []
+
+    if GUI.selectedTemplate == "":
+        return
+
+    zoiFileName = os.listdir(pathAvatars + entity.tag + '/' + pathTemplates + GUI.selectedTemplate + '/' + pathZoi)
+    for i in range(0,len(zoiFileName)):
+        zoiFileName[i] = zoiFileName[i][:-len(extension)]
+
+
+def loadZOI(entity, fileName):
+    Sensors.zoiSens = []
+
+    if fileName == "":
+        Limbs.setLimbsShow(StickMan.virtuMan, Events.SHOW)
+        Muscles.setMusclesShow(StickMan.virtuMan, Events.SHOW)
+        return
+    
+    Limbs.setLimbsShow(StickMan.virtuMan, Events.FADE)
+    Muscles.setMusclesShow(StickMan.virtuMan, Events.HIDE)
+
+    file = open(pathAvatars + entity.tag + '/' + pathTemplates + GUI.selectedTemplate + '/' + pathZoi + fileName + extension, 'r')
+    
+    color = (0.5,0.5,0.5,1)
+    type = GUI.selectedTemplate
+    while True:
+        line = file.readline() # read sensor data
+        if line == "":
+            break
+        name, parent, x, t, s = line.split(';')
+        Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
+        Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = name
+        Limbs.showLimb(StickMan.virtuMan, parent)
+        Muscles.showMuscle(StickMan.virtuMan, parent)
+    file.close()
+
+def renameZoi(entity, oldName, newName):
+    try:
+        os.rename(pathAvatars + entity.tag + '/' + pathTemplates + GUI.selectedTemplate + '/' + pathZoi + oldName + extension, pathAvatars + entity.tag + '/' + pathTemplates + GUI.selectedTemplate + '/' + pathZoi + newName + extension)
+    except:
+        pass
+
+
 """
     Group files
 """
@@ -305,7 +371,7 @@ def saveGroups(entity, fileName):
         file.write("\n")
     file.close()
 
-def loadGroups(entity, fileName):
+def loadGroup(entity, fileName):
     Sensors.virtuSens = []
 
     if fileName == "":
@@ -322,59 +388,11 @@ def loadGroups(entity, fileName):
         Sensors.virtuSens[len(Sensors.virtuSens)-1].tag = name
     file.close()
     
-def removeGroups(entity, fileName):
+def removeGroup(entity, fileName):
     os.remove(pathAvatars + entity.tag + '/' + pathGroups + fileName + extension)
 
 def renameGroup(entity, oldName, newName):
     try:
         os.rename(pathAvatars + entity.tag + '/' + pathGroups + oldName + extension, pathAvatars + entity.tag + '/' + pathGroups + newName + extension)
-    except:
-        pass
-
-"""
-    Zones of interest files
-"""
-
-def updateZoi():
-    global zoiFileName
-    zoiFileName = []
-
-    if GUI.selectedTemplate == "":
-        return
-
-    zoiFileName = os.listdir(pathTemplates + GUI.selectedTemplate + '/' + pathZoi)
-    for i in range(0,len(zoiFileName)):
-        zoiFileName[i] = zoiFileName[i][:-len(extension)]
-
-
-def loadZOI(fileName):
-    Sensors.zoiSens = []
-
-    if fileName == "":
-        Limbs.setLimbsShow(StickMan.virtuMan, Events.SHOW)
-        Muscles.setMusclesShow(StickMan.virtuMan, Events.SHOW)
-        return
-    
-    Limbs.setLimbsShow(StickMan.virtuMan, Events.FADE)
-    Muscles.setMusclesShow(StickMan.virtuMan, Events.HIDE)
-
-    file = open(pathTemplates + GUI.selectedTemplate + '/' + pathZoi + fileName + extension, 'r')
-    
-    color = (0.5,0.5,0.5,1)
-    type = GUI.selectedTemplate
-    while True:
-        line = file.readline() # read sensor data
-        if line == "":
-            break
-        name, parent, x, t, s = line.split(';')
-        Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
-        Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = name
-        Limbs.showLimb(StickMan.virtuMan, parent)
-        Muscles.showMuscle(StickMan.virtuMan, parent)
-    file.close()
-
-def renameZoi(oldName, newName):
-    try:
-        os.rename(pathTemplates + GUI.selectedTemplate + '/' + pathZoi + oldName + extension, pathTemplates + GUI.selectedTemplate + '/' + pathZoi + newName + extension)
     except:
         pass

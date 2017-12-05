@@ -94,33 +94,35 @@ class uiList(QtWidgets.QWidget):
 
         if self.listType == ListAvatars:
             self.setWindowTitle('Avatars')
+            self.setGeometry(850, 30, 275, 250)
             State.updateAvatar()
             self.listWidget.addItems(State.avatarFileName)
             saveButton.setEnabled(False)
             deleteButton.setEnabled(False)
         elif self.listType == ListPostures:
+            self.setGeometry(1145, 30, 275, 250)
             self.setWindowTitle('Postures')
             State.updatePosture(StickMan.virtuMan)
             self.listWidget.addItems(State.postureFileName)
         elif self.listType == ListTemplates:
+            self.setGeometry(850, 320, 275, 250)
             self.setWindowTitle('Templates')
-            State.updateTemplate()
+            State.updateTemplate(StickMan.virtuMan)
             self.listWidget.addItems(State.templateFileName)
-            saveButton.setEnabled(False)
-            deleteButton.setEnabled(False)
         elif self.listType == ListZoi:
+            self.setGeometry(1145, 320, 275, 250)
             self.setWindowTitle('Zoi')
             self.listWidget.addItems(State.zoiFileName)
             saveButton.setEnabled(False)
             deleteButton.setEnabled(False)
         elif self.listType == ListGroups:
+            self.setGeometry(850, 610, 275, 250)
             self.setWindowTitle('Groups')
             State.updateGroup(StickMan.virtuMan)
             self.listWidget.addItems(State.groupFileName)
             
-
-        self.setGeometry(900, 200, 300, 400)
         self.show()
+
         
     def itemSelect(self, text):
         text = ""
@@ -138,18 +140,24 @@ class uiList(QtWidgets.QWidget):
             uiGroups.listWidget.setCurrentItem(None)
             uiGroups.listWidget.clear()
             uiGroups.listWidget.addItems(State.groupFileName)
+            uiTemplates.listWidget.setCurrentItem(None)
+            uiTemplates.listWidget.clear()
+            uiTemplates.listWidget.addItems(State.templateFileName)
+            uiZoi.listWidget.setCurrentItem(None)
+            uiZoi.listWidget.clear()
+            uiZoi.listWidget.addItems(State.zoiFileName)
         elif self.listType == ListPostures:
             State.loadPosture(StickMan.virtuMan, text)
         elif self.listType == ListTemplates:
             GUI.selectedTemplate = text
-            State.updateZoi()
+            State.updateZoi(StickMan.virtuMan)
             uiZoi.listWidget.setCurrentItem(None)
             uiZoi.listWidget.clear()
             uiZoi.listWidget.addItems(State.zoiFileName)
         elif self.listType == ListZoi:
-            State.loadZOI(text)
+            State.loadZOI(StickMan.virtuMan, text)
         elif self.listType == ListGroups:
-            State.loadGroups(StickMan.virtuMan, text)
+            State.loadGroup(StickMan.virtuMan, text)
         
     def save(self):
 
@@ -161,6 +169,12 @@ class uiList(QtWidgets.QWidget):
             self.listWidget.setCurrentItem(None)
             self.listWidget.clear()
             self.listWidget.addItems(State.postureFileName)
+        elif self.listType == ListTemplates:
+            State.saveTemplate(StickMan.virtuMan, text)
+            State.updateTemplate(StickMan.virtuMan)
+            self.listWidget.setCurrentItem(None)
+            self.listWidget.clear()
+            self.listWidget.addItems(State.templateFileName)
         elif self.listType == ListGroups:
             State.saveGroups(StickMan.virtuMan, text)
             State.updateGroup(StickMan.virtuMan)
@@ -178,7 +192,7 @@ class uiList(QtWidgets.QWidget):
     def delete(self):
         if self.listWidget.currentItem() == None:
             return
-
+        #### TODO : update child lists when removing a parent item ?
         text = self.listWidget.currentItem().text()
         self.listWidget.setCurrentItem(None)
         self.listWidget.clear()
@@ -189,8 +203,12 @@ class uiList(QtWidgets.QWidget):
             State.removePosture(StickMan.virtuMan, text)
             State.updatePosture(StickMan.virtuMan)
             self.listWidget.addItems(State.postureFileName)
+        elif self.listType == ListTemplates:
+            State.removeTemplate(StickMan.virtuMan, text)
+            State.updateTemplate(StickMan.virtuMan)
+            self.listWidget.addItems(State.templateFileName)
         elif self.listType == ListGroups:
-            State.removeGroups(StickMan.virtuMan, text)
+            State.removeGroup(StickMan.virtuMan, text)
             State.updateGroup(StickMan.virtuMan)
             self.listWidget.addItems(State.groupFileName)
 
@@ -213,12 +231,12 @@ class uiList(QtWidgets.QWidget):
             self.listWidget.addItems(State.postureFileName)
         elif self.listType == ListTemplates:
             uiGroups.listWidget.setCurrentItem(None)
-            State.renameTemplate(oldName, newName)
-            State.updateTemplate()
+            State.renameTemplate(StickMan.virtuMan, oldName, newName)
+            State.updateTemplate(StickMan.virtuMan)
             self.listWidget.addItems(State.templateFileName)
         elif self.listType == ListZoi:
-            State.renameZoi(oldName, newName)
-            State.updateZoi()
+            State.renameZoi(StickMan.virtuMan, oldName, newName)
+            State.updateZoi(StickMan.virtuMan)
             self.listWidget.addItems(State.zoiFileName)
         elif self.listType == ListGroups:
             State.renameGroup(StickMan.virtuMan, oldName, newName)
