@@ -222,6 +222,8 @@ def updateTemplate(entity):
         file.close()
 
 def saveTemplate(entity, fileName):
+    if fileName == "":
+        return
 
     if not os.path.exists(pathAvatars + entity.tag + '/' + pathTemplates + fileName):
         os.makedirs(pathAvatars + entity.tag + '/' + pathTemplates + fileName)
@@ -229,21 +231,17 @@ def saveTemplate(entity, fileName):
 
     file = open(pathAvatars + entity.tag + '/' + pathTemplates + fileName + '/' + 'Template' + extension, 'w')
 
-    for sensorData in Sensors.sensorGraphics:
-        if fileName == sensorData.type:
-
-            file.write(str(sensorData.color[0]))
-            file.write(";")
-            file.write(str(sensorData.color[1]))
-            file.write(";")
-            file.write(str(sensorData.color[2]))
-            file.write(";")
-            file.write(str(sensorData.color[3]))
-            file.write(";")
-            file.write(str(sensorData.shape))
-            file.write(";")
-            file.write(str(sensorData.scale))
-            break;
+    file.write(str(Sensors.customTemplate.color[0]))
+    file.write(";")
+    file.write(str(Sensors.customTemplate.color[1]))
+    file.write(";")
+    file.write(str(Sensors.customTemplate.color[2]))
+    file.write(";")
+    file.write(str(Sensors.customTemplate.color[3]))
+    file.write(";")
+    file.write(str(Sensors.customTemplate.shape))
+    file.write(";")
+    file.write(str(Sensors.customTemplate.scale))
 
     file.close()
 

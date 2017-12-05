@@ -53,6 +53,7 @@ import GUI
 import ID
 import Shaders
 
+customTemplate = templates("", [0, 0, 0, 255], 0, 0.03)
 
 sensorGraphics = []
 newSens = []

@@ -34,6 +34,77 @@ iconFace  = None
 iconDelete = None
 iconRename = None
 
+
+class uiCustomize(QtWidgets.QWidget):
+    
+    def __init__(self):
+        super(uiCustomize, self).__init__()
+        self.initUI()
+        
+    def initUI(self):
+    
+        self.setWindowIcon(iconFace)
+        
+        self.setGeometry(1145, 610, 275, 250)
+        self.setWindowTitle('Customize template')
+        
+
+        self.lr = QtWidgets.QLabel("R : 127", self)
+        self.lr.move(100, 10)
+        self.lg = QtWidgets.QLabel("G : 127", self)
+        self.lg.move(100, 50)
+        self.lb = QtWidgets.QLabel("B : 127", self)
+        self.lb.move(100, 90)
+
+        self.r = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.r.move(10, 10)
+        self.r.setMinimum(0)
+        self.r.setMaximum(255)
+        self.r.setValue(127)
+        self.r.valueChanged.connect(self.valuechangeR)
+        
+        self.g = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.g.move(10, 50)
+        self.g.setMinimum(0)
+        self.g.setMaximum(255)
+        self.g.setValue(127)
+        self.g.valueChanged.connect(self.valuechangeG)
+        
+        self.b = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.b.move(10, 90)
+        self.b.setMinimum(0)
+        self.b.setMaximum(255)
+        self.b.setValue(127)
+        self.b.valueChanged.connect(self.valuechangeB)
+
+        self.show()
+
+    def valuechangeR(self):
+        value = self.r.value()
+        self.lr.setText("R : " + str(value))
+        Sensors.customTemplate.color[0] = value
+        
+        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(StickMan.virtuMan)
+
+    def valuechangeG(self):
+        value = self.g.value()
+        self.lg.setText("G : " + str(value))
+        Sensors.customTemplate.color[1] = value
+        
+        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(StickMan.virtuMan)
+        
+    def valuechangeB(self):
+        value = self.b.value()
+        self.lb.setText("B : " + str(value))
+        Sensors.customTemplate.color[2] = value
+        
+        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(StickMan.virtuMan)
+
+
+
 uiAvatars = None
 uiPostures = None
 uiTemplates = None
@@ -154,6 +225,11 @@ class uiList(QtWidgets.QWidget):
             uiZoi.listWidget.setCurrentItem(None)
             uiZoi.listWidget.clear()
             uiZoi.listWidget.addItems(State.zoiFileName)
+            #for sensorData in Sensors.sensorGraphics:
+            #    if text == sensorData.type:
+            #        uiCustom.r = sensorData.color[0]
+            #        uiCustom.g = sensorData.color[1]
+            #        uiCustom.b = sensorData.color[2]
         elif self.listType == ListZoi:
             State.loadZOI(StickMan.virtuMan, text)
         elif self.listType == ListGroups:
@@ -563,7 +639,8 @@ if __name__ == '__main__':
     uiTemplates = uiList(ListTemplates)
     uiZoi = uiList(ListZoi)
     uiGroups = uiList(ListGroups)
-    
+    uiCustom = uiCustomize()
+
     """ 3D Scene """
     window = mainWindow()
     window.setupUI()
