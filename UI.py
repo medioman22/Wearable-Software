@@ -48,15 +48,32 @@ class uiCustomize(QtWidgets.QWidget):
         self.setGeometry(1145, 610, 275, 250)
         self.setWindowTitle('Customize template')
         
+        self.editR = QtWidgets.QLineEdit("127",self)
+        self.editR.move(130, 10)
+        self.editR.editingFinished.connect(self.valueEditR)
+        self.editG = QtWidgets.QLineEdit("127",self)
+        self.editG.move(130, 50)
+        self.editG.editingFinished.connect(self.valueEditG)
+        self.editB = QtWidgets.QLineEdit("127",self)
+        self.editB.move(130, 90)
+        self.editB.editingFinished.connect(self.valueEditB)
+        self.editScale = QtWidgets.QLineEdit("0.03",self)
+        self.editScale.move(130, 130)
+        self.editScale.editingFinished.connect(self.valueEditScale)
+        self.editShape = QtWidgets.QLineEdit("0",self)
+        self.editShape.move(130, 170)
+        self.editShape.editingFinished.connect(self.valueEditShape)
 
-        self.lr = QtWidgets.QLabel("R : 127", self)
+        self.lr = QtWidgets.QLabel("Red", self)
         self.lr.move(100, 10)
-        self.lg = QtWidgets.QLabel("G : 127", self)
+        self.lg = QtWidgets.QLabel("Green", self)
         self.lg.move(100, 50)
-        self.lb = QtWidgets.QLabel("B : 127", self)
+        self.lb = QtWidgets.QLabel("Blue", self)
         self.lb.move(100, 90)
-        self.lscale = QtWidgets.QLabel("Scale : 0.03", self)
-        self.lscale.move(100, 140)
+        self.lscale = QtWidgets.QLabel("Scale", self)
+        self.lscale.move(100, 130)
+        self.lshape = QtWidgets.QLabel("Shape", self)
+        self.lshape.move(100, 170)
 
         self.r = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.r.move(10, 10)
@@ -80,17 +97,79 @@ class uiCustomize(QtWidgets.QWidget):
         self.b.valueChanged.connect(self.valuechangeB)
         
         self.scale = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.scale.move(10, 140)
+        self.scale.move(10, 130)
         self.scale.setMinimum(0)
         self.scale.setMaximum(100)
         self.scale.setValue(30)
         self.scale.valueChanged.connect(self.valuechangeScale)
+        
+        self.shape = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.shape.move(10, 170)
+        self.shape.setMinimum(0)
+        self.shape.setMaximum(7)
+        self.shape.setValue(0)
+        self.shape.valueChanged.connect(self.valuechangeShape)
 
         self.show()
+        
+    def valueEditR(self):
+        try:
+            value = int(self.editR.text())
+            self.r.setValue(value)
+            Sensors.customTemplate.color[0] = value
+        
+            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(StickMan.virtuMan)
+        except:
+            pass
+        
+    def valueEditG(self):
+        try:
+            value = int(self.editG.text())
+            self.g.setValue(value)
+            Sensors.customTemplate.color[1] = value
+        
+            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(StickMan.virtuMan)
+        except:
+            pass
+        
+    def valueEditB(self):
+        try:
+            value = int(self.editB.text())
+            self.b.setValue(value)
+            Sensors.customTemplate.color[2] = value
+        
+            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(StickMan.virtuMan)
+        except:
+            pass
+        
+    def valueEditScale(self):
+        try:
+            value = float(self.editScale.text())
+            self.scale.setValue(int(1000*value))
+            Sensors.customTemplate.scale = value
+        
+            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(StickMan.virtuMan)
+        except:
+            pass
+        
+    def valueEditShape(self):
+        try:
+            value = int(self.editShape.text())
+            self.shape.setValue(value)
+            Sensors.customTemplate.shape = value
+        
+            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(StickMan.virtuMan)
+        except:
+            pass
 
     def valuechangeR(self):
         value = self.r.value()
-        self.lr.setText("R : " + str(value))
+        self.editR.setText(str(value))
         Sensors.customTemplate.color[0] = value
         
         State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
@@ -98,7 +177,7 @@ class uiCustomize(QtWidgets.QWidget):
 
     def valuechangeG(self):
         value = self.g.value()
-        self.lg.setText("G : " + str(value))
+        self.editG.setText(str(value))
         Sensors.customTemplate.color[1] = value
         
         State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
@@ -106,7 +185,7 @@ class uiCustomize(QtWidgets.QWidget):
         
     def valuechangeB(self):
         value = self.b.value()
-        self.lb.setText("B : " + str(value))
+        self.editB.setText(str(value))
         Sensors.customTemplate.color[2] = value
         
         State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
@@ -114,8 +193,16 @@ class uiCustomize(QtWidgets.QWidget):
         
     def valuechangeScale(self):
         value = self.scale.value()
-        self.lscale.setText("Size : " + str(value/1000.))
+        self.editScale.setText(str(value/1000.))
         Sensors.customTemplate.scale = value/1000.
+        
+        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(StickMan.virtuMan)
+        
+    def valuechangeShape(self):
+        value = self.shape.value()
+        self.editShape.setText(str(value))
+        Sensors.customTemplate.shape = value
         
         State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
         State.updateTemplate(StickMan.virtuMan)
@@ -246,6 +333,9 @@ class uiList(QtWidgets.QWidget):
                     uiCustom.r.setValue(sensorData.color[0])
                     uiCustom.g.setValue(sensorData.color[1])
                     uiCustom.b.setValue(sensorData.color[2])
+                    uiCustom.shape.setValue(sensorData.shape)
+                    uiCustom.scale.setValue(int(sensorData.scale*1000))
+
         elif self.listType == ListZoi:
             State.loadZOI(StickMan.virtuMan, text)
         elif self.listType == ListGroups:

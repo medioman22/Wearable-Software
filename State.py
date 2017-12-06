@@ -54,6 +54,7 @@ def loadAvatar(entity, fileName):
     updatePosture(entity)
     loadPosture(entity, postureFileName[0])
     updateGroup(entity)
+    Sensors.virtuSens = []
     updateTemplate(entity)
     GUI.selectedTemplate = ""
     updateZoi(entity)
