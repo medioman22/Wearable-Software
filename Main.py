@@ -35,6 +35,75 @@ iconDelete = None
 iconRename = None
 
 
+class uiSensors(QtWidgets.QWidget):
+    
+    def __init__(self):
+        super(uiSensors, self).__init__()
+        self.initUI()
+        
+    def initUI(self):
+    
+        self.setWindowIcon(iconFace)
+
+        self.edit = QtWidgets.QLineEdit(self)
+        self.edit.move(10, 10)
+        self.edit.editingFinished.connect(self.valueEdit)
+
+
+        self.table = QtWidgets.QTableWidget(self)
+        self.table.move(10, 40)
+        self.table.selectionModel().selectionChanged.connect(self.itemSelect)
+
+        self.setWindowTitle('Sensors')
+        self.setGeometry(850, 30, 275, 250)
+        
+        self.table.setRowCount(len(Sensors.virtuSens))
+        self.table.setColumnCount(6)
+        self.table.setHorizontalHeaderLabels(["Tag","Type","Attach", "x", "t", "s"])
+        for i in range(0,len(Sensors.virtuSens)):
+            self.table.setItem(i, 0, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].tag))
+            self.table.setItem(i, 1, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].type))
+            self.table.setItem(i, 2, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].attach))
+            self.table.setItem(i, 3, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].x)))
+            self.table.setItem(i, 4, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].t)))
+            self.table.setItem(i, 5, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].s)))
+        self.table.resizeColumnsToContents()
+        self.table.resizeRowsToContents()
+            
+        self.show()
+
+        
+    def itemSelect(self, text):
+        text = ""
+        if self.table.currentItem() != None:
+            text = self.table.currentItem().text()
+        self.edit.setText(text)
+
+    
+    def valueEdit(self):
+        try:
+            value = self.edit.text()
+            self.table.currentItem().setText(value)
+            if self.table.currentColumn() == 0:
+                Sensors.virtuSens[self.table.currentRow()].tag = value
+            elif self.table.currentColumn() == 1:
+                Sensors.virtuSens[self.table.currentRow()].type = value
+            elif self.table.currentColumn() == 2:
+                Sensors.virtuSens[self.table.currentRow()].attach = value
+            elif self.table.currentColumn() == 3:
+                Sensors.virtuSens[self.table.currentRow()].x = float(value)
+            elif self.table.currentColumn() == 4:
+                Sensors.virtuSens[self.table.currentRow()].t = float(value)
+            elif self.table.currentColumn() == 5:
+                Sensors.virtuSens[self.table.currentRow()].s = float(value)
+
+            text = uiGroups.qle.text()
+            State.saveGroups(StickMan.virtuMan, text)
+            State.updateGroup(StickMan.virtuMan)
+        except:
+            pass
+
+
 class uiCustomize(QtWidgets.QWidget):
     
     def __init__(self):
@@ -320,6 +389,18 @@ class uiList(QtWidgets.QWidget):
             uiZoi.listWidget.setCurrentItem(None)
             uiZoi.listWidget.clear()
             uiZoi.listWidget.addItems(State.zoiFileName)
+            
+            uiSensor.table.setRowCount(len(Sensors.virtuSens))
+            uiSensor.table.setColumnCount(6)
+            for i in range(0, len(Sensors.virtuSens)):
+                uiSensor.table.setItem(i, 0, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].tag))
+                uiSensor.table.setItem(i, 1, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].type))
+                uiSensor.table.setItem(i, 2, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].attach))
+                uiSensor.table.setItem(i, 3, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].x)))
+                uiSensor.table.setItem(i, 4, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].t)))
+                uiSensor.table.setItem(i, 5, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].s)))
+            uiSensor.table.resizeColumnsToContents()
+            uiSensor.table.resizeRowsToContents()
         elif self.listType == ListPostures:
             State.loadPosture(StickMan.virtuMan, text)
         elif self.listType == ListTemplates:
@@ -340,6 +421,18 @@ class uiList(QtWidgets.QWidget):
             State.loadZOI(StickMan.virtuMan, text)
         elif self.listType == ListGroups:
             State.loadGroup(StickMan.virtuMan, text)
+            
+            uiSensor.table.setRowCount(len(Sensors.virtuSens))
+            uiSensor.table.setColumnCount(6)
+            for i in range(0,len(Sensors.virtuSens)):
+                uiSensor.table.setItem(i, 0, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].tag))
+                uiSensor.table.setItem(i, 1, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].type))
+                uiSensor.table.setItem(i, 2, QtWidgets.QTableWidgetItem(Sensors.virtuSens[i].attach))
+                uiSensor.table.setItem(i, 3, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].x)))
+                uiSensor.table.setItem(i, 4, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].t)))
+                uiSensor.table.setItem(i, 5, QtWidgets.QTableWidgetItem(str(Sensors.virtuSens[i].s)))
+            uiSensor.table.resizeColumnsToContents()
+            uiSensor.table.resizeRowsToContents()
         
     def save(self):
 
@@ -746,6 +839,7 @@ if __name__ == '__main__':
     uiZoi = uiList(ListZoi)
     uiGroups = uiList(ListGroups)
     uiCustom = uiCustomize()
+    uiSensor = uiSensors()
 
     """ 3D Scene """
     window = mainWindow()

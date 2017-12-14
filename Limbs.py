@@ -13,10 +13,10 @@ class limb(object):
         self.angleRepos = [0,0,0]
         self.twist = [1,0,0,0]
         self.swing = [1,0,0,0]
-        self.angle = [1,0,0,0]
         self.layer = 0
         self.modelMatrix = []
-        self.vbo = 0
+        self.vboId = 0
+        self.mesh = None
         self.selected = False
         self.show = Events.SHOW
 
@@ -50,12 +50,27 @@ def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
     """ limb is selected ? """
     entity.limbs[current_limb].selected = limbIsSelected
 
+    """ angle """
+    angleTwist = Definitions.vector4D(entity.limbs[current_limb].twist).quatAngle()
+
     """ preprocess muscles attachment points """
     for i in range(0,len(entity.muscles)):
         if entity.muscles[i].A == entity.limbs[current_limb].tag:
-            entity.muscles[i].Aworld = np.dot(np.array([entity.muscles[i].Alocal]), Definitions.modelMatrix.peek())
+            coordLocal = [entity.muscles[i].Alocal[0], entity.muscles[i].Alocal[1], entity.muscles[i].Alocal[2], entity.muscles[i].Alocal[3]]
+            angle = (coordLocal[0]+0.5)*math.pi/180*angleTwist
+            newY = coordLocal[1]*math.cos(angle) - coordLocal[2]*math.sin(angle)
+            newZ = coordLocal[1]*math.sin(angle) + coordLocal[2]*math.cos(angle)
+            coordLocal[1] = newY
+            coordLocal[2] = newZ
+            entity.muscles[i].Aworld = np.dot(np.array([coordLocal]), Definitions.modelMatrix.peek())
         if entity.muscles[i].B == entity.limbs[current_limb].tag:
-            entity.muscles[i].Bworld = np.dot(np.array([entity.muscles[i].Blocal]), Definitions.modelMatrix.peek())
+            coordLocal = [entity.muscles[i].Blocal[0], entity.muscles[i].Blocal[1], entity.muscles[i].Blocal[2], entity.muscles[i].Blocal[3]]
+            angle = (coordLocal[0]+0.5)*math.pi/180*angleTwist
+            newY = coordLocal[1]*math.cos(angle) - coordLocal[2]*math.sin(angle)
+            newZ = coordLocal[1]*math.sin(angle) + coordLocal[2]*math.cos(angle)
+            coordLocal[1] = newY
+            coordLocal[2] = newZ
+            entity.muscles[i].Bworld = np.dot(np.array([coordLocal]), Definitions.modelMatrix.peek())
     
     """ preprocess sensors """
     for sensor in Sensors.virtuSens + Sensors.zoiSens:
@@ -65,7 +80,12 @@ def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
                 sensor.h = 0.4
             if ID.idCategory(sensor.id) == ID.ZOI:
                 sensor.h = 0.55
+            Definitions.modelMatrix.push()
+            Qtw = Definitions.vector4D((angleTwist*(sensor.x+0.5),1,0,0))
+            Definitions.modelMatrix.rotate(Qtw.o, Qtw.x, Qtw.y, Qtw.z)
             Sensors.preprocessSensor(sensor, x, y, z)
+            Definitions.modelMatrix.pop()
+    Definitions.modelMatrix.pop()
 
 
             # TODO : do all same vbo together !!
@@ -86,13 +106,13 @@ def drawBodySurface(entity, style, show):
             continue
 
         drawSaturation = False
-        if vboId != part.vbo:
+        if True:#vboId != part.vboId:
             """ choose vbo """
-            vboId = part.vbo
+            vboId = part.vboId
                     
             """ bind surfaces vbo """
-            Graphics.indexPositions[vboId][Graphics.vboSurfaces].bind()
-            Graphics.vertexPositions[vboId].bind()
+            part.mesh.surfIndexPositions.bind()
+            part.mesh.vertexPositions.bind()
             glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         """ choose color """
         alpha = 0.3
@@ -116,7 +136,8 @@ def drawBodySurface(entity, style, show):
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, part.modelMatrix)
 
         """ draw vbo """
-        glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
+        offset = ctypes.c_void_p(0);
+        glDrawElements(part.mesh.surfStyleIndex, part.mesh.surfNbIndex, GL_UNSIGNED_INT, offset)
         
         if part.id == lookingAtID:
             lookingAt = np.dot(np.array([[0, 0, 0, 1]]), part.modelMatrix)
@@ -134,13 +155,13 @@ def drawBodyEdge(entity, style):
     for part in entity.limbs:
         if part.show == Events.FADE or part.show == Events.HIDE:
             continue
-        if vboId != part.vbo:
+        if True:#vboId != part.vboId:
             """ choose vbo """
-            vboId = part.vbo
+            vboId = part.vboId
                     
             """ bind surfaces vbo """
-            Graphics.indexPositions[vboId][Graphics.vboEdges].bind()
-            Graphics.vertexPositions[vboId].bind()
+            part.mesh.edgeIndexPositions.bind()
+            part.mesh.vertexPositions.bind()
             glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
                     
         """ choose color """
@@ -161,7 +182,8 @@ def drawBodyEdge(entity, style):
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, part.modelMatrix)
 
         """ draw vbo """
-        glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
+        offset = ctypes.c_void_p(0);
+        glDrawElements(part.mesh.edgeStyleIndex, part.mesh.edgeNbIndex, GL_UNSIGNED_INT, offset)
 
 
 def setLimbsShow(entity, show):

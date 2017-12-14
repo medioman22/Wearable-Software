@@ -57,8 +57,6 @@ def stick(entity, offset = (0,0,0)):
     """ default orientation of limb """
     l = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, entity.limbs[current_limb].angleRepos[0], entity.limbs[current_limb].angleRepos[1], entity.limbs[current_limb].angleRepos[2])))
 
-    """ current rotation of limb """
-    q = Definitions.vector4D((entity.limbs[current_limb].angle))
 
     """ new rotation to implement """
     if limbIsSelected == True:
@@ -70,9 +68,13 @@ def stick(entity, offset = (0,0,0)):
         tw = Definitions.vector4D.Twist(Definitions.vector4D((entity.limbs[current_limb].twist)), (entity.limbs[current_limb].saturations))
         entity.limbs[current_limb].twist = [tw.o,tw.x,tw.y,tw.z]
 
-        """ resulting orientation of limb ... """
-        q = Definitions.vector4D.QuatProd(sw, tw)
-        entity.limbs[current_limb].angle = [q.o,q.x,q.y,q.z]
+        """ twist effect on vbo """
+        entity.limbs[current_limb].mesh.twistVBO(Definitions.vector4D(entity.limbs[current_limb].twist).quatAngle())
+
+
+    """ current rotation of limb """
+    Qsw = Definitions.vector4D((entity.limbs[current_limb].swing))
+    Qtw = Definitions.vector4D((entity.limbs[current_limb].twist))
     
 
     """ Transformations """
@@ -96,11 +98,11 @@ def stick(entity, offset = (0,0,0)):
 
         Definitions.modelMatrix.pop()
 
+        
     """ total rotation to apply """
-    p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,q))
+    p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,Qsw))
     if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
         Definitions.modelMatrix.rotate(p.o, p.x, p.y, p.z)
-        
         
     """ preprocess limb """
     x = entity.size*entity.limbs[current_limb].dimensions[0]
@@ -111,8 +113,11 @@ def stick(entity, offset = (0,0,0)):
     dz = 0
     Limbs.preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb)
 
-    Definitions.modelMatrix.pop()
-
+    
+    """ total rotation to apply """
+    p = Definitions.vector4D.Quat2Vec(Qtw)
+    if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
+        Definitions.modelMatrix.rotate(p.o, p.x, p.y, p.z)
 
     """ recursive call for all limbs children to the current one """
     while limb + 1 < len(entity.limbs) and entity.limbs[limb+1].layer > entity.limbs[current_limb].layer:

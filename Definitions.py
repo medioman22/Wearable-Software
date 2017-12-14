@@ -270,9 +270,6 @@ class vector4D(object):
             Qswing = vector4D.Vec2Quat(Vswing)
             Qswing = vector4D.QuatProd(Qswing, Qoffset)
         return Qswing
-
-
-
     def Twist(twist, saturation = (0, 0, 0, 0, 0, 0)):
         Qtwist = twist
         if Qtwist.x < 0:
@@ -294,7 +291,17 @@ class vector4D(object):
             Vtwist.o = saturation[1]
         Qtwist = vector4D.Vec2Quat(Vtwist)
         return Qtwist
-    
+
+    def quatAngle(self):
+        if self.x < 0:
+            self = vector4D.QuatFlip(self)
+        angle = vector4D.Quat2Vec(self).o
+        if angle > 180:
+            angle -= 360
+        elif angle <= -180:
+            angle += 360
+        return angle
+
 
 
 

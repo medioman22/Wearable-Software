@@ -1,3 +1,38 @@
+class mesh(object):
+    """
+        mesh
+    """
+
+    def __init__(self): # add orientation sometime...
+        """ constructor """
+        self.vertices = None
+        self.surfIndices = None
+        self.edgeIndices = None
+
+        self.vertexPositions = None
+        self.surfIndexPositions = None
+        self.edgeIndexPositions = None
+
+        self.surfNbIndex = None
+        self.edgeNbIndex = None
+
+        self.surfStyleIndex = None
+        self.edgeStyleIndex = None
+
+    
+    def twistVBO(self, angleTwist = 0):
+        vertices = self.vertices.copy()
+        for i in range(0,vertices.size):
+            if i%3 == 0:
+                angle = (vertices[0,i]+0.5)*math.pi/180*angleTwist
+                newY = vertices[0,i+1]*math.cos(angle) - vertices[0,i+2]*math.sin(angle)
+                newZ = vertices[0,i+1]*math.sin(angle) + vertices[0,i+2]*math.cos(angle)
+                vertices[0,i+1] = newY
+                vertices[0,i+2] = newZ
+        self.vertexPositions = vbo.VBO(vertices)
+
+
+
 import pygame
 from pygame.locals import *
 
@@ -215,7 +250,6 @@ def VBO_cylindre(iMax = 8):
     edgeIndices = []
     surfIndices = []
     
-    
     i = 0
     while i <= iMax:
         phi = 2*math.pi*i/float(iMax)
@@ -233,20 +267,121 @@ def VBO_cylindre(iMax = 8):
     vertices = vertices + [-0.5, 0., 0.]
     vertices = vertices + [0.5, 0., 0.]
 
-
+    
     vertices = np.array([vertices],    dtype='f')
 
     edgeIndices = np.array([edgeIndices], dtype=np.int32)
 
     surfIndices = np.array([surfIndices], dtype=np.int32)
 
+
     vertexPositions = vertexPositions + [vbo.VBO(vertices),]
     
     indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-    
+
     nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-    
+
     styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+
+
+def VBO_limb(iMax = 16, jMax = 8):
+    """ Create the "sphere" VBO & EBO """
+    newMesh = mesh()
+    vertices = []
+    edgeIndices = []
+    surfIndices = []
+    
+    
+    i = 0
+    while i <= iMax:
+        phi = 2*math.pi*i/float(iMax)
+        
+        for j in range(0,jMax):
+            vertices = vertices + [-0.5 + (j)/float(jMax-1), 0.5*math.cos(phi), 0.5*math.sin(phi)]
+        if i != iMax:
+            edgeIndices = edgeIndices + [jMax*i,       jMax*(i+1)]
+            for j in range(1,jMax):
+                edgeIndices = edgeIndices + [jMax*i+j-1,       jMax*i+j]
+
+                surfIndices = surfIndices + [jMax*i+j-1,       jMax*(i+1)+j-1,    jMax*(i+1)+j]
+                surfIndices = surfIndices + [jMax*(i+1)+j, jMax*i+j,      jMax*i+j-1]
+            surfIndices = surfIndices + [jMax*i,       jMax*(i+1),    jMax*(iMax+1)]
+            surfIndices = surfIndices + [jMax*i+jMax-1,     jMax*(i+1)+jMax-1,  jMax*(iMax+1)+1]
+        i +=1
+    vertices = vertices + [-0.5, 0., 0.]
+    vertices = vertices + [0.5, 0., 0.]
+
+    
+    vertices = np.array([vertices],    dtype='f')
+    newMesh.vertices = vertices
+
+    edgeIndices = np.array([edgeIndices], dtype=np.int32)
+    newMesh.edgeIndices = edgeIndices
+
+    surfIndices = np.array([surfIndices], dtype=np.int32)
+    newMesh.surfIndices = surfIndices
+
+
+    newMesh.vertexPositions = vbo.VBO(vertices)
+    
+    newMesh.surfIndexPositions = vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)
+    newMesh.edgeIndexPositions = vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER)
+
+    newMesh.surfNbIndex = surfIndices.size
+    newMesh.edgeNbIndex = edgeIndices.size
+
+    newMesh.surfStyleIndex = GL_TRIANGLES
+    newMesh.edgeStyleIndex = GL_LINES
+
+    return newMesh
+
+def VBO_head(iMax = 16, jMax = 16, iMin = 16, jMin = 16):
+    """ Create the "sphere" VBO & EBO """
+    newMesh = mesh()
+    vertices = []
+    edgeIndices = []
+    surfIndices = []
+    
+    i = 0
+    while i <= iMin:
+        phi = math.pi*i/float(iMax)
+        j = 0
+        while j < jMin:
+            theta = 2*math.pi*j/float(jMax)
+            vertices = vertices + [0.5*math.cos(phi), 0.5*math.sin(phi)*math.cos(theta), 0.5*math.sin(phi)*math.sin(theta)]
+            if i != iMin:
+                edgeIndices = edgeIndices + [i*jMin + j, i*jMin + (j+1)%jMin]
+                edgeIndices = edgeIndices + [i*jMin + j, (i+1)*jMin + j]
+                surfIndices = surfIndices + [i*jMin + j, i*jMin + (j+1)%jMin, (i+1)*jMin + (j+1)%jMin]
+                surfIndices = surfIndices + [(i+1)*jMin + (j+1)%jMin, (i+1)*jMin + j, i*jMin + j]
+            j +=1
+        i +=1
+
+    
+    vertices = np.array([vertices],    dtype='f')
+    newMesh.vertices = vertices
+
+    edgeIndices = np.array([edgeIndices], dtype=np.int32)
+    newMesh.edgeIndices = edgeIndices
+
+    surfIndices = np.array([surfIndices], dtype=np.int32)
+    newMesh.surfIndices = surfIndices
+
+
+    newMesh.vertexPositions = vbo.VBO(vertices)
+    
+    newMesh.surfIndexPositions = vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)
+    newMesh.edgeIndexPositions = vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER)
+
+    newMesh.surfNbIndex = surfIndices.size
+    newMesh.edgeNbIndex = edgeIndices.size
+
+    newMesh.surfStyleIndex = GL_TRIANGLES
+    newMesh.edgeStyleIndex = GL_LINES
+
+    return newMesh
+
+
 
 def VBO_circle(iMax = 8):
     """ Create the "sphere" VBO & EBO """

@@ -2,6 +2,7 @@ import os
 import shutil
 #import csv
 
+import Definitions
 import Events
 import Graphics
 import GUI
@@ -88,9 +89,11 @@ def loadLimbs(entity):
         newLimb.layer = int(l)
         newLimb.tag = t
         if newLimb.tag == "Head":
-            newLimb.vbo = Graphics.vboSphere
+            newLimb.vboId = Graphics.vboSphere
+            newLimb.mesh = Graphics.VBO_head()
         else:
-            newLimb.vbo = Graphics.vboCylindre
+            newLimb.vboId = Graphics.vboCylindre
+            newLimb.mesh = Graphics.VBO_limb()
         newLimb.offset = [float(o1), float(o2), float(o3)]
         newLimb.dimensions = [float(d1), float(d2), float(d3)]
         newLimb.saturations = [float(s1), float(s2), float(s3), float(s4), float(s5), float(s6)]
@@ -158,16 +161,14 @@ def loadPosture(entity, fileName):
             break
         ID, a,b,c = map(str, line.split(";"))
         line = file.readline() # read part orientations
-        angle = map(float, line.split(";"))
-        line = file.readline() # read part orientations
         swing = map(float, line.split(";"))
         line = file.readline() # read part orientations
         twist = map(float, line.split(";"))
         for part in entity.limbs:
             if part.tag == ID:
-                part.angle = angle
                 part.swing = swing
                 part.twist = twist
+                part.mesh.twistVBO(Definitions.vector4D(part.twist).quatAngle())
                 break
     file.close()
 
@@ -182,9 +183,6 @@ def savePosture(entity, fileName):
     file.write("\n")
     for part in entity.limbs:
         file.write(part.tag + ";;;")
-        file.write("\n")
-        angle = ";".join(str(e) for e in part.angle)
-        file.write(angle)
         file.write("\n")
         swing = ";".join(str(e) for e in part.swing)
         file.write(swing)
