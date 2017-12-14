@@ -13,6 +13,9 @@ class muscle(object):
         self.B = ""
         self.Blocal = []
         self.Bworld = []
+        self.C = ""
+        self.Clocal = []
+        self.Cworld = []
         self.modelMatrix = []
         self.selected = False
         self.show = Events.SHOW
@@ -36,7 +39,8 @@ def preprocessMuscle(entity):
 
         P1 = entity.muscles[i].Aworld
         P2 = entity.muscles[i].Bworld
-        if P1 == [] or P2 == []:
+        P3 = entity.muscles[i].Cworld
+        if P1 == [] or P2 == [] or P3 == []:
             continue
 
         v1 = Definitions.vector4D((0, 1, 0, 0))
@@ -50,8 +54,23 @@ def preprocessMuscle(entity):
         Definitions.modelMatrix.set(Definitions.I)
         Definitions.modelMatrix.translate(center.x, center.y, center.z)
         Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
+
+        """ adjust facing direction (singularities) """
+        u2 = np.dot(np.array([0, 1, 0, 0]), Definitions.modelMatrix.peek())
+        u3 = np.array([0.5*(P1[0][0]+P2[0][0])-P3[0][0], 0.5*(P1[0][1]+P2[0][1])-P3[0][1], 0.5*(P1[0][2]+P2[0][2])-P3[0][2], 0])
+        v3 = Definitions.vector4D((0, u2[0], u2[1], u2[2]))
+        v4 = Definitions.vector4D((0, u3[0], u3[1], u3[2]))
+        w = Definitions.vector4D.AngleAxisBetween2Vec(v3,v4)
+        if w.x < 0:
+            w.o = -w.o
+        ######## SEMANTIC BUG HERE... muscle not always rotating in correct direction
+        if i == 1:
+            print(i, math.sqrt(w.x*w.x+w.y*w.y+w.z*w.z), int(1000*w.x), int(1000*w.y), int(1000*w.z), int(w.o))
+
+        Definitions.modelMatrix.rotate(w.o, -1, 0, 0)
+            
         Definitions.modelMatrix.scale(scale,0.03,0.03)
-        
+
         entity.muscles[i].modelMatrix = Definitions.modelMatrix.peek()
 
         

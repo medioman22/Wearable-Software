@@ -71,6 +71,14 @@ def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
             coordLocal[1] = newY
             coordLocal[2] = newZ
             entity.muscles[i].Bworld = np.dot(np.array([coordLocal]), Definitions.modelMatrix.peek())
+        if entity.muscles[i].C == entity.limbs[current_limb].tag:
+            coordLocal = [entity.muscles[i].Clocal[0], entity.muscles[i].Clocal[1], entity.muscles[i].Clocal[2], entity.muscles[i].Clocal[3]]
+            angle = (coordLocal[0]+0.5)*math.pi/180*angleTwist
+            newY = coordLocal[1]*math.cos(angle) - coordLocal[2]*math.sin(angle)
+            newZ = coordLocal[1]*math.sin(angle) + coordLocal[2]*math.cos(angle)
+            coordLocal[1] = newY
+            coordLocal[2] = newZ
+            entity.muscles[i].Cworld = np.dot(np.array([coordLocal]), Definitions.modelMatrix.peek())
     
     """ preprocess sensors """
     for sensor in Sensors.virtuSens + Sensors.zoiSens:

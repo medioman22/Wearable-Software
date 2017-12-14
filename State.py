@@ -117,13 +117,15 @@ def loadMuscles(entity):
         if line == "":
             break
 
-        tag, A, Al1, Al2, Al3, B, Bl1, Bl2, Bl3 = line.split(';')
+        tag, A, Al1, Al2, Al3, B, Bl1, Bl2, Bl3, C, Cl1, Cl2, Cl3 = line.split(';')
         newMuscle = Muscles.muscle()
         newMuscle.tag = tag
         newMuscle.A = A
         newMuscle.Alocal = [float(Al1), float(Al2), float(Al3), 1]
         newMuscle.B = B
         newMuscle.Blocal = [float(Bl1), float(Bl2), float(Bl3), 1]
+        newMuscle.C = C
+        newMuscle.Clocal = [float(Cl1), float(Cl2), float(Cl3), 1]
         entity.muscles = entity.muscles + [newMuscle]
 
     file.close()
