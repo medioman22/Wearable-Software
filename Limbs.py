@@ -97,23 +97,19 @@ def drawBodySurface(entity, style, show):
 
 
     global lookingAt
-
-    vboId = -1
+    
+    """ bind surfaces vbo """
+    entity.mesh.surfIndexPositions.bind()
+    entity.mesh.vertexPositions.bind()
+    i = -1
     for part in entity.limbs:
+        i += 1
         if part.show == Events.FADE and show == Events.SHOW\
         or part.show == Events.SHOW and show == Events.FADE and Events.showBody != Events.FADE\
         or part.show == Events.FADE and style == Graphics.idBuffer:
             continue
 
         drawSaturation = False
-        if True:#vboId != part.vboId:
-            """ choose vbo """
-            vboId = part.vboId
-                    
-            """ bind surfaces vbo """
-            part.mesh.surfIndexPositions.bind()
-            part.mesh.vertexPositions.bind()
-            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         """ choose color """
         alpha = 0.3
         if Events.showBody == Events.FADE or part.show == Events.FADE:
@@ -136,8 +132,9 @@ def drawBodySurface(entity, style, show):
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, part.modelMatrix)
 
         """ draw vbo """
-        offset = ctypes.c_void_p(0);
-        glDrawElements(part.mesh.surfStyleIndex, part.mesh.surfNbIndex, GL_UNSIGNED_INT, offset)
+        offset = ctypes.c_void_p(4*entity.mesh.surfIndexOffset[i]); #note : GL_UNSIGNED_INT is 4 bytes
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
+        glDrawElements(entity.mesh.surfStyleIndex[i], entity.mesh.surfNbIndex[i], GL_UNSIGNED_INT, offset)
         
         if part.id == lookingAtID:
             lookingAt = np.dot(np.array([[0, 0, 0, 1]]), part.modelMatrix)
@@ -150,19 +147,15 @@ def drawBodyEdge(entity, style):
     if style != Graphics.opaque and style != Graphics.blending:
         return
     
-
-    vboId = -1
+    
+    """ bind edges vbo """
+    entity.mesh.edgeIndexPositions.bind()
+    entity.mesh.vertexPositions.bind()
+    i = -1
     for part in entity.limbs:
+        i+=1
         if part.show == Events.FADE or part.show == Events.HIDE:
             continue
-        if True:#vboId != part.vboId:
-            """ choose vbo """
-            vboId = part.vboId
-                    
-            """ bind surfaces vbo """
-            part.mesh.edgeIndexPositions.bind()
-            part.mesh.vertexPositions.bind()
-            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
                     
         """ choose color """
         if style == Graphics.opaque:
@@ -182,8 +175,9 @@ def drawBodyEdge(entity, style):
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, part.modelMatrix)
 
         """ draw vbo """
-        offset = ctypes.c_void_p(0);
-        glDrawElements(part.mesh.edgeStyleIndex, part.mesh.edgeNbIndex, GL_UNSIGNED_INT, offset)
+        offset = ctypes.c_void_p(4*entity.mesh.edgeIndexOffset[i]); #note : GL_UNSIGNED_INT is 4 bytes
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
+        glDrawElements(entity.mesh.edgeStyleIndex[i], entity.mesh.edgeNbIndex[i], GL_UNSIGNED_INT, offset)
 
 
 def setLimbsShow(entity, show):

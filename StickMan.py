@@ -13,6 +13,7 @@ class characteristics(object):
         self.position = [0, 0, 0]
         self.orientation = [1, 0, 0, 0]
         self.limbs = []
+        self.mesh = None
         self.muscles = []
 
 
@@ -124,3 +125,31 @@ def stick(entity, offset = (0,0,0)):
         stick(entity, (x, 0, 0))
 
     Definitions.modelMatrix.pop()
+
+
+def oneMesh(entity):
+    entity.mesh = Graphics.mesh()
+    entity.mesh.vertices = np.array([],    dtype='f')
+    entity.mesh.surfIndices = np.array([],    dtype=np.int32)
+    entity.mesh.edgeIndices = np.array([],    dtype=np.int32)
+    entity.mesh.surfNbIndex = []
+    entity.mesh.edgeNbIndex = []
+    entity.mesh.surfIndexOffset = []
+    entity.mesh.edgeIndexOffset = []
+    entity.mesh.surfStyleIndex = []
+    entity.mesh.edgeStyleIndex = []
+    for limb in entity.limbs:
+        entity.mesh.surfIndices = np.append(entity.mesh.surfIndices, limb.mesh.surfIndices + entity.mesh.vertices.size/3)
+        entity.mesh.edgeIndices = np.append(entity.mesh.edgeIndices, limb.mesh.edgeIndices + entity.mesh.vertices.size/3)
+        entity.mesh.vertices = np.append(entity.mesh.vertices, limb.mesh.vertices)
+        if entity.mesh.surfIndexOffset != []:
+            entity.mesh.surfIndexOffset = entity.mesh.surfIndexOffset + [entity.mesh.surfIndexOffset[-1] + entity.mesh.surfNbIndex[-1],]
+            entity.mesh.edgeIndexOffset = entity.mesh.edgeIndexOffset + [entity.mesh.edgeIndexOffset[-1] + entity.mesh.edgeNbIndex[-1],]
+        else:
+            entity.mesh.surfIndexOffset = [0]
+            entity.mesh.edgeIndexOffset = [0]
+        entity.mesh.surfNbIndex = entity.mesh.surfNbIndex + [limb.mesh.surfNbIndex,]
+        entity.mesh.edgeNbIndex = entity.mesh.edgeNbIndex + [limb.mesh.edgeNbIndex,]
+        entity.mesh.surfStyleIndex = entity.mesh.surfStyleIndex + [limb.mesh.surfStyleIndex,]
+        entity.mesh.edgeStyleIndex = entity.mesh.edgeStyleIndex + [limb.mesh.edgeStyleIndex,]
+    Graphics.buildVBO(entity)

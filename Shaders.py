@@ -29,6 +29,7 @@ fragment_shader = """
     
 shader = None
 
+position = None
 proj_loc = None
 view_loc = None
 model_loc = None

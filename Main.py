@@ -561,14 +561,6 @@ class mainWindow(QtWidgets.QMainWindow):
         # keep track of loop frequency
         flagStart = time.clock()
 
-        
-        """
-            Update files lists.
-            you can edit / add / remove groupe & template files without closing software (as long as syntax is respected)
-        """
-        #State.updateFilesLists(StickMan.virtuMan)
-        #GUI.updateGuiLists()
-
 
 
         """
@@ -605,6 +597,7 @@ class mainWindow(QtWidgets.QMainWindow):
         Graphics.SaturationModelMatrix = []
         StickMan.stick(StickMan.virtuMan)
         Definitions.modelMatrix.pop()
+        StickMan.oneMesh(StickMan.virtuMan)
 
         Muscles.preprocessMuscle(StickMan.virtuMan)
         Ground.preprocessGround(math.fabs(Events.rMax))
@@ -712,7 +705,7 @@ class mainWindow(QtWidgets.QMainWindow):
             while len(Definitions.packageIndices[i]) > 0:
                 Definitions.packageIndices[i] = Definitions.packageIndices[i][:-1]
 
-        #print(int(1./(time.clock()-flagStart)))
+        #print("FREQ : ", int(1./(time.clock()-flagStart)))
 
     def initializeGL(self):
         
@@ -761,9 +754,9 @@ class mainWindow(QtWidgets.QMainWindow):
 
 
         """ Enable position attrib ? """
-        position = glGetAttribLocation(Shaders.shader, "position")
-        glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, None) 
-        glEnableVertexAttribArray(position)
+        Shaders.position = glGetAttribLocation(Shaders.shader, "position")
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None) 
+        glEnableVertexAttribArray(Shaders.position)
 
 
         """ Initialize some more stuff"""
