@@ -52,6 +52,7 @@ import Definitions
 import Shaders
 
 
+display = [800, 800] # window size
 
 vertexPositions = []
 indexPositions = []

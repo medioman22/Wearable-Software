@@ -8,34 +8,28 @@ import numpy as np
 import Definitions
 import Events
 import Graphics
-import GUI
 import ID
 import Limbs
 import Muscles
 import Sensors
 import State
 import StickMan
+import UI
 
 mouse = [0,0]
 parent = -1
 overID = 0
-name = ''
-info = []
 def mouseManage():
     global overID
     global parent
-    global name
-    global info
     
-    color = glReadPixels( mouse[0] , GUI.display[1] - mouse[1] - 1 , 1 , 1 , GL_RGBA , GL_FLOAT )
+    color = glReadPixels( mouse[0] , Graphics.display[1] - mouse[1] - 1 , 1 , 1 , GL_RGBA , GL_FLOAT )
     r,g,b,a = 255*color[0][0]
     r = int(r)
     g = int(g)
     b = int(b)
     a = int(a)
     overID = ID.color2id(r,g,b)
-    name = ''
-    info = []
 
     parent = -1
     if ID.idCategory(overID) == ID.LIMB:
@@ -51,7 +45,7 @@ def mouseManage():
         elif parent == 0:
             Limbs.lookingAtID = overID
     # select part
-    GUI.overGuiId = 0
+    ID.overGuiId = 0
     Limbs.overLimbId = 0
     Sensors.overSensId = 0
     Muscles.OverMuscId = 0
@@ -59,10 +53,10 @@ def mouseManage():
     if parent == 0:
         Limbs.overLimbId = overID
         if Events.mouse_click == True:
-            # place sensor on body
-            if GUI.selectedTemplate != "":
+            # place sensor on limb
+            if Sensors.selectedTemplate != "":
                 for sensorData in Sensors.sensorGraphics:
-                    if GUI.selectedTemplate == sensorData.type:
+                    if Sensors.selectedTemplate == sensorData.type:
                         r,g,b,a = sensorData.color
                         color = (r/255., g/255., b/255.)
                         Sensors.newSens = [Sensors.sensors(StickMan.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag, sensorData.type, (0.,90,90), color)]
@@ -77,20 +71,17 @@ def mouseManage():
                 if Select == True:
                     StickMan.selectedLimbs += [StickMan.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag,]
 
-        name = ' (' + StickMan.virtuMan.limbs[overID-1].tag + ')'
-
     elif parent == 1:
         Muscles.OverMuscId = overID
-        name = ' (' + StickMan.virtuMan.muscles[overID - ID.offsetId(ID.MUSCLE)].tag + ')'
         if Events.mouse_click == True:
-            # place sensor on body
-            if GUI.selectedTemplate != "":
+            # place sensor on muscle
+            if Sensors.selectedTemplate != "":
                 for sensorData in Sensors.sensorGraphics:
-                    if GUI.selectedTemplate == sensorData.type:
+                    if Sensors.selectedTemplate == sensorData.type:
                         r,g,b,a = sensorData.color
                         color = (r/255., g/255., b/255.)
                         Sensors.newSens = [Sensors.sensors(StickMan.virtuMan.muscles[Muscles.OverMuscId - ID.offsetId(ID.MUSCLE)].tag, sensorData.type, (0.,90,90), color)]
-            # select limb
+            # select muscle
             else:
                 if Muscles.SelectedMuscId != overID:
                     Muscles.SelectedMuscId = overID
@@ -102,28 +93,33 @@ def mouseManage():
         if Events.mouse_click == True:
             if Sensors.selectedSens == overID:
                 Sensors.selectedSens = 0
+                UI.uiSensor.table.clearSelection()
             else:
                 Sensors.selectedSens = overID
+                UI.uiSensor.table.selectRow(Sensors.selectedSens - ID.offsetId(ID.SENSOR))
+    
+        # place sensor on zoi
+        if Events.mouse_click == True and Sensors.selectedTemplate != "":
+            for sensor in Sensors.zoiSens:
+                if sensor.id == Sensors.overSensId:
+                    for sensorData in Sensors.sensorGraphics:
+                        if Sensors.selectedTemplate == sensorData.type:
+                            r,g,b,a = sensorData.color
+                            color = (r/255., g/255., b/255.)
+                            Sensors.newSens = [Sensors.sensors(sensor.attach, sensorData.type, (sensor.x,sensor.t,sensor.s), color)]
+                            Sensors.newSens[0].tag = sensor.tag
+                            break
+                    break
 
-            
-        for sensor in Sensors.virtuSens + Sensors.zoiSens:
-            if sensor.id == Sensors.overSensId:
-                if Events.mouse_click == True:
-                    if GUI.selectedTemplate != "" and ID.idCategory(sensor.id) == ID.ZOI:
-                        for sensorData in Sensors.sensorGraphics:
-                            if GUI.selectedTemplate == sensorData.type:
-                                r,g,b,a = sensorData.color
-                                color = (r/255., g/255., b/255.)
-                                Sensors.newSens = [Sensors.sensors(sensor.attach, sensorData.type, (sensor.x,sensor.t,sensor.s), color)]
-                                Sensors.newSens[0].tag = sensor.tag
 
-                if Events.deleteSens == True:
-                    if ID.idCategory(sensor.id) == ID.SENSOR:
-                        del Sensors.virtuSens[sensor.id - ID.offsetId(ID.SENSOR)]
-
-                name = ' (' + sensor.type + ')'
-                info = [str(sensor.x) + ' ' + str(sensor.t) + ' ' + str(sensor.s), str(sensor.id), str(sensor.tag)]
+    if Events.deleteSens == True:
+        for sensor in Sensors.virtuSens:
+            if sensor.id == Sensors.selectedSens:
+                del Sensors.virtuSens[sensor.id - ID.offsetId(ID.SENSOR)]
+                Sensors.selectedSens = 0
+                UI.uiSensor.updateTable()
                 break
+        
 
     Events.mouse_click = False
     Events.setLookAt = False

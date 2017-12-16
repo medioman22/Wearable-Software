@@ -5,7 +5,6 @@ import shutil
 import Definitions
 import Events
 import Graphics
-import GUI
 import ID
 import Limbs
 import Muscles
@@ -36,8 +35,8 @@ def importUserSettings():
     file = open(pathUserSettings + "Resolution" + extension, 'r')
     line = file.readline()
     x, y = line.split(';')
-    GUI.display[0] = int(x)
-    GUI.display[1] = int(y)
+    Graphics.display[0] = int(x)
+    Graphics.display[1] = int(y)
 
 
 """
@@ -57,7 +56,7 @@ def loadAvatar(entity, fileName):
     updateGroup(entity)
     Sensors.virtuSens = []
     updateTemplate(entity)
-    GUI.selectedTemplate = ""
+    Sensors.selectedTemplate = ""
     updateZoi(entity)
     Saturations.preprocessSaturations(entity)
     
@@ -300,10 +299,10 @@ def updateZoi(entity):
     global zoiFileName
     zoiFileName = []
 
-    if GUI.selectedTemplate == "":
+    if Sensors.selectedTemplate == "":
         return
 
-    zoiFileName = os.listdir(pathAvatars + entity.tag + '/' + pathTemplates + GUI.selectedTemplate + '/' + pathZoi)
+    zoiFileName = os.listdir(pathAvatars + entity.tag + '/' + pathTemplates + Sensors.selectedTemplate + '/' + pathZoi)
     for i in range(0,len(zoiFileName)):
         zoiFileName[i] = zoiFileName[i][:-len(extension)]
 
@@ -319,10 +318,10 @@ def loadZOI(entity, fileName):
     Limbs.setLimbsShow(StickMan.virtuMan, Events.FADE)
     Muscles.setMusclesShow(StickMan.virtuMan, Events.HIDE)
 
-    file = open(pathAvatars + entity.tag + '/' + pathTemplates + GUI.selectedTemplate + '/' + pathZoi + fileName + extension, 'r')
+    file = open(pathAvatars + entity.tag + '/' + pathTemplates + Sensors.selectedTemplate + '/' + pathZoi + fileName + extension, 'r')
     
     color = (0.5,0.5,0.5,1)
-    type = GUI.selectedTemplate
+    type = Sensors.selectedTemplate
     while True:
         line = file.readline() # read sensor data
         if line == "":
@@ -336,7 +335,7 @@ def loadZOI(entity, fileName):
 
 def renameZoi(entity, oldName, newName):
     try:
-        os.rename(pathAvatars + entity.tag + '/' + pathTemplates + GUI.selectedTemplate + '/' + pathZoi + oldName + extension, pathAvatars + entity.tag + '/' + pathTemplates + GUI.selectedTemplate + '/' + pathZoi + newName + extension)
+        os.rename(pathAvatars + entity.tag + '/' + pathTemplates + Sensors.selectedTemplate + '/' + pathZoi + oldName + extension, pathAvatars + entity.tag + '/' + pathTemplates + Sensors.selectedTemplate + '/' + pathZoi + newName + extension)
     except:
         pass
 
@@ -372,6 +371,7 @@ def saveGroups(entity, fileName):
 
 def loadGroup(entity, fileName):
     Sensors.virtuSens = []
+    Sensors.selectedSens = 0
 
     if fileName == "":
         return

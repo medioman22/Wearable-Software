@@ -49,9 +49,9 @@ import numpy as np
 import Definitions
 import Events
 import Graphics
-import GUI
 import ID
 import Shaders
+import UI
 
 customTemplate = templates("", [0, 0, 0, 255], 0, 0.03)
 
@@ -60,8 +60,8 @@ newSens = []
 virtuSens = []
 zoiSens = []
 overSensId = 0
-selectedSens = []
-
+selectedSens = 0
+selectedTemplate = ""
 
 def preprocessSensor(sensor, x, y, z):
     Definitions.modelMatrix.push()
@@ -137,6 +137,7 @@ def drawSensor(style):
                 sensor.x = 0
                 sensor.t = 90
                 sensor.s = 90
+            UI.uiSensor.updateTable()
 
         """ choose color """
         if style != Graphics.idBuffer:
@@ -233,10 +234,11 @@ def drawDashed(style):
 
 
 def displayTemplate():
+    global selectedTemplate
     glUseProgram(Shaders.shader)
     """ choose vbo """
     for sensorData in sensorGraphics:
-        if GUI.selectedTemplate == sensorData.type:
+        if selectedTemplate == sensorData.type:
             vboId = sensorData.shape
     vboDraw = Graphics.vboEdges
     """ bind surfaces vbo """
@@ -245,7 +247,7 @@ def displayTemplate():
     glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
     """ send color to shader """
     for sensorData in sensorGraphics:
-        if GUI.selectedTemplate == sensorData.type:
+        if selectedTemplate == sensorData.type:
             r,g,b,a = sensorData.color
     color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
     glUniform4fv(Shaders.setColor_loc, 1, color)

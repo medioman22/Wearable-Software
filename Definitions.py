@@ -113,7 +113,10 @@ class vector4D(object):
         v1.QuatNorm()
         v2.QuatNorm()
         result = vector4D()
-        angle = 180/math.pi*math.acos(vector4D.VecDot(v1, v2))
+        try: #prevents acos(+- 1.0002) which is math domain error
+            angle = 180/math.pi*math.acos(vector4D.VecDot(v1, v2))
+        except:
+            angle = 0
         axis = vector4D.VecCross(v1, v2)
         result.o = angle
         result.x = axis.x

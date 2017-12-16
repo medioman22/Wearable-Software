@@ -43,31 +43,28 @@ def preprocessMuscle(entity):
         if P1 == [] or P2 == [] or P3 == []:
             continue
 
-        v1 = Definitions.vector4D((0, 1, 0, 0))
-        v2 = Definitions.vector4D((0, P1[0][0]-P2[0][0], P1[0][1]-P2[0][1], P1[0][2]-P2[0][2]))
-        scale = math.sqrt(v2.x*v2.x + v2.y*v2.y + v2.z*v2.z)
+        """ set muscle model matrix """
+        Ux = Definitions.vector4D((0, 1, 0, 0))
+        Vx = Definitions.vector4D((0, P1[0][0]-P2[0][0], P1[0][1]-P2[0][1], P1[0][2]-P2[0][2]))
+        scale = math.sqrt(Vx.x*Vx.x + Vx.y*Vx.y + Vx.z*Vx.z)
         center = Definitions.vector4D((0, 0.5*(P1[0][0]+P2[0][0]), 0.5*(P1[0][1]+P2[0][1]), 0.5*(P1[0][2]+P2[0][2])))
-        u = Definitions.vector4D.AngleAxisBetween2Vec(v1,v2)
+        Wx = Definitions.vector4D.AngleAxisBetween2Vec(Ux,Vx)
     
-        """ load matrix in shader """
         Definitions.modelMatrix.push()
         Definitions.modelMatrix.set(Definitions.I)
         Definitions.modelMatrix.translate(center.x, center.y, center.z)
-        Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
+        Definitions.modelMatrix.rotate(Wx.o, Wx.x, Wx.y, Wx.z)
 
-        """ adjust facing direction (singularities) """
-        u2 = np.dot(np.array([0, 1, 0, 0]), Definitions.modelMatrix.peek())
-        u3 = np.array([0.5*(P1[0][0]+P2[0][0])-P3[0][0], 0.5*(P1[0][1]+P2[0][1])-P3[0][1], 0.5*(P1[0][2]+P2[0][2])-P3[0][2], 0])
-        v3 = Definitions.vector4D((0, u2[0], u2[1], u2[2]))
-        v4 = Definitions.vector4D((0, u3[0], u3[1], u3[2]))
-        w = Definitions.vector4D.AngleAxisBetween2Vec(v3,v4)
-        if w.x < 0:
-            w.o = -w.o
-        ######## SEMANTIC BUG HERE... muscle not always rotating in correct direction
-        if i == 1:
-            print(i, math.sqrt(w.x*w.x+w.y*w.y+w.z*w.z), int(1000*w.x), int(1000*w.y), int(1000*w.z), int(w.o))
+        """ readjust facing direction """
+        uy = np.dot(np.array([0, 1, 0, 0]), Definitions.modelMatrix.peek()) # Note : not same as Ux because here it's [x,y,z,o] and in vector4D it's [o,x,y,z]
+        vy = np.array([0.5*(P1[0][0]+P2[0][0])-P3[0][0], 0.5*(P1[0][1]+P2[0][1])-P3[0][1], 0.5*(P1[0][2]+P2[0][2])-P3[0][2], 0])
+        Uy = Definitions.vector4D((0, uy[0], uy[1], uy[2]))
+        Vy = Definitions.vector4D((0, vy[0], vy[1], vy[2]))
+        Wy = Definitions.vector4D.AngleAxisBetween2Vec(Uy,Vy)
+        if Definitions.vector4D.VecDot(Vx,Wy) < 0:
+            Wy.o = -Wy.o
 
-        Definitions.modelMatrix.rotate(w.o, -1, 0, 0)
+        Definitions.modelMatrix.rotate(Wy.o, 1, 0, 0)
             
         Definitions.modelMatrix.scale(scale,0.03,0.03)
 

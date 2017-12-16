@@ -4,11 +4,11 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 
 import time
 import Cursor
-import GUI
 import Sensors
 import State
 import Shaders
 import StickMan
+import UI
 
 import Definitions
 
@@ -152,15 +152,10 @@ def manage():
     deleteSens = False
     prevNext = 0
     
-    if loadGroup == True:
-        State.loadGroups()
-        loadGroup = False
-    if loadZoi == True:
-        State.loadZOI(GUI.selectedZoi)
-        loadZoi = False
     if Sensors.newSens != []:
         Sensors.virtuSens = Sensors.virtuSens + Sensors.newSens
         Sensors.newSens = []
+        UI.uiSensor.updateTable()
 
     """ New events """
 
@@ -311,18 +306,6 @@ def manage():
                 State.savePosture(StickMan.virtuMan)
             if eventPress == True and eventKey == QtCore.Qt.Key_A:
                 State.saveGroups(State.saveGroupFile)
-            if eventPress == True and eventKey == QtCore.Qt.Key_S:
-                if GUI.selectedTemplate != "":
-                    for sensorData in Sensors.sensorGraphics:
-                        if GUI.selectedTemplate == sensorData.type:
-                            sensorData.shape = (sensorData.shape - 1 + len(Definitions.packagePreprocess)) % len(Definitions.packagePreprocess)
-                            State.saveTemplates(sensorData)
-            if eventPress == True and eventKey == QtCore.Qt.Key_D:
-                if GUI.selectedTemplate != "":
-                    for sensorData in Sensors.sensorGraphics:
-                        if GUI.selectedTemplate == sensorData.type:
-                            sensorData.shape = (sensorData.shape + 1) % len(Definitions.packagePreprocess)
-                            State.saveTemplates(sensorData)
             if eventPress == True and eventKey == QtCore.Qt.Key_Delete:
                 deleteSens = True
             if eventPress == True and eventKey == QtCore.Qt.Key_G:
