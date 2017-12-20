@@ -111,6 +111,8 @@ class mainWindow(QtWidgets.QMainWindow):
 
         Muscles.preprocessMuscle(StickMan.virtuMan)
         Ground.preprocessGround(math.fabs(Events.rMax))
+        Ground.bubble.mesh.oscilateVBO()
+        Graphics.buildVBO(Ground.bubble)
 
         i = 0
         for package in Definitions.packagePreprocess:
@@ -166,7 +168,8 @@ class mainWindow(QtWidgets.QMainWindow):
         
         # draw scene
         Graphics.modelView(Graphics.blending)
-        Ground.drawGround()
+        #Ground.drawGround()
+        Ground.drawBubble()
 
         # draw saturation balls
         Graphics.modelView(Graphics.blending)
@@ -310,7 +313,9 @@ if __name__ == '__main__':
     State.updateAvatar()
     StickMan.virtuMan = StickMan.characteristics(1.7)
     State.loadAvatar(StickMan.virtuMan, State.avatarFileName[0])
-
+    
+    Ground.bubble = StickMan.characteristics(1.7)
+    Ground.bubble.mesh = Graphics.VBO_head(50,50,50,50)#Graphics.VBO_bubble()
     """ window size """
     State.importUserSettings()
 

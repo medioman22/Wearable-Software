@@ -1,3 +1,17 @@
+import pygame
+from pygame.locals import *
+
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.arrays import vbo
+
+import math
+import time
+import numpy as np
+
+import Definitions
+import Shaders
+
 class mesh(object):
     """
         mesh
@@ -35,21 +49,19 @@ class mesh(object):
                 vertices[0,i+2] = newZ
         self.vertices = vertices
 
-
-
-import pygame
-from pygame.locals import *
-
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.arrays import vbo
-
-import math
-import time
-import numpy as np
-
-import Definitions
-import Shaders
+    #for bubble, purely cosmetic...
+    def oscilateVBO(self):
+        vertices = self.defaultVertices.copy()
+        for i in range(0,vertices.size):
+            if i%3 == 0 and not (vertices[0,i] == 0 and vertices[0,i+1] == 0 and vertices[0,i+2] == 0):
+                angle = math.atan2(vertices[0,i+2],vertices[0,i+1])
+                angle2 = math.atan2(vertices[0,i], math.sqrt(vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]))
+                radius = math.sqrt(vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]) + 0.05*math.sin(10*angle + 3*time.clock()) + 0.02*math.sin(50*angle - 10*time.clock())
+                newY = radius*math.cos(angle)
+                newZ = radius*math.sin(angle)
+                vertices[0,i+1] = newY
+                vertices[0,i+2] = newZ
+        self.vertices = vertices
 
 
 display = [800, 800] # window size
@@ -486,6 +498,45 @@ def VBO_hypar(saturation = (0, 0, 0, 0, 0, 0)):
     SaturationNbIndex = SaturationNbIndex + [[edgeIndices.size, surfIndices.size],]
 
     SaturationStyleIndex = SaturationStyleIndex + [[GL_LINES, GL_TRIANGLES],]
+
+def VBO_bubble(iMax = 1000):
+    """ Create the "sphere" VBO & EBO """
+    newMesh = mesh()
+    
+    vertices = []
+    edgeIndices = []
+    surfIndices = []
+    
+    
+    i = 0
+    while i <= iMax:
+        phi = 2*math.pi*i/float(iMax)
+        vertices = vertices + [-0.5, 0.5*math.cos(phi), 0.5*math.sin(phi)]
+        if i != iMax:
+            edgeIndices = edgeIndices + [i, i+1]
+            surfIndices = surfIndices + [i, i+1, (iMax+1)]
+        i +=1
+    vertices = vertices + [-0.5, 0., 0.]
+
+    
+    vertices = np.array([vertices],    dtype='f')
+    newMesh.defaultVertices = vertices
+    newMesh.vertices = vertices
+
+    edgeIndices = np.array([edgeIndices], dtype=np.int32)
+    newMesh.edgeIndices = edgeIndices
+
+    surfIndices = np.array([surfIndices], dtype=np.int32)
+    newMesh.surfIndices = surfIndices
+
+    newMesh.surfNbIndex = surfIndices.size
+    newMesh.edgeNbIndex = edgeIndices.size
+
+    newMesh.surfStyleIndex = GL_TRIANGLES
+    newMesh.edgeStyleIndex = GL_LINES
+
+    return newMesh
+
 
 def VBO_init():
     global vertexPositions
