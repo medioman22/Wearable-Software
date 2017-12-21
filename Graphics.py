@@ -55,7 +55,7 @@ class mesh(object):
         for i in range(0,vertices.size):
             if i%3 == 0 and not (vertices[0,i] == 0 and vertices[0,i+1] == 0 and vertices[0,i+2] == 0):
                 angle = math.atan2(vertices[0,i+2],vertices[0,i+1])
-                angle2 = math.atan2(vertices[0,i], math.sqrt(vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]))
+                #angle2 = math.atan2(vertices[0,i], math.sqrt(vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]))
                 radius = math.sqrt(vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]) + 0.05*math.sin(10*angle + 3*time.clock()) + 0.02*math.sin(50*angle - 10*time.clock())
                 newY = radius*math.cos(angle)
                 newZ = radius*math.sin(angle)

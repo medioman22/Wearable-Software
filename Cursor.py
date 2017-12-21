@@ -96,7 +96,10 @@ def mouseManage():
                 UI.uiSensor.table.clearSelection()
             else:
                 Sensors.selectedSens = overID
-                UI.uiSensor.table.selectRow(Sensors.selectedSens - ID.offsetId(ID.SENSOR))
+                try:
+                    UI.uiSensor.table.selectRow(Sensors.selectedSens - ID.offsetId(ID.SENSOR))
+                except:
+                    pass
     
         # place sensor on zoi
         if Events.mouse_click == True and Sensors.selectedTemplate != "":
