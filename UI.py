@@ -1,3 +1,12 @@
+#
+#   File : UI.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Manage all user interfaces.
+#   
+
+
 from ctypes import *
 import math
 import numpy as np
@@ -16,7 +25,6 @@ import Cursor
 import Definitions
 import Events
 import Graphics
-import Ground
 import ID
 import Limbs
 import Muscles
@@ -24,7 +32,7 @@ import Saturations
 import Sensors
 import Shaders
 import State
-import StickMan
+import Avatar
 
 
 iconSave  = None
@@ -114,8 +122,8 @@ class uiSensors(QtWidgets.QWidget):
                 Sensors.virtuSens[self.table.currentRow()].s = float(value)
 
             text = uiGroups.qle.text()
-            State.saveGroups(StickMan.virtuMan, text)
-            State.updateGroup(StickMan.virtuMan)
+            State.saveGroups(Avatar.virtuMan, text)
+            State.updateGroup(Avatar.virtuMan)
         except:
             pass
 
@@ -203,8 +211,8 @@ class uiCustomize(QtWidgets.QWidget):
             self.r.setValue(value)
             Sensors.customTemplate.color[0] = value
         
-            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-            State.updateTemplate(StickMan.virtuMan)
+            State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(Avatar.virtuMan)
         except:
             pass
         
@@ -214,8 +222,8 @@ class uiCustomize(QtWidgets.QWidget):
             self.g.setValue(value)
             Sensors.customTemplate.color[1] = value
         
-            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-            State.updateTemplate(StickMan.virtuMan)
+            State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(Avatar.virtuMan)
         except:
             pass
         
@@ -225,8 +233,8 @@ class uiCustomize(QtWidgets.QWidget):
             self.b.setValue(value)
             Sensors.customTemplate.color[2] = value
         
-            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-            State.updateTemplate(StickMan.virtuMan)
+            State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(Avatar.virtuMan)
         except:
             pass
         
@@ -236,8 +244,8 @@ class uiCustomize(QtWidgets.QWidget):
             self.scale.setValue(int(1000*value))
             Sensors.customTemplate.scale = value
         
-            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-            State.updateTemplate(StickMan.virtuMan)
+            State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(Avatar.virtuMan)
         except:
             pass
         
@@ -247,8 +255,8 @@ class uiCustomize(QtWidgets.QWidget):
             self.shape.setValue(value)
             Sensors.customTemplate.shape = value
         
-            State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-            State.updateTemplate(StickMan.virtuMan)
+            State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+            State.updateTemplate(Avatar.virtuMan)
         except:
             pass
 
@@ -257,40 +265,40 @@ class uiCustomize(QtWidgets.QWidget):
         self.editR.setText(str(value))
         Sensors.customTemplate.color[0] = value
         
-        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-        State.updateTemplate(StickMan.virtuMan)
+        State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(Avatar.virtuMan)
 
     def valuechangeG(self):
         value = self.g.value()
         self.editG.setText(str(value))
         Sensors.customTemplate.color[1] = value
         
-        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-        State.updateTemplate(StickMan.virtuMan)
+        State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(Avatar.virtuMan)
         
     def valuechangeB(self):
         value = self.b.value()
         self.editB.setText(str(value))
         Sensors.customTemplate.color[2] = value
         
-        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-        State.updateTemplate(StickMan.virtuMan)
+        State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(Avatar.virtuMan)
         
     def valuechangeScale(self):
         value = self.scale.value()
         self.editScale.setText(str(value/1000.))
         Sensors.customTemplate.scale = value/1000.
         
-        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-        State.updateTemplate(StickMan.virtuMan)
+        State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(Avatar.virtuMan)
         
     def valuechangeShape(self):
         value = self.shape.value()
         self.editShape.setText(str(value))
         Sensors.customTemplate.shape = value
         
-        State.saveTemplate(StickMan.virtuMan, uiTemplates.qle.text())
-        State.updateTemplate(StickMan.virtuMan)
+        State.saveTemplate(Avatar.virtuMan, uiTemplates.qle.text())
+        State.updateTemplate(Avatar.virtuMan)
 
 
 uiAvatars = None
@@ -363,12 +371,12 @@ class uiList(QtWidgets.QWidget):
         elif self.listType == ListPostures:
             self.setGeometry(1145, 30, 275, 250)
             self.setWindowTitle('Postures')
-            State.updatePosture(StickMan.virtuMan)
+            State.updatePosture(Avatar.virtuMan)
             self.listWidget.addItems(State.postureFileName)
         elif self.listType == ListTemplates:
             self.setGeometry(850, 320, 275, 250)
             self.setWindowTitle('Templates')
-            State.updateTemplate(StickMan.virtuMan)
+            State.updateTemplate(Avatar.virtuMan)
             self.listWidget.addItems(State.templateFileName)
         elif self.listType == ListZoi:
             self.setGeometry(1145, 320, 275, 250)
@@ -379,7 +387,7 @@ class uiList(QtWidgets.QWidget):
         elif self.listType == ListGroups:
             self.setGeometry(850, 610, 275, 250)
             self.setWindowTitle('Groups')
-            State.updateGroup(StickMan.virtuMan)
+            State.updateGroup(Avatar.virtuMan)
             self.listWidget.addItems(State.groupFileName)
             
         self.show()
@@ -394,7 +402,7 @@ class uiList(QtWidgets.QWidget):
         if self.listType == ListAvatars:
             if self.listWidget.currentItem() == None:
                 return
-            State.loadAvatar(StickMan.virtuMan, text)
+            State.loadAvatar(Avatar.virtuMan, text)
             uiPostures.listWidget.setCurrentItem(None)
             uiPostures.listWidget.clear()
             uiPostures.listWidget.addItems(State.postureFileName)
@@ -420,10 +428,10 @@ class uiList(QtWidgets.QWidget):
             uiSensor.table.resizeColumnsToContents()
             uiSensor.table.resizeRowsToContents()
         elif self.listType == ListPostures:
-            State.loadPosture(StickMan.virtuMan, text)
+            State.loadPosture(Avatar.virtuMan, text)
         elif self.listType == ListTemplates:
             Sensors.selectedTemplate = text
-            State.updateZoi(StickMan.virtuMan)
+            State.updateZoi(Avatar.virtuMan)
             uiZoi.listWidget.setCurrentItem(None)
             uiZoi.listWidget.clear()
             uiZoi.listWidget.addItems(State.zoiFileName)
@@ -436,9 +444,9 @@ class uiList(QtWidgets.QWidget):
                     uiCustom.scale.setValue(int(sensorData.scale*1000))
 
         elif self.listType == ListZoi:
-            State.loadZOI(StickMan.virtuMan, text)
+            State.loadZOI(Avatar.virtuMan, text)
         elif self.listType == ListGroups:
-            State.loadGroup(StickMan.virtuMan, text)
+            State.loadGroup(Avatar.virtuMan, text)
             uiSensor.updateTable()
         
     def save(self):
@@ -446,20 +454,20 @@ class uiList(QtWidgets.QWidget):
         text = self.qle.text()
 
         if self.listType == ListPostures:
-            State.savePosture(StickMan.virtuMan, text)
-            State.updatePosture(StickMan.virtuMan)
+            State.savePosture(Avatar.virtuMan, text)
+            State.updatePosture(Avatar.virtuMan)
             self.listWidget.setCurrentItem(None)
             self.listWidget.clear()
             self.listWidget.addItems(State.postureFileName)
         elif self.listType == ListTemplates:
-            State.saveTemplate(StickMan.virtuMan, text)
-            State.updateTemplate(StickMan.virtuMan)
+            State.saveTemplate(Avatar.virtuMan, text)
+            State.updateTemplate(Avatar.virtuMan)
             self.listWidget.setCurrentItem(None)
             self.listWidget.clear()
             self.listWidget.addItems(State.templateFileName)
         elif self.listType == ListGroups:
-            State.saveGroups(StickMan.virtuMan, text)
-            State.updateGroup(StickMan.virtuMan)
+            State.saveGroups(Avatar.virtuMan, text)
+            State.updateGroup(Avatar.virtuMan)
             self.listWidget.setCurrentItem(None)
             self.listWidget.clear()
             self.listWidget.addItems(State.groupFileName)
@@ -482,16 +490,16 @@ class uiList(QtWidgets.QWidget):
             State.updateAvatar()
             self.listWidget.addItems(State.avatarFileName)
         elif self.listType == ListPostures:
-            State.removePosture(StickMan.virtuMan, text)
-            State.updatePosture(StickMan.virtuMan)
+            State.removePosture(Avatar.virtuMan, text)
+            State.updatePosture(Avatar.virtuMan)
             self.listWidget.addItems(State.postureFileName)
         elif self.listType == ListTemplates:
-            State.removeTemplate(StickMan.virtuMan, text)
-            State.updateTemplate(StickMan.virtuMan)
+            State.removeTemplate(Avatar.virtuMan, text)
+            State.updateTemplate(Avatar.virtuMan)
             self.listWidget.addItems(State.templateFileName)
         elif self.listType == ListGroups:
-            State.removeGroup(StickMan.virtuMan, text)
-            State.updateGroup(StickMan.virtuMan)
+            State.removeGroup(Avatar.virtuMan, text)
+            State.updateGroup(Avatar.virtuMan)
             self.listWidget.addItems(State.groupFileName)
 
     def rename(self):
@@ -504,25 +512,25 @@ class uiList(QtWidgets.QWidget):
         self.listWidget.clear()
         
         if self.listType == ListAvatars: #setCurrentItem needed, or crash
-            State.renameAvatar(StickMan.virtuMan, oldName, newName)
+            State.renameAvatar(Avatar.virtuMan, oldName, newName)
             State.updateAvatar()
             self.listWidget.addItems(State.avatarFileName)
         elif self.listType == ListPostures:
-            State.renamePosture(StickMan.virtuMan, oldName, newName)
-            State.updatePosture(StickMan.virtuMan)
+            State.renamePosture(Avatar.virtuMan, oldName, newName)
+            State.updatePosture(Avatar.virtuMan)
             self.listWidget.addItems(State.postureFileName)
         elif self.listType == ListTemplates:
             uiGroups.listWidget.setCurrentItem(None)
-            State.renameTemplate(StickMan.virtuMan, oldName, newName)
-            State.updateTemplate(StickMan.virtuMan)
+            State.renameTemplate(Avatar.virtuMan, oldName, newName)
+            State.updateTemplate(Avatar.virtuMan)
             self.listWidget.addItems(State.templateFileName)
         elif self.listType == ListZoi:
-            State.renameZoi(StickMan.virtuMan, oldName, newName)
-            State.updateZoi(StickMan.virtuMan)
+            State.renameZoi(Avatar.virtuMan, oldName, newName)
+            State.updateZoi(Avatar.virtuMan)
             self.listWidget.addItems(State.zoiFileName)
         elif self.listType == ListGroups:
-            State.renameGroup(StickMan.virtuMan, oldName, newName)
-            State.updateGroup(StickMan.virtuMan)
+            State.renameGroup(Avatar.virtuMan, oldName, newName)
+            State.updateGroup(Avatar.virtuMan)
             self.listWidget.addItems(State.groupFileName)
 
 

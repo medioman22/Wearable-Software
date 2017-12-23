@@ -1,3 +1,12 @@
+#
+#   File : Saturations.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Preprocess of saturations model matrix ; rendering of saturation meshes.
+#   
+
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import OpenGL.GL.shaders

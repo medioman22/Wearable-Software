@@ -1,3 +1,12 @@
+#
+#   File : Main.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Main loop, initialisation, main window.
+#   
+
+
 from ctypes import *
 import math
 import numpy as np
@@ -16,7 +25,7 @@ import Cursor
 import Definitions
 import Events
 import Graphics
-import Ground
+import Scene
 import ID
 import Limbs
 import Muscles
@@ -24,7 +33,7 @@ import Saturations
 import Sensors
 import Shaders
 import State
-import StickMan
+import Avatar
 import UI
 
 
@@ -84,7 +93,7 @@ class mainWindow(QtWidgets.QMainWindow):
         """
             Update all entities ID
         """
-        ID.setId([StickMan.virtuMan.limbs, StickMan.virtuMan.muscles, Sensors.virtuSens, Sensors.zoiSens])
+        ID.setId([Avatar.virtuMan.limbs, Avatar.virtuMan.muscles, Sensors.virtuSens, Sensors.zoiSens])
         
 
 
@@ -99,30 +108,20 @@ class mainWindow(QtWidgets.QMainWindow):
 
         # Preprocess of limbs
         Definitions.modelMatrix.push()
-        Definitions.modelMatrix.translate(StickMan.virtuMan.position[0],StickMan.virtuMan.position[1],StickMan.virtuMan.position[2])
-        R = Definitions.vector4D.Quat2Vec(Definitions.vector4D((StickMan.virtuMan.orientation)))
+        Definitions.modelMatrix.translate(Avatar.virtuMan.position[0],Avatar.virtuMan.position[1],Avatar.virtuMan.position[2])
+        R = Definitions.vector4D.Quat2Vec(Definitions.vector4D((Avatar.virtuMan.orientation)))
         Definitions.modelMatrix.rotate(R.o,R.x,R.y,R.z)
-        StickMan.limb = -1 # initialize the recursivity here
+        Avatar.limb = -1 # initialize the recursivity here
         Sensors.countID = 0
         Graphics.SaturationModelMatrix = []
-        StickMan.stick(StickMan.virtuMan)
+        Avatar.stick(Avatar.virtuMan)
         Definitions.modelMatrix.pop()
-        StickMan.oneMesh(StickMan.virtuMan)
 
-        Muscles.preprocessMuscle(StickMan.virtuMan)
-        Ground.preprocessGround(math.fabs(Events.rMax))
-        Ground.bubble.mesh.oscilateVBO()
-        Graphics.buildVBO(Ground.bubble)
+        Avatar.oneMesh(Avatar.virtuMan)
 
-        i = 0
-        for package in Definitions.packagePreprocess:
-            j = 0
-            for pack in package:
-                if pack[Definitions.packParent] == "Ground":
-                    Definitions.packageIndices[0] = Definitions.packageIndices[0] + [[i, j],]
-                j += 1
-            i += 1
-        #print(len(Definitions.packagePreprocess))
+        Muscles.preprocessMuscle(Avatar.virtuMan)
+        
+        Scene.preprocessGround()
 
 
         """ 
@@ -140,8 +139,8 @@ class mainWindow(QtWidgets.QMainWindow):
 
         Graphics.modelView(Graphics.opaque)
         
-        Limbs.drawBodySurface(StickMan.virtuMan, Graphics.idBuffer, Events.SHOW)
-        Muscles.drawMuscleSurface(StickMan.virtuMan, Graphics.idBuffer, Events.SHOW)
+        Limbs.drawBodySurface(Avatar.virtuMan, Graphics.idBuffer, Events.SHOW)
+        Muscles.drawMuscleSurface(Avatar.virtuMan, Graphics.idBuffer, Events.SHOW)
         Sensors.drawSensor(Graphics.idBuffer)
 
 
@@ -168,8 +167,7 @@ class mainWindow(QtWidgets.QMainWindow):
         
         # draw scene
         Graphics.modelView(Graphics.blending)
-        #Ground.drawGround()
-        Ground.drawBubble()
+        Scene.drawBubble()
 
         # draw saturation balls
         Graphics.modelView(Graphics.blending)
@@ -177,19 +175,19 @@ class mainWindow(QtWidgets.QMainWindow):
         
         # draw FADE body
         Graphics.modelView(Graphics.blending)
-        Limbs.drawBodySurface(StickMan.virtuMan, Events.style, Events.FADE)
+        Limbs.drawBodySurface(Avatar.virtuMan, Events.style, Events.FADE)
         # draw FADE muscles
         Graphics.modelView(Events.style)
-        Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, Events.FADE)
+        Muscles.drawMuscleSurface(Avatar.virtuMan, Events.style, Events.FADE)
         
         # draw SHOW body
         Graphics.modelView(Events.style)
-        Limbs.drawBodySurface(StickMan.virtuMan, Events.style, Events.SHOW)
-        Limbs.drawBodyEdge(StickMan.virtuMan, Events.style)
+        Limbs.drawBodySurface(Avatar.virtuMan, Events.style, Events.SHOW)
+        Limbs.drawBodyEdge(Avatar.virtuMan, Events.style)
         # draw SHOW muscles
         Graphics.modelView(Events.style)
-        Muscles.drawMuscleSurface(StickMan.virtuMan, Events.style, Events.SHOW)
-        Muscles.drawMuscleEdge(StickMan.virtuMan, Events.style)
+        Muscles.drawMuscleSurface(Avatar.virtuMan, Events.style, Events.SHOW)
+        Muscles.drawMuscleEdge(Avatar.virtuMan, Events.style)
             
         # draw saturation lines
         Graphics.modelView(Graphics.opaque)
@@ -200,21 +198,6 @@ class mainWindow(QtWidgets.QMainWindow):
         Sensors.drawSensor(Events.style)
         Sensors.drawDashed(Events.style)
         
-
-
-        """
-            empty preprocess package
-        """
-        i = len(Definitions.packagePreprocess)
-        while i > 0:
-            i -= 1
-            while len(Definitions.packagePreprocess[i]) > 0:
-                Definitions.packagePreprocess[i] = Definitions.packagePreprocess[i][:-1]
-        i = len(Definitions.packageIndices)
-        while i > 0:
-            i -= 1
-            while len(Definitions.packageIndices[i]) > 0:
-                Definitions.packageIndices[i] = Definitions.packageIndices[i][:-1]
 
         #print("FREQ : ", int(1./(time.clock()-flagStart)))
 
@@ -311,11 +294,13 @@ if __name__ == '__main__':
 
     """ Create Entities """
     State.updateAvatar()
-    StickMan.virtuMan = StickMan.characteristics(1.7)
-    State.loadAvatar(StickMan.virtuMan, State.avatarFileName[0])
+    Avatar.virtuMan = Avatar.characteristics(1.7)
+    State.loadAvatar(Avatar.virtuMan, State.avatarFileName[0])
     
-    Ground.bubble = StickMan.characteristics(1.7)
-    Ground.bubble.mesh = Graphics.VBO_head(50,50,50,50)#Graphics.VBO_bubble()
+    Scene.bubble = Avatar.characteristics(1.7)
+    Scene.bubble.mesh = Graphics.VBO_head(30,30,30,30)#Graphics.VBO_bubble()
+    Graphics.buildVBO(Scene.bubble)
+
     """ window size """
     State.importUserSettings()
 

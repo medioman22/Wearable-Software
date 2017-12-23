@@ -1,3 +1,12 @@
+#
+#   File : Cursor.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Manage mouse events by checking the ID buffer values.
+#   
+
+
 import pygame
 from pygame.locals import *
 
@@ -13,7 +22,7 @@ import Limbs
 import Muscles
 import Sensors
 import State
-import StickMan
+import Avatar
 import UI
 
 mouse = [0,0]
@@ -59,17 +68,17 @@ def mouseManage():
                     if Sensors.selectedTemplate == sensorData.type:
                         r,g,b,a = sensorData.color
                         color = (r/255., g/255., b/255.)
-                        Sensors.newSens = [Sensors.sensors(StickMan.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag, sensorData.type, (0.,90,90), color)]
+                        Sensors.newSens = [Sensors.sensors(Avatar.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag, sensorData.type, (0.,90,90), color)]
             # select limb
             else:
                 Select = True
-                for part in StickMan.selectedLimbs:
-                    if part == StickMan.virtuMan.limbs[overID-1].tag:
+                for part in Avatar.selectedLimbs:
+                    if part == Avatar.virtuMan.limbs[overID-1].tag:
                         Select = False
-                        StickMan.selectedLimbs.remove(part)
+                        Avatar.selectedLimbs.remove(part)
                         break
                 if Select == True:
-                    StickMan.selectedLimbs += [StickMan.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag,]
+                    Avatar.selectedLimbs += [Avatar.virtuMan.limbs[overID - ID.offsetId(ID.LIMB)].tag,]
 
     elif parent == 1:
         Muscles.OverMuscId = overID
@@ -80,7 +89,7 @@ def mouseManage():
                     if Sensors.selectedTemplate == sensorData.type:
                         r,g,b,a = sensorData.color
                         color = (r/255., g/255., b/255.)
-                        Sensors.newSens = [Sensors.sensors(StickMan.virtuMan.muscles[Muscles.OverMuscId - ID.offsetId(ID.MUSCLE)].tag, sensorData.type, (0.,90,90), color)]
+                        Sensors.newSens = [Sensors.sensors(Avatar.virtuMan.muscles[Muscles.OverMuscId - ID.offsetId(ID.MUSCLE)].tag, sensorData.type, (0.,90,90), color)]
             # select muscle
             else:
                 if Muscles.SelectedMuscId != overID:

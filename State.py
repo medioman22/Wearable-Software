@@ -1,3 +1,12 @@
+#
+#   File : State.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Manage all files reading/writing.
+#   
+
+
 import os
 import shutil
 #import csv
@@ -10,7 +19,7 @@ import Limbs
 import Muscles
 import Sensors
 import Saturations
-import StickMan
+import Avatar
 
 extension = ".csv"
 
@@ -311,12 +320,12 @@ def loadZOI(entity, fileName):
     Sensors.zoiSens = []
 
     if fileName == "":
-        Limbs.setLimbsShow(StickMan.virtuMan, Events.SHOW)
-        Muscles.setMusclesShow(StickMan.virtuMan, Events.SHOW)
+        Limbs.setLimbsShow(Avatar.virtuMan, Events.SHOW)
+        Muscles.setMusclesShow(Avatar.virtuMan, Events.SHOW)
         return
     
-    Limbs.setLimbsShow(StickMan.virtuMan, Events.FADE)
-    Muscles.setMusclesShow(StickMan.virtuMan, Events.HIDE)
+    Limbs.setLimbsShow(Avatar.virtuMan, Events.FADE)
+    Muscles.setMusclesShow(Avatar.virtuMan, Events.HIDE)
 
     file = open(pathAvatars + entity.tag + '/' + pathTemplates + Sensors.selectedTemplate + '/' + pathZoi + fileName + extension, 'r')
     
@@ -329,8 +338,8 @@ def loadZOI(entity, fileName):
         name, parent, x, t, s = line.split(';')
         Sensors.zoiSens = Sensors.zoiSens + [Sensors.sensors(parent, type, (float(x),float(t),float(s)), color)]
         Sensors.zoiSens[len(Sensors.zoiSens)-1].tag = name
-        Limbs.showLimb(StickMan.virtuMan, parent)
-        Muscles.showMuscle(StickMan.virtuMan, parent)
+        Limbs.showLimb(Avatar.virtuMan, parent)
+        Muscles.showMuscle(Avatar.virtuMan, parent)
     file.close()
 
 def renameZoi(entity, oldName, newName):

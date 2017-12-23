@@ -1,3 +1,12 @@
+#
+#   File : Limbs.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Preprocess of limbs model matrix ; rendering of limb meshes.
+#   
+
+
 class limb(object):
     """
         limb
@@ -96,7 +105,7 @@ def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
     Definitions.modelMatrix.pop()
 
 
-            # TODO : do all same vbo together !!
+
 def drawBodySurface(entity, style, show):
     if Events.showBody == Events.HIDE\
     or Events.showBody == Events.FADE and show != Events.FADE\

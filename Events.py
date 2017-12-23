@@ -1,3 +1,12 @@
+#
+#   File : Events.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Manage keyboard events (camera / limb control, view mode).
+#   
+
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PyQt5 import QtWidgets, QtGui, QtCore
@@ -7,7 +16,7 @@ import Cursor
 import Sensors
 import State
 import Shaders
-import StickMan
+import Avatar
 import UI
 
 import Definitions
@@ -22,8 +31,6 @@ lastTime = 0 # for time between frames
 """ mouse controls """
 mouse_click = False
 setLookAt = False
-rename = None
-renameType = 0
 caps = False
 ctrl = False
 
@@ -81,7 +88,6 @@ showMuscles = True
 showSensors = True
 showSaturations = SHOW
 showGround = True
-rMax = 0 # ground radius
 
 loadGroup = False
 loadZoi = False
@@ -96,7 +102,6 @@ def manage():
 
     global mouse_click
     global setLookAt
-    global rename
     global caps
     global ctrl
 
@@ -137,7 +142,6 @@ def manage():
     global showSensors
     global showSaturations
     global showGround
-    global rMax
 
     global loadGroup
     global loadZoi
@@ -214,104 +218,91 @@ def manage():
             frontBack_keyHold = 0
     
     
-        if rename != None:
-            pass
-            #if eventPress == True:
-            #    State.renameFile(pygame.key.name(eventKey))
-        else:
-            """ Stickman controller """ # WARNING : pygame uses qwerty by default !
-            if eventPress == True and eventKey == QtCore.Qt.Key_Q:
-                q_keyHold = True
-                pivot[0] = pivotSpeed*k
-            elif eventPress == False and eventKey == QtCore.Qt.Key_Q:
-                q_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_W:
-                w_keyHold = True
-                pivot[0] = -pivotSpeed*k
-            elif eventPress == False and eventKey == QtCore.Qt.Key_W:
-                w_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_E:
-                e_keyHold = True
-                pivot[1] = pivotSpeed*k
-            elif eventPress == False and eventKey == QtCore.Qt.Key_E:
-                e_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_R:
-                r_keyHold = True
-                pivot[1] = -pivotSpeed*k
-            elif eventPress == False and eventKey == QtCore.Qt.Key_R:
-                r_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_T:
-                t_keyHold = True
-                pivot[2] = pivotSpeed*k
-            elif eventPress == False and eventKey == QtCore.Qt.Key_T:
-                t_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_Z:
-                y_keyHold = True
-                pivot[2] = -pivotSpeed*k
-            elif eventPress == False and eventKey == QtCore.Qt.Key_Z:
-                y_keyHold = False
+        """ Avatar controller """ # WARNING : pygame uses qwerty by default !
+        if eventPress == True and eventKey == QtCore.Qt.Key_Q:
+            q_keyHold = True
+            pivot[0] = pivotSpeed*k
+        elif eventPress == False and eventKey == QtCore.Qt.Key_Q:
+            q_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_W:
+            w_keyHold = True
+            pivot[0] = -pivotSpeed*k
+        elif eventPress == False and eventKey == QtCore.Qt.Key_W:
+            w_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_E:
+            e_keyHold = True
+            pivot[1] = pivotSpeed*k
+        elif eventPress == False and eventKey == QtCore.Qt.Key_E:
+            e_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_R:
+            r_keyHold = True
+            pivot[1] = -pivotSpeed*k
+        elif eventPress == False and eventKey == QtCore.Qt.Key_R:
+            r_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_T:
+            t_keyHold = True
+            pivot[2] = pivotSpeed*k
+        elif eventPress == False and eventKey == QtCore.Qt.Key_T:
+            t_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_Z:
+            y_keyHold = True
+            pivot[2] = -pivotSpeed*k
+        elif eventPress == False and eventKey == QtCore.Qt.Key_Z:
+            y_keyHold = False
     
-            if eventPress == False and eventKey == QtCore.Qt.Key_Y:
-                z_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_Y:
-                z_keyHold = True
-                incSens[0] = 0.025*k
-            if eventPress == False and eventKey == QtCore.Qt.Key_X:
-                x_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_X:
-                x_keyHold = True
-                incSens[0] = -0.025*k
-            if eventPress == False and eventKey == QtCore.Qt.Key_C:
-                c_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_C:
-                c_keyHold = True
-                incSens[1] = 5*k
-            if eventPress == False and eventKey == QtCore.Qt.Key_V:
-                v_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_V:
-                v_keyHold = True
-                incSens[1] = -5*k
-            if eventPress == False and eventKey == QtCore.Qt.Key_B:
-                b_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_B:
-                b_keyHold = True
-                incSens[2] = 5*k
-            if eventPress == False and eventKey == QtCore.Qt.Key_N:
-                n_keyHold = False
-            if eventPress == True and eventKey == QtCore.Qt.Key_N:
-                n_keyHold = True
-                incSens[2] = -5*k
-            if eventPress == True and eventKey == QtCore.Qt.Key_M:
-                resetSens = True
+        if eventPress == False and eventKey == QtCore.Qt.Key_Y:
+            z_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_Y:
+            z_keyHold = True
+            incSens[0] = 0.025*k
+        if eventPress == False and eventKey == QtCore.Qt.Key_X:
+            x_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_X:
+            x_keyHold = True
+            incSens[0] = -0.025*k
+        if eventPress == False and eventKey == QtCore.Qt.Key_C:
+            c_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_C:
+            c_keyHold = True
+            incSens[1] = 5*k
+        if eventPress == False and eventKey == QtCore.Qt.Key_V:
+            v_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_V:
+            v_keyHold = True
+            incSens[1] = -5*k
+        if eventPress == False and eventKey == QtCore.Qt.Key_B:
+            b_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_B:
+            b_keyHold = True
+            incSens[2] = 5*k
+        if eventPress == False and eventKey == QtCore.Qt.Key_N:
+            n_keyHold = False
+        if eventPress == True and eventKey == QtCore.Qt.Key_N:
+            n_keyHold = True
+            incSens[2] = -5*k
+        if eventPress == True and eventKey == QtCore.Qt.Key_M:
+            resetSens = True
     
-            if eventPress == True and eventKey == QtCore.Qt.Key_U:
-                reset = True
-            if eventPress == True and eventKey == QtCore.Qt.Key_I:
-                prevNext = 1
-            if eventPress == True and eventKey == QtCore.Qt.Key_O:
-                prevNext = -1
-            if eventPress == True and eventKey == QtCore.Qt.Key_P:
-                style = (style + 1)%4
-            if eventPress == True and eventKey == QtCore.Qt.Key_1:
-                showBody = (showBody+1)%3
-            if eventPress == True and eventKey == QtCore.Qt.Key_2:
-                showMuscles = not showMuscles
-            if eventPress == True and eventKey == QtCore.Qt.Key_3:
-                showSensors = not showSensors
-            if eventPress == True and eventKey == QtCore.Qt.Key_4:
-                showSaturations = (showSaturations+1)%3
-            if eventPress == True and eventKey == QtCore.Qt.Key_5:
-                showGround = not showGround
-            if eventPress == True and eventKey == QtCore.Qt.Key_H:
-                State.savePosture(StickMan.virtuMan)
-            if eventPress == True and eventKey == QtCore.Qt.Key_A:
-                State.saveGroups(State.saveGroupFile)
-            if eventPress == True and eventKey == QtCore.Qt.Key_Delete:
-                deleteSens = True
-            if eventPress == True and eventKey == QtCore.Qt.Key_G:
-                rMax += 1
-                if rMax > 6:
-                    rMax = -5
+        if eventPress == True and eventKey == QtCore.Qt.Key_U:
+            reset = True
+        if eventPress == True and eventKey == QtCore.Qt.Key_I:
+            prevNext = 1
+        if eventPress == True and eventKey == QtCore.Qt.Key_O:
+            prevNext = -1
+        if eventPress == True and eventKey == QtCore.Qt.Key_P:
+            style = (style + 1)%4
+        if eventPress == True and eventKey == QtCore.Qt.Key_1:
+            showBody = (showBody+1)%3
+        if eventPress == True and eventKey == QtCore.Qt.Key_2:
+            showMuscles = not showMuscles
+        if eventPress == True and eventKey == QtCore.Qt.Key_3:
+            showSensors = not showSensors
+        if eventPress == True and eventKey == QtCore.Qt.Key_4:
+            showSaturations = (showSaturations+1)%3
+        if eventPress == True and eventKey == QtCore.Qt.Key_5:
+            showGround = not showGround
+        if eventPress == True and eventKey == QtCore.Qt.Key_Delete:
+            deleteSens = True
 
 
     eventKey = None
@@ -378,16 +369,16 @@ def manage():
 
     """ Apply camera/position/orientation control """
     if caps == True:
-        StickMan.virtuMan.position[0] += leftRight_acceleration*leftRight_pos_cap*k
-        StickMan.virtuMan.position[1] += upDown_acceleration*upDown_pos_cap*k
-        StickMan.virtuMan.position[2] += frontBack_acceleration*frontBack_pos_cap*k
+        Avatar.virtuMan.position[0] += leftRight_acceleration*leftRight_pos_cap*k
+        Avatar.virtuMan.position[1] += upDown_acceleration*upDown_pos_cap*k
+        Avatar.virtuMan.position[2] += frontBack_acceleration*frontBack_pos_cap*k
     elif ctrl == True:
-        Q = Definitions.vector4D((StickMan.virtuMan.orientation))
+        Q = Definitions.vector4D((Avatar.virtuMan.orientation))
         Qdelta = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0,upDown_acceleration*upDown_ori_cap*k,
                                                                      frontBack_acceleration*frontBack_ori_cap*k,
                                                                      leftRight_acceleration*leftRight_ori_cap*k)))
         Q = Definitions.vector4D.QuatProd(Q, Qdelta)
-        StickMan.virtuMan.orientation = [Q.o, Q.x, Q.y, Q.z]
+        Avatar.virtuMan.orientation = [Q.o, Q.x, Q.y, Q.z]
     else:
         frontBack_cam += frontBack_acceleration*frontBack_cam_cap*k
         leftRight_cam += leftRight_acceleration*upDown_cam_cap*k
@@ -418,15 +409,15 @@ def manage():
         incSens[2] = 0
     
     """ Limbs Events """
-    for j in range (0, len(StickMan.selectedLimbs)):
-        for i in range (0,len(StickMan.virtuMan.limbs)):
-            if StickMan.selectedLimbs[j] == StickMan.virtuMan.limbs[i].tag:
+    for j in range (0, len(Avatar.selectedLimbs)):
+        for i in range (0,len(Avatar.virtuMan.limbs)):
+            if Avatar.selectedLimbs[j] == Avatar.virtuMan.limbs[i].tag:
                 if reset == True:
-                    StickMan.virtuMan.limbs[i].twist = [1,0,0,0]
-                    StickMan.virtuMan.limbs[i].swing = [1,0,0,0]
-                    StickMan.virtuMan.limbs[i].angle = [1,0,0,0]
+                    Avatar.virtuMan.limbs[i].twist = [1,0,0,0]
+                    Avatar.virtuMan.limbs[i].swing = [1,0,0,0]
+                    Avatar.virtuMan.limbs[i].angle = [1,0,0,0]
                 if prevNext != 0:
-                    StickMan.selectedLimbs[j] = StickMan.virtuMan.limbs[(i+prevNext+len(StickMan.virtuMan.limbs))% (len(StickMan.virtuMan.limbs))].tag
+                    Avatar.selectedLimbs[j] = Avatar.virtuMan.limbs[(i+prevNext+len(Avatar.virtuMan.limbs))% (len(Avatar.virtuMan.limbs))].tag
                 break
 
         

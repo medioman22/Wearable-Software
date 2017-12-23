@@ -1,8 +1,17 @@
+#
+#   File : Shaders.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Convert 3D world to 2D display
+#   
+
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import OpenGL.GL.shaders
 
-#
+
 vertex_shader = """
     #version 330
     in vec3 position;

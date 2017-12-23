@@ -1,3 +1,12 @@
+#
+#   File : Sensors.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Preprocess of sensors model matrix ; rendering of sensor meshes.
+#   
+
+
 class templates(object):
     """
         templates

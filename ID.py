@@ -1,8 +1,17 @@
+#
+#   File : ID.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Manage related functionalities to ID buffer reading/writing.
+#   
+
+
 import math
 
 import Muscles
 import Sensors
-import StickMan
+import Avatar
 
 NONE = 0
 LIMB = 1
@@ -29,13 +38,13 @@ def color2id(r,g,b):
     return int(r*math.pow(2,16) + g*math.pow(2,8) + b)
 
 def idCategory(ID):
-    if StickMan.virtuMan.limbs != [] and\
-        ID >= StickMan.virtuMan.limbs[0].id and\
-        ID <= StickMan.virtuMan.limbs[len(StickMan.virtuMan.limbs)-1].id:
+    if Avatar.virtuMan.limbs != [] and\
+        ID >= Avatar.virtuMan.limbs[0].id and\
+        ID <= Avatar.virtuMan.limbs[len(Avatar.virtuMan.limbs)-1].id:
             return LIMB
-    if StickMan.virtuMan.muscles != [] and\
-        ID >= StickMan.virtuMan.muscles[0].id and\
-        ID <= StickMan.virtuMan.muscles[len(StickMan.virtuMan.muscles)-1].id:
+    if Avatar.virtuMan.muscles != [] and\
+        ID >= Avatar.virtuMan.muscles[0].id and\
+        ID <= Avatar.virtuMan.muscles[len(Avatar.virtuMan.muscles)-1].id:
             return MUSCLE
     if Sensors.virtuSens != [] and\
         ID >= Sensors.virtuSens[0].id and\
@@ -49,9 +58,9 @@ def idCategory(ID):
 
 def offsetId(type):
     if type == LIMB:
-        return StickMan.virtuMan.limbs[0].id
+        return Avatar.virtuMan.limbs[0].id
     if type == MUSCLE:
-        return StickMan.virtuMan.muscles[0].id
+        return Avatar.virtuMan.muscles[0].id
     if type == SENSOR:
         return Sensors.virtuSens[0].id
     if type == ZOI:

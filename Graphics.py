@@ -1,3 +1,12 @@
+#
+#   File : Graphics.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Manage meshes generation.
+#   
+
+
 import pygame
 from pygame.locals import *
 
@@ -55,10 +64,11 @@ class mesh(object):
         for i in range(0,vertices.size):
             if i%3 == 0 and not (vertices[0,i] == 0 and vertices[0,i+1] == 0 and vertices[0,i+2] == 0):
                 angle = math.atan2(vertices[0,i+2],vertices[0,i+1])
-                #angle2 = math.atan2(vertices[0,i], math.sqrt(vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]))
-                radius = math.sqrt(vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]) + 0.05*math.sin(10*angle + 3*time.clock()) + 0.02*math.sin(50*angle - 10*time.clock())
-                newY = radius*math.cos(angle)
-                newZ = radius*math.sin(angle)
+                angle2 = math.atan2(vertices[0,i], math.sqrt(vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]))
+                radius = math.sqrt(vertices[0,i]*vertices[0,i]+vertices[0,i+1]*vertices[0,i+1]+vertices[0,i+2]*vertices[0,i+2]) + 0.05*math.sin(10*angle + 0.3*time.clock()) + 0.02*math.sin(50*angle - 1*time.clock())
+                newX = radius*math.sin(angle2)
+                newY = radius*math.cos(angle)*math.cos(angle2)
+                newZ = radius*math.sin(angle)*math.cos(angle2)
                 vertices[0,i+1] = newY
                 vertices[0,i+2] = newZ
         self.vertices = vertices
@@ -552,19 +562,16 @@ def VBO_init():
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_init)
 
     """ Create VBOs"""
-    n = -1
-    n+=1 ; VBO_cube()
-    n+=1 ; VBO_pyramide()
-    n+=1 ; VBO_dashed()
-    n+=1 ; VBO_hexagon()
-    n+=1 ; VBO_sphere(16, 16, 16, 16)
-    n+=1 ; VBO_cylindre(16)
-    n+=1 ; VBO_circle(16)
-    n+=1 ; VBO_cone(16)
+    
+    VBO_cube()
+    VBO_pyramide()
+    VBO_dashed()
+    VBO_hexagon()
+    VBO_sphere(16, 16, 16, 16)
+    VBO_cylindre(16)
+    VBO_circle(16)
+    VBO_cone(16)
 
-    while n > 0:
-        n -= 1
-        Definitions.packagePreprocess = Definitions.packagePreprocess + [[]]
 
 opaque = 0
 blending = 1

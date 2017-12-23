@@ -1,3 +1,12 @@
+#
+#   File : Muscles.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Preprocess of muscles model matrix ; rendering of muscles meshes.
+#   
+
+
 class muscle(object):
     """
         muscle

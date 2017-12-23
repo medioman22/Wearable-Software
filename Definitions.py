@@ -1,3 +1,13 @@
+#
+#   File : Definitions.py
+#   
+#   Code written by : Johann Heches
+#
+#   Description : Handles vector4D and matrix44 classes
+#       The vector4D class is generic to hold either a quaternion, angle-axis or euler angles. With a set of methods specifically required for this project.
+#       The matrix44 class is used for the model / view / projection matrix, with methods to push/pop on a stack and apply commonly used transformations.
+#
+
 import numpy as np
 import math
 import Events
@@ -430,13 +440,3 @@ I = np.array([[1, 0, 0, 0],
               [0, 1, 0, 0],
               [0, 0, 1, 0],
               [0, 0, 0, 1]])
-
-""" transformation matrix storage for preprocessing """
-packModel = 0
-packParent = 1
-packID = 2 # body & sensor
-radius = 2 # ground
-selected = 3 # body
-entity = 3 # sensor
-packagePreprocess = [[]]
-packageIndices = [[],[],[],[]] # Ground, Body, Sensor, Link
