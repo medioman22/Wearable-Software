@@ -101,8 +101,8 @@ def mouseManage():
         Sensors.overSensId = overID
         if Events.mouse_click == True:
             if Sensors.selectedSens == overID:
-                Sensors.selectedSens = 0
                 UI.uiSensor.table.clearSelection()
+                Sensors.selectedSens = 0
             else:
                 Sensors.selectedSens = overID
                 try:
@@ -120,6 +120,8 @@ def mouseManage():
                             color = (r/255., g/255., b/255.)
                             Sensors.newSens = [Sensors.sensors(sensor.attach, sensorData.type, (sensor.x,sensor.t,sensor.s), color)]
                             Sensors.newSens[0].tag = sensor.tag
+                            UI.uiSensor.table.clearSelection()
+                            Sensors.selectedSens = 0
                             break
                     break
 

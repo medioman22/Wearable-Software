@@ -59,7 +59,7 @@ def drawSaturationLines(entity):
             glUniform4fv(Shaders.setColor_loc, 1, color)
             part.saturation.mesh.edgeIndexPositions.bind()
             part.saturation.mesh.vertexPositions.bind()
-            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+            glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
             glDrawElements(part.saturation.mesh.edgeStyleIndex,part.saturation.mesh.edgeNbIndex, GL_UNSIGNED_INT, None)
 
             
@@ -80,5 +80,5 @@ def drawSaturationBalls(entity):
             glUniform4fv(Shaders.setColor_loc, 1, color)
             saturationBall.mesh.surfIndexPositions.bind()
             saturationBall.mesh.vertexPositions.bind()
-            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+            glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
             glDrawElements(saturationBall.mesh.surfStyleIndex,saturationBall.mesh.surfNbIndex, GL_UNSIGNED_INT, None)

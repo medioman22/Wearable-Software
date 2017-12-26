@@ -6,7 +6,7 @@
 #   Description : Preprocess of sensors model matrix ; rendering of sensor meshes.
 #   
 
-
+#TODO : send all templates vbo at once
 class templates(object):
     """
         templates
@@ -175,7 +175,7 @@ def drawSensor(style):
             template.mesh.surfIndexPositions.bind()
         else:
             template.mesh.edgeIndexPositions.bind()
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
 
         """ draw vbo """
         if vboDraw == Graphics.vboSurfaces:
@@ -227,7 +227,7 @@ def drawZoi(style):
             zoi.mesh.surfIndexPositions.bind()
         else:
             zoi.mesh.edgeIndexPositions.bind()
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
 
         """ draw vbo """
         if vboDraw == Graphics.vboSurfaces:
@@ -243,7 +243,7 @@ def drawDashed(style):
 
     dash.mesh.edgeIndexPositions.bind()
     dash.mesh.vertexPositions.bind()
-    glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+    glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
 
     for sensor in virtuSens + zoiSens:
         """ choose color """
@@ -266,37 +266,37 @@ def drawDashed(style):
         glDrawElements(dash.mesh.surfStyleIndex, dash.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
 
 
-def displayTemplate():
-    global selectedTemplate
-    glUseProgram(Shaders.shader)
-    """ choose vbo """
-    for sensorData in sensorGraphics:
-        if selectedTemplate == sensorData.type:
-            vboId = sensorData.shape
-    vboDraw = Graphics.vboEdges
-    """ bind surfaces vbo """
-    Graphics.indexPositions[vboId][vboDraw].bind()
-    Graphics.vertexPositions[vboId].bind()
-    glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-    """ send color to shader """
-    for sensorData in sensorGraphics:
-        if selectedTemplate == sensorData.type:
-            r,g,b,a = sensorData.color
-    color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
-    glUniform4fv(Shaders.setColor_loc, 1, color)
-    """ load matrix in shader """
-    Definitions.modelMatrix.push()
-    Definitions.modelMatrix.set(Definitions.I)
-    u = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 0, 90))), Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, time.clock()*100, 0, 0)))))
-    Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
-
-    glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
-    Definitions.modelMatrix.pop()
-            
-    Definitions.viewMatrix.push()
-    Definitions.viewMatrix.translate(0,0,-1.5)
-    glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
-    Definitions.viewMatrix.pop()
-    """ draw vbo """
-    glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
-    glUseProgram(0)
+#def displayTemplate():
+#    global selectedTemplate
+#    glUseProgram(Shaders.shader)
+#    """ choose vbo """
+#    for sensorData in sensorGraphics:
+#        if selectedTemplate == sensorData.type:
+#            vboId = sensorData.shape
+#    vboDraw = Graphics.vboEdges
+#    """ bind surfaces vbo """
+#    Graphics.indexPositions[vboId][vboDraw].bind()
+#    Graphics.vertexPositions[vboId].bind()
+#    glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
+#    """ send color to shader """
+#    for sensorData in sensorGraphics:
+#        if selectedTemplate == sensorData.type:
+#            r,g,b,a = sensorData.color
+#    color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
+#    glUniform4fv(Shaders.setColor_loc, 1, color)
+#    """ load matrix in shader """
+#    Definitions.modelMatrix.push()
+#    Definitions.modelMatrix.set(Definitions.I)
+#    u = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 0, 90))), Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, time.clock()*100, 0, 0)))))
+#    Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
+#
+#    glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
+#    Definitions.modelMatrix.pop()
+#            
+#    Definitions.viewMatrix.push()
+#    Definitions.viewMatrix.translate(0,0,-1.5)
+#    glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
+#    Definitions.viewMatrix.pop()
+#    """ draw vbo """
+#    glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
+#    glUseProgram(0)

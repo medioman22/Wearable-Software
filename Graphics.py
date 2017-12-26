@@ -21,6 +21,8 @@ import numpy as np
 import Definitions
 import Shaders
 
+display = [800, 800] # window size
+
 class mesh(object):
     """
         mesh
@@ -74,21 +76,7 @@ class mesh(object):
         self.vertices = vertices
 
 
-display = [800, 800] # window size
 
-vertexPositions = []
-indexPositions = []
-nbIndex = []
-styleIndex = []
-
-vboCube = 0
-vboPyramide = 1
-vboDashed = 2
-vboHexagon = 3
-vboSphere = 4
-vboCylindre = 5
-vboCircle = 6
-vboCone = 7
 vboEdges = 0
 vboSurfaces = 1
 def VBO_cube():
@@ -283,6 +271,14 @@ def VBO_init():
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_init)
 
 
+vboCube = 0
+vboPyramide = 1
+vboDashed = 2
+vboHexagon = 3
+vboSphere = 4
+vboCylindre = 5
+vboCone = 6
+vboCircle = 7
 def VBO_create(vboID = 0):
     newMesh = None
     if vboID == vboCube:

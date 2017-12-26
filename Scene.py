@@ -46,7 +46,7 @@ def drawBubble():
         """ bind surfaces vbo """
         bubble.mesh.surfIndexPositions.bind()
         bubble.mesh.vertexPositions.bind()
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
 
         """ choose color """
         color = np.array([0.5,0.,1,0.05], dtype = np.float32)
@@ -62,10 +62,10 @@ def drawBubble():
 
     for pack in groundPreprocess:
                     
-        """ bind surfaces vbo """
+        """ bind edges vbo """
         bubble.mesh.edgeIndexPositions.bind()
         bubble.mesh.vertexPositions.bind()
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
 
         """ choose color """
         color = np.array([0.5,0.,1,0.2], dtype = np.float32)

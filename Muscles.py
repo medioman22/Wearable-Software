@@ -111,16 +111,10 @@ def drawMuscleSurface(entity, style, show):
         if entity.muscles[i].modelMatrix == []:
             continue
 
-
-        """ choose vbo """
-        #vboId = Graphics.vboHexagon
-        #vboDraw = Graphics.vboSurfaces
         """ bind surfaces vbo """
         entity.muscles[i].mesh.surfIndexPositions.bind()
         entity.muscles[i].mesh.vertexPositions.bind()
-        #Graphics.indexPositions[vboId][vboDraw].bind()
-        #Graphics.vertexPositions[vboId].bind()
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
         
         """ choose color """
         if style == Graphics.idBuffer:
@@ -156,16 +150,10 @@ def drawMuscleEdge(entity, style):
         if entity.muscles[i].modelMatrix == []:
             continue
 
-
-        """ choose vbo """
-        #vboId = Graphics.vboHexagon
-        #vboDraw = Graphics.vboEdges
-        """ bind surfaces vbo """
+        """ bind edges vbo """
         entity.muscles[i].mesh.edgeIndexPositions.bind()
         entity.muscles[i].mesh.vertexPositions.bind()
-        #Graphics.indexPositions[vboId][vboDraw].bind()
-        #Graphics.vertexPositions[vboId].bind()
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
 
         """ choose color """
         if style == Graphics.opaque:
