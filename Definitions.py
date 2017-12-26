@@ -435,6 +435,8 @@ projectionMatrix = matrix44(np.identity(4))
 viewMatrix = matrix44(np.identity(4))
 modelMatrix = matrix44(np.identity(4))
 
+lookingAt = np.array([[0, 0, 0, 1]])
+lookingAtID = 0
 
 I = np.array([[1, 0, 0, 0],
               [0, 1, 0, 0],

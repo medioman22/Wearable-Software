@@ -119,6 +119,19 @@ class mainWindow(QtWidgets.QMainWindow):
         
         Scene.preprocessGround()
 
+        
+        """
+            update camera
+        """
+        Definitions.viewMatrix.push()
+        Definitions.viewMatrix.translate(0,0,Events.frontBack_cam)
+        Definitions.viewMatrix.rotate(Events.upDown_cam, 1, 0, 0)
+        Definitions.viewMatrix.rotate(Events.leftRight_cam, 0, 1, 0)
+        if Definitions.lookingAtID != 0:
+            Definitions.viewMatrix.translate(-Definitions.lookingAt[0][0],-Definitions.lookingAt[0][1],-Definitions.lookingAt[0][2])
+        glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
+        Definitions.viewMatrix.pop()
+
 
         """ 
             Draw on the ID buffer.

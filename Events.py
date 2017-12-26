@@ -386,15 +386,6 @@ def manage():
         frontBack_cam += frontBack_acceleration*frontBack_cam_cap*k
         leftRight_cam += leftRight_acceleration*upDown_cam_cap*k
         upDown_cam += upDown_acceleration*leftRight_cam_cap*k
-        # update camera in shader
-        Definitions.viewMatrix.push()
-        Definitions.viewMatrix.translate(0,0,frontBack_cam)
-        Definitions.viewMatrix.rotate(upDown_cam, 1, 0, 0)
-        Definitions.viewMatrix.rotate(leftRight_cam, 0, 1, 0)
-        if Limbs.lookingAtID != 0:
-            Definitions.viewMatrix.translate(-Limbs.lookingAt[0][0],-Limbs.lookingAt[0][1],-Limbs.lookingAt[0][2])
-        glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
-        Definitions.viewMatrix.pop()
 
 
     """ limbs control """

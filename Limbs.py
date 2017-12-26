@@ -46,9 +46,6 @@ class limb(object):
 
             
 overLimbId = 0
-lookingAt = np.array([[0, 0, 0, 1]])
-lookingAtID = 0
-
 def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
     """ limb transformations """
     Definitions.modelMatrix.push()
@@ -58,6 +55,9 @@ def preprocessLimb(entity,x,y,z,dx,dy,dz,limbIsSelected, current_limb):
 
     """ limb is selected ? """
     entity.limbs[current_limb].selected = limbIsSelected
+    
+    if entity.limbs[current_limb].id == Definitions.lookingAtID:
+        Definitions.lookingAt = np.dot(np.array([[0, 0, 0, 1]]), entity.limbs[current_limb].modelMatrix)
 
     """ angle """
     angleTwist = Definitions.vector4D(entity.limbs[current_limb].twist).quatAngle()
@@ -111,9 +111,6 @@ def drawBodySurface(entity, style, show):
     or Events.showBody == Events.FADE and show != Events.FADE\
     or Events.showBody == Events.FADE and style == Graphics.idBuffer:
         return
-
-
-    global lookingAt
     
     """ bind surfaces vbo """
     entity.mesh.surfIndexPositions.bind()
@@ -153,8 +150,6 @@ def drawBodySurface(entity, style, show):
         glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
         glDrawElements(entity.mesh.surfStyleIndex[i], entity.mesh.surfNbIndex[i], GL_UNSIGNED_INT, offset)
         
-        if part.id == lookingAtID:
-            lookingAt = np.dot(np.array([[0, 0, 0, 1]]), part.modelMatrix)
 
     
 def drawBodyEdge(entity, style):

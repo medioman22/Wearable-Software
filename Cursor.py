@@ -50,9 +50,9 @@ def mouseManage():
         
     if Events.setLookAt == True:
         if parent == -1:
-            Limbs.lookingAtID = 0
+            Definitions.lookingAtID = 0
         elif parent == 0:
-            Limbs.lookingAtID = overID
+            Definitions.lookingAtID = overID
     # select part
     ID.overGuiId = 0
     Limbs.overLimbId = 0
