@@ -101,10 +101,6 @@ class mainWindow(QtWidgets.QMainWindow):
             Preprocess entities.
             Store all needed transformations to significantly lower calculation cost when rendering (redundancy otherwise between display buffer, ID buffer and bindings)
         """
-        if Limbs.lookingAtID != 0:
-            Definitions.modelMatrix.translate(-Limbs.lookingAt[0][0],-Limbs.lookingAt[0][1],-Limbs.lookingAt[0][2])
-        else:
-            Definitions.modelMatrix.set(np.identity(4))
 
         # Preprocess of limbs
         Definitions.modelMatrix.push()

@@ -23,9 +23,9 @@ import Shaders
 groundPreprocess = []
 def preprocessGround():
     global groundPreprocess
+    #preprocess only if something changed (empty groundPreprocess)
     if groundPreprocess != []:
         return
-    groundPreprocess = []
     
     Definitions.modelMatrix.push()
     Definitions.modelMatrix.rotate(90, 0, 0, 1)

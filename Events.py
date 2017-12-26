@@ -13,6 +13,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 
 import time
 import Cursor
+import Limbs
 import Sensors
 import State
 import Shaders
@@ -390,6 +391,8 @@ def manage():
         Definitions.viewMatrix.translate(0,0,frontBack_cam)
         Definitions.viewMatrix.rotate(upDown_cam, 1, 0, 0)
         Definitions.viewMatrix.rotate(leftRight_cam, 0, 1, 0)
+        if Limbs.lookingAtID != 0:
+            Definitions.viewMatrix.translate(-Limbs.lookingAt[0][0],-Limbs.lookingAt[0][1],-Limbs.lookingAt[0][2])
         glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
         Definitions.viewMatrix.pop()
 
