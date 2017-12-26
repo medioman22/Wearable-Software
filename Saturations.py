@@ -33,7 +33,6 @@ import Events
 import Graphics
 import Shaders
 
-saturationBall = None
 
 def preprocessSaturations(part, saturations):
     part.saturation = saturation()
@@ -63,6 +62,7 @@ def drawSaturationLines(entity):
             glDrawElements(part.saturation.mesh.edgeStyleIndex,part.saturation.mesh.edgeNbIndex, GL_UNSIGNED_INT, None)
 
             
+saturationBall = None
 def drawSaturationBalls(entity):
     if Events.showSaturations == Events.HIDE or Events.showSaturations == Events.FADE:
         return

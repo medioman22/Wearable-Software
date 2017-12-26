@@ -168,7 +168,7 @@ class mainWindow(QtWidgets.QMainWindow):
         
         # draw scene
         Graphics.modelView(Graphics.blending)
-        Scene.drawBubble()
+        Scene.drawScene()
 
         # draw saturation balls
         Graphics.modelView(Graphics.blending)
@@ -309,9 +309,9 @@ if __name__ == '__main__':
     Sensors.dash.mesh = Graphics.VBO_dashed()
     Graphics.buildVBO(Sensors.dash)
 
-    Scene.bubble = Avatar.characteristics(1.7)
-    Scene.bubble.mesh = Graphics.VBO_cube()
-    Graphics.buildVBO(Scene.bubble)
+    Scene.tile = Avatar.characteristics(1.7)
+    Scene.tile.mesh = Graphics.VBO_cube()
+    Graphics.buildVBO(Scene.tile)
 
     """ window size """
     State.importUserSettings()

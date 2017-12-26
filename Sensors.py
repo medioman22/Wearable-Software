@@ -188,6 +188,10 @@ def drawZoi(style):
     if Events.showSensors == False:
         return
     
+    """ bind vbo """
+    zoi.mesh.vertexPositions.bind()
+    zoi.mesh.surfIndexPositions.bind()
+    glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
     for sensor in zoiSens:
         """ find sensor's template """
         template = None
@@ -202,16 +206,9 @@ def drawZoi(style):
         """ choose color """
         if style != Graphics.idBuffer:
             color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
-            vboDraw = Graphics.vboSurfaces
-            if sensor.id == selectedSens:
-                vboDraw = Graphics.vboSurfaces
-            elif sensor.id == overSensId:
+            if sensor.id == overSensId:
                 color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
-                vboDraw = Graphics.vboSurfaces
-            else:
-                vboDraw = Graphics.vboEdges
         else:
-            vboDraw = Graphics.vboSurfaces
             r, g, b = ID.id2color(sensor.id)
             color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
             
@@ -220,20 +217,9 @@ def drawZoi(style):
 
         """ load matrix in shader """
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, sensor.modelMatrix)
-
-        """ bind vbo """
-        zoi.mesh.vertexPositions.bind()
-        if vboDraw == Graphics.vboSurfaces:
-            zoi.mesh.surfIndexPositions.bind()
-        else:
-            zoi.mesh.edgeIndexPositions.bind()
-        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
-
+        
         """ draw vbo """
-        if vboDraw == Graphics.vboSurfaces:
-            glDrawElements(zoi.mesh.surfStyleIndex, zoi.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
-        else:
-            glDrawElements(zoi.mesh.edgeStyleIndex, zoi.mesh.edgeNbIndex, GL_UNSIGNED_INT, None)
+        glDrawElements(zoi.mesh.surfStyleIndex, zoi.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
         
 
 dash = None
@@ -244,7 +230,6 @@ def drawDashed(style):
     dash.mesh.edgeIndexPositions.bind()
     dash.mesh.vertexPositions.bind()
     glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
-
     for sensor in virtuSens + zoiSens:
         """ choose color """
         for sensorData in sensorGraphics:
@@ -263,40 +248,5 @@ def drawDashed(style):
         """ load matrix in shader """
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, sensor.linkModelMatrix)
         
+        """ draw vbo """
         glDrawElements(dash.mesh.surfStyleIndex, dash.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
-
-
-#def displayTemplate():
-#    global selectedTemplate
-#    glUseProgram(Shaders.shader)
-#    """ choose vbo """
-#    for sensorData in sensorGraphics:
-#        if selectedTemplate == sensorData.type:
-#            vboId = sensorData.shape
-#    vboDraw = Graphics.vboEdges
-#    """ bind surfaces vbo """
-#    Graphics.indexPositions[vboId][vboDraw].bind()
-#    Graphics.vertexPositions[vboId].bind()
-#    glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
-#    """ send color to shader """
-#    for sensorData in sensorGraphics:
-#        if selectedTemplate == sensorData.type:
-#            r,g,b,a = sensorData.color
-#    color = np.array([r/255.,g/255.,b/255.,a/255.], dtype = np.float32)
-#    glUniform4fv(Shaders.setColor_loc, 1, color)
-#    """ load matrix in shader """
-#    Definitions.modelMatrix.push()
-#    Definitions.modelMatrix.set(Definitions.I)
-#    u = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, 0, 0, 90))), Definitions.vector4D.Eul2Quat(Definitions.vector4D((0, time.clock()*100, 0, 0)))))
-#    Definitions.modelMatrix.rotate(u.o, u.x, u.y, u.z)
-#
-#    glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.modelMatrix.peek())
-#    Definitions.modelMatrix.pop()
-#            
-#    Definitions.viewMatrix.push()
-#    Definitions.viewMatrix.translate(0,0,-1.5)
-#    glUniformMatrix4fv(Shaders.view_loc, 1, GL_FALSE, Definitions.viewMatrix.peek())
-#    Definitions.viewMatrix.pop()
-#    """ draw vbo """
-#    glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
-#    glUseProgram(0)

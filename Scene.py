@@ -23,30 +23,38 @@ import Shaders
 groundPreprocess = []
 def preprocessGround():
     global groundPreprocess
+    if groundPreprocess != []:
+        return
     groundPreprocess = []
     
     Definitions.modelMatrix.push()
     Definitions.modelMatrix.rotate(90, 0, 0, 1)
     Definitions.modelMatrix.translate(-1.1,0,0)
     Definitions.modelMatrix.scale(0.1,2,2)
-    groundPreprocess = groundPreprocess + [Definitions.modelMatrix.peek(),]
+    a = 5
+    for y in range(-a,a+1):
+        for z in range(-a,a+1):
+            Definitions.modelMatrix.push()
+            Definitions.modelMatrix.translate(0,y,z)
+            Definitions.modelMatrix.scale(1,0.95,0.95)
+            groundPreprocess = groundPreprocess + [Definitions.modelMatrix.peek(),]
+            Definitions.modelMatrix.pop()
     Definitions.modelMatrix.pop()
 
 
-bubble = None
-def drawBubble():
+tile = None
+def drawScene():
     if Events.style == Graphics.idBuffer:
         return
     if Events.showGround == False:
         return
     
-
+    
+    """ bind surfaces vbo """
+    tile.mesh.surfIndexPositions.bind()
+    tile.mesh.vertexPositions.bind()
+    glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
     for pack in groundPreprocess:
-        
-        """ bind surfaces vbo """
-        bubble.mesh.surfIndexPositions.bind()
-        bubble.mesh.vertexPositions.bind()
-        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
 
         """ choose color """
         color = np.array([0.5,0.,1,0.05], dtype = np.float32)
@@ -58,14 +66,14 @@ def drawBubble():
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack)
 
         """ draw vbo """
-        glDrawElements(bubble.mesh.surfStyleIndex, bubble.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
+        glDrawElements(tile.mesh.surfStyleIndex, tile.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
+        
 
+    """ bind edges vbo """
+    tile.mesh.edgeIndexPositions.bind()
+    tile.mesh.vertexPositions.bind()
+    glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
     for pack in groundPreprocess:
-                    
-        """ bind edges vbo """
-        bubble.mesh.edgeIndexPositions.bind()
-        bubble.mesh.vertexPositions.bind()
-        glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
 
         """ choose color """
         color = np.array([0.5,0.,1,0.2], dtype = np.float32)
@@ -77,4 +85,4 @@ def drawBubble():
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, pack)
 
         """ draw vbo """
-        glDrawElements(bubble.mesh.edgeStyleIndex, bubble.mesh.edgeNbIndex, GL_UNSIGNED_INT, None)
+        glDrawElements(tile.mesh.edgeStyleIndex, tile.mesh.edgeNbIndex, GL_UNSIGNED_INT, None)

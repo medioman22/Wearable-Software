@@ -99,6 +99,7 @@ def mouseManage():
 
     elif parent == 2:
         Sensors.overSensId = overID
+        # select / deselect sensor
         if Events.mouse_click == True:
             if Sensors.selectedSens == overID:
                 UI.uiSensor.table.clearSelection()
@@ -125,7 +126,7 @@ def mouseManage():
                             break
                     break
 
-
+    # delete selected sensor
     if Events.deleteSens == True:
         for sensor in Sensors.virtuSens:
             if sensor.id == Sensors.selectedSens:
