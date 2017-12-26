@@ -21,10 +21,10 @@ import UI
 
 import Definitions
 
-
-eventKey = None
-eventPress = None
-eventModifier = None
+""" list of all keyboard events waiting to be executed """
+eventKeyList = []
+eventPressList = []
+eventModifierList = []
 
 lastTime = 0 # for time between frames
 
@@ -94,9 +94,9 @@ loadZoi = False
 
 def manage():
 
-    global eventKey
-    global eventPress
-    global eventModifier
+    global eventKeyList
+    global eventPressList
+    global eventModifierList
 
     global lastTime
 
@@ -162,8 +162,10 @@ def manage():
         UI.uiSensor.updateTable()
 
     """ New events """
-
-    if eventKey != None:
+    for i in range(0,len(eventKeyList)):
+        eventKey = eventKeyList[i]
+        eventModifier = eventModifierList[i]
+        eventPress = eventPressList[i]
         """ Exit """
         if eventKey == QtCore.Qt.Key_Escape:
             quit()
@@ -218,7 +220,7 @@ def manage():
             frontBack_keyHold = 0
     
     
-        """ Avatar controller """ # WARNING : pygame uses qwerty by default !
+        """ Avatar controller """
         if eventPress == True and eventKey == QtCore.Qt.Key_Q:
             q_keyHold = True
             pivot[0] = pivotSpeed*k
@@ -305,9 +307,9 @@ def manage():
             deleteSens = True
 
 
-    eventKey = None
-    eventPress = None
-    eventModifier = None
+    eventKeyList = []
+    eventPressList = []
+    eventModifierList = []
 
     """ Controller acceleration update - left / right """
     if leftRight_keyHold == 0:

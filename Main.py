@@ -277,16 +277,16 @@ class mainWindow(QtWidgets.QMainWindow):
             Events.setLookAt = True
 
     def keyPressEvent(self, event):
-        Events.eventModifier = QtWidgets.QApplication.keyboardModifiers()
+        Events.eventModifierList = Events.eventModifierList + [QtWidgets.QApplication.keyboardModifiers()]
         if event.isAutoRepeat() == False:
-            Events.eventKey = event.key()
-            Events.eventPress = True
+            Events.eventKeyList = Events.eventKeyList + [event.key()]
+            Events.eventPressList = Events.eventPressList + [True]
 
     def keyReleaseEvent(self, event):
-        Events.eventModifier = QtWidgets.QApplication.keyboardModifiers()
+        Events.eventModifierList = Events.eventModifierList + [QtWidgets.QApplication.keyboardModifiers()]
         if event.isAutoRepeat() == False:
-            Events.eventKey = event.key()
-            Events.eventPress = False
+            Events.eventKeyList = Events.eventKeyList + [event.key()]
+            Events.eventPressList = Events.eventPressList + [False]
 
     
 if __name__ == '__main__':
