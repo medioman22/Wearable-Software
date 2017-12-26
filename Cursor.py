@@ -127,6 +127,7 @@ def mouseManage():
     if Events.deleteSens == True:
         for sensor in Sensors.virtuSens:
             if sensor.id == Sensors.selectedSens:
+                UI.uiSensor.table.clearSelection()
                 del Sensors.virtuSens[sensor.id - ID.offsetId(ID.SENSOR)]
                 Sensors.selectedSens = 0
                 UI.uiSensor.updateTable()

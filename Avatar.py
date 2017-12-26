@@ -71,11 +71,11 @@ def stick(entity, offset = (0,0,0)):
     """ new rotation to implement """
     if limbIsSelected == True:
         """ swing command with saturations """
-        sw = Definitions.vector4D.Swing(Definitions.vector4D((entity.limbs[current_limb].swing)), (entity.limbs[current_limb].saturations))
+        sw = Definitions.vector4D.Swing(Definitions.vector4D((entity.limbs[current_limb].swing)), (entity.limbs[current_limb].saturation.saturations))
         entity.limbs[current_limb].swing = [sw.o,sw.x,sw.y,sw.z]
 
         """ twist command with saturations """
-        tw = Definitions.vector4D.Twist(Definitions.vector4D((entity.limbs[current_limb].twist)), (entity.limbs[current_limb].saturations))
+        tw = Definitions.vector4D.Twist(Definitions.vector4D((entity.limbs[current_limb].twist)), (entity.limbs[current_limb].saturation.saturations))
         entity.limbs[current_limb].twist = [tw.o,tw.x,tw.y,tw.z]
 
         """ twist effect on vbo """
@@ -95,8 +95,8 @@ def stick(entity, offset = (0,0,0)):
     if limbIsSelected == True:
         Definitions.modelMatrix.push()
         
-        Cy = 0.5*(entity.limbs[current_limb].saturations[2]+entity.limbs[current_limb].saturations[3])
-        Cz = 0.5*(entity.limbs[current_limb].saturations[4]+entity.limbs[current_limb].saturations[5])
+        Cy = 0.5*(entity.limbs[current_limb].saturation.saturations[2]+entity.limbs[current_limb].saturation.saturations[3])
+        Cz = 0.5*(entity.limbs[current_limb].saturation.saturations[4]+entity.limbs[current_limb].saturation.saturations[5])
         Qoffset = Definitions.vector4D.Eul2Quat(Definitions.vector4D((0,0,Cy,Cz)))
         p = Definitions.vector4D.Quat2Vec(Definitions.vector4D.QuatProd(l,Qoffset))
         if math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) >= 0.0001:
@@ -104,7 +104,7 @@ def stick(entity, offset = (0,0,0)):
         scale = 2*entity.size*entity.limbs[current_limb].dimensions[0]
         Definitions.modelMatrix.scale(scale,scale,scale)
         
-        Graphics.SaturationModelMatrix = Graphics.SaturationModelMatrix + [[Definitions.modelMatrix.peek(),current_limb]]
+        entity.limbs[current_limb].saturation.modelMatrix = Definitions.modelMatrix.peek()
 
         Definitions.modelMatrix.pop()
 

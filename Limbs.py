@@ -7,27 +7,6 @@
 #   
 
 
-class limb(object):
-    """
-        limb
-    """
-
-    def __init__(self): # add orientation sometime...
-        """ constructor """
-        self.id = 0
-        self.tag = ''
-        self.offset = [0,0,0]
-        self.dimensions = [0,0,0]
-        self.saturations = [0,0,0,0,0,0]
-        self.angleRepos = [0,0,0]
-        self.twist = [1,0,0,0]
-        self.swing = [1,0,0,0]
-        self.layer = 0
-        self.modelMatrix = []
-        self.vboId = 0
-        self.mesh = None
-        self.selected = False
-        self.show = Events.SHOW
 
 
 
@@ -43,6 +22,27 @@ import Muscles
 import Sensors
 import Shaders
 
+class limb(object):
+    """
+        limb
+    """
+
+    def __init__(self): # add orientation sometime...
+        """ constructor """
+        self.id = 0
+        self.tag = ''
+        self.offset = [0,0,0]
+        self.dimensions = [0,0,0]
+        self.angleRepos = [0,0,0]
+        self.twist = [1,0,0,0]
+        self.swing = [1,0,0,0]
+        self.layer = 0
+        self.modelMatrix = []
+        self.vboId = 0
+        self.mesh = None
+        self.saturation = None
+        self.selected = False
+        self.show = Events.SHOW
 
             
 overLimbId = 0

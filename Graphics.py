@@ -93,60 +93,22 @@ vboEdges = 0
 vboSurfaces = 1
 def VBO_cube():
     """ Create the "cube" VBO & EBO """
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-
-    vertices = np.array([[-0.5,-0.5,-0.5],  [0.5,-0.5,-0.5],    [0.5,0.5,-0.5],     [-0.5,0.5,-0.5],    \
-                         [-0.5,-0.5,0.5],   [0.5,-0.5,0.5],     [0.5,0.5,0.5],      [-0.5,0.5,0.5]],    dtype='f')
-
-    edgeIndices = np.array([[0,1,   1,2,    2,3,    3,0,    \
-                             0,4,   1,5,    2,6,    3,7,    \
-                             4,5,   5,6,    6,7,    7,4,    ]], dtype=np.int32)
-    surfIndices = np.array([[0,1,2,3,    \
-                             0,4,5,1,    \
-                             1,5,6,2,    \
-                             2,6,7,3,    \
-                             3,7,4,0,    \
-                             7,6,5,4,    ]], dtype=np.int32)
-
-    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
+    vertices = [-0.5,-0.5,-0.5] + [0.5,-0.5,-0.5] + [0.5,0.5,-0.5] + [-0.5,0.5,-0.5] + [-0.5,-0.5,0.5] + [0.5,-0.5,0.5] + [0.5,0.5,0.5] + [-0.5,0.5,0.5]
+    edgeIndices = [0,1, 1,2, 2,3, 3,0, 0,4, 1,5, 2,6, 3,7, 4,5, 5,6, 6,7, 7,4]
+    surfIndices = [0,1,2, 2,3,0, 0,4,5, 5,1,0, 1,5,6, 6,2,1, 2,6,7, 7,3,2, 3,7,4, 4,0,3, 7,6,5, 5,4,7]
     
-    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-    
-    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-    
-    styleIndex = styleIndex + [[GL_LINES, GL_QUADS],]
+    return storeVertices(vertices, edgeIndices, surfIndices, GL_TRIANGLES, GL_LINES)
 
 def VBO_pyramide():
     """ Create the "pyramide" VBO & EBO """
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-
-    vertices = np.array([[-0.5,0,0],    [0.5,0,0.5],   [0.5,0.25*math.sqrt(3),-0.25],    [0.5,-0.25*math.sqrt(3),-0.25]],    dtype='f')
-
-    edgeIndices = np.array([[0,1,   0,2,    0,3,    1,2,    2,3,    3,1]], dtype=np.int32)
-
-    surfIndices = np.array([[0,1,2,   0,2,3,    0,3,1,    1,2,3]], dtype=np.int32)
-
-    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
+    vertices = [-0.5,0,0] + [0.5,0,0.5] + [0.5,0.25*math.sqrt(3),-0.25] + [0.5,-0.25*math.sqrt(3),-0.25]
+    edgeIndices = [0,1, 0,2, 0,3, 1,2, 2,3, 3,1]
+    surfIndices = [0,1,2, 0,2,3, 0,3,1, 1,2,3]
     
-    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-    
-    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-    
-    styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+    return storeVertices(vertices, edgeIndices, surfIndices, GL_TRIANGLES, GL_LINES)
 
 def VBO_cone(iMax = 8):
     """ Create the "pyramide" VBO & EBO """
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-    
     vertices = []
     edgeIndices = []
     surfIndices = []
@@ -161,166 +123,22 @@ def VBO_cone(iMax = 8):
             surfIndices = surfIndices + [i, i+1, (iMax+1)]
         i +=1
     vertices = vertices + [0.5, 0., 0.]
-
-
-    vertices = np.array([vertices],    dtype='f')
-
-    edgeIndices = np.array([edgeIndices], dtype=np.int32)
-
-    surfIndices = np.array([surfIndices], dtype=np.int32)
-
-    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
     
-    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-    
-    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-    
-    styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+    return storeVertices(vertices, edgeIndices, surfIndices, GL_TRIANGLES, GL_LINES)
 
 def VBO_dashed():
     """ Create the "dashed" VBO & EBO """
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-
-    vertices = np.array([[-5/10.,0,0],    [-3/10.,0,0],   [-1/10.,0,0],    [1/10.,0,0],    [3/10.,0,0],    [5/10.,0,0]],    dtype='f')
-
-    edgeIndices = np.array([[0,1,   2,3,    4,5]], dtype=np.int32)
-
-    surfIndices = np.array([[0,1,   2,3,    4,5]], dtype=np.int32)
-
-    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
+    vertices = [-5/10.,0,0] + [-3/10.,0,0] + [-1/10.,0,0] + [1/10.,0,0] + [3/10.,0,0] + [5/10.,0,0]
+    edgeIndices = [0,1, 2,3, 4,5]
+    surfIndices = [0,1, 2,3, 4,5]
     
-    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-    
-    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-    
-    styleIndex = styleIndex + [[GL_LINES, GL_LINES],]
-    
-def VBO_hexagon():
-    """ Create the "hexagon" VBO & EBO """
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-
-    vertices = np.array([[-0.5,-0.5,0],    [-0.5,-0.25,0.25*math.sqrt(3)],   [-0.5,0.25,0.25*math.sqrt(3)],    [-0.5,0.5,0],    [-0.5,0.25,-0.25*math.sqrt(3)],   [-0.5,-0.25,-0.25*math.sqrt(3)],    \
-                         [0.5,-0.5,0],     [0.5,-0.25,0.25*math.sqrt(3)],    [0.5,0.25,0.25*math.sqrt(3)],     [0.5,0.5,0],     [0.5,0.25,-0.25*math.sqrt(3)],    [0.5,-0.25,-0.25*math.sqrt(3)]],    dtype='f')
-
-    edgeIndices = np.array([[0,1,   1,2,    2,3,    3,4,    4,5,    5,0,    \
-                             6,7,   7,8,    8,9,    9,10,   10,11,  11,6,   \
-                             0,6,   1,7,    2,8,    3,9,    4,10,   5,11]], dtype=np.int32)
-
-    surfIndices = np.array([[0,1,2,3,   3,4,5,0,    \
-                             6,7,8,9,   9,10,11,6,  \
-                             0,6,7,1,   1,7,8,2,   2,8,9,3,   3,9,10,4,   4,10,11,5,   5,11,6,0]], dtype=np.int32)
-
-    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
-    
-    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-    
-    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-    
-    styleIndex = styleIndex + [[GL_LINES, GL_QUADS],]
-
-def VBO_sphere(iMax = 8, jMax = 8, iMin = 8, jMin = 8):
-    """ Create the "sphere" VBO & EBO """
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-
-    vertices = []
-    edgeIndices = []
-    surfIndices = []
-    
-    
-    i = 0
-    while i <= iMin:
-        phi = math.pi*i/float(iMax)
-        j = 0
-        while j < jMin:
-            theta = 2*math.pi*j/float(jMax)
-            vertices = vertices + [0.5*math.cos(phi), 0.5*math.sin(phi)*math.cos(theta), 0.5*math.sin(phi)*math.sin(theta)]
-            if i != iMin:
-                edgeIndices = edgeIndices + [i*jMin + j, i*jMin + (j+1)%jMin]
-                edgeIndices = edgeIndices + [i*jMin + j, (i+1)*jMin + j]
-                surfIndices = surfIndices + [i*jMin + j, i*jMin + (j+1)%jMin, (i+1)*jMin + (j+1)%jMin]
-                surfIndices = surfIndices + [(i+1)*jMin + (j+1)%jMin, (i+1)*jMin + j, i*jMin + j]
-            j +=1
-        i +=1
-
-
-    vertices = np.array([vertices],    dtype='f')
-
-    edgeIndices = np.array([edgeIndices], dtype=np.int32)
-
-    surfIndices = np.array([surfIndices], dtype=np.int32)
-
-    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
-    
-    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-    
-    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-    
-    styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
-
-def VBO_cylindre(iMax = 8):
-    """ Create the "sphere" VBO & EBO """
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-
-    vertices = []
-    edgeIndices = []
-    surfIndices = []
-    
-    i = 0
-    while i <= iMax:
-        phi = 2*math.pi*i/float(iMax)
-        vertices = vertices + [-0.5, 0.5*math.cos(phi), 0.5*math.sin(phi)]
-        vertices = vertices + [0.5, 0.5*math.cos(phi), 0.5*math.sin(phi)]
-        if i != iMax:
-            edgeIndices = edgeIndices + [2*i, 2*i+1]
-            edgeIndices = edgeIndices + [2*i, 2*(i+1)]
-            edgeIndices = edgeIndices + [2*i+1, 2*(i+1)+1]
-            surfIndices = surfIndices + [2*i, 2*(i+1), 2*(i+1)+1]
-            surfIndices = surfIndices + [2*(i+1)+1, 2*i+1, 2*i]
-            surfIndices = surfIndices + [2*i, 2*(i+1), 2*(iMax+1)]
-            surfIndices = surfIndices + [2*i+1, 2*(i+1)+1, 2*(iMax+1)+1]
-        i +=1
-    vertices = vertices + [-0.5, 0., 0.]
-    vertices = vertices + [0.5, 0., 0.]
-
-    
-    vertices = np.array([vertices],    dtype='f')
-
-    edgeIndices = np.array([edgeIndices], dtype=np.int32)
-
-    surfIndices = np.array([surfIndices], dtype=np.int32)
-
-
-    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
-    
-    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-
-    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-
-    styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+    return storeVertices(vertices, edgeIndices, surfIndices, GL_LINES, GL_LINES)
     
 def VBO_circle(iMax = 8):
     """ Create the "sphere" VBO & EBO """
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-
     vertices = []
     edgeIndices = []
     surfIndices = []
-    
     
     i = 0
     while i <= iMax:
@@ -331,29 +149,14 @@ def VBO_circle(iMax = 8):
             surfIndices = surfIndices + [i, i+1, (iMax+1)]
         i +=1
     vertices = vertices + [-0.5, 0., 0.]
-
-
-    vertices = np.array([vertices],    dtype='f')
-
-    edgeIndices = np.array([edgeIndices], dtype=np.int32)
-
-    surfIndices = np.array([surfIndices], dtype=np.int32)
-
-    vertexPositions = vertexPositions + [vbo.VBO(vertices),]
     
-    indexPositions = indexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-    
-    nbIndex = nbIndex + [[edgeIndices.size, surfIndices.size],]
-    
-    styleIndex = styleIndex + [[GL_LINES, GL_TRIANGLES],]
+    return storeVertices(vertices, edgeIndices, surfIndices, GL_TRIANGLES, GL_LINES)
 
-def VBO_limb(iMax = 16, jMax = 8):
+def VBO_cylinder(iMax = 16, jMax = 8):
     """ Create the "sphere" VBO & EBO """
-    newMesh = mesh()
     vertices = []
     edgeIndices = []
     surfIndices = []
-    
     
     i = 0
     while i <= iMax:
@@ -374,29 +177,11 @@ def VBO_limb(iMax = 16, jMax = 8):
         i +=1
     vertices = vertices + [-0.5, 0., 0.]
     vertices = vertices + [0.5, 0., 0.]
-
     
-    vertices = np.array([vertices],    dtype='f')
-    newMesh.defaultVertices = vertices
-    newMesh.vertices = vertices
+    return storeVertices(vertices, edgeIndices, surfIndices, GL_TRIANGLES, GL_LINES)
 
-    edgeIndices = np.array([edgeIndices], dtype=np.int32)
-    newMesh.edgeIndices = edgeIndices
-
-    surfIndices = np.array([surfIndices], dtype=np.int32)
-    newMesh.surfIndices = surfIndices
-
-    newMesh.surfNbIndex = surfIndices.size
-    newMesh.edgeNbIndex = edgeIndices.size
-
-    newMesh.surfStyleIndex = GL_TRIANGLES
-    newMesh.edgeStyleIndex = GL_LINES
-
-    return newMesh
-
-def VBO_head(iMax = 16, jMax = 16, iMin = 16, jMin = 16):
+def VBO_sphere(iMax = 16, jMax = 16, iMin = 16, jMin = 16):
     """ Create the "sphere" VBO & EBO """
-    newMesh = mesh()
     vertices = []
     edgeIndices = []
     surfIndices = []
@@ -415,46 +200,11 @@ def VBO_head(iMax = 16, jMax = 16, iMin = 16, jMin = 16):
                 surfIndices = surfIndices + [(i+1)*jMin + (j+1)%jMin, (i+1)*jMin + j, i*jMin + j]
             j +=1
         i +=1
+        
+    return storeVertices(vertices, edgeIndices, surfIndices, GL_TRIANGLES, GL_LINES)
 
-    
-    vertices = np.array([vertices],    dtype='f')
-    newMesh.defaultVertices = vertices
-    newMesh.vertices = vertices
-
-    edgeIndices = np.array([edgeIndices], dtype=np.int32)
-    newMesh.edgeIndices = edgeIndices
-
-    surfIndices = np.array([surfIndices], dtype=np.int32)
-    newMesh.surfIndices = surfIndices
-
-    newMesh.surfNbIndex = surfIndices.size
-    newMesh.edgeNbIndex = edgeIndices.size
-
-    newMesh.surfStyleIndex = GL_TRIANGLES
-    newMesh.edgeStyleIndex = GL_LINES
-
-    return newMesh
-
-def buildVBO(entity):
-    entity.mesh.vertexPositions = vbo.VBO(entity.mesh.vertices)
-    entity.mesh.surfIndexPositions = vbo.VBO(entity.mesh.surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)
-    entity.mesh.edgeIndexPositions = vbo.VBO(entity.mesh.edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER)
-
-
-
-SaturationVertexPositions = []
-SaturationIndexPositions = []
-SaturationNbIndex = []
-SaturationStyleIndex = []
-SaturationModelMatrix = []
 def VBO_hypar(saturation = (0, 0, 0, 0, 0, 0)):
     """ Create the "sphere" VBO & EBO """
-    global SaturationVertexPositions
-    global SaturationIndexPositions
-    global SaturationNbIndex
-    global SaturationStyleIndex
-
-
     vertices = []
     edgeIndices = []
     surfIndices = []
@@ -494,41 +244,13 @@ def VBO_hypar(saturation = (0, 0, 0, 0, 0, 0)):
         i +=1
 
     vertices = vertices + [0., 0., 0.]
+    
+    return storeVertices(vertices, edgeIndices, surfIndices, GL_TRIANGLES, GL_LINES)
 
-    vertices = np.array([vertices],    dtype='f')
 
-    edgeIndices = np.array([edgeIndices], dtype=np.int32)
-
-    surfIndices = np.array([surfIndices], dtype=np.int32)
-
-    SaturationVertexPositions = SaturationVertexPositions + [vbo.VBO(vertices),]
-
-    SaturationIndexPositions = SaturationIndexPositions + [[vbo.VBO(edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER), vbo.VBO(surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)],]
-
-    SaturationNbIndex = SaturationNbIndex + [[edgeIndices.size, surfIndices.size],]
-
-    SaturationStyleIndex = SaturationStyleIndex + [[GL_LINES, GL_TRIANGLES],]
-
-def VBO_bubble(iMax = 1000):
-    """ Create the "sphere" VBO & EBO """
+def storeVertices(vertices, edgeIndices, surfIndices, surfStyle, edgeStyle):
     newMesh = mesh()
-    
-    vertices = []
-    edgeIndices = []
-    surfIndices = []
-    
-    
-    i = 0
-    while i <= iMax:
-        phi = 2*math.pi*i/float(iMax)
-        vertices = vertices + [-0.5, 0.5*math.cos(phi), 0.5*math.sin(phi)]
-        if i != iMax:
-            edgeIndices = edgeIndices + [i, i+1]
-            surfIndices = surfIndices + [i, i+1, (iMax+1)]
-        i +=1
-    vertices = vertices + [-0.5, 0., 0.]
 
-    
     vertices = np.array([vertices],    dtype='f')
     newMesh.defaultVertices = vertices
     newMesh.vertices = vertices
@@ -542,18 +264,17 @@ def VBO_bubble(iMax = 1000):
     newMesh.surfNbIndex = surfIndices.size
     newMesh.edgeNbIndex = edgeIndices.size
 
-    newMesh.surfStyleIndex = GL_TRIANGLES
-    newMesh.edgeStyleIndex = GL_LINES
+    newMesh.surfStyleIndex = surfStyle
+    newMesh.edgeStyleIndex = edgeStyle
 
     return newMesh
 
+def buildVBO(entity):
+    entity.mesh.vertexPositions = vbo.VBO(entity.mesh.vertices)
+    entity.mesh.surfIndexPositions = vbo.VBO(entity.mesh.surfIndices, target=GL_ELEMENT_ARRAY_BUFFER)
+    entity.mesh.edgeIndexPositions = vbo.VBO(entity.mesh.edgeIndices, target=GL_ELEMENT_ARRAY_BUFFER)
 
 def VBO_init():
-    global vertexPositions
-    global indexPositions
-    global nbIndex
-    global styleIndex
-
     """ init VBO & EBO buffers """
     VBO_init = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, VBO_init)
@@ -561,17 +282,26 @@ def VBO_init():
     EBO_init = glGenBuffers(1)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_init)
 
-    """ Create VBOs"""
-    
-    VBO_cube()
-    VBO_pyramide()
-    VBO_dashed()
-    VBO_hexagon()
-    VBO_sphere(16, 16, 16, 16)
-    VBO_cylindre(16)
-    VBO_circle(16)
-    VBO_cone(16)
 
+def VBO_create(vboID = 0):
+    newMesh = None
+    if vboID == vboCube:
+        newMesh = VBO_cube()
+    elif vboID == vboPyramide:
+        newMesh = VBO_pyramide()
+    elif vboID == vboDashed:
+        newMesh = VBO_dashed()
+    elif vboID == vboHexagon:
+        newMesh = VBO_cylinder(6,2)
+    elif vboID == vboSphere:
+        newMesh = VBO_sphere(16,16,16,16)
+    elif vboID == vboCylindre:
+        newMesh = VBO_cylinder(16,2)
+    elif vboID == vboCone:
+        newMesh = VBO_cone()
+    else:
+        newMesh = VBO_circle(16)
+    return newMesh
 
 opaque = 0
 blending = 1

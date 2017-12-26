@@ -27,7 +27,8 @@ def preprocessGround():
     
     Definitions.modelMatrix.push()
     Definitions.modelMatrix.rotate(90, 0, 0, 1)
-    Definitions.modelMatrix.scale(2,2,2)
+    Definitions.modelMatrix.translate(-1.1,0,0)
+    Definitions.modelMatrix.scale(0.1,2,2)
     groundPreprocess = groundPreprocess + [Definitions.modelMatrix.peek(),]
     Definitions.modelMatrix.pop()
 

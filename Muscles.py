@@ -26,6 +26,7 @@ class muscle(object):
         self.Clocal = []
         self.Cworld = []
         self.modelMatrix = []
+        self.mesh = None
         self.selected = False
         self.show = Events.SHOW
 
@@ -45,6 +46,9 @@ import Shaders
 def preprocessMuscle(entity):
 
     for i in range(0,len(entity.muscles)):
+        if entity.muscles[i].mesh == None:
+            entity.muscles[i].mesh = Graphics.VBO_cylinder(6,2)
+            Graphics.buildVBO(entity.muscles[i])
 
         P1 = entity.muscles[i].Aworld
         P2 = entity.muscles[i].Bworld
@@ -109,11 +113,13 @@ def drawMuscleSurface(entity, style, show):
 
 
         """ choose vbo """
-        vboId = Graphics.vboHexagon
-        vboDraw = Graphics.vboSurfaces
+        #vboId = Graphics.vboHexagon
+        #vboDraw = Graphics.vboSurfaces
         """ bind surfaces vbo """
-        Graphics.indexPositions[vboId][vboDraw].bind()
-        Graphics.vertexPositions[vboId].bind()
+        entity.muscles[i].mesh.surfIndexPositions.bind()
+        entity.muscles[i].mesh.vertexPositions.bind()
+        #Graphics.indexPositions[vboId][vboDraw].bind()
+        #Graphics.vertexPositions[vboId].bind()
         glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
         
         """ choose color """
@@ -134,7 +140,7 @@ def drawMuscleSurface(entity, style, show):
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, entity.muscles[i].modelMatrix)
 
         """ draw vbo """
-        glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
+        glDrawElements(entity.muscles[i].mesh.surfStyleIndex, entity.muscles[i].mesh.surfNbIndex, GL_UNSIGNED_INT, None)
 
         
 def drawMuscleEdge(entity, style):
@@ -152,11 +158,13 @@ def drawMuscleEdge(entity, style):
 
 
         """ choose vbo """
-        vboId = Graphics.vboHexagon
-        vboDraw = Graphics.vboEdges
+        #vboId = Graphics.vboHexagon
+        #vboDraw = Graphics.vboEdges
         """ bind surfaces vbo """
-        Graphics.indexPositions[vboId][vboDraw].bind()
-        Graphics.vertexPositions[vboId].bind()
+        entity.muscles[i].mesh.edgeIndexPositions.bind()
+        entity.muscles[i].mesh.vertexPositions.bind()
+        #Graphics.indexPositions[vboId][vboDraw].bind()
+        #Graphics.vertexPositions[vboId].bind()
         glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
 
         """ choose color """
@@ -177,7 +185,7 @@ def drawMuscleEdge(entity, style):
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, entity.muscles[i].modelMatrix)
             
         """ draw vbo """
-        glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
+        glDrawElements(entity.muscles[i].mesh.edgeStyleIndex, entity.muscles[i].mesh.edgeNbIndex, GL_UNSIGNED_INT, None)
 
 
 def setMusclesShow(entity, show):

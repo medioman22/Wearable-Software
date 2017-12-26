@@ -67,7 +67,6 @@ def loadAvatar(entity, fileName):
     updateTemplate(entity)
     Sensors.selectedTemplate = ""
     updateZoi(entity)
-    Saturations.preprocessSaturations(entity)
     
 def renameAvatar(entity, oldName, newName):
     try:
@@ -98,13 +97,13 @@ def loadLimbs(entity):
         newLimb.tag = t
         if newLimb.tag == "Head":
             newLimb.vboId = Graphics.vboSphere
-            newLimb.mesh = Graphics.VBO_head()
+            newLimb.mesh = Graphics.VBO_sphere()
         else:
             newLimb.vboId = Graphics.vboCylindre
-            newLimb.mesh = Graphics.VBO_limb()
+            newLimb.mesh = Graphics.VBO_cylinder()
         newLimb.offset = [float(o1), float(o2), float(o3)]
         newLimb.dimensions = [float(d1), float(d2), float(d3)]
-        newLimb.saturations = [float(s1), float(s2), float(s3), float(s4), float(s5), float(s6)]
+        Saturations.preprocessSaturations(newLimb, [float(s1), float(s2), float(s3), float(s4), float(s5), float(s6)])
         newLimb.angleRepos = [float(r1), float(r2), float(r3)]
         entity.limbs = entity.limbs + [newLimb]
 
@@ -227,7 +226,14 @@ def updateTemplate(entity):
         if line == "":
             continue
         r, g, b, a, shape, scale = line.split(';')
-        Sensors.sensorGraphics = Sensors.sensorGraphics + [Sensors.templates(template, [int(r),int(g),int(b),int(a)], int(shape), float(scale))]
+        newTemplate = Sensors.templates()
+        newTemplate.type = template
+        newTemplate.color = [int(r),int(g),int(b),int(a)]
+        newTemplate.shape = int(shape)
+        newTemplate.scale = float(scale)
+        newTemplate.mesh = Graphics.VBO_create(newTemplate.shape)
+        Graphics.buildVBO(newTemplate)
+        Sensors.sensorGraphics = Sensors.sensorGraphics + [newTemplate]
         file.close()
 
 def saveTemplate(entity, fileName):

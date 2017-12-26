@@ -141,6 +141,7 @@ class mainWindow(QtWidgets.QMainWindow):
         
         Limbs.drawBodySurface(Avatar.virtuMan, Graphics.idBuffer, Events.SHOW)
         Muscles.drawMuscleSurface(Avatar.virtuMan, Graphics.idBuffer, Events.SHOW)
+        Sensors.drawZoi(Graphics.idBuffer)
         Sensors.drawSensor(Graphics.idBuffer)
 
 
@@ -171,7 +172,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
         # draw saturation balls
         Graphics.modelView(Graphics.blending)
-        Saturations.drawSaturationBalls()
+        Saturations.drawSaturationBalls(Avatar.virtuMan)
         
         # draw FADE body
         Graphics.modelView(Graphics.blending)
@@ -191,12 +192,13 @@ class mainWindow(QtWidgets.QMainWindow):
             
         # draw saturation lines
         Graphics.modelView(Graphics.opaque)
-        Saturations.drawSaturationLines()
+        Saturations.drawSaturationLines(Avatar.virtuMan)
         
         # draw sensors
         Graphics.modelView(Graphics.opaque)
-        Sensors.drawSensor(Events.style)
         Sensors.drawDashed(Events.style)
+        Sensors.drawZoi(Events.style)
+        Sensors.drawSensor(Events.style)
         
 
         #print("FREQ : ", int(1./(time.clock()-flagStart)))
@@ -297,8 +299,18 @@ if __name__ == '__main__':
     Avatar.virtuMan = Avatar.characteristics(1.7)
     State.loadAvatar(Avatar.virtuMan, State.avatarFileName[0])
     
+    Saturations.saturationBall = Saturations.saturation()
+    Saturations.saturationBall.mesh = Graphics.VBO_sphere(32,32,32,32)
+    Graphics.buildVBO(Saturations.saturationBall)
+    Sensors.zoi = Sensors.templates()
+    Sensors.zoi.mesh = Graphics.VBO_circle()
+    Graphics.buildVBO(Sensors.zoi)
+    Sensors.dash = Sensors.templates()
+    Sensors.dash.mesh = Graphics.VBO_dashed()
+    Graphics.buildVBO(Sensors.dash)
+
     Scene.bubble = Avatar.characteristics(1.7)
-    Scene.bubble.mesh = Graphics.VBO_head(30,30,30,30)#Graphics.VBO_bubble()
+    Scene.bubble.mesh = Graphics.VBO_cube()
     Graphics.buildVBO(Scene.bubble)
 
     """ window size """

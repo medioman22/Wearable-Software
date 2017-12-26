@@ -14,12 +14,13 @@ class templates(object):
         .t      attachment angle
     """
 
-    def __init__(self, type, color, shape, scale): # add orientation sometime...
+    def __init__(self, type = "", color = [0,0,0,255], shape = 0, scale = 0.03): # add orientation sometime...
         """ constructor """
         self.type = type
         self.color = color
         self.shape = shape
         self.scale = scale
+        self.mesh = None
         
 
 
@@ -43,7 +44,6 @@ class sensors(object):
         self.color = color
         self.modelMatrix = []
         self.linkModelMatrix = []
-        self.vbo = 0
         self.selected = False
         self.show = True
         
@@ -113,26 +113,26 @@ def preprocessSensor(sensor, x, y, z):
     
     """ store modelMatrix in sensor """
     sensor.modelMatrix = Definitions.modelMatrix.peek()
-    
-    """ choose and store vbo in sensor """
-    for sensorData in sensorGraphics:
-        if sensor.type == sensorData.type:
-            sensor.vbo = sensorData.shape
-            break
 
     Definitions.modelMatrix.pop()
     Definitions.modelMatrix.pop()
-
 
 
 def drawSensor(style):
     if Events.showSensors == False:
         return
+    
+    for sensor in virtuSens:
+        """ find sensor's template """
+        template = None
+        for sensorData in sensorGraphics:
+            if sensor.type == sensorData.type:
+                template = sensorData
+                break
+        if template == None:
+            print("WARNING : No template match !")
+            continue
 
-
-    vboId = -1
-    for sensor in virtuSens + zoiSens:
-        
         """ update sensor coordinates """
         if sensor.id == selectedSens:
             sensor.x += Events.incSens[0]
@@ -150,21 +150,11 @@ def drawSensor(style):
 
         """ choose color """
         if style != Graphics.idBuffer:
-            for sensorData in sensorGraphics:
-                if sensor.type == sensorData.type:
-                    if ID.idCategory(sensor.id) == ID.ZOI:
-                        color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
-                        vboDraw = Graphics.vboSurfaces
-                    else:
-                        color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)
-                    break
+            color = np.array([template.color[0]/255., template.color[1]/255., template.color[2]/255., template.color[3]/255.], dtype = np.float32)
             if sensor.id == selectedSens:
-                if ID.idCategory(sensor.id) != ID.ZOI:
-                    color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
+                color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
                 vboDraw = Graphics.vboSurfaces
             elif sensor.id == overSensId:
-                if ID.idCategory(sensor.id) == ID.ZOI:
-                    color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
                 vboDraw = Graphics.vboSurfaces
             else:
                 vboDraw = Graphics.vboEdges
@@ -172,18 +162,6 @@ def drawSensor(style):
             vboDraw = Graphics.vboSurfaces
             r, g, b = ID.id2color(sensor.id)
             color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
-
-        """ choose vbo """
-        vboId = sensor.vbo
-        if ID.idCategory(sensor.id) == ID.ZOI:
-            vboId = Graphics.vboCircle
-            vboDraw = Graphics.vboSurfaces
-
-        """ bind surfaces vbo """
-        Graphics.indexPositions[vboId][vboDraw].bind()
-        Graphics.vertexPositions[vboId].bind()
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-
             
         """ send color to shader """
         glUniform4fv(Shaders.setColor_loc, 1, color)
@@ -191,41 +169,49 @@ def drawSensor(style):
         """ load matrix in shader """
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, sensor.modelMatrix)
 
+        """ bind vbo """
+        template.mesh.vertexPositions.bind()
+        if vboDraw == Graphics.vboSurfaces:
+            template.mesh.surfIndexPositions.bind()
+        else:
+            template.mesh.edgeIndexPositions.bind()
+        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+
         """ draw vbo """
-        glDrawElements(Graphics.styleIndex[vboId][vboDraw], Graphics.nbIndex[vboId][vboDraw], GL_UNSIGNED_INT, None)
+        if vboDraw == Graphics.vboSurfaces:
+            glDrawElements(template.mesh.surfStyleIndex, template.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
+        else:
+            glDrawElements(template.mesh.edgeStyleIndex, template.mesh.edgeNbIndex, GL_UNSIGNED_INT, None)
 
-
-def drawDashed(style):
+zoi = None
+def drawZoi(style):
     if Events.showSensors == False:
         return
+    
+    for sensor in zoiSens:
+        """ find sensor's template """
+        template = None
+        for sensorData in sensorGraphics:
+            if sensor.type == sensorData.type:
+                template = sensorData
+                break
+        if template == None:
+            print("WARNING : No template match !")
+            continue
 
-    vboId = -1
-    for sensor in virtuSens + zoiSens:
-        
-        if vboId != Graphics.vboDashed:
-            """ choose vbo """
-            vboId = Graphics.vboDashed
-                    
-            """ bind surfaces vbo """
-            if style != Graphics.idBuffer:
-                Graphics.indexPositions[vboId][Graphics.vboEdges].bind()
-            else:
-                Graphics.indexPositions[vboId][Graphics.vboSurfaces].bind()
-            Graphics.vertexPositions[vboId].bind()
-            glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
-            
         """ choose color """
         if style != Graphics.idBuffer:
-            for sensorData in sensorGraphics:
-                if sensor.type == sensorData.type:
-                    if ID.idCategory(sensor.id) == ID.ZOI:
-                        color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
-                    else:
-                        color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)
-                    break
+            color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
+            vboDraw = Graphics.vboSurfaces
             if sensor.id == selectedSens:
+                vboDraw = Graphics.vboSurfaces
+            elif sensor.id == overSensId:
                 color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
+                vboDraw = Graphics.vboSurfaces
+            else:
+                vboDraw = Graphics.vboEdges
         else:
+            vboDraw = Graphics.vboSurfaces
             r, g, b = ID.id2color(sensor.id)
             color = np.array([r/255.,g/255.,b/255.,1.], dtype = np.float32)
             
@@ -233,13 +219,51 @@ def drawDashed(style):
         glUniform4fv(Shaders.setColor_loc, 1, color)
 
         """ load matrix in shader """
+        glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, sensor.modelMatrix)
+
+        """ bind vbo """
+        zoi.mesh.vertexPositions.bind()
+        if vboDraw == Graphics.vboSurfaces:
+            zoi.mesh.surfIndexPositions.bind()
+        else:
+            zoi.mesh.edgeIndexPositions.bind()
+        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+
+        """ draw vbo """
+        if vboDraw == Graphics.vboSurfaces:
+            glDrawElements(zoi.mesh.surfStyleIndex, zoi.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
+        else:
+            glDrawElements(zoi.mesh.edgeStyleIndex, zoi.mesh.edgeNbIndex, GL_UNSIGNED_INT, None)
+        
+
+dash = None
+def drawDashed(style):
+    if Events.showSensors == False or style == Graphics.idBuffer:
+        return
+
+    dash.mesh.edgeIndexPositions.bind()
+    dash.mesh.vertexPositions.bind()
+    glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+
+    for sensor in virtuSens + zoiSens:
+        """ choose color """
+        for sensorData in sensorGraphics:
+            if sensor.type == sensorData.type:
+                if ID.idCategory(sensor.id) == ID.ZOI:
+                    color = np.array([0.5,0.5,0.5,1], dtype = np.float32)
+                else:
+                    color = np.array([sensorData.color[0]/255., sensorData.color[1]/255., sensorData.color[2]/255., sensorData.color[3]/255.], dtype = np.float32)
+                break
+        if sensor.id == selectedSens:
+            color = np.array([0.5*color[0], 0.5*color[1], 0.5*color[2], color[3]], dtype = np.float32)
+            
+        """ send color to shader """
+        glUniform4fv(Shaders.setColor_loc, 1, color)
+    
+        """ load matrix in shader """
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, sensor.linkModelMatrix)
         
-        """ draw vbo """
-        if style != Graphics.idBuffer:
-            glDrawElements(Graphics.styleIndex[vboId][Graphics.vboEdges], Graphics.nbIndex[vboId][Graphics.vboEdges], GL_UNSIGNED_INT, None)
-        else:
-            glDrawElements(Graphics.styleIndex[vboId][Graphics.vboSurfaces], Graphics.nbIndex[vboId][Graphics.vboSurfaces], GL_UNSIGNED_INT, None)
+        glDrawElements(dash.mesh.surfStyleIndex, dash.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
 
 
 def displayTemplate():
