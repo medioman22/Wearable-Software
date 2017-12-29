@@ -117,7 +117,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
         Muscles.preprocessMuscle(Avatar.virtuMan)
         
-        Scene.preprocessGround()
+        Scene.preprocessScene()
 
         
         """
@@ -205,7 +205,7 @@ class mainWindow(QtWidgets.QMainWindow):
         
         # draw sensors
         Graphics.modelView(Graphics.opaque)
-        Sensors.drawDashed(Events.style)
+        Sensors.drawLink(Events.style)
         Sensors.drawZoi(Events.style)
         Sensors.drawSensor(Events.style)
         
@@ -314,9 +314,9 @@ if __name__ == '__main__':
     Sensors.zoi = Sensors.templates()
     Sensors.zoi.mesh = Graphics.VBO_circle()
     Graphics.buildVBO(Sensors.zoi)
-    Sensors.dash = Sensors.templates()
-    Sensors.dash.mesh = Graphics.VBO_dashed()
-    Graphics.buildVBO(Sensors.dash)
+    Sensors.link = Sensors.templates()
+    Sensors.link.mesh = Graphics.VBO_dashed()
+    Graphics.buildVBO(Sensors.link)
 
     Scene.tile = Avatar.characteristics(1.7)
     Scene.tile.mesh = Graphics.VBO_cube()

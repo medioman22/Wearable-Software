@@ -21,6 +21,9 @@ ZOI = 4
 
 overGuiId = 0
 
+"""
+    Gives a unique ID to each entity from the list input.
+"""
 def setId(list):
     id = 0
     for entity in list:
@@ -28,15 +31,24 @@ def setId(list):
             id += 1
             part.id = id
 
+"""
+    Converts an ID to it's corresponding color shade. Used when rendering entities on the ID buffer.
+"""
 def id2color(ID):
     r = math.floor(ID/math.pow(2,16))
     g = math.floor((ID%math.pow(2,16))/math.pow(2,8))
     b = ID%math.pow(2,8)
     return [r,g,b]
 
+"""
+    Converts a color shade to it's corresponding ID. Used when reading the ID buffer color at cursor location.
+"""
 def color2id(r,g,b):
     return int(r*math.pow(2,16) + g*math.pow(2,8) + b)
 
+"""
+    Determinate the type of the entity from it's ID.
+"""
 def idCategory(ID):
     if Avatar.virtuMan.limbs != [] and\
         ID >= Avatar.virtuMan.limbs[0].id and\
@@ -56,6 +68,9 @@ def idCategory(ID):
             return ZOI
     return NONE
 
+"""
+    Determinate the ID of the first entity from the desired type.
+"""
 def offsetId(type):
     if type == LIMB:
         return Avatar.virtuMan.limbs[0].id

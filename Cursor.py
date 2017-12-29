@@ -51,7 +51,7 @@ def mouseManage():
     if Events.setLookAt == True:
         if parent == -1:
             Definitions.lookingAtID = 0
-        elif parent == 0:
+        elif parent == 0 or parent == 1:
             Definitions.lookingAtID = overID
     # select part
     ID.overGuiId = 0

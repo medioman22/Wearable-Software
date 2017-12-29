@@ -12,11 +12,21 @@ import numpy as np
 import math
 import Events
 
+"""
+"""
 class vector4D(object):
     """
         vector4D
+        Can hold a quaternion, an axis-angle or an euler angle.
+        has methods to convert between those as well for basic operators.
+
+        Quaternion / axis-angle
         .o      rotation angle
         .xyz    rotation axis
+
+        Euler angles
+        .o      ~
+        .xyz    euler angles
     """
     __name__ = "vector4D"
     nb__init__ = 0 # keeps track of how many creations there are

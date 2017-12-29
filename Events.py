@@ -101,8 +101,6 @@ def manage():
 
     global lastTime
 
-    global mouse_click
-    global setLookAt
     global caps
     global ctrl
 

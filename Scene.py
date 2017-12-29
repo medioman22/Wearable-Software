@@ -21,7 +21,7 @@ import Shaders
     
 
 groundPreprocess = []
-def preprocessGround():
+def preprocessScene():
     global groundPreprocess
     #preprocess only if something changed (empty groundPreprocess)
     if groundPreprocess != []:

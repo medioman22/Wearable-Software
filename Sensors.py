@@ -73,6 +73,22 @@ selectedSens = 0
 selectedTemplate = ""
 
 def preprocessSensor(sensor, x, y, z):
+    
+    """ update sensor coordinates """
+    if sensor.id == selectedSens:
+        sensor.x += Events.incSens[0]
+        if sensor.x < -0.5:
+            sensor.x = -0.5
+        elif sensor.x > 0.5:
+            sensor.x = 0.5
+        sensor.t += Events.incSens[1]
+        sensor.s += Events.incSens[2]
+        if Events.resetSens == True:
+            sensor.x = 0
+            sensor.t = 90
+            sensor.s = 90
+        UI.uiSensor.updateTable()
+
     Definitions.modelMatrix.push()
 
     """ sensor orientation """
@@ -132,21 +148,6 @@ def drawSensor(style):
         if template == None:
             print("WARNING : No template match !")
             continue
-
-        """ update sensor coordinates """
-        if sensor.id == selectedSens:
-            sensor.x += Events.incSens[0]
-            if sensor.x < -0.5:
-                sensor.x = -0.5
-            elif sensor.x > 0.5:
-                sensor.x = 0.5
-            sensor.t += Events.incSens[1]
-            sensor.s += Events.incSens[2]
-            if Events.resetSens == True:
-                sensor.x = 0
-                sensor.t = 90
-                sensor.s = 90
-            UI.uiSensor.updateTable()
 
         """ choose color """
         if style != Graphics.idBuffer:
@@ -222,13 +223,13 @@ def drawZoi(style):
         glDrawElements(zoi.mesh.surfStyleIndex, zoi.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
         
 
-dash = None
-def drawDashed(style):
+link = None
+def drawLink(style):
     if Events.showSensors == False or style == Graphics.idBuffer:
         return
 
-    dash.mesh.edgeIndexPositions.bind()
-    dash.mesh.vertexPositions.bind()
+    link.mesh.edgeIndexPositions.bind()
+    link.mesh.vertexPositions.bind()
     glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
     for sensor in virtuSens + zoiSens:
         """ choose color """
@@ -249,4 +250,4 @@ def drawDashed(style):
         glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, sensor.linkModelMatrix)
         
         """ draw vbo """
-        glDrawElements(dash.mesh.surfStyleIndex, dash.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
+        glDrawElements(link.mesh.surfStyleIndex, link.mesh.surfNbIndex, GL_UNSIGNED_INT, None)

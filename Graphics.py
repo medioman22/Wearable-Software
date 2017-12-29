@@ -60,7 +60,7 @@ class mesh(object):
                 vertices[0,i+2] = newZ
         self.vertices = vertices
 
-    #for bubble, purely cosmetic...
+    #to be removed, purely cosmetic...
     def oscilateVBO(self):
         vertices = self.defaultVertices.copy()
         for i in range(0,vertices.size):

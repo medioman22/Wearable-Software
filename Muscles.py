@@ -82,7 +82,9 @@ def preprocessMuscle(entity):
         Definitions.modelMatrix.scale(scale,0.03,0.03)
 
         entity.muscles[i].modelMatrix = Definitions.modelMatrix.peek()
-
+        
+        if entity.muscles[i].id == Definitions.lookingAtID:
+            Definitions.lookingAt = np.dot(np.array([[0, 0, 0, 1]]), entity.muscles[i].modelMatrix)
         
         for sensor in Sensors.virtuSens + Sensors.zoiSens:
             if sensor.attach == entity.muscles[i].tag:
