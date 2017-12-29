@@ -6,5 +6,5 @@ Muscle 1;Forearm_r;0.495;0;0.3;Forearm_r;-0.495;0;0.3;Forearm_r;0;0;0
 Muscle 2;Forearm_r;0.495;0;-0.3;Forearm_r;-0.495;0;-0.3;Forearm_r;0;0;0
 Muscle 3;Forearm_l;0.495;0;0.3;Forearm_l;-0.495;0;0.3;Forearm_l;0;0;0
 Muscle 4;Forearm_l;0.495;0;-0.3;Forearm_l;-0.495;0;-0.3;Forearm_l;0;0;0
-Achille_r;Low_leg_r;0.495;0;-0.3;Low_leg_r;-0.495;0;-0.3;Low_leg_r;0;0;0
-Achille_l;Low_leg_l;0.495;0;-0.3;Low_leg_l;-0.495;0;-0.3;Low_leg_l;0;0;0
+Gastrocnemius_r;Low_leg_r;0.495;0;-0.3;Low_leg_r;-0.495;0;-0.3;Low_leg_r;0;0;0
+Gastrocnemius_l;Low_leg_l;0.495;0;-0.3;Low_leg_l;-0.495;0;-0.3;Low_leg_l;0;0;0
