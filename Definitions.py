@@ -166,7 +166,6 @@ class vector4D(object):
     def Quat2Vec(self, Conv2Deg = True):
         """ convert quaternion to vector """
         self.QuatNorm()
-        #result = vector4D((0,math.sqrt(1/3.),math.sqrt(1/3.),math.sqrt(1/3.)))
         result = vector4D((0,0,0,0))
         if self.o < 0.9999 and self.o > -0.9999:
             result.o = 2*math.acos(self.o)
@@ -277,8 +276,8 @@ class vector4D(object):
 
             # if out of saturation boundaries (ellipse form), find closest saturation point
             theta = math.atan2(Vswing.z, Vswing.y)
-            yp = Vswing.o*math.cos(theta) + Events.pivot[1] #-math.pi/2
-            zp = Vswing.o*math.sin(theta) + Events.pivot[2] #-math.pi/2
+            yp = Vswing.o*math.cos(theta) + Events.pivot[1]
+            zp = Vswing.o*math.sin(theta) + Events.pivot[2]
             theta = math.atan2(zp, yp)
             k = 1./math.sqrt(Ez*Ez*math.cos(theta)*math.cos(theta) + Ey*Ey*math.sin(theta)*math.sin(theta))
             ySat = k*Ey*Ez*math.cos(theta)
@@ -288,8 +287,8 @@ class vector4D(object):
                 zp = zSat
                 theta = math.atan2(zp, yp)
             Vswing.o = math.sqrt(yp*yp + zp*zp)
-            Vswing.y = math.cos(theta) #+math.pi/2
-            Vswing.z = math.sin(theta) #+math.pi/2
+            Vswing.y = math.cos(theta)
+            Vswing.z = math.sin(theta)
             Qswing = vector4D.Vec2Quat(Vswing)
             Qswing = vector4D.QuatProd(Qswing, Qoffset)
         return Qswing
