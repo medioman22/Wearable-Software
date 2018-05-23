@@ -77,14 +77,26 @@ class RoboCom:
                 try:
                     data = self._s.recv(1024)  
                     if not data: break    
-                    m_list = (remainder + data.decode("utf-8")).split("}")
-                    for idx, message in enumerate(m_list):
-                        if idx == len(m_list) - 1 and message is not "":
-                            remainder = message 
-                        elif message is not "":
-                            message = message + "}"
-                            self._recv_queue.append(json.loads(message))
-                            self._logger.info("Recieved data: " + str(message))
+                    self._logger.debug("Recieved RAW data: " + str(data))
+                    m_list = (remainder + data.decode("utf-8")).split("}")  # Add the recieved data to the previous remainder
+                    remainder = ""
+                    while len(m_list) > 0:      # After it's split, go through all sub-messages to compose a complete message
+                        # If we have a message stub and it's imbalanced (more '{' than '}')
+                        if remainder and remainder.count("{") > remainder.count("}"):
+                            remainder += m_list.pop(0)   # Add the next sub-message 
+                            if len(m_list) > 0:
+                                remainder += "}"         # Add terminator only if the split indicates we recieved it
+                        elif remainder:     # If we have a message and it's balanced -> we have a complete message
+                            self._recv_queue.append(json.loads(remainder))
+                            self._logger.info("Recieved data: " + str(remainder))
+                            remainder = ""  # After the recieve reset the remainder
+                        # If we have no message and the list is almost empty - only "" remains
+                        elif len(m_list) == 1 and m_list[0] == "":
+                             m_list.pop(0)  # Empty it
+                        else:   # If we have no message and the list is not empty -> start a new sub-message
+                            remainder += m_list.pop(0)
+                            if len(m_list) > 0:
+                                remainder += "}"         # Add terminator only if the split indicates we recieved it
                 except sock.timeout:
                     pass
                 except sock.error as exc:
@@ -93,7 +105,7 @@ class RoboCom:
                     self._state = 'Disconnected'
                     break
                 except Exception as exc:
-                    self._logger.error('General Error occurred: ' + str(exc))
+                    self._logger.error('General Error occurred: ' + str(exc) + ' rem: ' + str(remainder))
                 while len(self._send_queue) > 0:                    
                     send_message = self._send_queue.popleft()
                     self._s.sendall(str.encode(send_message))
@@ -123,14 +135,26 @@ class RoboCom:
                     try:
                         data = conn.recv(1024)           
                         if not data: break    
-                        m_list = (remainder + data.decode("utf-8")).split("}")
-                        for idx, message in enumerate(m_list):
-                            if idx == len(m_list) - 1 and message is not "":
-                                remainder = message 
-                            elif message is not "":
-                                message = message + "}"
-                                self._recv_queue.append(json.loads(message))
-                                self._logger.info("Recieved data: " + str(message))
+                        self._logger.debug("Recieved RAW data: " + str(data))
+                        m_list = (remainder + data.decode("utf-8")).split("}")  # Add the recieved data to the previous remainder
+                        remainder = ""
+                        while len(m_list) > 0:      # After it's split, go through all sub-messages to compose a complete message
+                            # If we have a message stub and it's imbalanced (more '{' than '}')
+                            if remainder and remainder.count("{") > remainder.count("}"):
+                                remainder += m_list.pop(0)     # Add the next sub-message 
+                                if len(m_list) > 0:
+                                        remainder += "}"       # Add terminator only if the split indicates we recieved it
+                            elif remainder:     # If we have a message and it's balanced -> we have a complete message
+                                self._recv_queue.append(json.loads(remainder))
+                                self._logger.info("Recieved data: " + str(remainder))
+                                remainder = ""  # After the recieve reset the remainder
+                            # If we have no message and the list is almost empty - only "" remains
+                            elif len(m_list) == 1 and m_list[0] == "":
+                                 m_list.pop(0)  # Empty it
+                            else:   # If we have no message and the list is not empty -> start a new sub-message
+                                remainder += m_list.pop(0)
+                                if len(m_list) > 0:
+                                    remainder += "}"         # Add terminator only if the split indicates we recieved it
                     except sock.timeout:
                         pass
                     except sock.error as exc:
@@ -205,13 +229,3 @@ class RoboCom:
     """ The Application Port. """
     port = 12345 
     
-
-#c = RoboCom(platform='pc')
-#c.start_communications()
-#time.sleep(2)
-#test_data = {'type':'pc_command', 'command_type':'set_pwm', 'value_pwm':85, 'pwm_channel':'pwm_2'}
-#c.send_data(test_data)
-#print('Sent: ' + str(test_data))
-#time.sleep(2)
-#print('Rcv: ' + str(c.rcv_data()[0]))
-#c.stop_and_free_resources()
