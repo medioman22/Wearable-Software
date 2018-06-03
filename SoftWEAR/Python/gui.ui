@@ -257,9 +257,9 @@
    <widget class="QTextEdit" name="tdisp_devices_imu">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>270</x>
       <y>140</y>
-      <width>251</width>
+      <width>291</width>
       <height>271</height>
      </rect>
     </property>

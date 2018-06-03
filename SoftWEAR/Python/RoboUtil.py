@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+SoftWEAR Utility module. Add here all inter-module utility functionality.
 """
 
 """ Provides the translation between the port pins as presented on the 
     BeagleBoard and the mraa indexes. This is strictly for GPIO pins not
-    used in any other peripheral. """
+    used in any other peripheral. When designing functionalities that require
+    GPIO only use pins from this list!"""
 # Use the below version if the eMMC is enabled and the P8 pins are not available    
 gpio2mraa = {'P8_07':7, 'P8_08':8, 
              'P8_09':9, 'P8_10':10, 'P8_11':11, 'P8_12':12, 'P8_14':14, 'P8_15':15, 
@@ -27,4 +29,6 @@ gpio2mraa = {'P8_07':7, 'P8_08':8,
              'P9_27':73, 'P9_41':87 } """ 
 
 class UsedGPIO:
+    """ Provides a list of used GPIO. Use this to detect any GPIO usage conflicts
+        in the SoftWEAR package (e.g. same pin used more than once). """
     pin_list = []
