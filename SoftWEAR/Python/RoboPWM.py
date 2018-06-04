@@ -7,10 +7,10 @@ PWM channels.
 import mraa      # # Main peripheral class. Implements basic PWM functions
 import logging   # This class logs all info - so logging is imported
 
-# Translation between normal ADC inexes and the ones that mraa uses
+# Translation between normal PWM indexes and the ones that mraa uses
 idx2mraa = {0:13, 1:19, 2:34, 3:36, 4:67, 5:68, 6:74, 7:88}
 
-# Translation between string IDs and normal ADC indexes (to be translated to MRAA)
+# Translation between string IDs and normal PWM indexes (to be translated to MRAA)
 str2idx = {'P8_13':0, 'P8_19':1, 'P8_34':2, 'P8_36':3, 
            'P9_21':4, 'P9_22':5, 'P9_28':6, 'P9_42':7}
 
