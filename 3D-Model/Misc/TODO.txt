@@ -1,0 +1,6 @@
+Cameras, différentes vues
+
+save/load vbo in files
+
+REPORT : add references to code functions in a table / annexe
+REPORT : add table of all sensors in annexe ?

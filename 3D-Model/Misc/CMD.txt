@@ -1,0 +1,5 @@
+conda create -n newEnvironmentName
+activate Wearable
+conda list
+cd "path"
+python Model.py

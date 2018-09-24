@@ -1,0 +1,5 @@
+# Local env
+Interface/bin
+Interface/include
+Interface/lib
+Interface/src/__pycache__
