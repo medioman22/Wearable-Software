@@ -8,12 +8,16 @@ Abstract definition of a physical board representation
 class Device():
     """Representation of a physical device."""
 
-    # state
-    _state = 0
-    # state message
-    _stateMessage = 'Offline'
+    # name
+    _name = 'Unknown Device'
+    # direction
+    _dir = 'in'
+    # dimension (length of value vector)
+    _dim = 1
+    # data
+    _data = None
 
-    def __init__(self, name, dir='in', dim=1):
+    def __init__(self, name="Unknown Device", dir='in', dim=1):
         """Configure a device."""
         # Set device name
         self._name = name;
@@ -25,7 +29,7 @@ class Device():
             self._dir = dir
 
         # Set device value dimension
-        self.dim = dim
+        self._dim = dim
 
         # Set data field
         self._data = []
@@ -36,10 +40,6 @@ class Device():
     def name(self):
         """Return the name."""
         return self._name
-
-    def state(self):
-        """Return the state."""
-        return self._state, self._stateMessage
 
     def dir(self):
         """Return the dir."""
@@ -55,7 +55,7 @@ class Device():
 
     def setData(self, data):
         """Return the data(s)."""
-        if (self._mode != 'out'):
+        if (self._dir != 'out'):
             raise ValueError('device has now permission to write data')
         else:
             self._data = data
@@ -69,14 +69,16 @@ class Board():
     # busy flag
     _busy = False
     # name
-    _name = 'Unknown device'
+    _name = 'Unknown Bboard'
     # default ip
     _defaultIp = '0.0.0.0'
+    # default port
+    _defaultPort = '12345'
     # devices
     _deviceList = None
 
 
-    def __init__(self, name="Unknown Device"):
+    def __init__(self, name="Unknown Board"):
         """Configure a board."""
         self._name = name;
         self._defaultIp = '192.168.7.2'
@@ -90,6 +92,10 @@ class Board():
     def defaultIp(self):
         """Return the default ip."""
         return self._defaultIp
+
+    def defaultPort(self):
+        """Return the default port."""
+        return self._defaultPort
 
     def connected(self):
         """Return the connected state."""

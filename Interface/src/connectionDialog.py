@@ -14,12 +14,14 @@ class ConnectionDialog(QDialog):
     A dialog to enter the IP of the board
     """
 
-    settingsChanged = pyqtSignal(str)
+    # Signal for new settings values
+    settingsChanged = pyqtSignal(str, str)
 
     def __init__(self):
         """Initialize the connection dialog."""
         super().__init__()
 
+        # Initialize the dialog UI
         self.setModal(True)
         self.initUI()
 
@@ -30,6 +32,9 @@ class ConnectionDialog(QDialog):
         ipLine = QLineEdit()
         ipLine.setPlaceholderText('IP')
         self._ipLine = ipLine
+        portLine = QLineEdit()
+        portLine.setPlaceholderText('PORT')
+        self._portLine = portLine
 
         # Confirmation button
         okButton = QPushButton("OK")
@@ -43,6 +48,7 @@ class ConnectionDialog(QDialog):
         # Layout for connection settings fields
         connectionSettingsLayout = QVBoxLayout()
         connectionSettingsLayout.addWidget(ipLine)
+        connectionSettingsLayout.addWidget(portLine)
 
         # Group informations
         groupLayout = QGroupBox('Connection Settings')
@@ -56,17 +62,18 @@ class ConnectionDialog(QDialog):
 
         self.setLayout(bodyLayout)
 
-    def setValues(self, ip):
+    def setValues(self, ip, port):
         """
         Set the values.
 
-        Values: ip, …
+        Values: ip, port, …
         """
         self._ipLine.setText(ip)
+        self._portLine.setText(port)
 
 
     @pyqtSlot()
     def _changeSettingsListener(self):
         """Update connection settings."""
-        self.settingsChanged.emit(self._ipLine.text())
+        self.settingsChanged.emit(self._ipLine.text(), self._portLine.text())
         self.close()

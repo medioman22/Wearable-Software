@@ -7,10 +7,10 @@ and their status is reported to the remote location.
 
 import os                   # Required for clearing the system display
 import time                 # Required for controllng the sampling period
-#import RoboCom as com       # SoftWEAR Communication module
-#import RoboADC as r_adc     # SoftWEAR ADC module
+import RoboCom as com       # SoftWEAR Communication module
+import RoboADC as r_adc     # SoftWEAR ADC module
 import RoboPWM as r_pwm     # SoftWEAR PWM module
-#import RoboI2C as r_i2c     # SoftWEAR I2C module
+import RoboI2C as r_i2c     # SoftWEAR I2C module
 import copy                 # Required for deepcopy on dictionary lists
 
 emg_list = []               # List of connected EMG devices on the ADC ports
@@ -20,9 +20,9 @@ last_message = ""           # Current text message to be displayed to the user
 send_last_message = False   # Becomes True when last message has changed.
 conn_message = ""           # Current connection status to be displayed
 
-#adc = r_adc.RoboADC()       # Initialize the SoftWEAR ADC Module
+adc = r_adc.RoboADC()       # Initialize the SoftWEAR ADC Module
 pwm = r_pwm.RoboPWM()       # Initialize the SoftWEAR PWM Module
-#i2c = r_i2c.RoboI2C()       # Initialize the SoftWEAR I2C Module
+i2c = r_i2c.RoboI2C()       # Initialize the SoftWEAR I2C Module
 
 def print_func():
     """ This function handles all the prints to the console. """

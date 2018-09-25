@@ -13,15 +13,16 @@ class MockedBoard(Board):
         # Set custom values
         self._name = '<Mocked Board>'
         self._defaultIp = '0.0.0.0'
+        self._defaultPort = '666'
 
 
         mockDevice = Device('Mock Device1')
         self._deviceList.append(mockDevice)
 
-        mockDevice = Device('Mock Device2')
+        mockDevice = Device('Mock Device2','out')
         self._deviceList.append(mockDevice)
 
-        mockDevice = Device('Mock Device3')
+        mockDevice = Device('Mock Device3','in',2)
         self._deviceList.append(mockDevice)
 
         mockDevice = Device('Mock Device4')
