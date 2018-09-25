@@ -3,7 +3,7 @@
 
 import logging
 from PyQt5.QtCore import (Qt, pyqtSignal, pyqtSlot)
-from PyQt5.QtWidgets import (QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QSplitter, QStackedWidget)
+from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel, QListWidget, QStackedWidget, QGridLayout, QGroupBox)
 from PyQt5.QtGui import (QPixmap)
 
 from deviceSettings import DeviceSettingsWidget
@@ -79,28 +79,32 @@ class InterfaceWidget(QWidget):
         deviceStack = QStackedWidget()
         self._deviceStack = deviceStack
 
-        informationLayout = QVBoxLayout()
-        informationLayout.addWidget(boardLabel)
-        informationLayout.addWidget(boardStatusLabel)
-        informationLayout.addWidget(boardIpLabel)
-        informationLayout.addWidget(connectButton)
-        informationLayout.addWidget(configureButton)
+        # Layout for information box
+        informationGridLayout = QGridLayout()
+        informationGridLayout.addWidget(boardLabel,        0, 0, 1, 2, Qt.AlignLeft)
+        informationGridLayout.addWidget(boardStatusLabel,  1, 0, Qt.AlignLeft)
+        informationGridLayout.addWidget(boardIpLabel,      1, 1, Qt.AlignLeft)
+        informationGridLayout.addWidget(connectButton,     2, 0, Qt.AlignLeft)
+        informationGridLayout.addWidget(configureButton,   2, 1, Qt.AlignLeft)
 
-        headerLayout = QHBoxLayout()
-        headerLayout.addWidget(boardPixmapLabel)
-        headerLayout.addLayout(informationLayout)
-        headerLayout.addStretch(1)
+        # Group informations
+        groupLayout = QGroupBox('Information')
+        groupLayout.setLayout(informationGridLayout)
 
-        listSplitter = QSplitter()
-        listSplitter.addWidget(deviceList)
-        listSplitter.addWidget(deviceStack)
-        listSplitter.setSizes([200, 600])
+        # Grid for the interface layout
+        bodyGridLayout = QGridLayout()
+        bodyGridLayout.addWidget(boardPixmapLabel,      0, 0, Qt.AlignCenter)
+        bodyGridLayout.addWidget(groupLayout,           0, 1, Qt.AlignLeft)
+        bodyGridLayout.addWidget(deviceList,            1, 0, Qt.AlignLeft)
+        bodyGridLayout.addWidget(deviceStack,           1, 1, Qt.AlignLeft)
 
-        bodyLayout = QVBoxLayout()
-        bodyLayout.addLayout(headerLayout)
-        bodyLayout.addWidget(listSplitter)
+        # Define stretching behaviour
+        bodyGridLayout.setRowStretch(0, 1)
+        bodyGridLayout.setRowStretch(1, 10)
+        bodyGridLayout.setColumnStretch(0, 1)
+        bodyGridLayout.setColumnStretch(1, 10)
 
-        self.setLayout(bodyLayout)
+        self.setLayout(bodyGridLayout)
 
     def setName(self, name):
         """Set name label."""

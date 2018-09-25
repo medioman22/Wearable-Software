@@ -3,7 +3,7 @@
 
 import logging
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot)
-from PyQt5.QtWidgets import (QDialog, QPushButton, QLineEdit, QVBoxLayout)
+from PyQt5.QtWidgets import (QDialog, QPushButton, QLineEdit, QVBoxLayout, QGroupBox)
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -26,18 +26,31 @@ class ConnectionDialog(QDialog):
 
     def initUI(self):
         """Initialize the ui of the connection dialog."""
+        # Field for the IP address
         ipLine = QLineEdit()
         ipLine.setPlaceholderText('IP')
         self._ipLine = ipLine
+
+        # Confirmation button
         okButton = QPushButton("OK")
         okButton.setDefault(True)
         okButton.clicked.connect(self._changeSettingsListener)
+
+        # Cancel button
         cancelButton = QPushButton("Cancel")
         cancelButton.clicked.connect(self.close)
 
+        # Layout for connection settings fields
+        connectionSettingsLayout = QVBoxLayout()
+        connectionSettingsLayout.addWidget(ipLine)
 
+        # Group informations
+        groupLayout = QGroupBox('Connection Settings')
+        groupLayout.setLayout(connectionSettingsLayout)
+
+        # Dialog layout
         bodyLayout = QVBoxLayout()
-        bodyLayout.addWidget(ipLine)
+        bodyLayout.addWidget(groupLayout)
         bodyLayout.addWidget(cancelButton)
         bodyLayout.addWidget(okButton)
 
