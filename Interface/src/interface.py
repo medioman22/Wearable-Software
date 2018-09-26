@@ -33,16 +33,12 @@ class InterfaceWidget(QWidget):
     # Board Device list
     _deviceList = None
 
-    def __init__(self, name='––', ip='0.0.0.0', port='', status='Initializing'):
+    def __init__(self):
         """Initialize the interface widget."""
         super().__init__()
 
         # Initialize interface UI
         self.initUI()
-        self.setName(name)
-        self.setIpAndPort(ip, port)
-        self.setStatus(status)
-
 
     def initUI(self):
         """Initialize the ui of the interface widget."""
@@ -58,6 +54,11 @@ class InterfaceWidget(QWidget):
         scaledboardPixmap = boardPixmap.scaledToWidth(164)
         boardPixmapLabel.setPixmap(scaledboardPixmap)
         self._boardPixmapLabel = boardPixmapLabel
+
+        # Label of current board status
+        boardConnectionTypeLabel = QLabel('Connection Type: <b></b>')
+        boardConnectionTypeLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self._boardConnectionTypeLabel = boardConnectionTypeLabel
 
         # Label of current board status
         boardStatusLabel = QLabel('Status: <b>Offline</b>')
@@ -80,10 +81,11 @@ class InterfaceWidget(QWidget):
 
         # Layout for information box
         informationGridLayout = QGridLayout()
-        informationGridLayout.addWidget(boardStatusLabel,  0, 0, Qt.AlignLeft)
-        informationGridLayout.addWidget(boardIpPortLabel,  0, 1, Qt.AlignLeft)
-        informationGridLayout.addWidget(connectButton,     1, 0, Qt.AlignLeft)
-        informationGridLayout.addWidget(configureButton,   1, 1, Qt.AlignLeft)
+        informationGridLayout.addWidget(boardConnectionTypeLabel,   0, 0, 1, 2, Qt.AlignLeft)
+        informationGridLayout.addWidget(boardStatusLabel,           1, 0, Qt.AlignLeft)
+        informationGridLayout.addWidget(boardIpPortLabel,           1, 1, Qt.AlignLeft)
+        informationGridLayout.addWidget(connectButton,              2, 0, Qt.AlignLeft)
+        informationGridLayout.addWidget(configureButton,            2, 1, Qt.AlignLeft)
 
         # Group informations
         groupLayout = QGroupBox('Information')
@@ -105,23 +107,26 @@ class InterfaceWidget(QWidget):
 
         self.setLayout(bodyGridLayout)
 
-    def setName(self, name):
-        """Set name label."""
-        self._groupLayout.setTitle(name)
+    def setBoardInformation(self, board):
+        """Set board information."""
+        #Set name label
+        self._groupLayout.setTitle(board.name())
 
-    def setImage(self, name):
-        """Set image label."""
-        boardPixmap = QPixmap('assets/{}.jpg'.format(name))
+        #Set image label
+        boardPixmap = QPixmap('assets/{}.jpg'.format(board.name()))
         scaledboardPixmap = boardPixmap.scaledToWidth(164)
         self._boardPixmapLabel.setPixmap(scaledboardPixmap)
 
-    def setIpAndPort(self, ip, port):
-        """Set ip and port label."""
-        self._boardIpPortLabel.setText('IP <b>{}</b> : <b>{}</b>'.format(ip, port))
+        #Set connection type
+        self._boardConnectionTypeLabel.setText('Connection Type <b>{}</b>'.format(board.connectionType()))
 
     def setStatus(self, status):
         """Set states label."""
         self._boardStatusLabel.setText('Status <b>{}</b>'.format(status))
+
+    def setIpAndPort(self, ip, port):
+        """Set ip and port label."""
+        self._boardIpPortLabel.setText('IP <b>{}</b> : <b>{}</b>'.format(ip, port))
 
     def updateDeviceList(self, devices):
         """Update device stack."""

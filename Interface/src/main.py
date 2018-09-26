@@ -1,6 +1,4 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
 """
 Wearable Software Interface
 
@@ -15,24 +13,34 @@ import logging
 from PyQt5.QtCore import (pyqtSlot)
 from PyQt5.QtWidgets import (QMainWindow, QMenu, QToolTip, QMessageBox, QAction, QDesktopWidget, QApplication)
 from PyQt5.QtGui import (QFont, QIcon)
+from time import sleep
+import threading
 
 from interface import InterfaceWidget
 from connectionDialog import ConnectionDialog
-from board import Board
-from mockedBoard import MockedBoard
+from boards.mockedBoard import MockedBoard
+from boards.beagleboneBlackWirelessBoard import BeagleboneBlackWirelessBoard
+from connections.mockedConnection import MockedConnection
+from connections.tcpIpConnection import TCPIPConnection
 
 logging.basicConfig(level=logging.DEBUG)
 logging.warning('Initialize …')
 
 
 # Global variables
-availableBoards = [MockedBoard(), Board('Beaglebone Black Wireless')]
+availableBoards = [MockedBoard(), BeagleboneBlackWirelessBoard()]
+availableConnections = [MockedConnection(), TCPIPConnection()]
+backgroundTask = None
+backgroundTaskRunning = False
 
 class MainWindow(QMainWindow):
     """The main window of the application."""
 
     # The selected board
     _board = None
+
+    # The selected boards connection
+    _connection = None
 
     # The connection ip
     _ip = None
@@ -109,7 +117,8 @@ class MainWindow(QMainWindow):
 
 
         # Show ready message when ui is loaded
-        self.statusBar().showMessage('UI Ready')
+        self._statusBar = self.statusBar();
+        self._statusBar.showMessage('Ready')
         self.show()
 
 
@@ -119,26 +128,38 @@ class MainWindow(QMainWindow):
 
         # Throw for no board
         if (self._board == None):
-            raise ValueError('board definition not found')
+            raise ValueError('board not found')
 
         # Update values from board configuration
         self._ip = self._board.defaultIp()
         self._port = self._board.defaultPort()
+
+        # Select connection
+        self.loadConnection(self._board.connectionType())
+
         self.updateUI()
 
-        print('{} loaded'.format(name))
+        print("Board '{}' loaded".format(name))
+        self._statusBar.showMessage('{} selected'.format(self._board.name()))
+
+
+    def loadConnection(self, type):
+        """Load a connection."""
+        self._connection = next((x for x in availableConnections if x.type() == type), None)
+
+        # Throw for no connection
+        if (self._connection == None):
+            raise ValueError('connection not found')
+
+        # Set the ip and port
+        self._connection.setIp(self._ip)
+        self._connection.setPort(self._port)
+
+        print("Connection '{}' loaded".format(type))
 
 
 
 
-
-
-    def center(self):
-        """Center the main window."""
-        qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
 
 
 
@@ -150,17 +171,22 @@ class MainWindow(QMainWindow):
 
     def updateStatusValues(self):
         """Update all status values."""
-        self._interface.setName(self._board.name())
-        self._interface.setImage(self._board.name())
+        # Set static board information
+        self._interface.setBoardInformation(self._board)
+        # Set dynamic board information
         self._interface.setIpAndPort(self._ip, self._port)
-        if (self._board.connected()):
-            self._interface.setStatus('Online')
-        else:
-            self._interface.setStatus('Offline')
+        self._interface.setStatus(self._connection.status())
 
     def updateDeviceList(self):
         """Update device lists."""
         self._interface.updateDeviceList(self._board.deviceList())
+
+    def center(self):
+        """Center the main window."""
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
 
 
@@ -175,8 +201,14 @@ class MainWindow(QMainWindow):
             QMessageBox.No, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            # Stop background task
+            global backgroundTaskRunning
+            backgroundTaskRunning = False
+
+            # Close app
             event.accept()
         else:
+            # Keep app open
             event.ignore()
 
 
@@ -205,15 +237,25 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def _connectListener(self):
-        """Try to connect (fails at the moment per default)."""
-        print("Abort connection trial")
+        """Try to connect."""
+        # Do a reconnect if already connected
+        if (self._connection.status() == 'Connected'):
+            self._connection.disconnect()
+        try:
+            self._connection.connect()
+            self._statusBar.showMessage('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
+        except ConnectionError as e:
+            print("Connection error, could not create connection: {}".format(e))
+            self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
+
+        self.updateUI()
 
 
     @pyqtSlot(QAction)
     def _selectBoardListener(self, action):
         """Select a board."""
-        if (self._board.connected()):
-            print('Deconnect the board') # TODO: Implement proper deconnection
+        if (self._connection.status() == 'Connected'):
+            self._connection.disconnect()
 
         # Load selected board configuration
         self.loadBoard(action.text())
@@ -222,7 +264,28 @@ class MainWindow(QMainWindow):
 
 
 
+    def backgroundTask(self):
+        """Background thread looking for new messages."""
+        global backgroundTaskRunning
+        backgroundTaskRunning = True
 
+        # Enter inifinite loop
+        while backgroundTaskRunning:
+
+            # Only do something when there is a connection
+            if (self._connection.status() == 'Connected'):
+                # Get the new messages from the connection
+                messages = self._connection.getMessages()
+
+                print(messages)
+
+                # Sleep for 100ms
+                sleep(0.1)
+
+            # Sleep for 1 sec
+            else:
+                print('Wait')
+                sleep(1)
 
 
 
@@ -233,4 +296,9 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     ex = MainWindow()
+
+    # Start the thread
+    threading.Thread(target=ex.backgroundTask).start()
+
+    # Start the app
     sys.exit(app.exec_())

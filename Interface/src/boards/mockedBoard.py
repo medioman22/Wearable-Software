@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """A representation of the mocked physical board connected."""
 
-from board import Board, Device
+from boards.board import Board, Device
 
 class MockedBoard(Board):
     """Representation of a mocked physical board."""
 
     def __init__(self):
         """Initialize the mocked board."""
-        super().__init__()
+        super().__init__('Mocked Board', 'Mocked Connection', '0.0.0.0', '666')
 
-        # Set custom values
-        self._name = '<Mocked Board>'
-        self._defaultIp = '0.0.0.0'
-        self._defaultPort = '666'
+
+
+
+
+
 
 
         mockDevice = Device('Mock Device1')

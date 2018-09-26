@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-A representation of the physical board connected.
+A representation of the connection to the physical board.
 
-Abstract definition of a physical board representation
+Abstract definition of a connection to the physical board representation
 """
+
+"""Globals"""
+# Allowed directions for the dataflow
+allowedDirTypes = ['in', 'out']
 
 class Device():
     """Representation of a physical device."""
@@ -17,19 +21,24 @@ class Device():
     # data
     _data = None
 
-    def __init__(self, name="Unknown Device", dir='in', dim=1):
+    def __init__(self, name="Unknown Device", dir=allowedDirTypes[0], dim=1):
         """Configure a device."""
         # Set device name
         self._name = name;
 
         # Set device mode
-        if (dir != 'in' and dir != 'out'):
-            raise ValueError('dir has to be in list [in,out]')
+        if (dir not in allowedDirTypes):
+            raise ValueError("dir has to be in list: {}".format(allowedDirTypes))
         else:
             self._dir = dir
 
         # Set device value dimension
-        self._dim = dim
+        if (dim <= 0):
+            raise ValueError("dim '{}' has to be positive".format(dim))
+        elif (isinstance(dim, int) == False):
+            raise ValueError("dim '{}' has to be an int".format(dim))
+        else:
+            self._dim = dim
 
         # Set data field
         self._data = []
@@ -64,30 +73,34 @@ class Device():
 class Board():
     """Representation of a physical board."""
 
-    # connection state
-    _connected = False
-    # busy flag
-    _busy = False
     # name
-    _name = 'Unknown Bboard'
+    _name = None
+    # connection type
+    _connectionType = None
     # default ip
-    _defaultIp = '0.0.0.0'
+    _defaultIp = None
     # default port
-    _defaultPort = '12345'
+    _defaultPort = None
     # devices
     _deviceList = None
 
 
-    def __init__(self, name="Unknown Board"):
-        """Configure a board."""
-        self._name = name;
-        self._defaultIp = '192.168.7.2'
-        self._deviceList = []
+    def __init__(self, name, connectionType, defaultIp='192.168.7.2', defaultPort='12345'):
+        """Configure the board."""
+        self._name = name
+        self._connectionType = connectionType
+        self._defaultIp = defaultIp
+        self._defaultPort = defaultPort
+        self._deviceList = [] # Empty list
 
 
     def name(self):
         """Return the name."""
         return self._name
+
+    def connectionType(self):
+        """Return the connection type."""
+        return self._connectionType
 
     def defaultIp(self):
         """Return the default ip."""
@@ -96,10 +109,6 @@ class Board():
     def defaultPort(self):
         """Return the default port."""
         return self._defaultPort
-
-    def connected(self):
-        """Return the connected state."""
-        return self._connected
 
     def deviceList(self):
         """Return a shallow copy of the device list."""
