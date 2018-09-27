@@ -10,14 +10,13 @@ Last edited: September 2018
 
 import sys
 import logging
-from PyQt5.QtCore import (pyqtSlot)
+from PyQt5.QtCore import (pyqtSlot, QTimer)
 from PyQt5.QtWidgets import (QMainWindow, QMenu, QToolTip, QMessageBox, QAction, QDesktopWidget, QApplication)
 from PyQt5.QtGui import (QFont, QIcon)
-from time import sleep
-import threading
 
 from interface import InterfaceWidget
 from connectionDialog import ConnectionDialog
+from boards.board import Device
 from boards.mockedBoard import MockedBoard
 from boards.beagleboneBlackWirelessBoard import BeagleboneBlackWirelessBoard
 from connections.mockedConnection import MockedConnection
@@ -30,24 +29,20 @@ logging.warning('Initialize …')
 # Global variables
 availableBoards = [MockedBoard(), BeagleboneBlackWirelessBoard()]
 availableConnections = [MockedConnection(), TCPIPConnection()]
-backgroundTask = None
-backgroundTaskRunning = False
 
 class MainWindow(QMainWindow):
     """The main window of the application."""
 
     # The selected board
     _board = None
-
     # The selected boards connection
     _connection = None
-
     # The connection ip
     _ip = None
-
     # The connection port
     _port = None
-
+    # The connection time
+    _connectionIteratorTimer = None
 
     def __init__(self):
         """Initialize the main window."""
@@ -62,6 +57,12 @@ class MainWindow(QMainWindow):
 
         # Load default board
         self.loadBoard(availableBoards[0].name())
+
+        # Start the timer for the connection itarator function
+        self._connectionIteratorTimer = QTimer(self)
+        self._connectionIteratorTimer.setSingleShot(False)
+        self._connectionIteratorTimer.timeout.connect(self.connectionIteration)
+        self._connectionIteratorTimer.start(100)
 
 
     def initUI(self):
@@ -168,6 +169,7 @@ class MainWindow(QMainWindow):
         """Update all ui elements."""
         self.updateStatusValues()
         self.updateDeviceList()
+        self.updateData()
 
     def updateStatusValues(self):
         """Update all status values."""
@@ -188,6 +190,9 @@ class MainWindow(QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
+    def updateData(self):
+        """Update all data elements."""
+        self._interface.updateData()
 
 
 
@@ -222,14 +227,14 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def _showConnectionDialogListener(self):
-        """Show connection dialog."""
+        """Show connection dialog listener."""
         self.connectionDialog.setValues(self._ip, self._port)
         self.connectionDialog.show()
 
 
     @pyqtSlot(str, str)
     def _connectionSettingsChangedListener(self, ip, port):
-        """Update connection settings."""
+        """Update connection settings listener."""
         self._ip = ip
         self._port = port
         self.updateStatusValues()
@@ -237,10 +242,11 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def _connectListener(self):
-        """Try to connect."""
+        """Try to connect listener."""
         # Do a reconnect if already connected
         if (self._connection.status() == 'Connected'):
             self._connection.disconnect()
+            self._board.reset()
         try:
             self._connection.connect()
             self._statusBar.showMessage('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
@@ -253,39 +259,60 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(QAction)
     def _selectBoardListener(self, action):
-        """Select a board."""
+        """Select a board listener."""
         if (self._connection.status() == 'Connected'):
             self._connection.disconnect()
+            self._board.reset()
 
         # Load selected board configuration
         self.loadBoard(action.text())
 
 
+    @pyqtSlot()
+    def connectionIteration(self):
+        """Next connection iteration listener."""
+        # Only do something when there is a connection
+        if (self._connection.status() == 'Connected'):
+            # Get the new messages from the connection
+            messages = self._connection.getMessages()
 
+            # Flags
+            data = False
+            ui = False
 
+            if (messages != None and len(messages) > 0):
+                for message in messages:
+                    # Message to register a device
+                    if (message.type == 'Register'):
+                        ui = True
+                        self._board.registerDevice(Device(message.name, message.data['dir'], message.data['dim']))
+                        self._statusBar.showMessage('Register Device: {}'.format(message.name))
+                    # Message to deregister a device
+                    elif (message.type == 'Deregister'):
+                        ui = True
+                        self._board.deregisterDevice(Device(message.name, message.data['dir'], message.data['dim']))
+                        self._statusBar.showMessage('Deregister Device: {}'.format(message.name))
+                    # Message with new data for a device
+                    elif (message.type == 'Data'):
+                        data = True
+                        self._board.updateData(message.name, message.data)
+                    # Message with unknown type
+                    else:
+                        print('Unknown message type: {}'.format(message.type))
+                        pass
 
-    def backgroundTask(self):
-        """Background thread looking for new messages."""
-        global backgroundTaskRunning
-        backgroundTaskRunning = True
+                # Update data and UI
+                if (data):
+                    self.updateData()
+                if (ui):
+                    print('UI')
+                    self.updateUI()
 
-        # Enter inifinite loop
-        while backgroundTaskRunning:
-
-            # Only do something when there is a connection
-            if (self._connection.status() == 'Connected'):
-                # Get the new messages from the connection
-                messages = self._connection.getMessages()
-
-                print(messages)
-
-                # Sleep for 100ms
-                sleep(0.1)
-
-            # Sleep for 1 sec
             else:
-                print('Wait')
-                sleep(1)
+                pass
+
+        # Print loop
+        # print('Loop')
 
 
 
@@ -296,9 +323,6 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     ex = MainWindow()
-
-    # Start the thread
-    threading.Thread(target=ex.backgroundTask).start()
 
     # Start the app
     sys.exit(app.exec_())

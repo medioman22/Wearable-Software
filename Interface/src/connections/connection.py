@@ -10,8 +10,24 @@ from abc import ABC, abstractmethod
 """Globals"""
 # Possible connection states
 possibleStatusTypes = ['Disconnected', 'Connected', 'Corrupted']
+possibleIncomingMessageTypes = ['Register', 'Deregister', 'Data']
+possibleOutgoingMessageTypes = ['Data']
 
+class Message():
+    """Message coming form the board."""
 
+    # type of the message
+    type = None
+    # name of the device the message belongs
+    name = None
+    # data object for message
+    data = None
+
+    def __init__(self, type, name, data=None):
+        """Create a new message."""
+        self.type = type
+        self.name = name
+        self.data = data
 
 
 

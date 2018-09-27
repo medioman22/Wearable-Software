@@ -145,6 +145,12 @@ class InterfaceWidget(QWidget):
         # Sort the device list
         self._deviceList.sortItems(Qt.AscendingOrder);
 
+    def updateData(self):
+        """Update all data elements."""
+        # Update data for all devices
+        for i in range(0, self._deviceList.count()):
+            self._deviceStack.widget(i).updateData()
+
 
     @pyqtSlot()
     def onConfigureConnection(self):
@@ -166,6 +172,6 @@ class InterfaceWidget(QWidget):
                 if (deviceWidget.device().name() == name):
                     self._deviceStack.setCurrentWidget(deviceWidget)
                     break
-            # Raise an error if no widget has been found
+            # Ignore when widget does no longer exist
             else:
-                raise ValueError('device not found')
+                pass

@@ -18,7 +18,7 @@ class Device():
     _dir = 'in'
     # dimension (length of value vector)
     _dim = 1
-    # data
+    # data (Accessible by the 'friend' object board)
     _data = None
 
     def __init__(self, name="Unknown Device", dir=allowedDirTypes[0], dim=1):
@@ -114,7 +114,35 @@ class Board():
         """Return a shallow copy of the device list."""
         return self._deviceList.copy()
 
+    def registerDevice(self, device):
+        """Register a device to the board."""
+        if (not isinstance(device, Device)):
+            raise ValueError('object is not a device')
+        else:
+            self._deviceList.append(device)
 
-    def processIncomingMessage(self, message):
-        """Process incoming message."""
-        print(message) # Abstract
+    def deregisterDevice(self, device):
+        """Register a device to the board."""
+        if (not isinstance(device, Device)):
+            raise ValueError('object is not a device')
+        else:
+            for registeredDevice in self._deviceList:
+                if (registeredDevice.name() == device.name()):
+                    self._deviceList.remove(device)
+                    break
+            else:
+                raise ValueError('device is not registered')
+
+    def updateData(self, name, data):
+        """Update data of a device."""
+        for registeredDevice in self._deviceList:
+            if (registeredDevice.name() == name):
+                # Access private field of 'friend' object
+                registeredDevice._data = data
+                break
+        else:
+            raise ValueError('device is not registered')
+
+    def reset(self):
+        """Reset the board to default."""
+        self._deviceList = []
