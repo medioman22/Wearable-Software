@@ -1,9 +1,8 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 import logging
 from PyQt5.QtCore import (Qt, pyqtSignal, pyqtSlot)
-from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel, QListWidget, QStackedWidget, QGridLayout, QGroupBox)
+from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel, QListWidget, QListWidgetItem, QStackedWidget, QGridLayout, QGroupBox)
 from PyQt5.QtGui import (QPixmap)
 
 from deviceSettings import DeviceSettingsWidget
@@ -32,6 +31,8 @@ class InterfaceWidget(QWidget):
     _deviceStack = None
     # Board Device list
     _deviceList = None
+    # Selected device
+    _selectedDeviceName = None
 
     def __init__(self):
         """Initialize the interface widget."""
@@ -72,7 +73,7 @@ class InterfaceWidget(QWidget):
 
         # List of connected devices
         deviceList = QListWidget()
-        deviceList.currentTextChanged.connect(self.onSelectDevice)
+        deviceList.itemClicked.connect(self.onSelectDevice)
         self._deviceList = deviceList
 
         # Stack of connected device settings
@@ -137,9 +138,26 @@ class InterfaceWidget(QWidget):
             deviceWidget = self._deviceStack.widget(0)
             self._deviceStack.removeWidget(deviceWidget)
         # Add devices to list/stack
+        deviceToSelect = None
+        deviceListItemToSelect = None
+        deviceWidgetToSelect = None
         for device in devices:
-            self._deviceList.addItem(device.name())
-            self._deviceStack.addWidget(DeviceSettingsWidget(device))
+            deviceListItem = QListWidgetItem(device.name())
+            deviceWidget = DeviceSettingsWidget(device)
+            self._deviceList.addItem(deviceListItem)
+            self._deviceStack.addWidget(deviceWidget)
+            # Check for previous selection
+            if (device.name() == self._selectedDeviceName):
+                deviceToSelect = device
+                deviceListItemToSelect = deviceListItem
+                deviceWidgetToSelect = deviceWidget
+        # Reselect device
+        if (deviceToSelect != None):
+            self._deviceList.setCurrentItem(deviceListItemToSelect)
+            self._deviceStack.setCurrentWidget(deviceWidgetToSelect)
+        elif (len(self._deviceList) > 0):
+            self._deviceList.setCurrentRow(0)
+            self._deviceStack.setCurrentIndex(0)
 
 
         # Sort the device list
@@ -160,10 +178,11 @@ class InterfaceWidget(QWidget):
     def onConnect(self):
         """Listen to configure connection click event."""
         self.connect.emit()
-    @pyqtSlot(str)
-    def onSelectDevice(self, name):
+    @pyqtSlot(QListWidgetItem)
+    def onSelectDevice(self, listItem):
         """Listen to device selection event."""
         # Check if the list isn't empty
+        name = listItem.text()
         if (self._deviceList.count() > 0):
             # Look for widget with name
             for i in range(0, self._deviceList.count()):
@@ -171,6 +190,7 @@ class InterfaceWidget(QWidget):
                 # Break on first matching widget found
                 if (deviceWidget.device().name() == name):
                     self._deviceStack.setCurrentWidget(deviceWidget)
+                    self._selectedDeviceName = name
                     break
             # Ignore when widget does no longer exist
             else:

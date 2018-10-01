@@ -14,11 +14,13 @@ from PyQt5.QtCore import (pyqtSlot, QTimer)
 from PyQt5.QtWidgets import (QMainWindow, QMenu, QToolTip, QMessageBox, QAction, QDesktopWidget, QApplication)
 from PyQt5.QtGui import (QFont, QIcon)
 
+from utils import Utils
 from interface import InterfaceWidget
 from connectionDialog import ConnectionDialog
 from boards.board import Device
 from boards.mockedBoard import MockedBoard
 from boards.beagleboneBlackWirelessBoard import BeagleboneBlackWirelessBoard
+from connections.connection import Message
 from connections.mockedConnection import MockedConnection
 from connections.tcpIpConnection import TCPIPConnection
 
@@ -29,6 +31,7 @@ logging.warning('Initialize …')
 # Global variables
 availableBoards = [MockedBoard(), BeagleboneBlackWirelessBoard()]
 availableConnections = [MockedConnection(), TCPIPConnection()]
+utils = Utils()
 
 class MainWindow(QMainWindow):
     """The main window of the application."""
@@ -62,7 +65,7 @@ class MainWindow(QMainWindow):
         self._connectionIteratorTimer = QTimer(self)
         self._connectionIteratorTimer.setSingleShot(False)
         self._connectionIteratorTimer.timeout.connect(self.connectionIteration)
-        self._connectionIteratorTimer.start(100)
+        self._connectionIteratorTimer.start(50)
 
 
     def initUI(self):
@@ -70,41 +73,48 @@ class MainWindow(QMainWindow):
         # Initialize the window
         self.setWindowTitle('Wearable Software Interface')
         self.setWindowIcon(QIcon('assets/Face.png'))
-        self.resize(600, 480)
+        self.resize(960, 720)
         self.center()
 
         # Configure the menus
         menubar = self.menuBar()
-        menubar.setNativeMenuBar(False)
-        boardMenu = menubar.addMenu('&Board')
+        #menubar.setNativeMenuBar(False)
 
-        # Configure the board selection menu
+        # Board menu
+        boardMenu = QMenu('&Board', self)
+        boardMenu.menuAction().setStatusTip("Board Menu")
+
+        # Board selection menu
         selectMenu = QMenu('Select Board', self)
         for availableBoard in availableBoards:
             selectMenu.addAction(QAction(availableBoard.name(), self))
         selectMenu.triggered.connect(self._selectBoardListener)
         boardMenu.addMenu(selectMenu)
 
-        # Configure the connection menu
+        # Connection option
         connectionAct = QAction('&Connect', self)
+        connectionAct.setShortcut('Ctrl+Shift+C')
         connectionAct.setStatusTip('Connect')
         connectionAct.triggered.connect(self._connectListener)
+        self._connectionAct = connectionAct
         boardMenu.addAction(connectionAct)
-        configureConnectionAct = QAction('&Configure Connection …', self)
-        configureConnectionAct.setStatusTip('Configure connection settings')
+
+        # Edit connection option
+        configureConnectionAct = QAction('&Edit Connection …', self)
+        configureConnectionAct.setShortcut('Ctrl+Alt+C')
+        configureConnectionAct.setStatusTip('Edit Connection Settings (IP/Port)')
         configureConnectionAct.triggered.connect(self._showConnectionDialogListener)
         boardMenu.addAction(configureConnectionAct)
 
+        # Quit option
+        quitAct = QAction('&Quit Application', self)
+        quitAct.setShortcut('Ctrl+Q')
+        quitAct.setStatusTip('Quit Application')
+        quitAct.triggered.connect(self.close)
+        boardMenu.addAction(quitAct)
 
-        # Configure the exit menu option
-        exitAct = QAction(QIcon('assets/Delete.png'), '&Exit', self)
-        exitAct.setShortcut('Ctrl+Q')
-        exitAct.setStatusTip('Exit application')
-        exitAct.triggered.connect(self.close)
-        boardMenu.addAction(exitAct)
-
-        # Configure the status bar
-        self.statusBar()
+        self._boardMenu = boardMenu
+        menubar.addMenu(boardMenu)
 
         # Set default font size for tooltips
         QToolTip.setFont(QFont('SansSerif', 10))
@@ -121,6 +131,14 @@ class MainWindow(QMainWindow):
         self._statusBar = self.statusBar();
         self._statusBar.showMessage('Ready')
         self.show()
+
+
+    def updateBoardMenu(self):
+        """Board menu tab."""
+        if (self._connection.status() == 'Connected'):
+            self._connectionAct.setText('Reconnect')
+        else:
+            self._connectionAct.setText('Connect')
 
 
     def loadBoard(self, name):
@@ -163,8 +181,6 @@ class MainWindow(QMainWindow):
 
 
 
-
-
     def updateUI(self):
         """Update all ui elements."""
         self.updateStatusValues()
@@ -201,22 +217,25 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         """Confirm closing application."""
-        reply = QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QMessageBox.Yes |
-            QMessageBox.No, QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
-            # Stop background task
-            global backgroundTaskRunning
-            backgroundTaskRunning = False
-
-            # Close app
+        # Close for no connection
+        if (self._connection.status() != 'Connected'):
             event.accept()
+        # Ask for confirmation
         else:
-            # Keep app open
-            event.ignore()
+            reply = QMessageBox.question(self, 'Message',
+                "Are you sure to quit?", QMessageBox.Yes |
+                QMessageBox.No, QMessageBox.No)
 
+            if reply == QMessageBox.Yes:
+                # Stop background task
+                global backgroundTaskRunning
+                backgroundTaskRunning = False
 
+                # Close app
+                event.accept()
+            else:
+                # Keep app open
+                event.ignore()
 
 
 
@@ -250,6 +269,7 @@ class MainWindow(QMainWindow):
         try:
             self._connection.connect()
             self._statusBar.showMessage('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
+            self.updateBoardMenu()
         except ConnectionError as e:
             print("Connection error, could not create connection: {}".format(e))
             self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
@@ -267,14 +287,13 @@ class MainWindow(QMainWindow):
         # Load selected board configuration
         self.loadBoard(action.text())
 
-
     @pyqtSlot()
     def connectionIteration(self):
         """Next connection iteration listener."""
         # Only do something when there is a connection
         if (self._connection.status() == 'Connected'):
-            # Get the new messages from the connection
-            messages = self._connection.getMessages()
+            # Get the new messages from the connection and unserialize them
+            messages = list(map(lambda x: self._board.unserializeMessage(x), self._connection.getMessages()))
 
             # Flags
             data = False
@@ -290,12 +309,12 @@ class MainWindow(QMainWindow):
                     # Message to deregister a device
                     elif (message.type == 'Deregister'):
                         ui = True
-                        self._board.deregisterDevice(Device(message.name, message.data['dir'], message.data['dim']))
+                        self._board.deregisterDevice(Device(message.name))
                         self._statusBar.showMessage('Deregister Device: {}'.format(message.name))
                     # Message with new data for a device
                     elif (message.type == 'Data'):
                         data = True
-                        self._board.updateData(message.name, message.data)
+                        self._board.updateData(message.name, message.data['values'])
                     # Message with unknown type
                     else:
                         print('Unknown message type: {}'.format(message.type))
@@ -305,11 +324,39 @@ class MainWindow(QMainWindow):
                 if (data):
                     self.updateData()
                 if (ui):
-                    print('UI')
                     self.updateUI()
 
             else:
                 pass
+
+            # Messages for outgoing devices
+            messages = []
+
+            # Calculate new values for all outgoing devices
+            for device in self._board.deviceList():
+                if (device.dir() == 'out' and device.functionRunning()):
+                    data = [[] for i in range(device.dim())]
+                    # Calculate next function step
+                    for i in range(device.dim()):
+                        f, p, s = device.function(i)
+                        data[i] = utils.functionForLabel(f)(p, s)
+
+                    # Update device
+                    device.setData(data)
+
+                    # Check if there are none-'None' values
+                    if (None not in data):
+                        # Create the message
+                        messages.append(Message('out', device.name(), data))
+
+
+            # Send and serialize messages
+            if (len(messages) > 0):
+                self._connection.sendMessages(list(map(lambda x: self._board.serializeMessage(x), messages)))
+
+
+
+
 
         # Print loop
         # print('Loop')
