@@ -156,6 +156,8 @@ class Board():
     _defaultPort = None
     # devices
     _deviceList = None
+    # Save to file
+    _fileName = None
 
 
     def __init__(self, name, connectionType, defaultIp='192.168.7.2', defaultPort='12345'):
@@ -194,6 +196,14 @@ class Board():
     def deviceList(self):
         """Return a shallow copy of the device list."""
         return self._deviceList.copy()
+
+    def fileName(self):
+        """Return the file name."""
+        return self._fileName
+
+    def setFileName(self, fileName):
+        """Set the file name."""
+        self._fileName = fileName
 
     def registerDevice(self, device):
         """Register a device to the board."""

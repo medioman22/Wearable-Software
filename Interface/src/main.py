@@ -9,14 +9,16 @@ Last edited: September 2018
 """
 
 import sys
+import time
 import logging
 from PyQt5.QtCore import (pyqtSlot, QTimer)
-from PyQt5.QtWidgets import (QMainWindow, QMenu, QToolTip, QMessageBox, QAction, QDesktopWidget, QApplication)
+from PyQt5.QtWidgets import (QMainWindow, QMenu, QToolTip, QMessageBox, QAction, QDesktopWidget, QFileDialog, QApplication)
 from PyQt5.QtGui import (QFont, QIcon)
 
 from utils import Utils
 from interface import InterfaceWidget
 from connectionDialog import ConnectionDialog
+from udpBroadcast import UDPBroadcast
 from boards.board import Device
 from boards.mockedBoard import MockedBoard
 from boards.beagleboneBlackWirelessBoard import BeagleboneBlackWirelessBoard
@@ -33,6 +35,11 @@ availableBoards = [MockedBoard(), BeagleboneBlackWirelessBoard()]
 availableConnections = [MockedConnection(), TCPIPConnection()]
 utils = Utils()
 
+# Settings
+UDP_IP = "127.0.0.1"
+UDP_PORT = 12346
+
+
 class MainWindow(QMainWindow):
     """The main window of the application."""
 
@@ -46,6 +53,8 @@ class MainWindow(QMainWindow):
     _port = None
     # The connection time
     _connectionIteratorTimer = None
+    # The UPD broadcast
+    _broadcast = None
 
     def __init__(self):
         """Initialize the main window."""
@@ -105,6 +114,25 @@ class MainWindow(QMainWindow):
         configureConnectionAct.setStatusTip('Edit Connection Settings (IP/Port)')
         configureConnectionAct.triggered.connect(self._showConnectionDialogListener)
         boardMenu.addAction(configureConnectionAct)
+
+        # Stream menu
+        streamMenu = QMenu('Stream', self)
+        streamToFileAct = QAction('&File (.CSV)', self)
+        streamToFileAct.setStatusTip('Stream Incoming Data To File')
+        streamToFileAct.triggered.connect(self._onStreamToFile)
+        streamMenu.addAction(streamToFileAct)
+        streamToPortAct = QAction('&UDP Protocol', self)
+        streamToPortAct.setStatusTip('Stream Incoming Data To UDP Service (Not Implemented)')
+        streamToPortAct.triggered.connect(self._onStreamToUDP)
+        streamMenu.addAction(streamToPortAct)
+        self._streamMenu = streamMenu
+        boardMenu.addMenu(streamMenu)
+        streamStopAct = QAction('&Stop Stream', self)
+        streamStopAct.setStatusTip('Stop Streaming Incoming Data')
+        streamStopAct.triggered.connect(self._onStreamStop)
+        streamStopAct.setVisible(False)
+        self._streamStopAct = streamStopAct
+        boardMenu.addAction(streamStopAct)
 
         # Quit option
         quitAct = QAction('&Quit Application', self)
@@ -288,6 +316,41 @@ class MainWindow(QMainWindow):
         self.loadBoard(action.text())
 
     @pyqtSlot()
+    def _onStreamToFile(self):
+        """Stream data to file."""
+        # Get file location
+        fileName = self.saveFileDialog()
+        # Prepare file
+        if (fileName != None):
+            with open(fileName, "w") as fh:
+                fh.write(','.join(['Device','Dimension','Date','Value']) + '\n')
+                self._board.setFileName(fileName)
+                self._streamMenu.menuAction().setVisible(False)
+                self._streamStopAct.setVisible(True)
+
+    @pyqtSlot()
+    def _onStreamToUDP(self):
+        """Stream data to udp service."""
+        self._broadcast = UDPBroadcast(UDP_IP, UDP_PORT)
+        self._streamMenu.menuAction().setVisible(False)
+        self._streamStopAct.setVisible(True)
+
+    @pyqtSlot()
+    def _onStreamStop(self):
+        """Stop streaming data."""
+        # Stop all streaming to file and UDP
+        if (self._broadcast != None):
+            del self._broadcast
+            self._broadcast = None
+        elif (self._board.fileName() != None):
+            self._board.setFileName(None)
+
+        self._streamStopAct.setVisible(False)
+        self._streamMenu.menuAction().setVisible(True)
+
+
+
+    @pyqtSlot()
     def connectionIteration(self):
         """Next connection iteration listener."""
         # Only do something when there is a connection
@@ -311,10 +374,21 @@ class MainWindow(QMainWindow):
                         ui = True
                         self._board.deregisterDevice(Device(message.name))
                         self._statusBar.showMessage('Deregister Device: {}'.format(message.name))
-                    # Message with new data for a device
+                    # Message with new data for a device (',' are escaped to '-')
                     elif (message.type == 'Data'):
                         data = True
                         self._board.updateData(message.name, message.data['values'])
+                        # Stream data to file
+                        if (self._board.fileName() != None):
+                            with open(self._board.fileName(), "a") as fh:
+                                for i in range(len(message.data['values'])):
+                                    fh.write(','.join([message.name.replace(',','-'), str(i), str(time.time()), str(message.data['values'][i])]) + '\n')
+                        # Stream data to UDP
+                        # Using same format as for the .CSV files
+                        if (self._broadcast != None):
+                            for i in range(len(message.data['values'])):
+                                self._broadcast.send(','.join([message.name.replace(',','-'), str(i), str(time.time()), str(message.data['values'][i])]))
+
                     # Message with unknown type
                     else:
                         print('Unknown message type: {}'.format(message.type))
@@ -363,6 +437,14 @@ class MainWindow(QMainWindow):
 
 
 
+    def saveFileDialog(self):
+        """Dialog to select location to save file."""
+        options = QFileDialog.Options()
+        #options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Board Multi Plot For {}".format(self._board.name()),"{}/../../Plots/{} Multi Plot.csv".format(sys.path[0], self._board.name()),"Text Files (*.csv)", options=options)
+        if fileName:
+            print('Save multi plot to file: {}'.format(fileName))
+        return fileName
 
 
 # Run main app
