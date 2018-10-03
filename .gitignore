@@ -1,0 +1,6 @@
+# Local env
+Interface/bin
+Interface/include
+Interface/lib
+Plots/**.csv
+**/__pycache__

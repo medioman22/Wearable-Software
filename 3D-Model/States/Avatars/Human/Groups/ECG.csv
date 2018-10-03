@@ -1,0 +1,10 @@
+v1;Torso;ECG;0.0;175.0;90.0
+v2;Torso;ECG;0.0;185.0;90.0
+v3;Torso;ECG;-0.05;195.0;90.0
+v4;Torso;ECG;-0.1;205.0;90.0
+v5;Torso;ECG;-0.1;215.0;90.0
+v6;Torso;ECG;-0.1;225.0;90.0
+RA;Arm_r;ECG;-0.45;270.0;90.0
+LA;Arm_l;ECG;-0.45;90.0;90.0
+LL;Upp_leg_l;ECG;-0.45;180.0;90.0
+RL;Upp_leg_r;ECG;-0.45;180.0;90.0
