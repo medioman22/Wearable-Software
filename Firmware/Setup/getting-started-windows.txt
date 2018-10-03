@@ -1,0 +1,44 @@
+Connect BBG via USB cable - wait for reboot
+
+
+
+Volume should show up in explorer or prompt
+(Do not use README.htm and START.htm as they are outdated. Look for online version)
+
+
+
+CAREFUL: Drivers provided by the board itself are outdated. Go to the webpage itself to download most recent drivers or use tested drivers from the rep with following configuration.
+(Install the one for your operating system. Note that on Windows it may fail due to lack of signature. Search the web how to disable signature requirement for Windows.)
+
+
+WEB	Go to http://beagleboard.org/static/beaglebone/latest/README.htm You should see a 	list of the most recent drivers.
+
+
+Go to: /Install/Drivers/Windows and install all drivers
+
+
+
+Connect to the board with PuttY or something to SSH into the BBG by connecting to 192.168.7.2 (port 22) user:debian password:temppwd
+
+
+
+Connect to internet via inbuilt WIFI module
+
+-OR-
+
+To connect to the internet, prepare the board with default gateway by following command
+>> sudo /sbin/route add default gw 192.168.7.1
+
+
+
+To connect to the internet, allow the board to use your computers interface by going to "network" > "adapter settings" and enable sharing your network connection with "Linux USB Ethernet/RNDIS" > edit the "Linux USB Ethernet/RNDIS" connection:
+	IP 192.168.7.1 / 255.255.255.0
+	DNS server 8.8.8.8
+
+
+(There are detailed instructions of how to do this in the manuals)
+(If not able to ping 192.168.7.1, check the manual to allow ingoing pings)
+
+
+
+Once connected to the internet ping epfl.ch to test

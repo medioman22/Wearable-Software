@@ -1,0 +1,5 @@
+To make run the code on the BBB, you need to set up some tools:
+
+- python3/pip3: To run code
+- git: To get the code
+- mraa: To access low-level hardware and add it to PYTHONPATH
