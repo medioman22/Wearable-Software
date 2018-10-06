@@ -3,4 +3,7 @@ Interface/bin
 Interface/include
 Interface/lib
 Plots/**.csv
+Logs/**
+Images/**
 **/__pycache__
+**/*.log

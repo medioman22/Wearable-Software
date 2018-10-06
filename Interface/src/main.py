@@ -21,23 +21,25 @@ from connectionDialog import ConnectionDialog
 from udpBroadcast import UDPBroadcast
 from boards.board import Device
 from boards.mockedBoard import MockedBoard
-from boards.beagleboneBlackWirelessBoard import BeagleboneBlackWirelessBoard
+from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard
 from connections.connection import Message
 from connections.mockedConnection import MockedConnection
-from connections.tcpIpConnection import TCPIPConnection
+from connections.roboComConnection import RoboComConnection
 
-logging.basicConfig(level=logging.DEBUG)
-logging.warning('Initialize …')
+# Logging settings
+LOG_LEVEL_PRINT = logging.INFO
+LOG_LEVEL_SAVE = logging.DEBUG
 
 
 # Global variables
-availableBoards = [MockedBoard(), BeagleboneBlackWirelessBoard()]
-availableConnections = [MockedConnection(), TCPIPConnection()]
+availableBoards = [MockedBoard(), BeagleboneGreenWirelessBoard()]
+availableConnections = [MockedConnection(), RoboComConnection()]
 utils = Utils()
 
 # Settings
 UDP_IP = "127.0.0.1"
 UDP_PORT = 12346
+UPDATE_LOOP = 50
 
 
 class MainWindow(QMainWindow):
@@ -55,10 +57,23 @@ class MainWindow(QMainWindow):
     _connectionIteratorTimer = None
     # The UPD broadcast
     _broadcast = None
+    # Logger module
+    _logger = None
 
     def __init__(self):
         """Initialize the main window."""
         super().__init__()
+
+        # Configure the logger
+        self._logger = logging.getLogger('Main')
+        self._logger.setLevel(LOG_LEVEL_PRINT)   # Only {LOG_LEVEL} level or above will be saved
+        fh = logging.FileHandler('../Logs/Main.log', 'w')
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        fh.setFormatter(formatter)
+        fh.setLevel(LOG_LEVEL_SAVE)              # Only {LOG_LEVEL} level or above will be saved
+        self._logger.addHandler(fh)
+
+        self._logger.info("Main initializing …")
 
         # Setup UI
         self.initUI()
@@ -74,7 +89,10 @@ class MainWindow(QMainWindow):
         self._connectionIteratorTimer = QTimer(self)
         self._connectionIteratorTimer.setSingleShot(False)
         self._connectionIteratorTimer.timeout.connect(self.connectionIteration)
-        self._connectionIteratorTimer.start(50)
+        self._connectionIteratorTimer.start(UPDATE_LOOP)
+        self._logger.debug("Start timer [{}ms] for update loop".format(UPDATE_LOOP))
+
+        self._logger.info("Main initialized")
 
 
     def initUI(self):
@@ -84,6 +102,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('assets/Face.png'))
         self.resize(960, 720)
         self.center()
+        self._logger.debug("Main UI window created")
 
         # Configure the menus
         menubar = self.menuBar()
@@ -143,9 +162,11 @@ class MainWindow(QMainWindow):
 
         self._boardMenu = boardMenu
         menubar.addMenu(boardMenu)
+        self._logger.debug("Main UI menu created")
 
         # Set default font size for tooltips
         QToolTip.setFont(QFont('SansSerif', 10))
+        self._logger.debug("Main UI tooltip created")
 
         # Configure the interface widget
         interface = InterfaceWidget()
@@ -153,12 +174,14 @@ class MainWindow(QMainWindow):
         interface.connect.connect(self._connectListener)
         self._interface = interface
         self.setCentralWidget(interface)
+        self._logger.debug("Main UI interface created")
 
 
         # Show ready message when ui is loaded
         self._statusBar = self.statusBar();
         self._statusBar.showMessage('Ready')
         self.show()
+        self._logger.debug("Main UI loaded")
 
 
     def updateBoardMenu(self):
@@ -180,13 +203,14 @@ class MainWindow(QMainWindow):
         # Update values from board configuration
         self._ip = self._board.defaultIp()
         self._port = self._board.defaultPort()
+        self._logger.debug("Reset IP/Port to default values {}/{} of board '{}'".format(self._board.defaultIp(), self._board.defaultPort(), name))
 
         # Select connection
         self.loadConnection(self._board.connectionType())
 
         self.updateUI()
 
-        print("Board '{}' loaded".format(name))
+        self._logger.info("Board '{}' loaded".format(name))
         self._statusBar.showMessage('{} selected'.format(self._board.name()))
 
 
@@ -202,7 +226,7 @@ class MainWindow(QMainWindow):
         self._connection.setIp(self._ip)
         self._connection.setPort(self._port)
 
-        print("Connection '{}' loaded".format(type))
+        self._logger.info("Connection '{}' loaded".format(type))
 
 
 
@@ -214,6 +238,7 @@ class MainWindow(QMainWindow):
         self.updateStatusValues()
         self.updateDeviceList()
         self.updateData()
+        self._logger.debug("Main UI updated")
 
     def updateStatusValues(self):
         """Update all status values."""
@@ -277,6 +302,7 @@ class MainWindow(QMainWindow):
         """Show connection dialog listener."""
         self.connectionDialog.setValues(self._ip, self._port)
         self.connectionDialog.show()
+        self._logger.debug("Show connection settings dialog")
 
 
     @pyqtSlot(str, str)
@@ -285,6 +311,7 @@ class MainWindow(QMainWindow):
         self._ip = ip
         self._port = port
         self.updateStatusValues()
+        self._logger.debug("Update connection settings")
 
 
     @pyqtSlot()
@@ -292,14 +319,18 @@ class MainWindow(QMainWindow):
         """Try to connect listener."""
         # Do a reconnect if already connected
         if (self._connection.status() == 'Connected'):
+            self._logger.info("Terminate existing connection before reconnecting")
             self._connection.disconnect()
             self._board.reset()
         try:
+            self._logger.debug("Start connection attempt …")
             self._connection.connect()
+            self._logger.debug("Connection successfully established")
+            self._logger.info('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
             self._statusBar.showMessage('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
             self.updateBoardMenu()
         except ConnectionError as e:
-            print("Connection error, could not create connection: {}".format(e))
+            self._logger.error("Connection error, could not create connection: {}".format(e))
             self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
 
         self.updateUI()
@@ -309,6 +340,7 @@ class MainWindow(QMainWindow):
     def _selectBoardListener(self, action):
         """Select a board listener."""
         if (self._connection.status() == 'Connected'):
+            self._logger.info("Terminate existing connection")
             self._connection.disconnect()
             self._board.reset()
 
@@ -323,6 +355,7 @@ class MainWindow(QMainWindow):
         # Prepare file
         if (fileName != None):
             with open(fileName, "w") as fh:
+                self._logger.info("Stream data to file '{}'".format(fileName))
                 fh.write(','.join(['Device','Dimension','Date','Value']) + '\n')
                 self._board.setFileName(fileName)
                 self._streamMenu.menuAction().setVisible(False)
@@ -331,6 +364,7 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def _onStreamToUDP(self):
         """Stream data to udp service."""
+        self._logger.info("Stream data to port '{}'".format(UDP_PORT))
         self._broadcast = UDPBroadcast(UDP_IP, UDP_PORT)
         self._streamMenu.menuAction().setVisible(False)
         self._streamStopAct.setVisible(True)
@@ -344,6 +378,7 @@ class MainWindow(QMainWindow):
             self._broadcast = None
         elif (self._board.fileName() != None):
             self._board.setFileName(None)
+        self._logger.info("Data streaming has been stopped")
 
         self._streamStopAct.setVisible(False)
         self._streamMenu.menuAction().setVisible(True)
@@ -368,11 +403,13 @@ class MainWindow(QMainWindow):
                     if (message.type == 'Register'):
                         ui = True
                         self._board.registerDevice(Device(message.name, message.data['dir'], message.data['dim']))
+                        self._logger.info('Register Device: {}'.format(message.name))
                         self._statusBar.showMessage('Register Device: {}'.format(message.name))
                     # Message to deregister a device
                     elif (message.type == 'Deregister'):
                         ui = True
                         self._board.deregisterDevice(Device(message.name))
+                        self._logger.info('Deregister Device: {}'.format(message.name))
                         self._statusBar.showMessage('Deregister Device: {}'.format(message.name))
                     # Message with new data for a device (',' are escaped to '-')
                     elif (message.type == 'Data'):
@@ -382,16 +419,24 @@ class MainWindow(QMainWindow):
                         if (self._board.fileName() != None):
                             with open(self._board.fileName(), "a") as fh:
                                 for i in range(len(message.data['values'])):
-                                    fh.write(','.join([message.name.replace(',','-'), str(i), str(time.time()), str(message.data['values'][i])]) + '\n')
+                                    for device in self._board.deviceList():
+                                        if (device.name() == message.name and not device.ignore):
+                                            fh.write(','.join([message.name.replace(',','-'), str(i), str(time.time()), str(message.data['values'][i])]) + '\n')
                         # Stream data to UDP
                         # Using same format as for the .CSV files
                         if (self._broadcast != None):
                             for i in range(len(message.data['values'])):
-                                self._broadcast.send(','.join([message.name.replace(',','-'), str(i), str(time.time()), str(message.data['values'][i])]))
+                                for device in self._board.deviceList():
+                                    if (device.name() == message.name and not device.ignore):
+                                        self._broadcast.send(','.join([message.name.replace(',','-'), str(i), str(time.time()), str(message.data['values'][i])]))
+
+                    # Ping
+                    elif (message.type == 'Ping'):
+                        self._logger.debug('PING')
 
                     # Message with unknown type
                     else:
-                        print('Unknown message type: {}'.format(message.type))
+                        self._logger.warn('Unknown message type: {}'.format(message.type))
                         pass
 
                 # Update data and UI
@@ -409,32 +454,27 @@ class MainWindow(QMainWindow):
             # Calculate new values for all outgoing devices
             for device in self._board.deviceList():
                 if (device.dir() == 'out' and device.functionRunning()):
-                    data = [[] for i in range(device.dim())]
+                    values = [[] for i in range(device.dim())]
                     # Calculate next function step
                     for i in range(device.dim()):
                         f, p, s = device.function(i)
-                        data[i] = utils.functionForLabel(f)(p, s)
+                        values[i] = utils.functionForLabel(f)(p, s)
 
                     # Update device
-                    device.setData(data)
+                    device.setData(values)
 
                     # Check if there are none-'None' values
-                    if (None not in data):
+                    if (None not in values):
                         # Create the message
-                        messages.append(Message('out', device.name(), data))
+                        messages.append(Message('out', device.name(), {'values': values}))
 
 
             # Send and serialize messages
             if (len(messages) > 0):
                 self._connection.sendMessages(list(map(lambda x: self._board.serializeMessage(x), messages)))
 
-
-
-
-
-        # Print loop
-        # print('Loop')
-
+            # Ping
+            self._connection.sendMessages([self._board.serializeMessage(Message('Ping',''))]);
 
 
     def saveFileDialog(self):
@@ -442,8 +482,9 @@ class MainWindow(QMainWindow):
         options = QFileDialog.Options()
         #options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(self, "Save Board Multi Plot For {}".format(self._board.name()),"{}/../../Plots/{} Multi Plot.csv".format(sys.path[0], self._board.name()),"Text Files (*.csv)", options=options)
-        if fileName:
-            print('Save multi plot to file: {}'.format(fileName))
+        if not fileName:
+            self._logger.info('No file selected')
+            return
         return fileName
 
 

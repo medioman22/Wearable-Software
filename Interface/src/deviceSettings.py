@@ -4,7 +4,7 @@ import sys
 import logging
 import time
 from PyQt5.QtCore import (Qt, pyqtSlot)
-from PyQt5.QtWidgets import (QWidget, QPushButton, QHBoxLayout, QLabel, QGridLayout, QGroupBox, QFileDialog)
+from PyQt5.QtWidgets import (QWidget, QPushButton, QCheckBox, QHBoxLayout, QLabel, QGridLayout, QGroupBox, QFileDialog)
 import pyqtgraph as pg
 import numpy as np
 
@@ -13,7 +13,9 @@ from deviceSettingsFunctionSelector import DeviceSettingsFunctionSelectorWidget
 # Enable antialiasing for prettier plots
 pg.setConfigOptions(antialias=True)
 
-logging.basicConfig(level=logging.DEBUG)
+# Logging settings
+LOG_LEVEL_PRINT = logging.INFO
+LOG_LEVEL_SAVE = logging.DEBUG
 
 # Standard color set for plots
 standardColorSet = [
@@ -40,13 +42,26 @@ class DeviceSettingsWidget(QWidget):
 
     # Associated device
     _device = None
-
     # Plots used to display current data
     _plots = None
+    # Logger module
+    _logger = None
 
     def __init__(self, device):
         """Initialize the device settings widget."""
         super().__init__()
+
+        # Configure the logger
+        self._logger = logging.getLogger('DeviceSettings')
+        self._logger.setLevel(LOG_LEVEL_PRINT)   # Only {LOG_LEVEL} level or above will be saved
+        fh = logging.FileHandler('../Logs/DeviceSettings.log', 'w')
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        fh.setFormatter(formatter)
+        fh.setLevel(LOG_LEVEL_SAVE)              # Only {LOG_LEVEL} level or above will be saved
+        self._logger.addHandler(fh)
+
+        self._logger.info("Device settings initializing …")
+
 
         if (device == None):
             raise ValueError('device is invalid')
@@ -55,6 +70,7 @@ class DeviceSettingsWidget(QWidget):
 
         # Initialize the device settings UI
         self.initUI()
+        self._logger.info("Device settings initialized")
 
 
     def initUI(self):
@@ -67,6 +83,7 @@ class DeviceSettingsWidget(QWidget):
         # Group informations
         groupInformationWidget = QGroupBox(self._device.name())
         groupInformationWidget.setLayout(informationLayout)
+        self._logger.debug("Device settings UI information created")
 
         # Label for device data
         dataLabel = QLabel('Data')
@@ -79,6 +96,7 @@ class DeviceSettingsWidget(QWidget):
         # Group data
         groupDataWidget = QGroupBox("Data [{}]".format(self._device.dim()))
         groupDataWidget.setLayout(dataLayout)
+        self._logger.debug("Device settings UI data created")
 
         # Device status layout
         statusLayout = QHBoxLayout()
@@ -89,6 +107,7 @@ class DeviceSettingsWidget(QWidget):
         # Grid for the device settings layout
         bodyGridLayout = QGridLayout()
         bodyGridLayout.addLayout(statusLayout,                  0, 0, Qt.AlignLeft)
+        self._logger.debug("Device settings UI status created")
 
         # Widgets for dir=in
         if (self._device.dir() == 'in'):
@@ -103,9 +122,10 @@ class DeviceSettingsWidget(QWidget):
                 plot = plotWidget.plot(pen=(standardColorSet[i]), name="Plot {}".format(i))
                 self._plots.append(plot)
                 bodyGridLayout.addWidget(plotWidget,            2, 0, Qt.AlignLeft | Qt.AlignTop)
+            self._logger.debug("Device settings UI plot created")
 
             # Save button
-            saveButton = QPushButton('Save Plot')
+            saveButton = QPushButton('Save Single Plot')
             saveButton.clicked.connect(self._onSavePlot)
             self._saveButton = saveButton
 
@@ -115,12 +135,25 @@ class DeviceSettingsWidget(QWidget):
             saveStopButton.clicked.connect(self._onSaveStopPlot)
             self._saveStopButton = saveStopButton
 
+            # Ignore flag
+            ignoreCheckBox = QCheckBox('Ignore device in data plots and streams')
+            if self._device.ignore():
+                ignoreCheckBox.setChecked(True)
+            else:
+                ignoreCheckBox.setChecked(False)
+            ignoreCheckBox.stateChanged.connect(self._onIgnore)
+            self._ignoreCheckBox = ignoreCheckBox
+            self._logger.debug("Device settings UI buttons created")
+
+
             # Control options
             controlLayout = QHBoxLayout()
             controlLayout.addWidget(saveButton)
             controlLayout.addWidget(saveStopButton)
+            controlLayout.addWidget(ignoreCheckBox)
             controlLayout.addStretch(1)
             bodyGridLayout.addLayout(controlLayout,             1, 0, Qt.AlignLeft | Qt.AlignTop)
+            self._logger.debug("Device settings UI layout created")
 
         # Widgets for dir=out
         else:
@@ -135,6 +168,7 @@ class DeviceSettingsWidget(QWidget):
             stopButton.setVisible(False)
             stopButton.clicked.connect(self._onStopFunction)
             self._stopButton = stopButton
+            self._logger.debug("Device settings UI buttons created")
 
             # Control options
             controlLayout = QHBoxLayout()
@@ -142,6 +176,7 @@ class DeviceSettingsWidget(QWidget):
             controlLayout.addWidget(stopButton)
             controlLayout.addStretch(1)
             bodyGridLayout.addLayout(controlLayout,             1, 0, Qt.AlignLeft | Qt.AlignTop)
+            self._logger.debug("Device settings UI control created")
 
             # List of function selectors
             functionSelectionLayout = QHBoxLayout()
@@ -154,6 +189,7 @@ class DeviceSettingsWidget(QWidget):
                 functionSelectionLayout.addWidget(functionSelector)
                 self._functionSelectors.append(functionSelector)
             bodyGridLayout.addLayout(functionSelectionLayout,   2, 0, Qt.AlignLeft | Qt.AlignTop)
+            self._logger.debug("Device settings UI function selector created")
 
 
 
@@ -163,6 +199,7 @@ class DeviceSettingsWidget(QWidget):
         bodyGridLayout.setRowStretch(2, 10)
 
         self.setLayout(bodyGridLayout)
+        self._logger.debug("Device settings UI layout created")
 
 
     def updateData(self):
@@ -194,35 +231,38 @@ class DeviceSettingsWidget(QWidget):
         options = QFileDialog.Options()
         #options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(self, "Save Device Plot For {}".format(self._device.name()),"{}/../../Plots/{} Plot.csv".format(sys.path[0], self._device.name()),"Text Files (*.csv)", options=options)
-        if fileName:
-            print('Save plot to file: {}'.format(fileName))
-        return fileName
+        if not fileName:
+            self._logger.info('No file selected')
+            return
+        else:
+            self._logger.info("Stream data to file '{}'".format(fileName))
+            return fileName
 
     @pyqtSlot(int, str, dict)
     def updateFunction(self, dim, function, parameters):
         """Update function of a device."""
-        print('Update Function')
         self._device.setFunctionRunning(False)
         self._stopButton.setVisible(False)
         self._startButton.setVisible(True)
         self._device.setFunction(dim, function, parameters)
+        self._logger.debug("Function '{}' updated".format(function))
 
 
     @pyqtSlot()
     def _onStartFunction(self):
         """Start the funtion."""
-        print('Start Function')
         self._device.setFunctionRunning(True)
         self._startButton.setVisible(False)
         self._stopButton.setVisible(True)
+        self._logger.info("Start function '{}'".format(self._device.function()))
 
     @pyqtSlot()
     def _onStopFunction(self):
         """Stop the funtion."""
-        print('Stop Function')
         self._device.setFunctionRunning(False)
         self._stopButton.setVisible(False)
         self._startButton.setVisible(True)
+        self._logger.info("Stop function '{}'".format(self._device.function()))
 
     @pyqtSlot()
     def _onSavePlot(self):
@@ -242,6 +282,18 @@ class DeviceSettingsWidget(QWidget):
         self._device.setFileName(None)
         self._saveStopButton.setVisible(False)
         self._saveButton.setVisible(True)
+        self._logger.info("Data streaming has been stopped")
+
+    @pyqtSlot(int)
+    def _onIgnore(self, flag):
+        """Set ignore flag."""
+        if (flag == Qt.CheckState.Checked):
+            self._device.setIgnore(True)
+            self._logger.info("Ignore device '{}' for streaming services".format(self._device.name()))
+        else:
+            self._device.setIgnore(False)
+            self._logger.info("Do not ignore device '{}' for streaming services".format(self._device.name()))
+
 
     def device(self):
         """Return the device."""

@@ -7,7 +7,9 @@ from PyQt5.QtGui import (QPixmap)
 
 from deviceSettings import DeviceSettingsWidget
 
-logging.basicConfig(level=logging.DEBUG)
+# Logging settings
+LOG_LEVEL_PRINT = logging.INFO
+LOG_LEVEL_SAVE = logging.DEBUG
 
 class InterfaceWidget(QWidget):
     """
@@ -33,13 +35,28 @@ class InterfaceWidget(QWidget):
     _deviceList = None
     # Selected device
     _selectedDeviceName = None
+    # Logger module
+    _logger = None
 
     def __init__(self):
         """Initialize the interface widget."""
         super().__init__()
 
+        # Configure the logger
+        self._logger = logging.getLogger('Interfaces')
+        self._logger.setLevel(LOG_LEVEL_PRINT)   # Only {LOG_LEVEL} level or above will be saved
+        fh = logging.FileHandler('../Logs/Interface.log', 'w')
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        fh.setFormatter(formatter)
+        fh.setLevel(LOG_LEVEL_SAVE)              # Only {LOG_LEVEL} level or above will be saved
+        self._logger.addHandler(fh)
+
+        self._logger.info("Interface initializing …")
+
         # Initialize interface UI
         self.initUI()
+
+        self._logger.info("Interface initialized")
 
     def initUI(self):
         """Initialize the ui of the interface widget."""
@@ -48,6 +65,7 @@ class InterfaceWidget(QWidget):
         configureButton.clicked.connect(self.onConfigureConnection)
         connectButton = QPushButton("Connect")
         connectButton.clicked.connect(self.onConnect)
+        self._logger.debug("Interface UI buttons created")
 
         # Image of current board
         boardPixmapLabel = QLabel()
@@ -55,6 +73,7 @@ class InterfaceWidget(QWidget):
         scaledboardPixmap = boardPixmap.scaledToWidth(164)
         boardPixmapLabel.setPixmap(scaledboardPixmap)
         self._boardPixmapLabel = boardPixmapLabel
+        self._logger.debug("Interface UI image created")
 
         # Label of current board status
         boardConnectionTypeLabel = QLabel('Connection Type: <b></b>')
@@ -70,15 +89,18 @@ class InterfaceWidget(QWidget):
         boardIpPortLabel = QLabel('IP: <b>–</b>')
         boardIpPortLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self._boardIpPortLabel = boardIpPortLabel
+        self._logger.debug("Interface UI labels created")
 
         # List of connected devices
         deviceList = QListWidget()
         deviceList.itemClicked.connect(self.onSelectDevice)
         self._deviceList = deviceList
+        self._logger.debug("Interface UI device list created")
 
         # Stack of connected device settings
         deviceStack = QStackedWidget()
         self._deviceStack = deviceStack
+        self._logger.debug("Interface UI device stack created")
 
         # Layout for information box
         informationGridLayout = QGridLayout()
@@ -107,6 +129,7 @@ class InterfaceWidget(QWidget):
         bodyGridLayout.setColumnStretch(1, 10)
 
         self.setLayout(bodyGridLayout)
+        self._logger.debug("Interface UI layout created")
 
     def setBoardInformation(self, board):
         """Set board information."""
@@ -120,14 +143,17 @@ class InterfaceWidget(QWidget):
 
         #Set connection type
         self._boardConnectionTypeLabel.setText('Connection Type <b>{}</b>'.format(board.connectionType()))
+        self._logger.debug("Interface UI information updated")
 
     def setStatus(self, status):
         """Set states label."""
         self._boardStatusLabel.setText('Status <b>{}</b>'.format(status))
+        self._logger.debug("Interface UI status updated")
 
     def setIpAndPort(self, ip, port):
         """Set ip and port label."""
         self._boardIpPortLabel.setText('IP <b>{}</b> : <b>{}</b>'.format(ip, port))
+        self._logger.debug("Interface UI ip/port updated")
 
     def updateDeviceList(self, devices):
         """Update device stack."""
@@ -158,6 +184,7 @@ class InterfaceWidget(QWidget):
         elif (len(self._deviceList) > 0):
             self._deviceList.setCurrentRow(0)
             self._deviceStack.setCurrentIndex(0)
+        self._logger.debug("Interface UI device list updated")
 
 
         # Sort the device list
@@ -191,6 +218,7 @@ class InterfaceWidget(QWidget):
                 if (deviceWidget.device().name() == name):
                     self._deviceStack.setCurrentWidget(deviceWidget)
                     self._selectedDeviceName = name
+                    self._logger.info("Device '{}' selected".format(name))
                     break
             # Ignore when widget does no longer exist
             else:

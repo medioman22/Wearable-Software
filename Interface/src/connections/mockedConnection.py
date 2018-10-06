@@ -56,7 +56,6 @@ class MockedConnection(Connection):
     def sendMessages(self, messages):
         """Send a list of messages."""
         # Sending messages is not implemented in the mocked connection
-        print('Send {} message(s)'.format(len(messages)))
 
     def getState(self):
         """Get the connection state."""

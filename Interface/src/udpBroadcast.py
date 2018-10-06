@@ -3,18 +3,23 @@
 ## Use wireshark to check for packages in the loopback
 
 import socket
+import logging
+
+# Logging settings
+LOG_LEVEL_PRINT = logging.INFO
+LOG_LEVEL_SAVE = logging.DEBUG
 
 class UDPBroadcast():
     """Class to send serialized messages via udp protocol."""
 
     # Socket
     _socket = None
-
     # Ip
     _ip = None
-
     # Port
     _port = None
+    # Logger module
+    _logger = None
 
 
     def __init__(self, ip='127.0.0.1', port=12346):
@@ -22,10 +27,12 @@ class UDPBroadcast():
         self._ip = ip
         self._port = port
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+        self._logger.info("Configure UDP socket with {}/{}".format(ip,port))
 
     def __del__(self):
         """Class destructor. This is needed in order to close the socket."""
         self._socket.close()
+        self._logger.info("Close UDP socket")
 
     def __enter__(self):
         """Needed for usage like: 'with UPDBroadcast() as b:'."""
@@ -34,6 +41,7 @@ class UDPBroadcast():
     def __exit__(self, type, value, traceback):
         """Needed for usage like: 'with UPDBroadcast() as b:'."""
         self._socket.close()
+        self._logger.info("Close UDP socket")
 
     def send(self, string):
         """Send serialized message."""

@@ -31,7 +31,7 @@ class TCPIPConnection(Connection):
 
     def connect(self):
         """Try to establish the connection."""
-        raise ConnectionError('Not Implmented')
+        raise ConnectionError('Not Implemented')
 
     def disconnect(self):
         """Close the connection."""

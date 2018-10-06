@@ -36,7 +36,8 @@ class Device():
     _functionRunning = None
     # Save to file
     _fileName = None
-
+    # Ignore device
+    _ignore = False
 
 
     def __init__(self, name="Unknown Device", dir=allowedDirTypes[0], dim=1):
@@ -101,12 +102,15 @@ class Device():
         """Return the file name."""
         return self._fileName
 
+    def ignore(self):
+        """Return the ignore flag."""
+        return self._ignore
+
     def setFunction(self, dim, function, parameters):
         """Set a function and parameters."""
         if (self._dir != 'out'):
             raise ValueError('device has now permission to send data')
         else:
-            print(dim, function, parameters)
             self._functions[dim] = function
             self._parameters[dim] = parameters
             # Set t=0
@@ -140,6 +144,10 @@ class Device():
     def setFileName(self, fileName):
         """Set the file name."""
         self._fileName = fileName
+
+    def setIgnore(self, ignore):
+        """Set the ignore flag."""
+        self._ignore = ignore
 
 
 
