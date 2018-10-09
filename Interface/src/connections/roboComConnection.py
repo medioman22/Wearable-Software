@@ -180,6 +180,7 @@ class RoboComConnection(Connection):
             # Pop all messages from the recieve queue and add them to the return list
             message = self._recvQueue.popleft()
             self._logger.debug('Message removed from rcv queue: ' + str(message))
+            messages.append(message)
         return list(map(lambda x: json.dumps(x), messages))
 
     def getState(self):

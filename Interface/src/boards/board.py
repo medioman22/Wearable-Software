@@ -230,7 +230,8 @@ class Board():
                     self._deviceList.remove(registeredDevice)
                     break
             else:
-                raise ValueError('device is not registered')
+                print('Register unregisted device …') # TODO: Make it not happen
+                # raise ValueError('device is not registered')
 
     def updateData(self, name, data):
         """Update data of a device."""

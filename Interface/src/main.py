@@ -402,6 +402,7 @@ class MainWindow(QMainWindow):
                     # Message to register a device
                     if (message.type == 'Register'):
                         ui = True
+                        print(message.data)
                         self._board.registerDevice(Device(message.name, message.data['dir'], message.data['dim']))
                         self._logger.info('Register Device: {}'.format(message.name))
                         self._statusBar.showMessage('Register Device: {}'.format(message.name))
