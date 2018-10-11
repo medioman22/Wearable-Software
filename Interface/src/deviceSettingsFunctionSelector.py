@@ -1,17 +1,32 @@
 # -*- coding: utf-8 -*-
 
-import math
-import logging
-from PyQt5.QtCore import (Qt, pyqtSlot, pyqtSignal)
-from PyQt5.QtWidgets import (QWidget, QLabel, QGridLayout, QComboBox, QStackedWidget, QDoubleSpinBox, QGroupBox, QVBoxLayout)
+import math                                                     # Math package
+import logging                                                  # Logging package
+from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
+                            pyqtSlot,
+                            pyqtSignal)
+from PyQt5.QtWidgets import (   QWidget,                        # Widget objects for GUI from Qt
+                                QLabel,
+                                QGridLayout,
+                                QComboBox,
+                                QStackedWidget,
+                                QDoubleSpinBox,
+                                QGroupBox,
+                                QVBoxLayout)
 
 
 # Logging settings
-LOG_LEVEL_PRINT = logging.INFO
-LOG_LEVEL_SAVE = logging.DEBUG
+LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
+LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print level for .log logging
 
 # List of allowed functions
-allowedFunctions = ['~','f(t) = a', 'f(t) = a * t + b', 'f(t) = rect((t - b) / a)', 'f(t) = tri((t - b) / a)', 'f(t) = b * (exp(- a * t) - 1)', 'f(t) = sin((2pi * t)/a + b)']
+allowedFunctions = [    '~',
+                        'f(t) = a',
+                        'f(t) = a * t + b',
+                        'f(t) = rect((t - b) / a)',
+                        'f(t) = tri((t - b) / a)',
+                        'f(t) = b * (exp(- a * t) - 1)',
+                        'f(t) = sin((2pi * t)/a + b)']
 
 
 class DeviceSettingsFunctionSelectorWidget(QWidget):
@@ -40,11 +55,11 @@ class DeviceSettingsFunctionSelectorWidget(QWidget):
 
         # Configure the logger
         self._logger = logging.getLogger('DeviceSettingsFunctionSelector')
-        self._logger.setLevel(LOG_LEVEL_PRINT)   # Only {LOG_LEVEL} level or above will be saved
+        self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
         fh = logging.FileHandler('../Logs/DeviceSettingsFunctionSelector.log', 'w')
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)              # Only {LOG_LEVEL} level or above will be saved
+        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
         self._logger.addHandler(fh)
 
         self._logger.info("Device settings function selector initializing …")
@@ -293,10 +308,10 @@ class DeviceSettingsFunctionSelectorWidget(QWidget):
     def _onFunctionSelection(self, function):
         """Select Function listener."""
         if (function in allowedFunctions):
-            i = allowedFunctions.index(function)
-            self._parameterSettingsStack.setCurrentWidget(self._parameterSettingsStack.widget(i))
-            self._function = function
-            self._parameters = {'a': 0, 'b': 0, 'lower': 0, 'upper': 100}
+            i = allowedFunctions.index(function)                # Get function name
+            self._parameterSettingsStack.setCurrentWidget(self._parameterSettingsStack.widget(i)) # Show selected function
+            self._function = function                           # Set function
+            self._parameters = {'a': 0, 'b': 0, 'lower': 0, 'upper': 100} # Reset function parameters
             self.functionChanged.emit(self._dim, self._function, self._parameters.copy())
             self._logger.info("Function '{}' selected with parameters: {}".format(self._function, str(self._parameters)))
         else:

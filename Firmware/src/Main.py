@@ -165,7 +165,19 @@ def main():
             i2c_list_register, i2c_list_deregister = i2c_update()
 
             if c.getState() is 'Connected' or True: # TODO: REMOVE SHORTCUT
-                messagesSend = []
+                messagesSend = []                                   # List of messages to send
+
+                messagesRecv = c.getMessages()                      # Get new messages
+                for messageString in messagesRecv:
+                    message = json.loads(messageString)             # Parse message from string to JSON
+                    if message['type'] == 'DeviceList':             # Create i2c device register message for all devices
+                        for device in i2c_list:
+                            messagesSend.append(json.dumps({'type': 'Register',
+                                                            'name': device['device'],
+                                                            'dir': device['dir'],
+                                                            'dim': device['dim']}))
+
+
                 for device in i2c_list_deregister:                  # Create i2c device deregister message
                     messagesSend.append(json.dumps({'type': 'Deregister',
                                                     'name': device['device']}))
@@ -176,7 +188,7 @@ def main():
                     messagesSend.append(json.dumps({'type': 'Register',
                                                     'name': device['device'],
                                                     'dir': device['dir'],
-                                                    'dim': device['dim']})) # TODO: Provide those values from the driver
+                                                    'dim': device['dim']}))
 
 
 
@@ -208,13 +220,12 @@ def main():
 
                 c.sendMessages(messagesSend)
 
-            getMessages = c.getMessages()
-            for message in getMessages:
-                pass
-                # if message['type'] == 'pwm_set':
-                #     # Pwm command from the remote location
-                #     pwm.write_pin(message['chn'], message['val'])
-                #     last_message = "New PWM command: cnh:" + str(message['chn']) + " val:" + str(message['val'])
+                # print(messagesSend, messagesRecv)
+
+                """Ping"""
+                # if c.getState() is 'Connected':
+                #     sendMessages = [json.dumps({'type': 'Ping','name':''})]
+                #     c.sendMessages(sendMessages)
 
             print_func()                # Call print function
             time.sleep(0.1)             # Sleep until next sampling period

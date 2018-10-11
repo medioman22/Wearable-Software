@@ -16,7 +16,7 @@ class MockedBoard(Board):
         """Return serialized message as string."""
         global d
         d = {}
-        if messageObject.data != None:
+        if messageObject.data != None:                          # Use empty data dict when none is provided
             d = messageObject.data.copy()
         d['type'] = messageObject.type
         d['name'] = messageObject.name

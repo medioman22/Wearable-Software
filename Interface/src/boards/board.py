@@ -5,13 +5,18 @@ A representation of the connection to the physical board.
 Abstract definition of a connection to the physical board representation
 """
 
-import datetime
+import datetime                                                 # Time and date keeping package
+import logging                                                  # This class logs all info - so logging is imported
 
 """Globals"""
 # Allowed directions for the dataflow
 allowedDirTypes = ['in', 'out']
 # Max past points stored
 maxPoints = 256
+
+LOG_LEVEL_PRINT = logging.WARN
+LOG_LEVEL_SAVE = logging.DEBUG
+
 
 class Device():
     """Representation of a physical device."""
@@ -38,14 +43,25 @@ class Device():
     _fileName = None
     # Ignore device
     _ignore = False
+    # The logger
+    _logger = None
 
 
     def __init__(self, name="Unknown Device", dir=allowedDirTypes[0], dim=1):
         """Configure a device."""
+        # Configure the logger
+        self._logger = logging.getLogger('Device')
+        self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
+        fh = logging.FileHandler('../Logs/Device({}).log'.format(name), 'w')
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        fh.setFormatter(formatter)
+        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        self._logger.addHandler(fh)
+
         # Set device name
         self._name = name;
 
-        # Set device mode
+        # Validate dir values
         if (dir not in allowedDirTypes):
             raise ValueError("dir has to be in list: {}".format(allowedDirTypes))
         else:
@@ -59,7 +75,7 @@ class Device():
         else:
             self._dim = dim
 
-        # Set data field
+        # Set data field in respect to provided dimension
         self._data = []
         self._pastData = [[] for x in range(dim)]
 
@@ -108,38 +124,33 @@ class Device():
 
     def setFunction(self, dim, function, parameters):
         """Set a function and parameters."""
-        if (self._dir != 'out'):
+        if (self._dir != 'out'):                                # Function is only available for out devices
             raise ValueError('device has now permission to send data')
         else:
-            self._functions[dim] = function
-            self._parameters[dim] = parameters
-            # Set t=0
-            self._startTimestamps[dim] = datetime.datetime.now()
+            self._functions[dim] = function                     # Set function type
+            self._parameters[dim] = parameters                  # Set function parameter
+            self._startTimestamps[dim] = datetime.datetime.now() # Set t=0
 
     def setFunctionRunning(self, running):
         """Set a function running."""
-        if (self._dir != 'out'):
+        if (self._dir != 'out'):                                # Function is only available for out devices
             raise ValueError('device has now permission to send data')
         else:
-            # Set t=0
             for i in range(self._dim):
-                self._startTimestamps[i] = datetime.datetime.now()
-            self._functionRunning = running
+                self._startTimestamps[i] = datetime.datetime.now() # Set t=0
+            self._functionRunning = running                     # Start function
 
     def setData(self, data):
         """Set data for device."""
-        if (self._dir != 'out'):
+        if (self._dir != 'out'):                                # Set data is only available for out devices
             raise ValueError('device has now permission to send data')
         else:
-            for i, dataI in enumerate(self._data):
-                # Add current data to past data
-                self._pastData[i].append(dataI)
-                # Create overflow for past self
-                while (maxPoints < len(self._pastData[i])):
+            for i, dataI in enumerate(self._data):              # Store new data
+                self._pastData[i].append(dataI)                 # Add current data to past data
+                while (maxPoints < len(self._pastData[i])):     # Create overflow for past data
                     self._pastData[i].pop(0)
 
-            # Set new data
-            self._data = data
+            self._data = data                                   # Set most recent data
 
     def setFileName(self, fileName):
         """Set the file name."""
@@ -166,15 +177,26 @@ class Board():
     _deviceList = None
     # Save to file
     _fileName = None
+    # The logger
+    _logger = None
 
 
     def __init__(self, name, connectionType, defaultIp='192.168.7.2', defaultPort='12345'):
         """Configure the board."""
+        # Configure the logger
+        self._logger = logging.getLogger('Board')
+        self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
+        fh = logging.FileHandler('../Logs/Board({}).log'.format(name), 'w')
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        fh.setFormatter(formatter)
+        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        self._logger.addHandler(fh)
+
         self._name = name
         self._connectionType = connectionType
         self._defaultIp = defaultIp
         self._defaultPort = defaultPort
-        self._deviceList = [] # Empty list
+        self._deviceList = []                                   # Clear device list
 
 
     def name(self):
@@ -215,44 +237,43 @@ class Board():
 
     def registerDevice(self, device):
         """Register a device to the board."""
-        if (not isinstance(device, Device)):
+        if (not isinstance(device, Device)):                    # Only device objects can be registered
             raise ValueError('object is not a device')
         else:
-            self._deviceList.append(device)
+            for registeredDevice in self._deviceList:           # Check for device to register
+                if (registeredDevice.name() == device.name()):
+                    break                                       # Device already registered
+            else:
+                self._deviceList.append(device)                 # Register device
 
     def deregisterDevice(self, device):
         """Register a device to the board."""
-        if (not isinstance(device, Device)):
+        if (not isinstance(device, Device)):                    # Only device objects can be deregistered
             raise ValueError('object is not a device')
         else:
-            for registeredDevice in self._deviceList:
+            for registeredDevice in self._deviceList:           # Check for device to deregister
                 if (registeredDevice.name() == device.name()):
-                    self._deviceList.remove(registeredDevice)
+                    self._deviceList.remove(registeredDevice)   # Remove from boards device lists
                     break
-            else:
-                print('Register unregisted device …') # TODO: Make it not happen
-                # raise ValueError('device is not registered')
+            else:                                               # Tried to deregister a non-registered device
+                self._logger.debug('device {} is not registered'.format(device.name()))
 
     def updateData(self, name, data):
         """Update data of a device."""
         for registeredDevice in self._deviceList:
             if (registeredDevice.name() == name):
-                # Access private field of 'friend' object
-                for i, dataI in enumerate(registeredDevice._data):
-                    # Add current data to past data
-                    registeredDevice._pastData[i].append(dataI)
-                    # Create overflow for past values
-                    while (maxPoints < len(registeredDevice._pastData[i])):
+                for i, dataI in enumerate(registeredDevice._data): # Access private field of 'friend' object
+                    registeredDevice._pastData[i].append(dataI) # Add current data to past data of 'friend' object
+                    while (maxPoints < len(registeredDevice._pastData[i])): # Create overflow for past values of 'friend' object
                         registeredDevice._pastData[i].pop(0)
 
-                # Set new data
-                registeredDevice._data = data
+                registeredDevice._data = data                   # Set most recent data
 
 
                 break
-        else:
-            raise ValueError('device is not registered')
+        else:                                                   # Tried to update data for a non-registered device
+            self._logger.debug('device {} is not registered'.format(name))
 
     def reset(self):
         """Reset the board to default."""
-        self._deviceList = []
+        self._deviceList = []                                   # Clear device list

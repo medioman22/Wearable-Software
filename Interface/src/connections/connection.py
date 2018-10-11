@@ -10,8 +10,10 @@ from abc import ABC, abstractmethod
 """Globals"""
 # Possible connection states
 possibleStatusTypes = ['Disconnected', 'Connected', 'Corrupted']
+# Ingoing message types
 possibleIncomingMessageTypes = ['Register', 'Deregister', 'Data', 'Ping']
-possibleOutgoingMessageTypes = ['Data', 'Ping']
+# Outgoing message types
+possibleOutgoingMessageTypes = ['Data', 'Ping','DeviceList']
 
 class Message():
     """Message coming form the board."""

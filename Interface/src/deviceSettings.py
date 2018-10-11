@@ -1,21 +1,28 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import logging
-import time
-from PyQt5.QtCore import (Qt, pyqtSlot)
-from PyQt5.QtWidgets import (QWidget, QPushButton, QCheckBox, QHBoxLayout, QLabel, QGridLayout, QGroupBox, QFileDialog)
-import pyqtgraph as pg
-import numpy as np
+import sys                                                      # System package
+import time                                                     # Time package
+import logging                                                  # Logging package
+from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
+                            pyqtSlot)
+from PyQt5.QtWidgets import (   QWidget,                        # Widget objects for GUI from Qt
+                                QPushButton,
+                                QCheckBox,
+                                QHBoxLayout,
+                                QLabel,
+                                QGridLayout,
+                                QGroupBox,
+                                QFileDialog)
+import pyqtgraph as pg                                          # Custom graphics package
+import numpy as np                                              # Number utility package
 
-from deviceSettingsFunctionSelector import DeviceSettingsFunctionSelectorWidget
+from deviceSettingsFunctionSelector import DeviceSettingsFunctionSelectorWidget # Custom device settings function selector widget
 
-# Enable antialiasing for prettier plots
-pg.setConfigOptions(antialias=True)
+pg.setConfigOptions(antialias=True)                             # Enable antialiasing for prettier plots
 
 # Logging settings
-LOG_LEVEL_PRINT = logging.INFO
-LOG_LEVEL_SAVE = logging.DEBUG
+LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
+LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print level for .log logging
 
 # Standard color set for plots
 standardColorSet = [
@@ -53,11 +60,11 @@ class DeviceSettingsWidget(QWidget):
 
         # Configure the logger
         self._logger = logging.getLogger('DeviceSettings')
-        self._logger.setLevel(LOG_LEVEL_PRINT)   # Only {LOG_LEVEL} level or above will be saved
+        self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
         fh = logging.FileHandler('../Logs/DeviceSettings.log', 'w')
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)              # Only {LOG_LEVEL} level or above will be saved
+        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
         self._logger.addHandler(fh)
 
         self._logger.info("Device settings initializing …")
@@ -207,29 +214,22 @@ class DeviceSettingsWidget(QWidget):
         newData = self._device.data()
         self._dataLabel.setText("<b>{}</b>".format("<br>".join('{:.4f}'.format(el) for el in newData if el != None)))
 
-        # Save values
-        if (self._device.fileName() != None and None not in newData):
-            with open(self._device.fileName(), "a") as fh:
-                fh.write(','.join(([str(time.time())] + list('{:f}'.format(el) for el in newData))) + '\n')
+        if (self._device.fileName() != None and None not in newData): # Save values
+            with open(self._device.fileName(), "a") as fh:      # Open file to append data
+                fh.write(','.join(([str(time.time())] + list('{:f}'.format(el) for el in newData))) + '\n') # Write data
 
-        # Widgets for dir=in
-        if (self._device.dir() == 'in'):
-            # Only update if new data is available
-            if (len(newData) > 0):
+        if (self._device.dir() == 'in'):                        # Widgets for dir=in
+            if (len(newData) > 0):                              # Only update if new data is available
+                for i, pastDataI in enumerate(self._device.pastData()): # Update every plot with past data from the device
+                    self._plots[i].setData(y=np.asarray(pastDataI), x=np.arange(len(pastDataI))) # Plot values
 
-                # Update every plot with past data from the device
-                for i, pastDataI in enumerate(self._device.pastData()):
-                    # Plot values
-                    self._plots[i].setData(y=np.asarray(pastDataI), x=np.arange(len(pastDataI)))
-
-        # Widgets for dir=out
-        else:
+        else:                                                   # Widgets for dir=out
             pass
 
     def saveFileDialog(self):
         """Dialog to select location to save file."""
         options = QFileDialog.Options()
-        #options |= QFileDialog.DontUseNativeDialog
+        #options |= QFileDialog.DontUseNativeDialog             # Can be uncommented if there is a problem with the default menu on OSX
         fileName, _ = QFileDialog.getSaveFileName(self, "Save Device Plot For {}".format(self._device.name()),"{}/../../Plots/{} Plot.csv".format(sys.path[0], self._device.name()),"Text Files (*.csv)", options=options)
         if not fileName:
             self._logger.info('No file selected')
@@ -241,17 +241,17 @@ class DeviceSettingsWidget(QWidget):
     @pyqtSlot(int, str, dict)
     def updateFunction(self, dim, function, parameters):
         """Update function of a device."""
-        self._device.setFunctionRunning(False)
+        self._device.setFunctionRunning(False)                  # Stop function
         self._stopButton.setVisible(False)
         self._startButton.setVisible(True)
-        self._device.setFunction(dim, function, parameters)
+        self._device.setFunction(dim, function, parameters)     # Set function parameter
         self._logger.debug("Function '{}' updated".format(function))
 
 
     @pyqtSlot()
     def _onStartFunction(self):
         """Start the funtion."""
-        self._device.setFunctionRunning(True)
+        self._device.setFunctionRunning(True)                   # Start function
         self._startButton.setVisible(False)
         self._stopButton.setVisible(True)
         self._logger.info("Start function '{}'".format(self._device.function()))
@@ -259,7 +259,7 @@ class DeviceSettingsWidget(QWidget):
     @pyqtSlot()
     def _onStopFunction(self):
         """Stop the funtion."""
-        self._device.setFunctionRunning(False)
+        self._device.setFunctionRunning(False)                  # Stop function
         self._stopButton.setVisible(False)
         self._startButton.setVisible(True)
         self._logger.info("Stop function '{}'".format(self._device.function()))
@@ -267,9 +267,8 @@ class DeviceSettingsWidget(QWidget):
     @pyqtSlot()
     def _onSavePlot(self):
         """Save the plot."""
-        fileName = self.saveFileDialog()
-        # Prepare file
-        if (fileName != None):
+        fileName = self.saveFileDialog()                        # Get file location
+        if (fileName != None):                                  # Prepare file if one is selected
             with open(fileName, "w") as fh:
                 fh.write(','.join((['Date'] + list('{:d}'.format(el) for el in range(self._device.dim())))) + '\n')
                 self._device.setFileName(fileName)
@@ -287,7 +286,7 @@ class DeviceSettingsWidget(QWidget):
     @pyqtSlot(int)
     def _onIgnore(self, flag):
         """Set ignore flag."""
-        if (flag == Qt.CheckState.Checked):
+        if (flag == Qt.CheckState.Checked):                     # Set ignore flag for the device
             self._device.setIgnore(True)
             self._logger.info("Ignore device '{}' for streaming services".format(self._device.name()))
         else:

@@ -1,13 +1,18 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import logging
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot)
-from PyQt5.QtWidgets import (QDialog, QPushButton, QLineEdit, QVBoxLayout, QGroupBox)
+import logging                                              # Logging package
+from PyQt5.QtCore import (  pyqtSignal,                     # Core functionality from Qt
+                            pyqtSlot)
+from PyQt5.QtWidgets import (   QDialog,                    # Widget objects for GUI from Qt
+                                QPushButton,
+                                QLineEdit,
+                                QVBoxLayout,
+                                QGroupBox)
 
 # Logging settings
-LOG_LEVEL_PRINT = logging.INFO
-LOG_LEVEL_SAVE = logging.DEBUG
+LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
+LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print level for .log logging
 
 class ConnectionDialog(QDialog):
     """
@@ -18,6 +23,7 @@ class ConnectionDialog(QDialog):
 
     # Signal for new settings values
     settingsChanged = pyqtSignal(str, str)
+
     # Logger module
     _logger = None
 
@@ -27,11 +33,11 @@ class ConnectionDialog(QDialog):
 
         # Configure the logger
         self._logger = logging.getLogger('ConnectionDialog')
-        self._logger.setLevel(LOG_LEVEL_PRINT)   # Only {LOG_LEVEL} level or above will be saved
+        self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
         fh = logging.FileHandler('../Logs/ConnectionDialog.log', 'w')
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)              # Only {LOG_LEVEL} level or above will be saved
+        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
         self._logger.addHandler(fh)
 
         self._logger.info("Connection dialog initializing …")

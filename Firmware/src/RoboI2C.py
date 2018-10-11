@@ -120,7 +120,7 @@ class RoboI2C:
                     if drv.getDeviceConnected():                    # If any driver works
                         drv.configureDevice()                       # Configure the device and save driver & vals
                         chn_dict['vals'] = drv.getValues()
-                        chn_dict['device'] = drv.getDevice()
+                        chn_dict['device'] = '{}@I2C[{}]'.format(drv.getDevice(), chn_dict['chn'])
                         chn_dict['drv_idx'] = drv_idx
                         chn_dict['actv'] = True
                         chn_dict['dir'] = drv.getDir()

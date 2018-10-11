@@ -1,15 +1,24 @@
 # -*- coding: utf-8 -*-
 
-import logging
-from PyQt5.QtCore import (Qt, pyqtSignal, pyqtSlot)
-from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel, QListWidget, QListWidgetItem, QStackedWidget, QGridLayout, QGroupBox)
-from PyQt5.QtGui import (QPixmap)
+import logging                                              # Logging package
+from PyQt5.QtCore import (  Qt,                             # Core functionality from Qt
+                            pyqtSignal,
+                            pyqtSlot)
+from PyQt5.QtWidgets import (   QWidget,                    # Widget objects for GUI from Qt
+                                QPushButton,
+                                QLabel,
+                                QListWidget,
+                                QListWidgetItem,
+                                QStackedWidget,
+                                QGridLayout,
+                                QGroupBox)
+from PyQt5.QtGui import (QPixmap)                           # Media elements from Qt
 
-from deviceSettings import DeviceSettingsWidget
+from deviceSettings import DeviceSettingsWidget             # Custom device settings widget
 
 # Logging settings
-LOG_LEVEL_PRINT = logging.INFO
-LOG_LEVEL_SAVE = logging.DEBUG
+LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
+LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print level for .log logging
 
 class InterfaceWidget(QWidget):
     """
@@ -44,11 +53,11 @@ class InterfaceWidget(QWidget):
 
         # Configure the logger
         self._logger = logging.getLogger('Interfaces')
-        self._logger.setLevel(LOG_LEVEL_PRINT)   # Only {LOG_LEVEL} level or above will be saved
+        self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
         fh = logging.FileHandler('../Logs/Interface.log', 'w')
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)              # Only {LOG_LEVEL} level or above will be saved
+        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
         self._logger.addHandler(fh)
 
         self._logger.info("Interface initializing …")
@@ -133,15 +142,15 @@ class InterfaceWidget(QWidget):
 
     def setBoardInformation(self, board):
         """Set board information."""
-        #Set name label
+        # Set name label
         self._groupLayout.setTitle(board.name())
 
-        #Set image label
+        # Set image label
         boardPixmap = QPixmap('assets/{}.jpg'.format(board.name()))
         scaledboardPixmap = boardPixmap.scaledToWidth(164)
         self._boardPixmapLabel.setPixmap(scaledboardPixmap)
 
-        #Set connection type
+        # Set connection type
         self._boardConnectionTypeLabel.setText('Connection Type <b>{}</b>'.format(board.connectionType()))
         self._logger.debug("Interface UI information updated")
 
@@ -157,28 +166,24 @@ class InterfaceWidget(QWidget):
 
     def updateDeviceList(self, devices):
         """Update device stack."""
-        # Remove devices from list/stack
-        while self._deviceList.count() > 0:
+        while self._deviceList.count() > 0:                     # Remove devices from list/stack
             self._deviceList.takeItem(0)
-        while self._deviceStack.count() > 0:
+        while self._deviceStack.count() > 0:                    # Remove devices from list/stack
             deviceWidget = self._deviceStack.widget(0)
             self._deviceStack.removeWidget(deviceWidget)
-        # Add devices to list/stack
         deviceToSelect = None
         deviceListItemToSelect = None
         deviceWidgetToSelect = None
-        for device in devices:
+        for device in devices:                                  # Add devices to list/stack
             deviceListItem = QListWidgetItem(device.name())
             deviceWidget = DeviceSettingsWidget(device)
             self._deviceList.addItem(deviceListItem)
             self._deviceStack.addWidget(deviceWidget)
-            # Check for previous selection
-            if (device.name() == self._selectedDeviceName):
+            if (device.name() == self._selectedDeviceName):     # Check for previous selection
                 deviceToSelect = device
                 deviceListItemToSelect = deviceListItem
                 deviceWidgetToSelect = deviceWidget
-        # Reselect device
-        if (deviceToSelect != None):
+        if (deviceToSelect != None):                            # Reselect device
             self._deviceList.setCurrentItem(deviceListItemToSelect)
             self._deviceStack.setCurrentWidget(deviceWidgetToSelect)
         elif (len(self._deviceList) > 0):
@@ -187,13 +192,11 @@ class InterfaceWidget(QWidget):
         self._logger.debug("Interface UI device list updated")
 
 
-        # Sort the device list
-        self._deviceList.sortItems(Qt.AscendingOrder);
+        self._deviceList.sortItems(Qt.AscendingOrder);          # Sort the device list
 
     def updateData(self):
         """Update all data elements."""
-        # Update data for all devices
-        for i in range(0, self._deviceList.count()):
+        for i in range(0, self._deviceList.count()):            # Update data for all devices
             self._deviceStack.widget(i).updateData()
 
 
@@ -208,18 +211,14 @@ class InterfaceWidget(QWidget):
     @pyqtSlot(QListWidgetItem)
     def onSelectDevice(self, listItem):
         """Listen to device selection event."""
-        # Check if the list isn't empty
         name = listItem.text()
-        if (self._deviceList.count() > 0):
-            # Look for widget with name
-            for i in range(0, self._deviceList.count()):
+        if (self._deviceList.count() > 0):                      # Check if the list isn't empty
+            for i in range(0, self._deviceList.count()):        # Look for widget with name
                 deviceWidget = self._deviceStack.widget(i)
-                # Break on first matching widget found
-                if (deviceWidget.device().name() == name):
+                if (deviceWidget.device().name() == name):      # Break on first matching widget found
                     self._deviceStack.setCurrentWidget(deviceWidget)
                     self._selectedDeviceName = name
                     self._logger.info("Device '{}' selected".format(name))
                     break
-            # Ignore when widget does no longer exist
-            else:
+            else:                                               # Ignore when widget does no longer exist
                 pass
