@@ -7,13 +7,20 @@ and their status is reported to the remote location.
 
 import os                   # Required for clearing the system display
 import time                 # Required for controllng the sampling period
+import threading               # Threading class for the threads
 import RoboComConnection as com # SoftWEAR Communication module
+import MuxModule            # SoftWEAR MUX module
+import InputModule          # SoftWEAR Input module
 #import RoboADC as r_adc     # SoftWEAR ADC module
 #import RoboPWM as r_pwm     # SoftWEAR PWM module
 import RoboI2C as r_i2c     # SoftWEAR I2C module
 #import copy                 # Required for deepcopy on dictionary lists
 import json                 # Serializing class. All objects sent are serialized
 
+exit = False                # Exit flag to terminate all threads
+c = None                    # Connection object
+
+inputList = []             # List of connected Input devices on the GPIO pins
 emg_list = []               # List of connected EMG devices on the ADC ports
 i2c_list = []               # List of connected IMU devices on the I2C ports
 pwm_list = []               # List of current PWM channels and their state
@@ -21,8 +28,9 @@ last_message = ""           # Current text message to be displayed to the user
 send_last_message = False   # Becomes True when last message has changed.
 conn_message = ""           # Current connection status to be displayed
 
-#adc = r_adc.RoboADC()       # Initialize the SoftWEAR ADC Module
-#pwm = r_pwm.RoboPWM()       # Initialize the SoftWEAR PWM Module
+input = InputModule.Input() # Initialize the SoftWEAR Input Module
+#adc = r_adc.RoboADC()      # Initialize the SoftWEAR ADC Module
+#pwm = r_pwm.RoboPWM()      # Initialize the SoftWEAR PWM Module
 i2c = r_i2c.RoboI2C()       # Initialize the SoftWEAR I2C Module
 
 def print_func():
@@ -33,6 +41,18 @@ def print_func():
     print(conn_message)                         # Print connection status
     print(last_message + "\n")                  # Print last comm message
 
+    # Print Input informations:
+    print("\nConnected Inputs: " + str(len(inputList)))
+    for el in inputList:                        # Go through all connected Input devices
+        # if len(elem['sublist']) > 0:            # Check if we have a MUX
+        #     for sub_elem in elem['sublist']:
+        #         if sub_elem['actv']:            # Print all elements of the MUX
+        #             print("Channel " + str(elem['chn']) + ', Mux ' + str(sub_elem['subchn']) + ', value: ' + str(sub_elem['vals']))
+        # else:                                   # No MUX -> print element
+        if el['mux'] != -1:                     # Muxed pin
+            print("Pin " + str(el['pin']) + ':' + str(el['mux']) + ' type: ' + el['device'] +', values: ' + str(el['vals']))
+        else:                                   # Unmuxed pin
+            print("Pin " + str(el['pin']) + ' type: ' + el['device'] +', values: ' + str(el['vals']))
     # # Print EMG informations:
     # print("Connected EMGs: " + str(len(emg_list)))
     # for elem in adc.all_devices:                # Go through all ADC devices
@@ -91,10 +111,42 @@ def print_func():
 #         send_last_message = True        # and mark it for sending
 #     return events, adc.all_devices
 #
-def i2c_update():
-    """Function updates the status of all ADC devices and saves any connnect or disconnect events."""
+def inputScan():
+    """Scan for new input devices."""
+    global inputList, input, last_message, send_last_message
+    input.scan()                                            # Update devices on the input pins
+    inputListPrevious = inputList                           # Keep copy of last input devices
+    inputList = []                                          # Reset list of connected Input list
+    inputListRegister = []                                  # List of new devices that need to be registered
+    inputListDeregister = []                                # List of new devices that need to be deregistered
+    new_last_message = ''                                   # Test if we have a new connect / disconnect message
+
+    for el1 in input.connectedDevices:                      # Check for connected and new devices
+        if (len(filter(lambda el2: el2['device'] == el1['device'], inputListPrevious)) > 0):
+            inputList.append(el1)                           # Add to connected list
+        else:                                               # Device is not yet registered
+            inputListRegister.append(el1)                   # Add to register list
+            inputList.append(el1)                           # Add connected list
+
+    for el1 in inputListPrevious:                           # Check for disconnected devices
+        if (len(filter(lambda el2: el2['device'] == el1['device'], inputList)) == 0):
+            inputListDeregister.append(el1)                 # Add to deregister list
+
+    if new_last_message is not '':                          # Check for any event present
+        last_message = new_last_message                     # IF we have an event -> save text message
+        send_last_message = True                            # and mark it for sending
+    return inputListRegister, inputListDeregister
+
+
+def inputUpdate():
+    """Update the input devices."""
+    input.updateValues()
+
+
+def i2c_scan():
+    """Update the status of all I2C devices and saves any connect or disconnect events."""
     global i2c_list, i2c, last_message, send_last_message
-    events = i2c.update()                                   # Update devices on the I2C channels
+    i2c.update()                                            # Update devices on the I2C channels
     i2c_list_previous = i2c_list                            # Keep copy of last i2c devices
     i2c_list = []                                           # Reset list of connected I2C list
     i2c_list_register = []                                  # List of new devices that need to be registered
@@ -145,93 +197,110 @@ def i2c_update():
 #     ret_message = {'type':'pwm_read', 'pwm_list':ret_list}
 #     return ret_message
 
-def main():
-    """Infinite loop function, reads all devices and manages the connection."""
-    global conn_message, last_message, emg_list, send_last_message, pwm
-    # Create the communication class. Using 'with' to ensure correct termination.
-    with com.RoboComConnection() as c:
-        c.connect()        # Start the communication
-        while(True):                    # Enter the infinite loop
-            # Get the connection state for printing reasons
-            conn_message = "Conn State: " + c.getState()
+def scanThread():
+    """Thread dedicated to scan for new devices."""
+    global c
+    while True:                                                     # Enter the infinite loop
+        messagesSend = []                                           # List of messages to send
 
-            # Get the ADC devices and events
-            # emg_events, emg_devices = adc_aquisition_func()
-
-            # Get the PWM values
-            # pwm_message = pwm_aquisition_func()
-
-            # Get the I2C devices and events
-            i2c_list_register, i2c_list_deregister = i2c_update()
-
-            if c.getState() is 'Connected' or True: # TODO: REMOVE SHORTCUT
-                messagesSend = []                                   # List of messages to send
-
-                messagesRecv = c.getMessages()                      # Get new messages
-                for messageString in messagesRecv:
-                    message = json.loads(messageString)             # Parse message from string to JSON
-                    if message['type'] == 'DeviceList':             # Create i2c device register message for all devices
-                        for device in i2c_list:
-                            messagesSend.append(json.dumps({'type': 'Register',
-                                                            'name': device['device'],
-                                                            'dir': device['dir'],
-                                                            'dim': device['dim']}))
+        i2c_list_register, i2c_list_deregister = i2c_scan()         # Get the I2C devices and events
+        inputListRegister, inputListDeregister = inputScan()        # Get the Input devices and events
 
 
-                for device in i2c_list_deregister:                  # Create i2c device deregister message
-                    messagesSend.append(json.dumps({'type': 'Deregister',
-                                                    'name': device['device']}))
+        for device in i2c_list_deregister:                          # Create i2c device deregister message
+            messagesSend.append(json.dumps({'type': 'Deregister',
+                                            'name': device['device']}))
 
 
 
-                for device in i2c_list_register:                    # Create i2c device register message
+        for device in i2c_list_register:                            # Create i2c device register message
+            messagesSend.append(json.dumps({'type': 'Register',
+                                            'name': device['device'],
+                                            'dir': device['dir'],
+                                            'dim': device['dim']}))
+
+        for device in inputListDeregister:                          # Create input device deregister message
+            messagesSend.append(json.dumps({'type': 'Deregister',
+                                            'name': device['device']}))
+
+
+
+        for device in inputListRegister:                            # Create input device register message
+            messagesSend.append(json.dumps({'type': 'Register',
+                                            'name': device['device'],
+                                            'dir': device['dir'],
+                                            'dim': device['dim']}))
+
+
+        c.sendMessages(messagesSend)                                # Send the messages
+        time.sleep(1)                                               # Sleep until next scan period
+
+        if exit:                                                    # Exit
+            break;
+
+
+def updateThread():
+    """Thread dedicated to get updated values of the devices."""
+    global c
+    while True:                                                     # Enter the infinite loop
+        messagesSend = []                                           # List of messages to send
+        messagesRecv = c.getMessages()                              # Get new messages
+
+        inputUpdate()                                               # Update input devices
+
+        for messageString in messagesRecv:
+            message = json.loads(messageString)                     # Parse message from string to JSON
+            if message['type'] == 'DeviceList':                     # Create i2c device register message for all devices
+                for device in i2c_list:
                     messagesSend.append(json.dumps({'type': 'Register',
                                                     'name': device['device'],
                                                     'dir': device['dir'],
                                                     'dim': device['dim']}))
 
 
+        for device in i2c_list:                                     # Create i2c device data message
+            messagesSend.append(json.dumps({'type': 'Data',
+                                            'name': device['device'],
+                                            'values': device['vals']}))
 
-                for device in i2c_list:                             # Create i2c device data message
-                    messagesSend.append(json.dumps({'type': 'Data',
-                                                    'name': device['device'],
-                                                    'values': device['vals']}))
 
-                # # Send Text message
-                # if send_last_message is True:
-                #     c.send_data({'type':'message', 'message':last_message})
-                #     send_last_message = False
-                #
-                # # Handle EMGs on the ADC channels
-                # to_send  = {'type':'emg', 'channels':emg_devices}
-                # c.send_data(to_send)
-                # for elem in emg_events:
-                #     c.send_data(elem)   # Send the ADC device info over the network
-                #
-                # Handle IMUs on the I2C channels
-                # to_send = {'type':'imu', 'channels':i2c_devices}
-                # c.send_data(to_send)
-                # c.sendMessages(to_send)
-                # for elem in i2c_events:
-                #     c.send_data(elem)   # Send the I2C device info over the network
-                #
-                # # Send the PWM state
-                # c.send_data(pwm_message)
+        for device in inputList:                                   # Create input device data message
+            messagesSend.append(json.dumps({'type': 'Data',
+                                            'name': device['device'],
+                                            'values': device['vals']}))
 
-                c.sendMessages(messagesSend)
 
-                # print(messagesSend, messagesRecv)
+        c.sendMessages(messagesSend)                                # Send the messages
+        time.sleep(0.1)                                             # Sleep until next update period
 
-                """Ping"""
-                # if c.getState() is 'Connected':
-                #     sendMessages = [json.dumps({'type': 'Ping','name':''})]
-                #     c.sendMessages(sendMessages)
+        if exit:                                                    # Exit
+            break;
 
-            print_func()                # Call print function
-            time.sleep(0.1)             # Sleep until next sampling period
+def main():
+    """Infinite loop function, reads all devices and manages the connection."""
+    global conn_message, last_message, emg_list, send_last_message, pwm, c, exit
+                                                                    # Create the communication class. Using 'with' to ensure correct termination.
+    c = com.RoboComConnection()                                     # Create the communication
+    c.connect()                                                     # Start communication thread
+    scan = threading.Thread(target=scanThread, name="ScanThread")   # Create scan thread
+    scan.daemon = True                                              # Set scan thread as daemonic
+    scan.start()                                                    # Start scan thread
+    update = threading.Thread(target=updateThread, name="UpdateThread") # Create update thread
+    update.daemon = True                                            # Set update thread as daemonic
+    update.start()                                                  # Start update thread
+    while(True):                                                    # Enter the infinite loop
+        conn_message = "Conn State: " + c.getState()                # Get the connection state for printing reasons
+        """Ping"""
+        # if c.getState() is 'Connected':
+        #     sendMessages = [json.dumps({'type': 'Ping','name':''})]
+        #     c.sendMessages(sendMessages)
 
-        # If we reach this -> something happened. Close communication channel
-        c.stopAndFreeResources()
+        print_func()                                                # Call print function
+        time.sleep(0.1)                                             # Sleep until next print period
+
+    # If we reach this -> something happened. Close communication channel
+    exit = True
+    c.stopAndFreeResources()
 
 # Just call the main function.
 main()

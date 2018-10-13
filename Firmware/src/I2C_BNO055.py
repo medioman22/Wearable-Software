@@ -4,8 +4,8 @@ Driver file for the BNO055 accelerometer / gyroscope / magnetometer. Communicate
 with the device via I2C and implements the basic functions for integrating into
 the SoftWEAR package.
 """
-import Adafruit_GPIO.I2C as I2C # Main peripheral class. Implements I2C communication
-import time  # Imported for delay reasons
+import Adafruit_GPIO.I2C as I2C                                 # Main peripheral class. Implements I2C communication
+import time                                                     # Imported for delay reasons
 
 class BNO055:
     """Driver for BNO055."""

@@ -160,7 +160,9 @@ class RoboComConnection:
 
     def connect(self):
         """Start the background communication thread."""
-        threading.Thread(target=self._innerThread).start()
+        communicationThread = threading.Thread(target=self._innerThread, name="CommunicationThread")
+        communicationThread.daemon = True                       # Set thread as daemonic
+        communicationThread.start()                             # Start the thread
 
 
     def disconnect(self):
