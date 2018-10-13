@@ -24,6 +24,15 @@ class UDPBroadcast():
 
     def __init__(self, ip='127.0.0.1', port=12346):
         """Initialize broadcast with port and ip."""
+        # Configure the logger
+        self._logger = logging.getLogger('UDPBroadcast')
+        self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
+        fh = logging.FileHandler('../Logs/UDPBroadcast.log', 'w')
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        fh.setFormatter(formatter)
+        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        self._logger.addHandler(fh)
+
         self._ip = ip
         self._port = port
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import logging                                              # Logging package
-from PyQt5.QtCore import (  Qt,                             # Core functionality from Qt
+import logging                                                  # Logging package
+from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
+                            QSize,
                             pyqtSignal,
                             pyqtSlot)
-from PyQt5.QtWidgets import (   QWidget,                    # Widget objects for GUI from Qt
+from PyQt5.QtWidgets import (   QWidget,                        # Widget objects for GUI from Qt
                                 QPushButton,
                                 QLabel,
                                 QListWidget,
@@ -12,9 +13,9 @@ from PyQt5.QtWidgets import (   QWidget,                    # Widget objects for
                                 QStackedWidget,
                                 QGridLayout,
                                 QGroupBox)
-from PyQt5.QtGui import (QPixmap)                           # Media elements from Qt
+from PyQt5.QtGui import (QPixmap, QMovie)                       # Media elements from Qt
 
-from deviceSettings import DeviceSettingsWidget             # Custom device settings widget
+from deviceSettings import DeviceSettingsWidget                 # Custom device settings widget
 
 # Logging settings
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
@@ -79,7 +80,7 @@ class InterfaceWidget(QWidget):
         # Image of current board
         boardPixmapLabel = QLabel()
         boardPixmap = QPixmap()
-        scaledboardPixmap = boardPixmap.scaledToWidth(164)
+        scaledboardPixmap = boardPixmap.scaledToWidth(240)
         boardPixmapLabel.setPixmap(scaledboardPixmap)
         self._boardPixmapLabel = boardPixmapLabel
         self._logger.debug("Interface UI image created")
@@ -100,9 +101,25 @@ class InterfaceWidget(QWidget):
         self._boardIpPortLabel = boardIpPortLabel
         self._logger.debug("Interface UI labels created")
 
+        # Stream label
+        streamLabel = QLabel('Stream ()')
+        streamLabel.setVisible(False)
+        self._streamLabel = streamLabel
+
+        # Stream indicator
+        streamGifLabel = QLabel()
+        streamGif = QMovie("assets/stream.gif")
+        streamGif.setScaledSize(QSize(24,24))
+        streamGifLabel.setMovie(streamGif)
+        streamGifLabel.setVisible(False)
+        streamGif.start()
+        self._streamGifLabel = streamGifLabel
+
+
         # List of connected devices
         deviceList = QListWidget()
-        deviceList.itemClicked.connect(self.onSelectDevice)
+        deviceList.currentItemChanged.connect(self.onSelectDevice)
+        deviceList.setMinimumWidth(240)
         self._deviceList = deviceList
         self._logger.debug("Interface UI device list created")
 
@@ -113,9 +130,11 @@ class InterfaceWidget(QWidget):
 
         # Layout for information box
         informationGridLayout = QGridLayout()
-        informationGridLayout.addWidget(boardConnectionTypeLabel,   0, 0, 1, 2, Qt.AlignLeft)
+        informationGridLayout.addWidget(boardConnectionTypeLabel,   0, 0, 1, 4, Qt.AlignLeft)
         informationGridLayout.addWidget(boardStatusLabel,           1, 0, Qt.AlignLeft)
         informationGridLayout.addWidget(boardIpPortLabel,           1, 1, Qt.AlignLeft)
+        informationGridLayout.addWidget(streamLabel,                1, 2, Qt.AlignLeft)
+        informationGridLayout.addWidget(streamGifLabel,             1, 3, Qt.AlignLeft)
         informationGridLayout.addWidget(connectButton,              2, 0, Qt.AlignLeft)
         informationGridLayout.addWidget(configureButton,            2, 1, Qt.AlignLeft)
 
@@ -146,8 +165,8 @@ class InterfaceWidget(QWidget):
         self._groupLayout.setTitle(board.name())
 
         # Set image label
-        boardPixmap = QPixmap('assets/{}.jpg'.format(board.name()))
-        scaledboardPixmap = boardPixmap.scaledToWidth(164)
+        boardPixmap = QPixmap('assets/{}.png'.format(board.name()))
+        scaledboardPixmap = boardPixmap.scaledToWidth(240)
         self._boardPixmapLabel.setPixmap(scaledboardPixmap)
 
         # Set connection type
@@ -163,6 +182,17 @@ class InterfaceWidget(QWidget):
         """Set ip and port label."""
         self._boardIpPortLabel.setText('IP <b>{}</b> : <b>{}</b>'.format(ip, port))
         self._logger.debug("Interface UI ip/port updated")
+
+    def setStreamLabel(self, stream, toChannel=None):
+        """Set stream label and channel."""
+        if stream:                                              # Show stream label
+            self._streamLabel.setText('Stream <b>{}</b>'.format(toChannel))
+            self._streamLabel.setVisible(True)
+            self._streamGifLabel.setVisible(True)
+        else:                                                   # Hide stream label
+            self._streamLabel.setVisible(False)
+            self._streamGifLabel.setVisible(False)
+        self._logger.debug("Interface UI stream updated")
 
     def updateDeviceList(self, devices):
         """Update device stack."""
@@ -211,6 +241,8 @@ class InterfaceWidget(QWidget):
     @pyqtSlot(QListWidgetItem)
     def onSelectDevice(self, listItem):
         """Listen to device selection event."""
+        if listItem == None:                                    # Ignore empty selection
+            return
         name = listItem.text()
         if (self._deviceList.count() > 0):                      # Check if the list isn't empty
             for i in range(0, self._deviceList.count()):        # Look for widget with name

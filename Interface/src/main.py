@@ -8,6 +8,7 @@ Author: Cyrill Lippuner
 Last edited: September 2018
 """
 
+import os                                                       # Operating system package
 import sys                                                      # System package
 import time                                                     # Time package
 import logging                                                  # Logging package
@@ -33,7 +34,7 @@ from boards.mockedBoard import MockedBoard                      # MockedBoard im
 from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard # BBGW implementation
 from connections.connection import Message                      # Message class
 from connections.mockedConnection import MockedConnection       # MockedConnection implementation
-from connections.roboComConnection import RoboComConnection     # RoboComConnection implementation
+from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection # BBGWConnection implementation
 
 # Logging settings
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
@@ -41,9 +42,9 @@ LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print leve
 
 
 # Global variables
-availableBoards = [ MockedBoard(),                              # List of available boards
-                    BeagleboneGreenWirelessBoard()]
-availableConnections = [MockedConnection(), RoboComConnection()]
+availableBoards = [ BeagleboneGreenWirelessBoard(),             # List of available boards
+                    MockedBoard()]
+availableConnections = [MockedConnection(), BeagleboneGreenWirelessConnection()]
 utils = Utils()                                                 # Utility class
 
 # Settings
@@ -108,8 +109,16 @@ class MainWindow(QMainWindow):
     def initUI(self):
         """Initialize the ui of the main window."""
         # Initialize the window
-        self.setWindowTitle('Wearable Software Interface')
-        self.setWindowIcon(QIcon('assets/Face.png'))
+        self.setWindowTitle('SoftWEAR Interface')
+        self.setWindowIcon(QIcon('assets/Icon.png'))
+        try:                                                    # OSX, Linux
+            sys.stdout.write("\x1b]2;SoftWEAR Interface\x07")
+        except:
+            pass
+        try:                                                    # Windows
+            os.system("title SoftWEAR Interface")
+        except:
+            pass
         self.resize(960, 720)
         self.center()
         self._logger.debug("Main UI window created")
@@ -382,6 +391,8 @@ class MainWindow(QMainWindow):
                 self._board.setFileName(fileName)
                 self._streamMenu.menuAction().setVisible(False)
                 self._streamStopAct.setVisible(True)
+                shortFileName = (fileName[:32] and '...') + fileName[32:]
+                self._interface.setStreamLabel(True, '{}'.format(shortFileName))
 
     @pyqtSlot()
     def _onStreamToUDP(self):
@@ -390,6 +401,7 @@ class MainWindow(QMainWindow):
         self._broadcast = UDPBroadcast(UDP_IP, UDP_PORT)        # Create UDP data stream
         self._streamMenu.menuAction().setVisible(False)
         self._streamStopAct.setVisible(True)
+        self._interface.setStreamLabel(True, 'UDP {}:{}'.format(UDP_IP, UDP_PORT))
 
     @pyqtSlot()
     def _onStreamStop(self):
@@ -403,6 +415,7 @@ class MainWindow(QMainWindow):
 
         self._streamStopAct.setVisible(False)
         self._streamMenu.menuAction().setVisible(True)
+        self._interface.setStreamLabel(False)
 
 
 
@@ -430,7 +443,8 @@ class MainWindow(QMainWindow):
                         self._statusBar.showMessage('Deregister Device: {}'.format(message.name))
                     elif (message.type == 'Data'):              # Message with new data for a device (',' are escaped to '-')
                         data = True                             # Raise data refresh flag
-                        self._board.updateData(message.name, message.data['values']) # Update the data
+                                                                # Update the data
+                        self._board.updateData(message.name, message.data['values'], message.data['timestamp'])
                         if (self._board.fileName() != None):    # Stream data to file
                             with open(self._board.fileName(), "a") as fh: # Open the file
                                 for i in range(len(message.data['values'])): # Loop through all dimensions
@@ -438,7 +452,7 @@ class MainWindow(QMainWindow):
                                         if (device.name() == message.name and not device.ignore): # Check if it exists and should be ignored
                                             fh.write(','.join([ message.name.replace(',','-'), # Write data entry
                                                                 str(i),
-                                                                str(time.time()),
+                                                                str(message.data['timestamp']),
                                                                 str(message.data['values'][i])]) + '\n')
 
                         if (self._broadcast != None):           # Stream data to UDP using same format as for the CSV files
@@ -447,7 +461,7 @@ class MainWindow(QMainWindow):
                                     if (device.name() == message.name and not device.ignore): # Check if it exists and should be ignored
                                         self._broadcast.send(','.join([ message.name.replace(',','-'), # Send data entry
                                                                         str(i),
-                                                                        str(time.time()),
+                                                                        str(message.data['timestamp']),
                                                                         str(message.data['values'][i])]))
 
                     elif (message.type == 'Ping'):              # Ping message

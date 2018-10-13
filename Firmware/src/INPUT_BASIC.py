@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Driver file for the BASIC INPUT.Read the value from a input pin for integrating into
+Driver file for the BASIC INPUT. Read the value from a input pin for integrating into
 the SoftWEAR package.
 """
 #import Adafruit_GPIO.AdafruitBBIOAdapter as AdafruitBBIOAdapter # Main peripheral class. Implements GPIO read out
 import Adafruit_BBIO.GPIO as GPIO
-import time                                                     # Imported for delay reasons
-
-# Adapter for BBGW
-# GPIO = AdafruitBBIOAdapter()
 
 class InputBasic:
     """Driver for BASIC INPUT."""
 
     # Name of the device
-    _name = 'BASIC_INPUT'
+    _name = 'INPUT_BASIC'
 
     # Direction of the driver (in/out)
     _dir = 'in'
@@ -31,8 +27,8 @@ class InputBasic:
 
     def __init__(self, pin, muxedPin = None):
         """Device supports a pin."""
-        self._pin = pin
-        self._muxedPin = muxedPin
+        self._pin = pin                                         # Set pin
+        self._muxedPin = muxedPin                               # Set muxed pin
 
 
     def getDeviceConnected(self):

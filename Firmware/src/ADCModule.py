@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-SoftWEAR Input module.
+SoftWEAR ADC module.
 
-Adds Input features and hardware detection capabilities
+Adds ADC features and hardware detection capabilities
 """
 
 import time                                                     # Time keeping module to get timestamps
@@ -11,17 +11,17 @@ import Adafruit_BBIO.GPIO as GPIO                               # Main periphera
 from Config import PIN_MAP                                      # SoftWEAR Config module.
 from MuxModule import Mux                                       # SoftWEAR MUX module.
 
-from INPUT_BASIC import InputBasic                              # Driver module for basic input
+from ADC_BASIC import ADCBasic                                  # Driver module for basic ADC
 
-# TODO: Special drivers for inputs
+# TODO: Special drivers for ADCs
 
 # Create a MUX shadow instance as there is only one Mux
 MuxShadow = Mux()
 
 # List of all possible drivers
-DRIVERS = [InputBasic]
+DRIVERS = [ADCBasic]
 
-class Input:
+class ADC:
     """Implements basic input functionality."""
 
     # List of all connected drivers
@@ -36,7 +36,7 @@ class Input:
 
             Initialises the module with the hardware options. This includes the scan pins and the possible MUX objects.
         """
-        for pinConfig in PIN_MAP["INPUT"]:                      # Loop all available pin configs
+        for pinConfig in PIN_MAP["ADC"]:                        # Loop all available pin configs
             muxSwitch = pinConfig["MUX"]                        # MUX switch pin
             if muxSwitch != None:
                 GPIO.setup(muxSwitch, GPIO.IN, GPIO.PUD_DOWN)   # Setup detect pin
@@ -55,12 +55,12 @@ class Input:
             for drv in self._connectedDrivers:                  # Loop all connected drivers
                 if (device['mux'] == -1):                       # Unmuxed pin
                                                                 # Match for drv and device
-                    if device['device'] == '{}@Input[{}]'.format(drv.getDevice(), drv.getPin()):
+                    if device['device'] == '{}@ADC[{}]'.format(drv.getDevice(), drv.getPin()):
                         device['vals'] = drv.getValues()        # Update values
                         device['timestamp'] = time.time()       # Update timestamp
                 else:
                                                                 # Match for drv and device
-                    if device['device'] == '{}@Input[{}:{}]'.format(drv.getDevice(), drv.getPin(), drv.getMuxedPin()):
+                    if device['device'] == '{}@ADC[{}:{}]'.format(drv.getDevice(), drv.getPin(), drv.getMuxedPin()):
                         MuxShadow.activate(device['mux'])       # Activate mux pin
                         device['vals'] = drv.getValues()        # Update values
                         MuxShadow.deactivate()                  # Deactivate mux
@@ -74,7 +74,7 @@ class Input:
         self._connectedDrivers = []                             # Update connected drivers - start by clearing previous results
         self.connectedDevices = []                              # Update connected devices - start by clearing previous results
 
-        for pinConfig in PIN_MAP["INPUT"]:                      # Loop all available pin configs
+        for pinConfig in PIN_MAP["ADC"]:                        # Loop all available pin configs
             pin = pinConfig["DATA"]                             # DATA pin
             muxSwitch = pinConfig["MUX"]                        # MUX switch pin
 
@@ -85,7 +85,7 @@ class Input:
                         self._connectedDrivers.append(lastDrv)  # Add to connected driver list
                         self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                         'mux': -1,
-                                                        'device': '{}@Input[{}]'.format(lastDrv.getDevice(), pin),
+                                                        'device': '{}@ADC[{}]'.format(lastDrv.getDevice(), pin),
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
                                                         'vals': [],
@@ -100,7 +100,7 @@ class Input:
                         self._connectedDrivers.append(drv)      # Add to connected driver list
                         self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                         'mux': -1,
-                                                        'device': '{}@Input[{}]'.format(drv.getDevice(), pin),
+                                                        'device': '{}@ADC[{}]'.format(drv.getDevice(), pin),
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),
                                                         'vals': [],
@@ -117,7 +117,7 @@ class Input:
                             self._connectedDrivers.append(lastDrv) # Add to connected driver list
                             self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
-                                                            'device': '{}@Input[{}:{}]'.format(lastDrv.getDevice(), pin, muxedPin),
+                                                            'device': '{}@ADC[{}:{}]'.format(lastDrv.getDevice(), pin, muxedPin),
                                                             'dir': lastDrv.getDir(),
                                                             'dim': lastDrv.getDim(),
                                                             'vals': [],
@@ -132,7 +132,7 @@ class Input:
                             self._connectedDrivers.append(drv)  # Add to connected driver list
                             self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
-                                                            'device': '{}@Input[{}:{}]'.format(drv.getDevice(), pin, muxedPin),
+                                                            'device': '{}@ADC[{}:{}]'.format(drv.getDevice(), pin, muxedPin),
                                                             'dir': drv.getDir(),
                                                             'dim': drv.getDim(),
                                                             'vals': [],

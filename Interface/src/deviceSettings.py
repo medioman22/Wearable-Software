@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import sys                                                      # System package
-import time                                                     # Time package
 import logging                                                  # Logging package
 from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
+                            QSize,
                             pyqtSlot)
 from PyQt5.QtWidgets import (   QWidget,                        # Widget objects for GUI from Qt
                                 QPushButton,
@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (   QWidget,                        # Widget objects
                                 QGridLayout,
                                 QGroupBox,
                                 QFileDialog)
+from PyQt5.QtGui import (QMovie)                                # Media elements from Qt
 import pyqtgraph as pg                                          # Custom graphics package
 import numpy as np                                              # Number utility package
 
@@ -53,6 +54,10 @@ class DeviceSettingsWidget(QWidget):
     _plots = None
     # Logger module
     _logger = None
+    # Popup with plot
+    _popupPlotWidget = None
+    # Plots used to display current data for popup
+    _popupPlots = None
 
     def __init__(self, device):
         """Initialize the device settings widget."""
@@ -131,12 +136,21 @@ class DeviceSettingsWidget(QWidget):
                 bodyGridLayout.addWidget(plotWidget,            2, 0, Qt.AlignLeft | Qt.AlignTop)
             self._logger.debug("Device settings UI plot created")
 
+            # Stream indicator
+            streamGifLabel = QLabel()
+            streamGif = QMovie("assets/stream.gif")
+            streamGif.setScaledSize(QSize(24,24))
+            streamGifLabel.setMovie(streamGif)
+            streamGifLabel.setVisible(False)
+            streamGif.start()
+            self._streamGifLabel = streamGifLabel
+
             # Save button
             saveButton = QPushButton('Save Single Plot')
             saveButton.clicked.connect(self._onSavePlot)
             self._saveButton = saveButton
 
-            # Save button
+            # Stop save button
             saveStopButton = QPushButton('Stop Plot')
             saveStopButton.setVisible(False)
             saveStopButton.clicked.connect(self._onSaveStopPlot)
@@ -152,11 +166,17 @@ class DeviceSettingsWidget(QWidget):
             self._ignoreCheckBox = ignoreCheckBox
             self._logger.debug("Device settings UI buttons created")
 
+            # Show plot in popup
+            plotPopup = QPushButton('Show Plot In Popup')
+            plotPopup.clicked.connect(self._onShowPlotInPopup)
+            self._plotPopup = plotPopup
 
             # Control options
             controlLayout = QHBoxLayout()
+            controlLayout.addWidget(streamGifLabel)
             controlLayout.addWidget(saveButton)
             controlLayout.addWidget(saveStopButton)
+            controlLayout.addWidget(plotPopup)
             controlLayout.addWidget(ignoreCheckBox)
             controlLayout.addStretch(1)
             bodyGridLayout.addLayout(controlLayout,             1, 0, Qt.AlignLeft | Qt.AlignTop)
@@ -212,16 +232,20 @@ class DeviceSettingsWidget(QWidget):
     def updateData(self):
         """Update data of a device."""
         newData = self._device.data()
+        newTimestamp = self._device.timestamp()
         self._dataLabel.setText("<b>{}</b>".format("<br>".join('{:.4f}'.format(el) for el in newData if el != None)))
 
         if (self._device.fileName() != None and None not in newData): # Save values
             with open(self._device.fileName(), "a") as fh:      # Open file to append data
-                fh.write(','.join(([str(time.time())] + list('{:f}'.format(el) for el in newData))) + '\n') # Write data
+                fh.write(','.join(([str(newTimestamp)] + list('{:f}'.format(el) for el in newData))) + '\n') # Write data
 
         if (self._device.dir() == 'in'):                        # Widgets for dir=in
             if (len(newData) > 0):                              # Only update if new data is available
                 for i, pastDataI in enumerate(self._device.pastData()): # Update every plot with past data from the device
                     self._plots[i].setData(y=np.asarray(pastDataI), x=np.arange(len(pastDataI))) # Plot values
+                    if self._popupPlots != None and len(self._popupPlots) > 0: # Check for open popup
+                        self._popupPlots[i].setData(y=np.asarray(pastDataI), x=np.arange(len(pastDataI))) # Plot values for popup
+
 
         else:                                                   # Widgets for dir=out
             pass
@@ -250,7 +274,7 @@ class DeviceSettingsWidget(QWidget):
 
     @pyqtSlot()
     def _onStartFunction(self):
-        """Start the funtion."""
+        """Start the function."""
         self._device.setFunctionRunning(True)                   # Start function
         self._startButton.setVisible(False)
         self._stopButton.setVisible(True)
@@ -258,7 +282,7 @@ class DeviceSettingsWidget(QWidget):
 
     @pyqtSlot()
     def _onStopFunction(self):
-        """Stop the funtion."""
+        """Stop the function."""
         self._device.setFunctionRunning(False)                  # Stop function
         self._stopButton.setVisible(False)
         self._startButton.setVisible(True)
@@ -274,12 +298,14 @@ class DeviceSettingsWidget(QWidget):
                 self._device.setFileName(fileName)
                 self._saveButton.setVisible(False)
                 self._saveStopButton.setVisible(True)
+                self._streamGifLabel.setVisible(True)
 
     @pyqtSlot()
     def _onSaveStopPlot(self):
         """Stop saving the plot."""
         self._device.setFileName(None)
         self._saveStopButton.setVisible(False)
+        self._streamGifLabel.setVisible(False)
         self._saveButton.setVisible(True)
         self._logger.info("Data streaming has been stopped")
 
@@ -292,6 +318,28 @@ class DeviceSettingsWidget(QWidget):
         else:
             self._device.setIgnore(False)
             self._logger.info("Do not ignore device '{}' for streaming services".format(self._device.name()))
+
+    @pyqtSlot()
+    def _onShowPlotInPopup(self):
+        """Show plot in popup."""
+        if (self._popupPlotWidget != None):                           # Bring popup to front
+            self._popupPlotWidget.show()
+            self._popupPlotWidget.activateWindow()
+            self._popupPlotWidget.raise_()
+        else:
+            # Widget for plot data
+            self._popupPlots = []
+            self._popupPlotWidget = pg.PlotWidget(title='Live Data Plot')
+            self._popupPlotWidget.setWindowTitle(self._device.name())
+            self._popupPlotWidget.showAxis('bottom', False)
+            for i in range(self._device.dim()):
+                plot = self._popupPlotWidget.plot(pen=(standardColorSet[i]), name="Plot {}".format(i))
+                self._popupPlots.append(plot)
+            self._logger.debug("Popup Plot For {}".format(self._device.name()))
+            self._popupPlotWidget.show()
+            self._popupPlotWidget.activateWindow()
+            self._popupPlotWidget.raise_()
+
 
 
     def device(self):

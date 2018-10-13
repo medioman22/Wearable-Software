@@ -15,21 +15,35 @@ Configuration file for the Firmware of the Wearable SoftWEAR. PLEASE DO NOT CHAN
              'P9_27':73, 'P9_41':87
 """
 
+# Layout configuration
+LAYOUT = "DevLayout"
+
 PIN_MAP = {
     "MUX": {
-        "A": "P8_43",
-        "B": "P8_44",
-        "C": "P8_45",
-        "DETECT": "P8_46"
+        "A": "P8_41",
+        "B": "P8_42",
+        "C": "P8_43",
+        "DETECT": "P8_44"
     },
     "INPUT": [
         {
-            "DATA": "P8_42",
-            "MUX": "P8_41"
-        },
-        {
             "DATA": "P8_40",
             "MUX": "P8_39"
+        }
+    ],
+    "ADC": [
+        {
+            "DATA": "P9_39",
+            "MUX": "P9_41"
+        },
+        {
+            "DATA": "P9_40",
+            "MUX": None
+        }
+    ],
+    "I2C": [
+        {
+            "CHANNEL": "1"
         }
     ]
 

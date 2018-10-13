@@ -29,8 +29,12 @@ class Device():
     _dim = 1
     # data (Accessible by the 'friend' object board)
     _data = None
+    # timestamp (Accessible by the 'friend' object board)
+    _timestamp = None
     # Past data values
     _pastData = None
+    # Past timestamps
+    _pastTimestamps = None
     # Functions
     _functions = None
     # Parameters
@@ -75,9 +79,13 @@ class Device():
         else:
             self._dim = dim
 
-        # Set data field in respect to provided dimension
+        # Set data fields in respect to provided dimension
         self._data = []
         self._pastData = [[] for x in range(dim)]
+
+        # Set timestamp fields
+        self._timestamp = None
+        self._pastTimestamps = []
 
         # Set functions
         self._functions = [None for x in range(dim)]
@@ -102,9 +110,17 @@ class Device():
         """Return the data list."""
         return self._data
 
+    def timestamp(self):
+        """Return the timestamp."""
+        return self._timestamp
+
     def pastData(self):
         """Return a shallow copy of the past data lists."""
         return self._pastData.copy()
+
+    def pastTimestamps(self):
+        """Return a shallow copy of the past timestamp list."""
+        return self._pastTimestamps.copy()
 
     def function(self, i):
         """Return the function."""
@@ -258,16 +274,21 @@ class Board():
             else:                                               # Tried to deregister a non-registered device
                 self._logger.debug('device {} is not registered'.format(device.name()))
 
-    def updateData(self, name, data):
+    def updateData(self, name, data, timestamp):
         """Update data of a device."""
         for registeredDevice in self._deviceList:
             if (registeredDevice.name() == name):
+                                                                # Add current timestamp to past timestamps of 'friend' object
+                registeredDevice._pastTimestamps.append(registeredDevice._timestamp)
+                while (maxPoints < len(registeredDevice._pastTimestamps)): # Create overflow for past timestamps of 'friend' object
+                    registeredDevice._pastTimestamps.pop(0)
                 for i, dataI in enumerate(registeredDevice._data): # Access private field of 'friend' object
                     registeredDevice._pastData[i].append(dataI) # Add current data to past data of 'friend' object
                     while (maxPoints < len(registeredDevice._pastData[i])): # Create overflow for past values of 'friend' object
                         registeredDevice._pastData[i].pop(0)
 
                 registeredDevice._data = data                   # Set most recent data
+                registeredDevice._timestamp = timestamp         # Set most recent timestamp
 
 
                 break

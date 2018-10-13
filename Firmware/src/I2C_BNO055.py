@@ -7,6 +7,9 @@ the SoftWEAR package.
 import Adafruit_GPIO.I2C as I2C                                 # Main peripheral class. Implements I2C communication
 import time                                                     # Imported for delay reasons
 
+# Unique identifier of the sensor
+IDENTIFIER = 0xA0
+
 class BNO055:
     """Driver for BNO055."""
 
@@ -19,74 +22,71 @@ class BNO055:
     # Dimension of the driver (0-#)
     _dim = 3
 
+    # Channel
+    _channel = None
 
-    def __init__(self, chn, ADR_set = False):
-        """Device supports an address pin, one can represent this with a 'True' value of ADR_set."""
-        #self._i2c_object = mraa.I2c(chn)   # Create mraa I2C object
-        if ADR_set == True:                 # Set the I2C address
-            #self._i2c_object.address(0x29)
-            self._i2c_object = I2C.get_i2c_device(0x29, 2)
+    # Muxed channel
+    _muxedChannel = None
+
+    # The object used to handle the I2C communication
+    _i2cObject = None
+
+
+    def __init__(self, channel, muxedChannel = None, ADRSet = False):
+        """Device supports an address pin, one can represent this with a 'True' value of ADRSet."""
+        self._channel = channel                                 # Set pin
+        self._muxedChannel = muxedChannel                       # Set muxed pin
+
+        if ADRSet == True:                                      # Set the I2C address
+            self._i2cObject = I2C.get_i2c_device(0x29, 2)
         else:
-            #self._i2c_object.address(0x28)
-            self._i2c_object = I2C.get_i2c_device(0x28, 2)
+            self._i2cObject = I2C.get_i2c_device(0x28, 2)
 
 
     def getDeviceConnected(self):
         """Return True if the device is connected, false otherwise."""
-        time.sleep(0.005)   # Wait 5ms  - test if needed!!!!
-        try:                # If no device, it will throw an exception.
-            # At register address 0x00 a constant of 0xA0 is always returned.
-            #res = self._i2c_object.readReg(0x00)
-            res = self._i2c_object.readU8(0x00)
-            if res == 0xA0:
+        time.sleep(0.005)                                       # Wait 5ms  - test if needed!!!!
+        try:                                                    # If no device, it will throw an exception.
+            res = self._i2cObject.readU8(0x00)                  # At register address 0x00 a constant of IDENTIFIER is always returned.
+            if res == IDENTIFIER:
                 return True
-            else:           # Other value -> other device at same I2C address
+            else:                                               # Other value -> other device at same I2C address
                 return False
-        except:             # exception -> no device. Return False
+        except:                                                 # exception -> no device. Return False
             return False
 
     def configureDevice(self):
         """Once the device is connected, it must be configured."""
         try:
-            time.sleep(0.005)   # Wait 5ms  - test if needed!!!!
-            #self._i2c_object.writeReg(0x3D, 0x00)  # Set device in configuration mode
-            self._i2c_object.write8(0x3D, 0x00)
-            #self._i2c_object.writeReg(0x3E, 0x00)  # Put device in normal power mode
-            self._i2c_object.write8(0x3E, 0x00)
-            #self._i2c_object.writeReg(0x3B, 0x01)  # Select default units
-            self._i2c_object.write8(0x3B, 0x01)
-            time.sleep(0.005)   # Wait 5ms  - test if needed!!!!
+            time.sleep(0.005)                                   # Wait 5ms  - test if needed!!!!
+            self._i2cObject.write8(0x3D, 0x00)                  # Set device in configuration mode
+            self._i2cObject.write8(0x3E, 0x00)                  # Put device in normal power mode
+            self._i2cObject.write8(0x3B, 0x01)                  # Select default units
+            time.sleep(0.005)                                   # Wait 5ms  - test if needed!!!!
 
-            #self._i2c_object.writeReg(0x3D, 0x08)  # Set device as IMU
-            self._i2c_object.write8(0x3D, 0x08)
-        except:     # Device disconnected in the meantime
+            self._i2cObject.write8(0x3D, 0x08)                  # Set device as IMU
+        except:                                                 # Device disconnected in the meantime
             return
 
     def getValues(self):
         """Get values for the imu (x,y,z)."""
         try:
-            #x = self._i2c_object.readReg(0x08)             # Read LSB of X axis
-            x = self._i2c_object.readU8(0x08)
-            #x += 0x100 * self._i2c_object.readReg(0x09)    # Read MSB of X axis
-            x += 0x100 * self._i2c_object.readU8(0x09)
-            if x > 0x7fff:          # Convert to signed int (16 bits)
+            x = self._i2cObject.readU8(0x08)                    # Read LSB of X axis
+            x += 0x100 * self._i2cObject.readU8(0x09)           # Read MSB of X axis
+            if x > 0x7fff:                                      # Convert to signed int (16 bits)
                 x = x - 65536
 
-            #y = self._i2c_object.readReg(0x0A)             # Read LSB of Y axis
-            y = self._i2c_object.readU8(0x0A)
-            #y += 0x100 * self._i2c_object.readReg(0x0B)    # Read MSB of Y axis
-            y += 0x100 * self._i2c_object.readU8(0x0B)
-            if y > 0x7fff:          # Convert to signed int (16 bits)
+            y = self._i2cObject.readU8(0x0A)                    # Read LSB of Y axis
+            y += 0x100 * self._i2cObject.readU8(0x0B)           # Read MSB of Y axis
+            if y > 0x7fff:                                      # Convert to signed int (16 bits)
                 y = y - 65536
 
-            #z = self._i2c_object.readReg(0x0C)             # Read LSB of Z axis
-            z = self._i2c_object.readU8(0x0C)
-            #z += 0x100 * self._i2c_object.readReg(0x0D)    # Read MSB of Z axis
-            z += 0x100 * self._i2c_object.readU8(0x0D)
-            if z > 0x7fff:          # Convert to signed int (16 bits)
+            z = self._i2cObject.readU8(0x0C)                    # Read LSB of Z axis
+            z += 0x100 * self._i2cObject.readU8(0x0D)           # Read MSB of Z axis
+            if z > 0x7fff:                                      # Convert to signed int (16 bits)
                 z = z - 65536
 
-        except:     # Device disconnected in the meantime
+        except:                                                 # Device disconnected in the meantime
             return [0,0,0]
 
         return [x, y, z]
@@ -100,9 +100,12 @@ class BNO055:
     def getDim(self):
         """Return device dimension."""
         return self._dim
-
-    """The object used to handle the I2C communication."""
-    _i2c_object = None
+    def getChannel(self):
+        """Return device channel."""
+        return self._channel
+    def getMuxedChannel(self):
+        """Return device muxed channel."""
+        return self._muxedChannel
 
 
 

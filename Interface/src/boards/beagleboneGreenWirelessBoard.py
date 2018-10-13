@@ -10,7 +10,7 @@ class BeagleboneGreenWirelessBoard(Board):
 
     def __init__(self):
         """Initialize the Beaglebone Green Wireless board."""
-        super().__init__('Beaglebone Green Wireless', 'RoboComConnection', '192.168.7.2', '12345')
+        super().__init__('Beaglebone Green Wireless', 'BeagleboneGreenWirelessConnection', '192.168.7.2', '12345')
 
     def serializeMessage(self, messageObject):
         """Return serialized message as string."""

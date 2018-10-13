@@ -17,8 +17,8 @@ LOG_LEVEL_PRINT = logging.WARN
 LOG_LEVEL_SAVE = logging.DEBUG
 
 
-class RoboComConnection(Connection):
-    """RoboCommunication connection."""
+class BeagleboneGreenWirelessConnection(Connection):
+    """BeagleboneGreenWirelessConnection connection."""
 
     # Timeout in seconds. Affects the sending 'Sampling Period'
     _timeout = 0.1
@@ -30,7 +30,7 @@ class RoboComConnection(Connection):
     _recvQueue = deque()
 
     # Logger object used by the class to create the log file
-    _logger = logging.getLogger('RoboCom')
+    _logger = logging.getLogger('BeagleboneGreenWireless')
 
     # Inner communications thread object
     _commsThreadRun = True
@@ -56,16 +56,16 @@ class RoboComConnection(Connection):
 
         Creates (and binds) the socket, starts the logger and sets all communication options.
         """
-        super().__init__('RoboComConnection')
+        super().__init__('BeagleboneGreenWirelessConnection')
 
         self._commsThreadRun = True                             # Initialize the thread enable boolean
         self._sendQueue = deque()                               # Initialize the send queue
         self._recvQueue = deque()                               # Initialize the recieve queue
 
         # Configure the logger
-        self._logger = logging.getLogger('RoboComConnection')
+        self._logger = logging.getLogger('BeagleboneGreenWirelessConnection')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/RoboComConnection.log', 'w')
+        fh = logging.FileHandler('../Logs/BeagleboneGreenWirelessConnection.log', 'w')
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         fh.setFormatter(formatter)
         fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
@@ -78,20 +78,20 @@ class RoboComConnection(Connection):
         self._state = 'Initialized'
 
         # Start never ending thread
-        threading.Thread(target=self._innerThread).start()
+        communicationThread = threading.Thread(target=self._innerThread, name="CommunicationThread")
+        communicationThread.daemon = True                       # Set thread as daemonic
+        communicationThread.start()
 
     def __del__(self):
         """Class destructor. This is needed in order to stop the background thread."""
-        print('DESTROY')
         self.stopAndFreeResources()
 
     def __enter__(self):
-        """Needed for usage like: 'with RoboComConnection() as c:'."""
+        """Needed for usage like: 'with BeagleboneGreenWirelessConnection() as c:'."""
         return self
 
     def __exit__(self, type, value, traceback):
-        """Needed for usage like: 'with RoboComConnection() as c:'."""
-        print('DESTROY')
+        """Needed for usage like: 'with BeagleboneGreenWirelessConnection() as c:'."""
         self.stopAndFreeResources()
         pass
 
