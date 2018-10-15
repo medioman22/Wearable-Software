@@ -172,6 +172,20 @@ class MainWindow(QMainWindow):
         self._streamStopAct = streamStopAct
         boardMenu.addAction(streamStopAct)
 
+        # Scan menu
+        scanStopAct = QAction('&Stop Scan', self)
+        scanStopAct.setStatusTip('Stop Scanning For Devices')
+        scanStopAct.triggered.connect(self._onScanStop)
+        scanStopAct.setVisible(True)
+        self._scanStopAct = scanStopAct
+        boardMenu.addAction(scanStopAct)
+        scanStartAct = QAction('&Start Scan', self)
+        scanStartAct.setStatusTip('Start Scanning For Devices')
+        scanStartAct.triggered.connect(self._onScanStart)
+        scanStartAct.setVisible(False)
+        self._scanStartAct = scanStartAct
+        boardMenu.addAction(scanStartAct)
+
         # Quit option
         quitAct = QAction('&Quit Application', self)
         quitAct.setShortcut('Ctrl+Q')
@@ -275,6 +289,7 @@ class MainWindow(QMainWindow):
         self._interface.setBoardInformation(self._board)        # Set static board information
         self._interface.setIpAndPort(self._ip, self._port)      # Set dynamic board information
         self._interface.setStatus(self._connection.status())    # Set current connection status
+        self._interface.setScanLabel(self._connection.status() == 'Connected') # Set scan label
 
     def updateDeviceList(self):
         """Update device lists."""
@@ -417,6 +432,26 @@ class MainWindow(QMainWindow):
         self._streamStopAct.setVisible(False)
         self._streamMenu.menuAction().setVisible(True)
         self._interface.setStreamLabel(False)
+
+    @pyqtSlot()
+    def _onScanStop(self):
+        """Stop streaming data."""
+        self._interface.setScanLabel(False)
+        self._connection.sendMessages([self._board.serializeMessage(Message('Scan','', {'value': False}))])
+        self._logger.info("Stop scanning")
+
+        self._scanStopAct.setVisible(False)
+        self._scanStartAct.setVisible(True)
+
+    @pyqtSlot()
+    def _onScanStart(self):
+        """Start streaming data."""
+        self._interface.setScanLabel(True)
+        self._connection.sendMessages([self._board.serializeMessage(Message('Scan','', {'value': True}))])
+        self._logger.info("Start scanning")
+
+        self._scanStartAct.setVisible(False)
+        self._scanStopAct.setVisible(True)
 
 
 

@@ -79,6 +79,7 @@ class I2C:
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
                                                         'mode': lastDrv.getMode(),
+                                                        'flags': lastDrv.getFlags(),
                                                         'vals': [],
                                                         'timestamp': time.time()})
                         break                                   # Break to next device
@@ -96,6 +97,7 @@ class I2C:
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),
                                                         'mode': drv.getMode(),
+                                                        'flags': drv.getFlags(),
                                                         'vals': [],
                                                         'timestamp': time.time()})
                         break                                   # Break to next device
@@ -139,7 +141,6 @@ class I2C:
         """Change settings of a device."""
         drv = None
         for el in self._connectedDrivers:                       # Check for driver
-            print(el.getName(), settingsMessage['name'])
             if (el.getName() == settingsMessage['name']):
                 drv = el
                 break
@@ -149,5 +150,11 @@ class I2C:
         if ('mode' in settingsMessage):                         # Check for mode settings
             try:                                                # Try to set the mode
                 drv.setMode(settingsMessage['mode'])
+            except ValueError:
+                raise ValueError                                # Pass on the value error
+
+        if ('flag' in settingsMessage):                         # Check for flag settings
+            try:                                                # Try to set the flag
+                drv.setFlag(settingsMessage['flag'], settingsMessage['value'])
             except ValueError:
                 raise ValueError                                # Pass on the value error

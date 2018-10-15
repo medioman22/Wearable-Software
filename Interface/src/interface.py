@@ -118,6 +118,15 @@ class InterfaceWidget(QWidget):
         streamGif.start()
         self._streamGifLabel = streamGifLabel
 
+        # Scan indicator
+        scanGifLabel = QLabel()
+        scanGif = QMovie("assets/scan.gif")
+        scanGif.setScaledSize(QSize(24,24))
+        scanGifLabel.setMovie(scanGif)
+        scanGifLabel.setVisible(False)
+        scanGif.start()
+        self._scanGifLabel = scanGifLabel
+
 
         # List of connected devices
         deviceList = QListWidget()
@@ -140,6 +149,7 @@ class InterfaceWidget(QWidget):
         informationGridLayout.addWidget(streamGifLabel,             1, 3, Qt.AlignLeft)
         informationGridLayout.addWidget(connectButton,              2, 0, Qt.AlignLeft)
         informationGridLayout.addWidget(configureButton,            2, 1, Qt.AlignLeft)
+        informationGridLayout.addWidget(scanGifLabel,               2, 2, Qt.AlignLeft)
 
         # Group informations
         groupLayout = QGroupBox('Information')
@@ -196,6 +206,14 @@ class InterfaceWidget(QWidget):
             self._streamLabel.setVisible(False)
             self._streamGifLabel.setVisible(False)
         self._logger.debug("Interface UI stream updated")
+
+    def setScanLabel(self, scan):
+        """Set scan label and channel."""
+        if scan:                                                # Show scan label
+            self._scanGifLabel.setVisible(True)
+        else:                                                   # Hide scan label
+            self._scanGifLabel.setVisible(False)
+        self._logger.debug("Interface UI scan updated")
 
     def updateDeviceList(self, devices):
         """Update device stack."""

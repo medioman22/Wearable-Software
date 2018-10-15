@@ -41,6 +41,8 @@ class Device():
     _settings = None
     # Mode
     _mode = None
+    # Flags
+    _flags = None
     # Save to file
     _fileName = None
     # Ignore device
@@ -100,6 +102,8 @@ class Device():
             self._settings = data['settings']                   # Get settings for device
             if 'modes' in data['settings']:                     # Check if device provides mode-setting
                 self._mode = data['mode']                       # Get mode of device
+            if 'flags' in data['settings']:                     # Check if device provides flag-setting
+                self._flags = data['flags']                     # Get flags of device
 
         # Set functions
         self._functions = [None for x in range(data['dim'])]
@@ -149,6 +153,10 @@ class Device():
     def mode(self):
         """Return the mode."""
         return self._mode
+
+    def flags(self):
+        """Return the flag."""
+        return self._flags.copy()
 
     def fileName(self):
         """Return the file name."""
