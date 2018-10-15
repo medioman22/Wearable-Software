@@ -485,7 +485,7 @@ class MainWindow(QMainWindow):
                             with open(self._board.fileName(), "a") as fh: # Open the file
                                 for i in range(len(message.data['values'])): # Loop through all dimensions
                                     for device in self._board.deviceList(): # Look for correct device
-                                        if (device.name() == message.name and not device.ignore): # Check if it exists and should be ignored
+                                        if (device.name() == message.name and not device.ignore()): # Check if it exists and should be ignored
                                             fh.write(','.join([ message.name.replace(',','-'), # Write data entry
                                                                 str(i),
                                                                 str(message.data['timestamp']),
@@ -494,7 +494,7 @@ class MainWindow(QMainWindow):
                         if (self._broadcast != None):           # Stream data to UDP using same format as for the CSV files
                             for i in range(len(message.data['values'])): # Loop through all dimensions
                                 for device in self._board.deviceList(): # Look for correct device
-                                    if (device.name() == message.name and not device.ignore): # Check if it exists and should be ignored
+                                    if (device.name() == message.name and not device.ignore()): # Check if it exists and should be ignored
                                         self._broadcast.send(','.join([ message.name.replace(',','-'), # Send data entry
                                                                         str(i),
                                                                         str(message.data['timestamp']),
