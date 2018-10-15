@@ -4,6 +4,7 @@ import sys                                                      # System package
 import logging                                                  # Logging package
 from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
                             QSize,
+                            pyqtSignal,
                             pyqtSlot)
 from PyQt5.QtWidgets import (   QWidget,                        # Widget objects for GUI from Qt
                                 QPushButton,
@@ -12,12 +13,14 @@ from PyQt5.QtWidgets import (   QWidget,                        # Widget objects
                                 QLabel,
                                 QGridLayout,
                                 QGroupBox,
+                                QComboBox,
                                 QFileDialog)
 from PyQt5.QtGui import (QMovie)                                # Media elements from Qt
 import pyqtgraph as pg                                          # Custom graphics package
 import numpy as np                                              # Number utility package
+from connections.connection import Message                      # Import message
 
-from deviceSettingsFunctionSelector import DeviceSettingsFunctionSelectorWidget # Custom device settings function selector widget
+# from deviceSettingsFunctionSelector import DeviceSettingsFunctionSelectorWidget # Custom device settings function selector widget
 
 pg.setConfigOptions(antialias=True)                             # Enable antialiasing for prettier plots
 
@@ -27,18 +30,25 @@ LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print leve
 
 # Standard color set for plots
 standardColorSet = [
-    (0,200,0),
-    (200,0,100),
-    (0,0,200),
-    (200,200,100),
-    (200,0,0),
-    (200,200,200),
-    (200,200,200),
-    (200,200,200),
-    (200,200,200),
-    (200,200,200),
-    (200,200,200),
-    (200,200,200)
+    (0,     200,    0),
+    (200,   0,      0),
+    (0,     0,      200),
+    (200,   200,    100),
+    (200,   0,      100),
+    (200,   100,    0),
+    (0,     200,    100),
+    (100,   0,      100),
+    (200,   100,    200),
+    (100,   100,    0),
+    (100,   100,    200),
+    (50,    50,     200),
+    (50,    0,       200),
+    (50,    150,    0),
+    (100,   150,    50),
+    (100,   50,     0),
+    (50,    150,    50),
+    (150,   0,      150),
+    (200,   200,    200)
 ]
 
 class DeviceSettingsWidget(QWidget):
@@ -47,6 +57,8 @@ class DeviceSettingsWidget(QWidget):
 
     Default device settings
     """
+    # Signal for mode change
+    sendMessage = pyqtSignal(Message)
 
     # Associated device
     _device = None
@@ -133,7 +145,7 @@ class DeviceSettingsWidget(QWidget):
             for i in range(self._device.dim()):
                 plot = plotWidget.plot(pen=(standardColorSet[i]), name="Plot {}".format(i))
                 self._plots.append(plot)
-                bodyGridLayout.addWidget(plotWidget,            2, 0, Qt.AlignLeft | Qt.AlignTop)
+                bodyGridLayout.addWidget(plotWidget,            3, 0, Qt.AlignLeft | Qt.AlignTop)
             self._logger.debug("Device settings UI plot created")
 
             # Stream indicator
@@ -184,46 +196,66 @@ class DeviceSettingsWidget(QWidget):
 
         # Widgets for dir=out
         else:
+            pass
+            # # Start button
+            # startButton = QPushButton('Start Function')
+            # startButton.clicked.connect(self._onStartFunction)
+            # self._startButton = startButton
+            #
+            # # Stop button
+            # stopButton = QPushButton('Stop Function')
+            # stopButton.setVisible(False)
+            # stopButton.clicked.connect(self._onStopFunction)
+            # self._stopButton = stopButton
+            # self._logger.debug("Device settings UI buttons created")
+            #
+            # # Control options
+            # controlLayout = QHBoxLayout()
+            # controlLayout.addWidget(startButton)
+            # controlLayout.addWidget(stopButton)
+            # controlLayout.addStretch(1)
+            # bodyGridLayout.addLayout(controlLayout,             1, 0, Qt.AlignLeft | Qt.AlignTop)
+            # self._logger.debug("Device settings UI control created")
+            #
+            # # List of function selectors
+            # functionSelectionLayout = QHBoxLayout()
+            #
+            # # Function selector widgets
+            # self._functionSelectors = []
+            # for i in range(self._device.dim()):
+            #     functionSelector = DeviceSettingsFunctionSelectorWidget(i)
+            #     functionSelector.functionChanged.connect(self.updateFunction)
+            #     functionSelectionLayout.addWidget(functionSelector)
+            #     self._functionSelectors.append(functionSelector)
+            # bodyGridLayout.addLayout(functionSelectionLayout,   2, 0, Qt.AlignLeft | Qt.AlignTop)
+            # self._logger.debug("Device settings UI function selector created")
 
-            # Start button
-            startButton = QPushButton('Start Function')
-            startButton.clicked.connect(self._onStartFunction)
-            self._startButton = startButton
+        # Settings
+        if self._device.settings() != None:
+            settingsLayout = QHBoxLayout()
 
-            # Stop button
-            stopButton = QPushButton('Stop Function')
-            stopButton.setVisible(False)
-            stopButton.clicked.connect(self._onStopFunction)
-            self._stopButton = stopButton
-            self._logger.debug("Device settings UI buttons created")
+            # Mode setting
+            if ('modes' in self._device.settings()):
+                # Button for mode selector menu
+                modeSelectorMenu = QComboBox()
+                for mode in self._device.settings()['modes']:
+                    modeSelectorMenu.addItem(mode)
+                index = modeSelectorMenu.findText(self._device.mode())
+                modeSelectorMenu.setCurrentIndex(index);
+                modeSelectorMenu.currentTextChanged.connect(self._onModeSelection)
+                settingsLayout.addWidget(modeSelectorMenu)
 
-            # Control options
-            controlLayout = QHBoxLayout()
-            controlLayout.addWidget(startButton)
-            controlLayout.addWidget(stopButton)
-            controlLayout.addStretch(1)
-            bodyGridLayout.addLayout(controlLayout,             1, 0, Qt.AlignLeft | Qt.AlignTop)
-            self._logger.debug("Device settings UI control created")
+            bodyGridLayout.addLayout(settingsLayout,            2, 0, Qt.AlignLeft | Qt.AlignTop)
+            self._logger.debug("Device settings created")
 
-            # List of function selectors
-            functionSelectionLayout = QHBoxLayout()
-
-            # Function selector widgets
-            self._functionSelectors = []
-            for i in range(self._device.dim()):
-                functionSelector = DeviceSettingsFunctionSelectorWidget(i)
-                functionSelector.functionChanged.connect(self.updateFunction)
-                functionSelectionLayout.addWidget(functionSelector)
-                self._functionSelectors.append(functionSelector)
-            bodyGridLayout.addLayout(functionSelectionLayout,   2, 0, Qt.AlignLeft | Qt.AlignTop)
-            self._logger.debug("Device settings UI function selector created")
 
 
 
         # Define stretching behaviour
         bodyGridLayout.setRowStretch(0, 1)
         bodyGridLayout.setRowStretch(1, 1)
-        bodyGridLayout.setRowStretch(2, 10)
+        bodyGridLayout.setRowStretch(2, 1)
+        bodyGridLayout.setRowStretch(3, 10)
 
         self.setLayout(bodyGridLayout)
         self._logger.debug("Device settings UI layout created")
@@ -233,7 +265,12 @@ class DeviceSettingsWidget(QWidget):
         """Update data of a device."""
         newData = self._device.data()
         newTimestamp = self._device.timestamp()
-        self._dataLabel.setText("<b>{}</b>".format("<br>".join('{:.4f}'.format(el) for el in newData if el != None)))
+        dataDimLabels = []
+        if len(newData) == self._device.dim():
+            for dim in range(self._device.dim()):
+                if (self._device.activeDim()[dim]):             # Only print active dim
+                    dataDimLabels.append('<span style="color: rgb({},{},{})">{:.4f}</span>'.format(standardColorSet[dim][0], standardColorSet[dim][1], standardColorSet[dim][2], newData[dim]))
+        self._dataLabel.setText("<b>{}</b>".format("<br>".join(dataDimLabels)))
 
         if (self._device.fileName() != None and None not in newData): # Save values
             with open(self._device.fileName(), "a") as fh:      # Open file to append data
@@ -243,6 +280,10 @@ class DeviceSettingsWidget(QWidget):
             if (len(newData) > 0):                              # Only update if new data is available
                 for i, pastDataI in enumerate(self._device.pastData()): # Update every plot with past data from the device
                     self._plots[i].setData(y=np.asarray(pastDataI), x=np.arange(len(pastDataI))) # Plot values
+                    if self._device.activeDim()[i] == False:    # Check if dimension is active
+                        self._plots[i].setPen((0,0,0))          # Set pen to BLACK
+                    else:
+                        self._plots[i].setPen(standardColorSet[i]) # Set pen to default color
                     if self._popupPlots != None and len(self._popupPlots) > 0: # Check for open popup
                         self._popupPlots[i].setData(y=np.asarray(pastDataI), x=np.arange(len(pastDataI))) # Plot values for popup
 
@@ -318,6 +359,15 @@ class DeviceSettingsWidget(QWidget):
         else:
             self._device.setIgnore(False)
             self._logger.info("Do not ignore device '{}' for streaming services".format(self._device.name()))
+
+    @pyqtSlot(str)
+    def _onModeSelection(self, mode):
+        """Select mode listener."""
+        if (mode in self._device.settings()['modes']):
+            self.sendMessage.emit(Message('Settings', self._device.name(), {'mode': mode}))
+            self._logger.info("Mode '{}' selected".format(mode))
+        else:
+            raise ValueError('Mode {} is invalid'.format(mode))
 
     @pyqtSlot()
     def _onShowPlotInPopup(self):

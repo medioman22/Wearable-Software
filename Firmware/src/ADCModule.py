@@ -55,12 +55,12 @@ class ADC:
             for drv in self._connectedDrivers:                  # Loop all connected drivers
                 if (device['mux'] == -1):                       # Unmuxed pin
                                                                 # Match for drv and device
-                    if device['device'] == '{}@ADC[{}]'.format(drv.getDevice(), drv.getPin()):
+                    if device['name'] == drv.getName():
                         device['vals'] = drv.getValues()        # Update values
                         device['timestamp'] = time.time()       # Update timestamp
                 else:
                                                                 # Match for drv and device
-                    if device['device'] == '{}@ADC[{}:{}]'.format(drv.getDevice(), drv.getPin(), drv.getMuxedPin()):
+                    if device['name'] == drv.getName():
                         MuxShadow.activate(device['mux'])       # Activate mux pin
                         device['vals'] = drv.getValues()        # Update values
                         MuxShadow.deactivate()                  # Deactivate mux
@@ -85,9 +85,11 @@ class ADC:
                         self._connectedDrivers.append(lastDrv)  # Add to connected driver list
                         self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                         'mux': -1,
-                                                        'device': '{}@ADC[{}]'.format(lastDrv.getDevice(), pin),
+                                                        'name': lastDrv.getName(),
+                                                        'settings': lastDrv.getSettings(),
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
+                                                        'mode': lastDrv.getMode(),
                                                         'vals': [],
                                                         'timestamp': time.time()})
                         break                                   # Break to next device
@@ -100,9 +102,11 @@ class ADC:
                         self._connectedDrivers.append(drv)      # Add to connected driver list
                         self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                         'mux': -1,
-                                                        'device': '{}@ADC[{}]'.format(drv.getDevice(), pin),
+                                                        'name': drv.getName(),
+                                                        'settings': drv.getSettings(),
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),
+                                                        'mode': drv.getMode(),
                                                         'vals': [],
                                                         'timestamp': time.time()})
                         break                                   # Break to next device
@@ -111,15 +115,18 @@ class ADC:
             else:
                 for muxedPin in range(Mux.range):               # Loop all muxed pins
                     MuxShadow.activate(muxedPin)                # Activate mux pin
+                    time.sleep(0.005)
                     for lastDrv in lastConnectedDrivers:        # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
                         if lastDrv.getPin() == pin and lastDrv.getMuxedPin() == muxedPin and lastDrv.getDeviceConnected():
                             self._connectedDrivers.append(lastDrv) # Add to connected driver list
                             self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
-                                                            'device': '{}@ADC[{}:{}]'.format(lastDrv.getDevice(), pin, muxedPin),
+                                                            'name': lastDrv.getName(),
+                                                            'settings': lastDrv.getSettings(),
                                                             'dir': lastDrv.getDir(),
                                                             'dim': lastDrv.getDim(),
+                                                            'mode': lastDrv.getMode(),
                                                             'vals': [],
                                                             'timestamp': time.time()})
                             break                               # Break to next device
@@ -132,12 +139,32 @@ class ADC:
                             self._connectedDrivers.append(drv)  # Add to connected driver list
                             self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
-                                                            'device': '{}@ADC[{}:{}]'.format(drv.getDevice(), pin, muxedPin),
+                                                            'name': drv.getName(),
+                                                            'settings': drv.getSettings(),
                                                             'dir': drv.getDir(),
                                                             'dim': drv.getDim(),
+                                                            'mode': drv.getMode(),
                                                             'vals': [],
                                                             'timestamp': time.time()})
                             break                               # Break to next device
                         else:
                             pass                                # No suitable driver has been found
                     MuxShadow.deactivate()                      # Deactivate mux
+
+
+
+    def settings(self, settingsMessage):
+        """Change settings of a device."""
+        drv = None
+        for el in self._connectedDrivers:                       # Check for driver
+            if (el.getName() == settingsMessage['name']):
+                drv = el
+                break
+        else:
+            raise ReferenceError('Driver not registered')
+
+        if ('mode' in settingsMessage):                         # Check for mode settings
+            try:                                                # Try to set the mode
+                drv.setMode(settingsMessage['mode'])
+            except ValueError:
+                raise ValueError                                # Pass on the value error

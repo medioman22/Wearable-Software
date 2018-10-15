@@ -191,6 +191,7 @@ class MainWindow(QMainWindow):
         interface = InterfaceWidget()
         interface.configureConnectionClicked.connect(self._showConnectionDialogListener)
         interface.connect.connect(self._connectListener)
+        interface.sendMessage.connect(self._sendMessageListener)
         self._interface = interface
         self.setCentralWidget(interface)
         self._logger.debug("Main UI interface created")
@@ -433,7 +434,7 @@ class MainWindow(QMainWindow):
                 for message in messages:
                     if (message.type == 'Register'):            # Message to register a device
                         ui = True                               # Raise UI refresh flag
-                        self._board.registerDevice(Device(message.name, message.data['dir'], message.data['dim'])) # Register device
+                        self._board.registerDevice(Device(message.name, message.data)) # Register device
                         self._logger.info('Register Device: {}'.format(message.name))
                         self._statusBar.showMessage('Register Device: {}'.format(message.name))
                     elif (message.type == 'Deregister'):        # Message to deregister a device
@@ -499,6 +500,11 @@ class MainWindow(QMainWindow):
 
             """Ping"""
             # self._connection.sendMessages([self._board.serializeMessage(Message('Ping',''))]);
+
+    @pyqtSlot(Message)
+    def _sendMessageListener(self, message):
+        """Listen to send message event from the interface and pass them to the connection."""
+        self._connection.sendMessages([self._board.serializeMessage(message)])
 
 
     def saveFileDialog(self):

@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (   QWidget,                        # Widget objects
 from PyQt5.QtGui import (QPixmap, QMovie)                       # Media elements from Qt
 
 from deviceSettings import DeviceSettingsWidget                 # Custom device settings widget
+from connections.connection import Message                      # Import message
 
 # Logging settings
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
@@ -25,13 +26,15 @@ class InterfaceWidget(QWidget):
     """
     Interface Widget.
 
-    Interface as the central widget of the main window displaying the board informations and connected peripheral devices
+        Interface as the central widget of the main window displaying the board informations and connected peripheral devices
     """
 
     # Signal for connection button clicked
     configureConnectionClicked = pyqtSignal()
     # Signal for connect
     connect = pyqtSignal()
+    # Signal for mode change
+    sendMessage = pyqtSignal(Message)
 
     # Board label
     _boardLabel = None
@@ -207,6 +210,7 @@ class InterfaceWidget(QWidget):
         for device in devices:                                  # Add devices to list/stack
             deviceListItem = QListWidgetItem(device.name())
             deviceWidget = DeviceSettingsWidget(device)
+            deviceWidget.sendMessage.connect(self.onSendMessage)
             self._deviceList.addItem(deviceListItem)
             self._deviceStack.addWidget(deviceWidget)
             if (device.name() == self._selectedDeviceName):     # Check for previous selection
@@ -254,3 +258,9 @@ class InterfaceWidget(QWidget):
                     break
             else:                                               # Ignore when widget does no longer exist
                 pass
+
+
+    @pyqtSlot(Message)
+    def onSendMessage(self, message):
+        """Listen to send message event from device widgets and pass them to the main."""
+        self.sendMessage.emit(message)

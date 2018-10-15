@@ -178,6 +178,7 @@ class BeagleboneGreenWirelessConnection(Connection):
         for message in messages:
             self._sendQueue.append(message)
             self._logger.debug('Message added to send queue: ' + str(message))
+            print(message)
 
     def getMessages(self):
         """Get a list of all the messages that have been recieved since the last call of this function."""

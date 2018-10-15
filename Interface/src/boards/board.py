@@ -27,6 +27,8 @@ class Device():
     _dir = 'in'
     # dimension (length of value vector)
     _dim = 1
+    # active dimensions (Accessible by the 'friend' object board)
+    _activeDim = [True]
     # data (Accessible by the 'friend' object board)
     _data = None
     # timestamp (Accessible by the 'friend' object board)
@@ -35,6 +37,17 @@ class Device():
     _pastData = None
     # Past timestamps
     _pastTimestamps = None
+    # Settings of the device
+    _settings = None
+    # Mode
+    _mode = None
+    # Save to file
+    _fileName = None
+    # Ignore device
+    _ignore = False
+    # The logger
+    _logger = None
+
     # Functions
     _functions = None
     # Parameters
@@ -43,15 +56,9 @@ class Device():
     _startTimestamps = None
     # Whether the function is running four outgoing device
     _functionRunning = None
-    # Save to file
-    _fileName = None
-    # Ignore device
-    _ignore = False
-    # The logger
-    _logger = None
 
 
-    def __init__(self, name="Unknown Device", dir=allowedDirTypes[0], dim=1):
+    def __init__(self, name="Unknown Device", data={'dir': allowedDirTypes[0], 'dim': 1}):#dir=allowedDirTypes[0], dim=1):
         """Configure a device."""
         # Configure the logger
         self._logger = logging.getLogger('Device')
@@ -66,31 +73,38 @@ class Device():
         self._name = name;
 
         # Validate dir values
-        if (dir not in allowedDirTypes):
+        if (data['dir'] not in allowedDirTypes):
             raise ValueError("dir has to be in list: {}".format(allowedDirTypes))
         else:
-            self._dir = dir
+            self._dir = data['dir']
 
         # Set device value dimension
-        if (dim <= 0):
-            raise ValueError("dim '{}' has to be positive".format(dim))
-        elif (isinstance(dim, int) == False):
-            raise ValueError("dim '{}' has to be an int".format(dim))
+        if (data['dim'] <= 0):
+            raise ValueError("dim '{}' has to be positive".format(data['dim']))
+        elif (isinstance(data['dim'], int) == False):
+            raise ValueError("dim '{}' has to be an int".format(data['dim']))
         else:
-            self._dim = dim
+            self._dim = data['dim']
+            self._activeDim = [False for i in range(self._dim)]
 
         # Set data fields in respect to provided dimension
         self._data = []
-        self._pastData = [[] for x in range(dim)]
+        self._pastData = [[] for x in range(data['dim'])]
 
         # Set timestamp fields
         self._timestamp = None
         self._pastTimestamps = []
 
+        # Get settings
+        if 'settings' in data:                                  # Check if device provides any settings
+            self._settings = data['settings']                   # Get settings for device
+            if 'modes' in data['settings']:                     # Check if device provides mode-setting
+                self._mode = data['mode']                       # Get mode of device
+
         # Set functions
-        self._functions = [None for x in range(dim)]
-        self._parameters = [None for x in range(dim)]
-        self._startTimestamps = [None for x in range(dim)]
+        self._functions = [None for x in range(data['dim'])]
+        self._parameters = [None for x in range(data['dim'])]
+        self._startTimestamps = [None for x in range(data['dim'])]
         self._functionRunning = False
 
 
@@ -105,6 +119,10 @@ class Device():
     def dim(self):
         """Return the dim."""
         return self._dim
+
+    def activeDim(self):
+        """Return a shallow copy the active dim flags."""
+        return self._activeDim.copy()
 
     def data(self):
         """Return the data list."""
@@ -122,13 +140,15 @@ class Device():
         """Return a shallow copy of the past timestamp list."""
         return self._pastTimestamps.copy()
 
-    def function(self, i):
-        """Return the function."""
-        return self._functions[i], self._parameters[i], self._startTimestamps[i]
+    def settings(self):
+        """Return a shallow copy of the settings."""
+        if self._settings == None:
+            return None
+        return self._settings.copy()
 
-    def functionRunning(self):
-        """Return whether the function is running."""
-        return self._functionRunning
+    def mode(self):
+        """Return the mode."""
+        return self._mode
 
     def fileName(self):
         """Return the file name."""
@@ -137,24 +157,6 @@ class Device():
     def ignore(self):
         """Return the ignore flag."""
         return self._ignore
-
-    def setFunction(self, dim, function, parameters):
-        """Set a function and parameters."""
-        if (self._dir != 'out'):                                # Function is only available for out devices
-            raise ValueError('device has now permission to send data')
-        else:
-            self._functions[dim] = function                     # Set function type
-            self._parameters[dim] = parameters                  # Set function parameter
-            self._startTimestamps[dim] = datetime.datetime.now() # Set t=0
-
-    def setFunctionRunning(self, running):
-        """Set a function running."""
-        if (self._dir != 'out'):                                # Function is only available for out devices
-            raise ValueError('device has now permission to send data')
-        else:
-            for i in range(self._dim):
-                self._startTimestamps[i] = datetime.datetime.now() # Set t=0
-            self._functionRunning = running                     # Start function
 
     def setData(self, data):
         """Set data for device."""
@@ -175,6 +177,39 @@ class Device():
     def setIgnore(self, ignore):
         """Set the ignore flag."""
         self._ignore = ignore
+
+
+
+
+
+
+
+
+    def function(self, i):
+        """Return the function."""
+        return self._functions[i], self._parameters[i], self._startTimestamps[i]
+
+    def functionRunning(self):
+        """Return whether the function is running."""
+        return self._functionRunning
+
+    def setFunction(self, dim, function, parameters):
+        """Set a function and parameters."""
+        if (self._dir != 'out'):                                # Function is only available for out devices
+            raise ValueError('device has now permission to send data')
+        else:
+            self._functions[dim] = function                     # Set function type
+            self._parameters[dim] = parameters                  # Set function parameter
+            self._startTimestamps[dim] = datetime.datetime.now() # Set t=0
+
+    def setFunctionRunning(self, running):
+        """Set a function running."""
+        if (self._dir != 'out'):                                # Function is only available for out devices
+            raise ValueError('device has now permission to send data')
+        else:
+            for i in range(self._dim):
+                self._startTimestamps[i] = datetime.datetime.now() # Set t=0
+            self._functionRunning = running                     # Start function
 
 
 
@@ -278,6 +313,12 @@ class Board():
         """Update data of a device."""
         for registeredDevice in self._deviceList:
             if (registeredDevice.name() == name):
+                for i, dataI in enumerate(data):
+                    if data[i] == None:
+                        data[i] = 0                             # Map None to 0
+                        registeredDevice._activeDim[i] = False  # Deactivate dim
+                    else:
+                        registeredDevice._activeDim[i] = True   # Activate dim
                                                                 # Add current timestamp to past timestamps of 'friend' object
                 registeredDevice._pastTimestamps.append(registeredDevice._timestamp)
                 while (maxPoints < len(registeredDevice._pastTimestamps)): # Create overflow for past timestamps of 'friend' object
