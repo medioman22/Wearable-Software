@@ -14,8 +14,10 @@ class MockedBoard(Board):
 
     def serializeMessage(self, messageObject):
         """Return serialized message as string."""
-        Message('Register','Mocked Device 02 (rand 0-100)', {'dir': 'in', 'dim': 1})
-        d = messageObject.data.copy()
+        global d
+        d = {}
+        if messageObject.data != None:                          # Use empty data dict when none is provided
+            d = messageObject.data.copy()
         d['type'] = messageObject.type
         d['name'] = messageObject.name
 

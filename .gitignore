@@ -2,5 +2,7 @@
 Interface/bin
 Interface/include
 Interface/lib
-Plots/**.csv
+Interface/Logs/**
+Plots/*.csv
 **/__pycache__
+**/*.log

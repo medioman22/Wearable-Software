@@ -10,8 +10,10 @@ from abc import ABC, abstractmethod
 """Globals"""
 # Possible connection states
 possibleStatusTypes = ['Disconnected', 'Connected', 'Corrupted']
-possibleIncomingMessageTypes = ['Register', 'Deregister', 'Data']
-possibleOutgoingMessageTypes = ['Data']
+# Ingoing message types
+possibleIncomingMessageTypes = ['Register', 'Deregister', 'Data', 'Ping']
+# Outgoing message types
+possibleOutgoingMessageTypes = ['Data', 'Ping', 'DeviceList', 'Settings', 'Scan']
 
 class Message():
     """Message coming form the board."""
@@ -106,4 +108,4 @@ class Connection(ABC):
 
     def setPort(self, port):
         """Set the port (Does not affect the connection, needs reconnect)."""
-        self._port = port
+        self._port = int(port)

@@ -1,0 +1,7 @@
+1. To prepare the environment on the BBGW, first update your board
+>> sudo apt-get update
+
+2. To make run the code on the BBB, you need to set up some tools. Make sure those tools are installed and updated:
+- python/pip: To run code (Usually preinstalled, just needs to be updated) [IMPORTANT: Not running on python3 for now!!!]
+- git: To get the code (Usually preinstalled, just needs to be updated)
+- Adafruit_GPIO: To access low-level hardware (https://github.com/adafruit/Adafruit_Python_GPIO)
