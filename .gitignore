@@ -2,5 +2,10 @@
 Interface/bin
 Interface/include
 Interface/lib
-Plots/**.csv
+# Ignore everything in this directory
+Interface/Logs/**
+# Except this file
+!Interface/Logs/dummy.txt
+Plots/*.csv
 **/__pycache__
+**/*.log

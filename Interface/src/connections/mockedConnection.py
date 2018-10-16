@@ -7,6 +7,7 @@ A mocked connection to a mocked board
 
 # import math
 import random
+import time
 import datetime
 # import time
 import json
@@ -56,7 +57,6 @@ class MockedConnection(Connection):
     def sendMessages(self, messages):
         """Send a list of messages."""
         # Sending messages is not implemented in the mocked connection
-        print('Send {} message(s)'.format(len(messages)))
 
     def getState(self):
         """Get the connection state."""
@@ -95,22 +95,22 @@ def defaultBehaviour():
     # Report values
     else:
         dataMessages = []
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 01 (rand 0-1)', 'values': [random.random()]})
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 02 (rand 0-100)', 'values': [random.randint(1,101)]})
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 03 (rand 0-1 x3)', 'values': [random.uniform(1,11), random.uniform(11,21), random.uniform(21,31)]})
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 04 (const)', 'values': [utils.constantFunction({'a': 1}, delta)]})
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 05 (lin 0-10)', 'values': [utils.linearFunction({'a': 0.2, 'b': 0, 'lower': -1, 'upper': 1}, delta)]})
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 06 (rect 1,0)', 'values': [utils.rectFunction({'a': 5, 'b': 0, 'lower': 0, 'upper': 1}, delta)]})
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 07 (tri 0-1)', 'values': [utils.triFunction({'a': 5, 'b': 0, 'lower': 0, 'upper': 1}, delta)]})
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 08 (exp 0-1)', 'values': [utils.expFunction({'a': 0.2, 'b': 1, 'lower': 0, 'upper': 1}, delta)]})
-        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 09 (sin 0,±1)', 'values': [utils.sinFunction({'a': 5, 'b': 0, 'lower': -1, 'upper': 1}, delta)]})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 01 (rand 0-1)', 'values': [random.random()], 'timestamp': time.time()})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 02 (rand 0-100)', 'values': [random.randint(1,101)], 'timestamp': time.time()})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 03 (rand 0-1 x3)', 'values': [random.uniform(1,11), random.uniform(11,21), random.uniform(21,31)], 'timestamp': time.time()})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 04 (const)', 'values': [utils.constantFunction({'a': 1}, delta)], 'timestamp': time.time()})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 05 (lin 0-10)', 'values': [utils.linearFunction({'a': 0.2, 'b': 0, 'lower': -1, 'upper': 1}, delta)], 'timestamp': time.time()})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 06 (rect 1,0)', 'values': [utils.rectFunction({'a': 5, 'b': 0, 'lower': 0, 'upper': 1}, delta)], 'timestamp': time.time()})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 07 (tri 0-1)', 'values': [utils.triFunction({'a': 5, 'b': 0, 'lower': 0, 'upper': 1}, delta)], 'timestamp': time.time()})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 08 (exp 0-1)', 'values': [utils.expFunction({'a': 0.2, 'b': 1, 'lower': 0, 'upper': 1}, delta)], 'timestamp': time.time()})
+        dataMessages.append({'type': 'Data', 'name': 'Mocked Device 09 (sin 0,±1)', 'values': [utils.sinFunction({'a': 5, 'b': 0, 'lower': -1, 'upper': 1}, delta)], 'timestamp': time.time()})
         dataMessages.append({'type': 'Data', 'name': 'Mocked Device 10 (all)', 'values': [
             utils.constantFunction({'a': 1}, delta),
             utils.linearFunction({'a': 0.2, 'b': 0, 'lower': -1, 'upper': 1}, delta),
             utils.rectFunction({'a': 5, 'b': 0, 'lower': 0, 'upper': 1}, delta),
             utils.triFunction({'a': 5, 'b': 0, 'lower': 0, 'upper': 1}, delta),
             utils.expFunction({'a': 0.2, 'b': 1, 'lower': 0, 'upper': 1}, delta),
-            utils.sinFunction({'a': 5, 'b': 0, 'lower': -1, 'upper': 1}, delta)]})
+            utils.sinFunction({'a': 5, 'b': 0, 'lower': -1, 'upper': 1}, delta)], 'timestamp': time.time()})
 
         # TODO: Adapt to new serialized message format
         # De/Register temp device

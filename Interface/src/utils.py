@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-import math
+import datetime                                                 # Time package
+import math                                                     # Math package
 
 class Utils():
     """The utils of the application."""
@@ -91,7 +91,7 @@ class Utils():
         return ft
 
     def sinFunction(self, p, time):
-        """Return an sin function."""
+        """Return a sin function."""
         delta = self.timeDifSeconds(time, datetime.datetime.now())
         ft = (p['upper'] - p['lower']) / 2
         if (p['a'] != 0):
