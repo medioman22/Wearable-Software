@@ -39,3 +39,6 @@ end
 fclose(u);
 delete(u);
 clear u;
+
+
+% Data stored in data & dataLabels

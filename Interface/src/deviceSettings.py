@@ -245,6 +245,24 @@ class DeviceSettingsWidget(QWidget):
                 modeSelectorMenu.currentTextChanged.connect(self._onModeSelection)
                 settingsLayout.addWidget(modeSelectorMenu)
 
+            # Flag setting
+            if ('flags' in self._device.settings()):
+                # Checkbox for flags
+                for flag in self._device.settings()['flags']:
+                    # Create an inline slot listener
+                    @pyqtSlot(int)
+                    def flagChanged(value):
+                        self._onFlagChanged(flag, value)
+                    # Create an inline slot listener
+
+                    flagCheckboxWidget = QCheckBox(flag)
+                    if flag in self._device.flags():
+                        flagCheckboxWidget.setChecked(True)
+                    else:
+                        flagCheckboxWidget.setChecked(False)
+                    flagCheckboxWidget.stateChanged.connect(flagChanged)
+                    settingsLayout.addWidget(flagCheckboxWidget)
+
             bodyGridLayout.addLayout(settingsLayout,            2, 0, Qt.AlignLeft | Qt.AlignTop)
             self._logger.debug("Device settings created")
 
@@ -368,6 +386,16 @@ class DeviceSettingsWidget(QWidget):
             self._logger.info("Mode '{}' selected".format(mode))
         else:
             raise ValueError('Mode {} is invalid'.format(mode))
+
+    @pyqtSlot(int)
+    def _onFlagChanged(self, flag, value):
+        """Set flag."""
+        if (value == Qt.CheckState.Checked):                     # Set flag for the device
+            self.sendMessage.emit(Message('Settings', self._device.name(), {'flag': flag, 'value': True}))
+            self._logger.info("Flag '{}' enabled".format(flag))
+        else:
+            self.sendMessage.emit(Message('Settings', self._device.name(), {'flag': flag, 'value': False}))
+            self._logger.info("Flag '{}' disabled".format(flag))
 
     @pyqtSlot()
     def _onShowPlotInPopup(self):

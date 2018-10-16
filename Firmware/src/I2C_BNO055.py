@@ -189,7 +189,7 @@ class BNO055:
     _dir = 'in'
 
     # Dimension of the driver (0-#)
-    _dim = 16
+    _dim = 17
 
     # Channel
     _channel = None
@@ -202,11 +202,15 @@ class BNO055:
 
     # Settings of the driver
     _settings = {
-        'modes': ['ACCONLY', 'MAGONLY', 'GYROONLY', 'ACCMAG', 'ACCGYRO', 'MAGGYRO', 'AMG', 'IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']
+        'modes': ['ACCONLY', 'MAGONLY', 'GYROONLY', 'ACCMAG', 'ACCGYRO', 'MAGGYRO', 'AMG', 'IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF'],
+        'flags': ['TEMPERATURE']
     }
 
     # Mode
     _mode = None
+
+    # Mode
+    _flags = None
 
 
     def __init__(self, channel, muxedChannel = None, ADRSet = False):
@@ -215,6 +219,7 @@ class BNO055:
         self._muxedChannel = muxedChannel                       # Set muxed pin
 
         self._mode = self._settings['modes'][0]                 # Set default mode
+        self._flags = []                                        # Set default flag list
 
         if ADRSet == True:                                      # Set the I2C address
             self._i2cObject = I2C.get_i2c_device(ADDRESS_2, 2)
@@ -254,18 +259,21 @@ class BNO055:
         gyr = [None,None,None]
         eul = [None,None,None]
         qua = [None,None,None,None]
+        tem = [None]
         if self._mode in ['ACCONLY', 'ACCMAG', 'ACCGYRO', 'AMG', 'IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
             acc = self._getAccValues()                          # Get acc data
         if self._mode in ['MAGONLY', 'ACCMAG', 'MAGGYRO', 'AMG', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
             mag = self._getMagValues()                          # Get mag data
         if self._mode in ['GYROONLY', 'ACCGYRO', 'MAGGYRO', 'AMG', 'IMU', 'NDOF_FMC_OFF', 'NDOF']:
             gyr = self._getGyrValues()                          # Get gyr data
-        if self._mode in ['IMU', 'M4G']:
+        if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
             eul = self._getEulValues()                          # Get eul data
-        if self._mode in ['COMPASS', 'NDOF_FMC_OFF', 'NDOF']:
+        if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
             qua = self._getQuaValues()                          # Get qua data
+        if 'TEMPERATURE' in self._flags:
+            tem = self._getTemValues()
 
-        return acc + mag + gyr + eul + qua
+        return acc + mag + gyr + eul + qua + tem
 
     def _getAccValues(self):
         """Get values for the acc (x,y,z)."""
@@ -387,6 +395,16 @@ class BNO055:
         except:                                                 # Device disconnected in the meantime
             return [0,0,0]
 
+    def _getTemValues(self):
+        """Get values for the tem (t)."""
+        try:
+            t = self._i2cObject.readU8(BNO055_TEMP)             # Read LSB of T
+
+            return [t]                                          # Return values
+
+        except:                                                 # Device disconnected in the meantime
+            return [0]
+
     def getDevice(self):
         """Return device name."""
         return self._name
@@ -414,12 +432,17 @@ class BNO055:
     def getMode(self):
         """Return device mode."""
         return self._mode
+    def getFlags(self):
+        """Return device mode."""
+        return self._flags[:]
+    def getFlag(self, flag):
+        """Return device mode."""
+        return self._flags[flag]
 
     def setMode(self, mode):
         """Set device mode."""
         if (mode in self._settings['modes']):
             self._mode = mode
-            print('set mode', self._mode)
             try:
                 self._i2cObject.write8(BNO055_OPR_MODE_ADDR, 0x00)  # Set device to  config mode
                 time.sleep(0.01)                                    # Wait >7ms to let the device switch the mode
@@ -430,3 +453,13 @@ class BNO055:
 
         else:
             raise ValueError('mode {} is not allowed'.format(mode))
+
+    def setFlag(self, flag, value):
+        """Set device flag."""
+        if (flag in self._settings['flags']):
+            if value:
+                self._flags.append(flag)                            # Add the flag
+            else:
+                self._flags.remove(flag)                            # Remove the flag
+        else:
+            raise ValueError('flag {} is not allowed'.format(flag))

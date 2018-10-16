@@ -39,6 +39,26 @@ PIN_MAP = {
         {
             "DATA": "P9_40",
             "MUX": None
+        },
+        {
+            "DATA": "P9_33",
+            "MUX": None
+        },
+        {
+            "DATA": "P9_35",
+            "MUX": None
+        },
+        {
+            "DATA": "P9_36",
+            "MUX": None
+        },
+        {
+            "DATA": "P9_37",
+            "MUX": None
+        },
+        {
+            "DATA": "P9_38",
+            "MUX": None
         }
     ],
     "I2C": [

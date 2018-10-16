@@ -21,6 +21,7 @@ import json                                                     # Serializing cl
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
 SOFTWARE = "SoftWEAR/Firmware-BeagleboneGreenWireless(v0.1)"    # Identifier of the Software
 
+scanForDevices = True                                           # Scanning enabled as default
 exit = False                                                    # Exit flag to terminate all threads
 c = None                                                        # Connection object
 
@@ -170,8 +171,12 @@ def i2cUpdate():
 
 def scanThread():
     """Thread dedicated to scan for new devices."""
-    global c
+    global c, scanForDevices
     while True:                                                 # Enter the infinite loop
+        if not scanForDevices:                                  # Check for scanning
+            time.sleep(1)
+            continue
+
         messagesSend = []                                       # List of messages to send
 
         inputListRegister, inputListDeregister = inputScan()    # Get the Input devices and events
@@ -219,7 +224,8 @@ def scanThread():
                                             'dir': device['dir'],
                                             'dim': device['dim'],
                                             'settings': device['settings'],
-                                            'mode': device['mode']}))
+                                            'mode': device['mode'],
+                                            'flags': device['flags']}))
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend)                        # Send the messages
@@ -231,7 +237,7 @@ def scanThread():
 
 def updateThread():
     """Thread dedicated to get updated values of the devices."""
-    global c
+    global c, scanForDevices
     while True:                                                 # Enter the infinite loop
         messagesSend = []                                       # List of messages to send
         messagesRecv = c.getMessages()                          # Get new messages
@@ -263,8 +269,10 @@ def updateThread():
                                                     'dir': device['dir'],
                                                     'dim': device['dim'],
                                                     'settings': device['settings'],
-                                                    'mode': device['mode']}))
+                                                    'mode': device['mode'],
+                                                    'flags': device['flags']}))
             if message['type'] == 'Settings':                   # Change settings for a device
+                print(message)
                 for device in inputList:
                     if device['name'] == message['name']:       # Check for device name
                         input.settings(message)
@@ -274,6 +282,9 @@ def updateThread():
                 for device in i2cList:
                     if device['name'] == message['name']:       # Check for device name
                         i2c.settings(message)
+
+            if message['type'] == 'Scan':                       # Change scan for a device
+                scanForDevices = message['value']
 
         for device in inputList:                                # Create input device data message
             messagesSend.append(json.dumps({'type': 'Data',
@@ -323,7 +334,7 @@ def main():
         #     sendMessages = [json.dumps({'type': 'Ping','name':''})]
         #     c.sendMessages(sendMessages)
 
-        #print_func()                                            # Call print function
+        print_func()                                            # Call print function
         time.sleep(0.1)                                         # Sleep until next print period
 
     # If we reach this -> something happened. Close communication channel

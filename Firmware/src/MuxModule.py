@@ -50,7 +50,7 @@ class Mux:
 
     def activate(self, muxedPin):
         """Activate a MUX pin (0-#). Any future operations will happen on this selected channel."""
-        # TODO: LOCK
+        # TODO: CHECK IF IT IS NEEDED TO WAIT A BIT
         self.LOCK.acquire()
 
         if muxedPin < 0 or muxedPin > MUX_RANGE-1:              # Test parameter validity
