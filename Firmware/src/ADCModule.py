@@ -11,7 +11,7 @@ import Adafruit_BBIO.GPIO as GPIO                               # Main periphera
 from Config import PIN_MAP                                      # SoftWEAR Config module.
 from MuxModule import Mux                                       # SoftWEAR MUX module.
 
-from ADC_BASIC import ADCBasic                                  # Driver module for basic ADC
+from drivers.ADC_BASIC import ADCBasic                          # Driver module for basic ADC
 
 # TODO: Special drivers for ADCs
 
@@ -86,6 +86,7 @@ class ADC:
                         self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                         'mux': -1,
                                                         'name': lastDrv.getName(),
+                                                        'about': lastDrv.getAbout(),
                                                         'settings': lastDrv.getSettings(),
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
@@ -103,6 +104,7 @@ class ADC:
                         self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                         'mux': -1,
                                                         'name': drv.getName(),
+                                                        'about': drv.getAbout(),
                                                         'settings': drv.getSettings(),
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),
@@ -123,6 +125,7 @@ class ADC:
                             self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
                                                             'name': lastDrv.getName(),
+                                                            'about': lastDrv.getAbout(),
                                                             'settings': lastDrv.getSettings(),
                                                             'dir': lastDrv.getDir(),
                                                             'dim': lastDrv.getDim(),
@@ -140,6 +143,7 @@ class ADC:
                             self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
                                                             'name': drv.getName(),
+                                                            'about': drv.getAbout(),
                                                             'settings': drv.getSettings(),
                                                             'dir': drv.getDir(),
                                                             'dim': drv.getDim(),

@@ -59,6 +59,8 @@ class DeviceSettingsWidget(QWidget):
     """
     # Signal for mode change
     sendMessage = pyqtSignal(Message)
+    # Signal for ignore
+    ignore = pyqtSignal()
 
     # Associated device
     _device = None
@@ -169,7 +171,7 @@ class DeviceSettingsWidget(QWidget):
             self._saveStopButton = saveStopButton
 
             # Ignore flag
-            ignoreCheckBox = QCheckBox('Ignore device in data plots and streams')
+            ignoreCheckBox = QCheckBox('Ignore')
             if self._device.ignore():
                 ignoreCheckBox.setChecked(True)
             else:
@@ -287,7 +289,7 @@ class DeviceSettingsWidget(QWidget):
         if len(newData) == self._device.dim():
             for dim in range(self._device.dim()):
                 if (self._device.activeDim()[dim]):             # Only print active dim
-                    dataDimLabels.append('<span style="color: rgb({},{},{})">{:.4f}</span>'.format(standardColorSet[dim][0], standardColorSet[dim][1], standardColorSet[dim][2], newData[dim]))
+                    dataDimLabels.append('<span style="color: rgb({},{},{})">{}: {:.4f}</span>'.format(standardColorSet[dim][0], standardColorSet[dim][1], standardColorSet[dim][2], self._device.about()['dimMap'][dim], newData[dim]))
         self._dataLabel.setText("<b>{}</b>".format("<br>".join(dataDimLabels)))
 
         if (self._device.fileName() != None and None not in newData): # Save values
@@ -373,10 +375,12 @@ class DeviceSettingsWidget(QWidget):
         """Set ignore flag."""
         if (flag == Qt.CheckState.Checked):                     # Set ignore flag for the device
             self._device.setIgnore(True)
-            self._logger.info("Ignore device '{}' for streaming services".format(self._device.name()))
+            self.ignore.emit()
+            self._logger.info("Ignore device '{}'".format(self._device.name()))
         else:
             self._device.setIgnore(False)
-            self._logger.info("Do not ignore device '{}' for streaming services".format(self._device.name()))
+            self.ignore.emit()
+            self._logger.info("Do not ignore device '{}'".format(self._device.name()))
 
     @pyqtSlot(str)
     def _onModeSelection(self, mode):

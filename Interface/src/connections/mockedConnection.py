@@ -76,18 +76,18 @@ def defaultBehaviour():
     global devicesRegistered, tempDeviceRegistered
     if (devicesRegistered == False):
         registerDeviceMessages = []
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 01 (rand 0-1)',          'dir': 'in', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 02 (rand 0-100)',        'dir': 'in', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 03 (rand 0-1 x3)',       'dir': 'in', 'dim': 3})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 04 (const)',             'dir': 'in', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 05 (lin 0-10)',          'dir': 'in', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 06 (rect 1,0)',          'dir': 'in', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 07 (tri 0-1)',           'dir': 'in', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 08 (exp 0-1)',           'dir': 'in', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 09 (sin 0,±1)',          'dir': 'in', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 10 (all)',               'dir': 'in', 'dim': 6})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 11',                     'dir': 'out', 'dim': 1})
-        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 12',                     'dir': 'out', 'dim': 3})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 01 (rand 0-1)',          'dir': 'in', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 02 (rand 0-100)',        'dir': 'in', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 03 (rand 0-1 x3)',       'dir': 'in', 'dim': 3, 'about': {'dimMap': ['1','2', '3']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 04 (const)',             'dir': 'in', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 05 (lin 0-10)',          'dir': 'in', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 06 (rect 1,0)',          'dir': 'in', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 07 (tri 0-1)',           'dir': 'in', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 08 (exp 0-1)',           'dir': 'in', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 09 (sin 0,±1)',          'dir': 'in', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 10 (all)',               'dir': 'in', 'dim': 6, 'about': {'dimMap': ['1', '2', '3', '4', '5', '6']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 11',                     'dir': 'out', 'dim': 1, 'about': {'dimMap': ['1']}})
+        registerDeviceMessages.append({ 'type': 'Register', 'name': 'Mocked Device 12',                     'dir': 'out', 'dim': 3, 'about': {'dimMap': ['1']}})
 
         devicesRegistered = True
         # Simulate serialized connection

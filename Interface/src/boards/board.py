@@ -37,6 +37,8 @@ class Device():
     _pastData = None
     # Past timestamps
     _pastTimestamps = None
+    # About the device
+    _about = None
     # Settings of the device
     _settings = None
     # Mode
@@ -97,6 +99,9 @@ class Device():
         self._timestamp = None
         self._pastTimestamps = []
 
+        # Get about
+        self._about = data['about']                             # Information about the device
+        
         # Get settings
         if 'settings' in data:                                  # Check if device provides any settings
             self._settings = data['settings']                   # Get settings for device
@@ -143,6 +148,10 @@ class Device():
     def pastTimestamps(self):
         """Return a shallow copy of the past timestamp list."""
         return self._pastTimestamps.copy()
+
+    def about(self):
+        """Return a shallow copy of the about information."""
+        return self._about.copy()
 
     def settings(self):
         """Return a shallow copy of the settings."""
