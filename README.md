@@ -15,13 +15,13 @@ For the firmeware to run you will need:
 * Micro SD card with a way to write it on the PC
 * Sensors that you want to have on the board
 
-### Installing
+### Installing and setup of the BBGW
 
 Download and falsh the "debian 8.10" image from the [Beaglebone image repo](https://beagleboard.org/latest-images). To flash it onto the board.
 
 We the flash is done, plug your beaglebone to a PC with the power USB cable and access it with SSH 
 ```
-ssh debian@192.168.7.2 by default
+ssh debian@192.168.7.2
 ```
 
 Connect the board to a accessible network (with only a password and not a username/password combo. E.g. a wifi hotsport on you smartphone) by following the "ConnectWifi.pdf" guide in "Manual"
@@ -52,7 +52,7 @@ Or you can manually install the packages
 
 List of packages used
 * [Adafruit_Python_GPIO](https://github.com/adafruit/Adafruit_Python_GPIO)
-* [Serial] (https://pypi.org/project/serial/)
+* [Serial](https://pypi.org/project/serial/)
 
 To install the [Adafruit_Python_GPIO](https://github.com/adafruit/Adafruit_Python_GPIO) one, click on the name to follow the instruction in ther github page.
 To install the other package, use
@@ -65,6 +65,14 @@ You will also need to have the `Firmware/src` folrder of the firmware to by copi
 In order to do so you can clone the repository as explain before or use a FTP connection.[Filezilla](https://filezilla-project.org/) could be usefull.
 To connect with a FTP client, use the SSH port `192.168.7.2` the username `debian` the password `temppwd` (if not changed from the default beaglebone image one) and port `22`.
 
+### Installing and setup of the PC
+
+On the PC, you will need to have Python 3.5 or above installed as well as some pakages
+
+```
+pip install pyqt5
+pip install pyqtgraph
+```
 
 
 ## Running the tests
@@ -91,32 +99,6 @@ Give an example
 
 Add additional notes about how to deploy this on a live system
 
-## Built With
+## Known issue
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+* The BNO055 sensor is not able to run on the `NDOF` mode from the interface. To do so you need to change the initial mode of initialization of the sensor in the `Firmware/src/drivers/I2C_BNO055.py` from `0` to `11` in the init function.
