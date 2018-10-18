@@ -21,6 +21,10 @@ import json                                                     # Serializing cl
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
 SOFTWARE = "SoftWEAR/Firmware-BeagleboneGreenWireless(v0.1)"    # Identifier of the Software
 
+PRINT_PERIODE = 0.2                                             # Print periode to display values of devices in terminal
+UPDATE_PERIODE = 0.1                                            # Update periode to refresh values
+SCAN_PERIODE = 1                                                # Scan periode to refresh values
+
 scanForDevices = True                                           # Scanning enabled as default
 exit = False                                                    # Exit flag to terminate all threads
 c = None                                                        # Connection object
@@ -30,6 +34,8 @@ adcList = []                                                    # List of connec
 i2cList = []                                                    # List of connected IMU devices on the I2C ports
 pwm_list = []                                                   # List of current PWM channels and their state
 connectionState = ""                                            # Current connection state to be displayed
+updateDuration = 0                                              # Cycle duration needed to update values
+scanDuration = 0                                                # Cycle duration needed to scan for new devices
 
 MuxShadow = MuxModule.Mux()                                     # Initialize the SoftWEAR Mux Module
 input = InputModule.Input()                                     # Initialize the SoftWEAR Input Module
@@ -49,6 +55,12 @@ def print_func():
     print("****************************************************************")
     print("")
     print("Connection:  {}".format(connectionState))            # Print connection status
+    print("")
+    print("Update cycle:  {:.2f} ms / {:.2f} ms".format(updateDuration * 1000, UPDATE_PERIODE * 1000)) # Print update cycle time
+    if scanForDevices:
+        print("Scan   cycle:  {:.2f} ms / {:.2f} ms".format(scanDuration * 1000, SCAN_PERIODE * 1000)) # Print scan cycle time
+    else:
+        print("Scan   cycle: -") # Print scan disabled
 
     # Print Input informations:
     print("\nConnected Inputs: " + str(len(inputList)))
@@ -65,7 +77,7 @@ def print_func():
         else:                                                   # Unmuxed pin
             print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
     # Print IMU informations:
-    print("\nConnected IMUs: " + str(len(i2cList)))
+    print("\nConnected ICSs: " + str(len(i2cList)))
     for el in i2cList:                                        # Go through all connected I2C devices
         print('(Channel {}) {}: {} / {}'.format(str(el['channel']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
     #
@@ -171,11 +183,13 @@ def i2cUpdate():
 
 def scanThread():
     """Thread dedicated to scan for new devices."""
-    global c, scanForDevices
+    global c, scanForDevices, scanDuration
     while True:                                                 # Enter the infinite loop
         if not scanForDevices:                                  # Check for scanning
-            time.sleep(1)
+            scanDuration = 0                                    # No scanning
+            time.sleep(SCAN_PERIODE)
             continue
+        startTime = time.time()                                 # Save start time of update cycle
 
         messagesSend = []                                       # List of messages to send
 
@@ -232,7 +246,12 @@ def scanThread():
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend)                        # Send the messages
-        time.sleep(1)                                           # Sleep until next scan period
+
+        endTime = time.time()                                   # Save end time of update cycle
+        scanDuration = endTime - startTime                      # Calculate time used to scan for devices
+
+        if (scanDuration < SCAN_PERIODE):
+            time.sleep(SCAN_PERIODE - scanDuration)             # Sleep until next scan period
 
         if exit:                                                # Exit
             break;
@@ -240,14 +259,15 @@ def scanThread():
 
 def updateThread():
     """Thread dedicated to get updated values of the devices."""
-    global c, scanForDevices
+    global c, scanForDevices, updateDuration, UPDATE_PERIODE
     while True:                                                 # Enter the infinite loop
+        startTime = time.time()                                 # Save start time of update cycle
         messagesSend = []                                       # List of messages to send
         messagesRecv = c.getMessages()                          # Get new messages
 
-        inputUpdate()                                           # Update input devices
+        inputUpdate()                                          # Update input devices
         adcUpdate()                                             # Update ADC devices
-        i2cUpdate()                                             # Update I2C devices
+        i2cUpdate()                                            # Update I2C devices
 
         for messageString in messagesRecv:
             message = json.loads(messageString)                 # Parse message from string to JSON
@@ -278,7 +298,6 @@ def updateThread():
                                                     'mode': device['mode'],
                                                     'flags': device['flags']}))
             if message['type'] == 'Settings':                   # Change settings for a device
-                print(message)
                 for device in inputList:
                     if device['name'] == message['name']:       # Check for device name
                         input.settings(message)
@@ -291,6 +310,9 @@ def updateThread():
 
             if message['type'] == 'Scan':                       # Change scan for a device
                 scanForDevices = message['value']
+
+            if message['type'] == 'Frequency':                  # Change update frequency
+                UPDATE_PERIODE = 1./message['value']
 
         for device in inputList:                                # Create input device data message
             messagesSend.append(json.dumps({'type': 'Data',
@@ -314,7 +336,11 @@ def updateThread():
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend)                        # Send the messages
-        time.sleep(0.1)                                         # Sleep until next update period
+        endTime = time.time()                                   # Save end time of update cycle
+        updateDuration = endTime - startTime                    # Calculate time used to update values
+
+        if (updateDuration < UPDATE_PERIODE):
+            time.sleep(UPDATE_PERIODE - updateDuration)         # Sleep until next update period
 
         if exit:                                                # Exit
             break;
@@ -336,12 +362,14 @@ def main():
     while(True):                                                # Enter the infinite loop
         connectionState = c.getState()                          # Get the connection state for printing reasons
         """Ping"""
-        # if c.getState() is 'Connected':
+        if c.getState() is 'Connected':
         #     sendMessages = [json.dumps({'type': 'Ping','name':''})]
         #     c.sendMessages(sendMessages)
+            sendMessages = [json.dumps({'type': 'CycleDuration','name':'', 'values': {'update': updateDuration, 'scan': scanDuration}})]
+            c.sendMessages(sendMessages)
 
         print_func()                                            # Call print function
-        time.sleep(0.1)                                         # Sleep until next print period
+        time.sleep(PRINT_PERIODE)                               # Sleep until next print period
 
     # If we reach this -> something happened. Close communication channel
     exit = True

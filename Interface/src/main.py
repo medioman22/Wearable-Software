@@ -52,6 +52,19 @@ UDP_IP = "127.0.0.1"                                            # Default host i
 UDP_PORT = 12346                                                # Default host port
 UPDATE_LOOP = 50                                                # Update rate of the stream in [ms]
 
+FREQUENCIES = {                                                 # Available frequencies
+    '1 Hz': 1,
+    '2 Hz': 2,
+    '5 Hz': 5,
+    '10 Hz': 10,
+    # '20 Hz': 20,
+    # '50 Hz': 50,
+    # '100 Hz': 100,
+    # '>100 Hz': 1000
+    # TODO: Is limited by the TCP/IP bandwidth --> improve the protocol/firmware to be able to stream more data
+}
+DEFAULT_FREQUENCY = '10 Hz'                                     # Default frequency
+
 
 class MainWindow(QMainWindow):
     """The main window of the application."""
@@ -80,11 +93,11 @@ class MainWindow(QMainWindow):
         # Configure the logger
         self._logger = logging.getLogger('Main')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/Main.log', 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/Main.log', 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         self._logger.info("Main initializing …")
 
@@ -153,6 +166,13 @@ class MainWindow(QMainWindow):
         hideIgnoreAct.setVisible(False)
         self._hideIgnoreAct = hideIgnoreAct
         boardMenu.addAction(hideIgnoreAct)
+
+        # Board frequency selection menu
+        frequencyMenu = QMenu('Frequency', self)
+        for frequency, frequencyLabel in enumerate(FREQUENCIES):
+            frequencyMenu.addAction(QAction(frequencyLabel, self))
+        frequencyMenu.triggered.connect(self._setFrequencyListener)
+        boardMenu.addMenu(frequencyMenu)
         boardMenu.addSeparator()
 
         # Connection option
@@ -494,6 +514,15 @@ class MainWindow(QMainWindow):
         self._showIgnoreAct.setVisible(True)
         self._hideIgnoreAct.setVisible(False)
 
+    @pyqtSlot(QAction)
+    def _setFrequencyListener(self, action):
+        """Set frequency listener."""
+        self._connection.sendMessages([self._board.serializeMessage(Message('Frequency','', {'value': FREQUENCIES[action.text()]}))])
+        print("Set frequency {} for board".format(action.text()))
+        self._logger.info("Set frequency {} for board".format(action.text()))
+
+
+
 
 
     @pyqtSlot()
@@ -541,6 +570,9 @@ class MainWindow(QMainWindow):
                                                                         str(message.data['timestamp']),
                                                                         str(message.data['values'][i])]))
 
+                    elif (message.type == 'CycleDuration'):       # Cycle duration message
+                        self._logger.debug('Cycle durations: {}', str(message.data['values']))
+                        self._interface.setCycleDurationLabel(message.data['values'])
                     elif (message.type == 'Ping'):              # Ping message
                         self._logger.debug('PING')
 
@@ -574,6 +606,7 @@ class MainWindow(QMainWindow):
             if (len(messagesSend) > 0):                         # Send and serialize messages
                 self._connection.sendMessages(list(map(lambda x: self._board.serializeMessage(x), messagesSend)))
 
+            self.update()                                       # Update all GUI
             """Ping"""
             # self._connection.sendMessages([self._board.serializeMessage(Message('Ping',''))]);
 

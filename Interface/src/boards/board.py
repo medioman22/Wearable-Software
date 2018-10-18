@@ -67,11 +67,11 @@ class Device():
         # Configure the logger
         self._logger = logging.getLogger('Device')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/Device({}).log'.format(name), 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/Device({}).log'.format(name), 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         # Set device name
         self._name = name;
@@ -100,8 +100,9 @@ class Device():
         self._pastTimestamps = []
 
         # Get about
-        self._about = data['about']                             # Information about the device
-        
+        if 'about' in data:                                     # Check if device provides any settings
+            self._about = data['about']                         # Information about the device
+
         # Get settings
         if 'settings' in data:                                  # Check if device provides any settings
             self._settings = data['settings']                   # Get settings for device
@@ -254,11 +255,11 @@ class Board():
         # Configure the logger
         self._logger = logging.getLogger('Board')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/Board({}).log'.format(name), 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/Board({}).log'.format(name), 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         self._name = name
         self._connectionType = connectionType

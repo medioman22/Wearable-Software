@@ -80,11 +80,11 @@ class DeviceSettingsWidget(QWidget):
         # Configure the logger
         self._logger = logging.getLogger('DeviceSettings')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/DeviceSettings.log', 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/DeviceSettings.log', 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         self._logger.info("Device settings initializing …")
 

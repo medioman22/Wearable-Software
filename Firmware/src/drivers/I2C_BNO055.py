@@ -29,9 +29,12 @@ MODE_MAP = {
     'COMPASS':      BNO055_DRIVER.OPERATION_MODE_COMPASS,
     'M4G':          BNO055_DRIVER.OPERATION_MODE_M4G,
     'NDOF_FMC_OFF': BNO055_DRIVER.OPERATION_MODE_NDOF_FMC_OFF,
-    'NDOF':         BNO055_DRIVER.OPERATION_MODE_NDOF,
+    #'NDOF':         BNO055_DRIVER.OPERATION_MODE_NDOF
 }
-
+######################
+# BUG: NDOF
+# NDOF mode cannot be selected during runtime. Please change driver to initialize to NDOF mode at the beginning if needed and do not change it afterwards.
+######################
 
 
 
@@ -77,7 +80,8 @@ class BNO055:
             'COMPASS',
             'M4G',
             'NDOF_FMC_OFF',
-            'NDOF'],
+            #'NDOF'
+        ],
         'flags': ['TEMPERATURE']
     }
 
@@ -189,7 +193,7 @@ class BNO055:
         if (mode in self._settings['modes']):
             self._mode = mode
             try:
-                self._bno.set_mode(MODE_MAP[self._mode])            # Set device as to default mode
+                self._bno.set_mode(MODE_MAP[self._mode])            # Set device to mode
             except:                                                 # Device disconnected in the meantime
                 raise IOError('Error on i2c device while switching mode')
         else:
