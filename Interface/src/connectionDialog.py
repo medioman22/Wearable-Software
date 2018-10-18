@@ -5,6 +5,7 @@ import logging                                              # Logging package
 from PyQt5.QtCore import (  pyqtSignal,                     # Core functionality from Qt
                             pyqtSlot)
 from PyQt5.QtWidgets import (   QDialog,                    # Widget objects for GUI from Qt
+                                QLabel,
                                 QPushButton,
                                 QLineEdit,
                                 QVBoxLayout,
@@ -43,6 +44,8 @@ class ConnectionDialog(QDialog):
         self._logger.info("Connection dialog initializing …")
 
         # Initialize the dialog UI
+        self.setWindowTitle('Connection Settings')
+        self.resize(360, 240)
         self.setModal(True)
         self.initUI()
         self._logger.info("Connection dialog initialized")
@@ -71,11 +74,13 @@ class ConnectionDialog(QDialog):
 
         # Layout for connection settings fields
         connectionSettingsLayout = QVBoxLayout()
+        connectionSettingsLayout.addWidget(QLabel('IP'))
         connectionSettingsLayout.addWidget(ipLine)
+        connectionSettingsLayout.addWidget(QLabel('Port'))
         connectionSettingsLayout.addWidget(portLine)
 
         # Group informations
-        groupLayout = QGroupBox('Connection Settings')
+        groupLayout = QGroupBox()
         groupLayout.setLayout(connectionSettingsLayout)
 
         # Dialog layout

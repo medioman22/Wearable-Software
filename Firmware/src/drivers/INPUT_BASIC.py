@@ -19,6 +19,9 @@ class InputBasic:
     # Dimension of the driver (0-#)
     _dim = 1
 
+    # Dimension map of the driver (0-#)
+    _dimMap = ['Voltage']
+
     # Pin
     _pin = None
 
@@ -75,12 +78,18 @@ class InputBasic:
     def getDim(self):
         """Return device dimension."""
         return self._dim
+    def getDimMap(self):
+        """Return device dimension map."""
+        return self._dimMap[:]
     def getPin(self):
         """Return device pin."""
         return self._pin
     def getMuxedPin(self):
         """Return device muxed pin."""
         return self._muxedPin
+    def getAbout(self):
+        """Return device settings."""
+        return {'dimMap': self._dimMap[:]}
     def getSettings(self):
         """Return device settings."""
         return self._settings

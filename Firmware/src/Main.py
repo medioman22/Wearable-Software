@@ -54,20 +54,20 @@ def print_func():
     print("\nConnected Inputs: " + str(len(inputList)))
     for el in inputList:                                        # Go through all connected Input devices
         if el['mux'] != -1:                                     # Muxed pin
-            print("Pin " + str(el['pin']) + ':' + str(el['mux']) + ' type: ' + el['name'] +', values: ' + str(el['vals']))
+            print('({}:{}) {}: {} / {}'.format(str(el['pin']), str(el['mux']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
         else:                                                   # Unmuxed pin
-            print("Pin " + str(el['pin']) + ' type: ' + el['name'] +', values: ' + str(el['vals']))
+            print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
     # Print ADC informations:
     print("\nConnected ADCs: " + str(len(adcList)))
     for el in adcList:                                          # Go through all connected ADC devices
         if el['mux'] != -1:                                     # Muxed pin
-            print("Pin " + str(el['pin']) + ':' + str(el['mux']) + ' type: ' + el['name'] +', values: ' + str(el['vals']))
+            print('({}:{}) {}: {} / {}'.format(str(el['pin']), str(el['mux']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
         else:                                                   # Unmuxed pin
-            print("Pin " + str(el['pin']) + ' type: ' + el['name'] +', values: ' + str(el['vals']))
+            print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
     # Print IMU informations:
     print("\nConnected IMUs: " + str(len(i2cList)))
-    for elem in i2cList:                                        # Go through all connected I2C devices
-        print("Channel " + str(elem['channel']) + ' type: ' + elem['name'] +', values: ' + str(elem['vals']))
+    for el in i2cList:                                        # Go through all connected I2C devices
+        print('(Channel {}) {}: {} / {}'.format(str(el['channel']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
     #
     # # Print PWM informations:
     # print("\nPWM states:")
@@ -195,6 +195,7 @@ def scanThread():
                                             'name': device['name'],
                                             'dir': device['dir'],
                                             'dim': device['dim'],
+                                            'about': device['about'],
                                             'settings': device['settings'],
                                             'mode': device['mode']}))
 
@@ -209,6 +210,7 @@ def scanThread():
                                             'name': device['name'],
                                             'dir': device['dir'],
                                             'dim': device['dim'],
+                                            'about': device['about'],
                                             'settings': device['settings'],
                                             'mode': device['mode']}))
 
@@ -223,6 +225,7 @@ def scanThread():
                                             'name': device['name'],
                                             'dir': device['dir'],
                                             'dim': device['dim'],
+                                            'about': device['about'],
                                             'settings': device['settings'],
                                             'mode': device['mode'],
                                             'flags': device['flags']}))
@@ -254,6 +257,7 @@ def updateThread():
                                                     'name': device['name'],
                                                     'dir': device['dir'],
                                                     'dim': device['dim'],
+                                                    'about': device['about'],
                                                     'settings': device['settings'],
                                                     'mode': device['mode']}))
                 for device in adcList:
@@ -261,6 +265,7 @@ def updateThread():
                                                     'name': device['name'],
                                                     'dir': device['dir'],
                                                     'dim': device['dim'],
+                                                    'about': device['about'],
                                                     'settings': device['settings'],
                                                     'mode': device['mode']}))
                 for device in i2cList:
@@ -268,6 +273,7 @@ def updateThread():
                                                     'name': device['name'],
                                                     'dir': device['dir'],
                                                     'dim': device['dim'],
+                                                    'about': device['about'],
                                                     'settings': device['settings'],
                                                     'mode': device['mode'],
                                                     'flags': device['flags']}))

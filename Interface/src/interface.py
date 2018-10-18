@@ -35,6 +35,8 @@ class InterfaceWidget(QWidget):
     connect = pyqtSignal()
     # Signal for mode change
     sendMessage = pyqtSignal(Message)
+    # Signal for update
+    update = pyqtSignal()
 
     # Board label
     _boardLabel = None
@@ -229,6 +231,7 @@ class InterfaceWidget(QWidget):
             deviceListItem = QListWidgetItem(device.name())
             deviceWidget = DeviceSettingsWidget(device)
             deviceWidget.sendMessage.connect(self.onSendMessage)
+            deviceWidget.ignore.connect(self.onIgnoreDevice)
             self._deviceList.addItem(deviceListItem)
             self._deviceStack.addWidget(deviceWidget)
             if (device.name() == self._selectedDeviceName):     # Check for previous selection
@@ -282,3 +285,8 @@ class InterfaceWidget(QWidget):
     def onSendMessage(self, message):
         """Listen to send message event from device widgets and pass them to the main."""
         self.sendMessage.emit(message)
+
+    @pyqtSlot()
+    def onIgnoreDevice(self):
+        """Listen to ignore flag of a device to pass it to the main."""
+        self.update.emit()
