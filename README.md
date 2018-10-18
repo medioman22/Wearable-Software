@@ -19,26 +19,53 @@ For the firmeware to run you will need:
 
 Download and falsh the "debian 8.10" image from the [Beaglebone image repo](https://beagleboard.org/latest-images). To flash it onto the board.
 
-We the flash is done, plug your beaglebone to a PC and access it with SSH (ssh debian@192.168.7.2 by default).
-
-Connect the board to a accessible network (with only a password and not a username/password combo) by following this:
-
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
+We the flash is done, plug your beaglebone to a PC with the power USB cable and access it with SSH 
 ```
-Give the example
+ssh debian@192.168.7.2 by default
 ```
 
-And repeat
+Connect the board to a accessible network (with only a password and not a username/password combo. E.g. a wifi hotsport on you smartphone) by following the "ConnectWifi.pdf" guide in "Manual"
+
+Then make sure to do an update
+```
+sudo apt-get update
+```
+
+You will now need to clone this repository into your beaglebone in order to install everything.
+```
+git clone https://github.com/medioman22/Wearable-Software.git
+```
+
+#### Installing all the packages in you BBGW from the repo
+
+In order for the code on the beaglebone to run properly. It will need to have some packages installed.
+To do so you can use the provided script in the repository that you just download.
+To run it use
 
 ```
-until finished
+install_package.sh  (not yet implemented in the repo)
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+#### Installing all the packages in you BBGW manually
+
+Or you can manually install the packages
+
+List of packages used
+* [Adafruit_Python_GPIO](https://github.com/adafruit/Adafruit_Python_GPIO)
+* [Serial] (https://pypi.org/project/serial/)
+
+To install the [Adafruit_Python_GPIO](https://github.com/adafruit/Adafruit_Python_GPIO) one, click on the name to follow the instruction in ther github page.
+To install the other package, use
+
+```
+sudo pip install serial
+```
+
+You will also need to have the `Firmware/src` folrder of the firmware to by copied to you beaglebone. 
+In order to do so you can clone the repository as explain before or use a FTP connection.[Filezilla](https://filezilla-project.org/) could be usefull.
+To connect with a FTP client, use the SSH port `192.168.7.2` the username `debian` the password `temppwd` (if not changed from the default beaglebone image one) and port `22`.
+
+
 
 ## Running the tests
 
