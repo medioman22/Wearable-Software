@@ -11,9 +11,9 @@ from abc import ABC, abstractmethod
 # Possible connection states
 possibleStatusTypes = ['Disconnected', 'Connected', 'Corrupted']
 # Ingoing message types
-possibleIncomingMessageTypes = ['Register', 'Deregister', 'Data', 'DataBundle', 'CycleDuration', 'Ping']
+possibleIncomingMessageTypes = ['Register', 'Deregister', 'D', 'CycleDuration', 'Ping']
 # Outgoing message types
-possibleOutgoingMessageTypes = ['Data', 'Ping', 'DeviceList', 'Settings', 'Scan', 'Frequency']
+possibleOutgoingMessageTypes = ['Data', 'Ping', 'DeviceList', 'Set', 'Settings', 'Scan', 'Frequency']
 
 class Message():
     """Message coming form the board."""

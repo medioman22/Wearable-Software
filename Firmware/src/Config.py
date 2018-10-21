@@ -31,6 +31,34 @@ PIN_MAP = {
             "MUX": "P8_39"
         }
     ],
+    "OUTPUT": [
+        # {
+        #     "DATA": "USR0"
+        # },
+        # {
+        #     "DATA": "USR1"
+        # },
+        # {
+        #     "DATA": "USR2"
+        # },
+        # {
+        #     "DATA": "USR3"
+        # },
+        {
+            "DATA": "P9_16"
+        },
+        # {
+        #     "DATA": "P9_115"
+        # },
+        # {
+        #     "DATA": "P9_117"
+        # },
+    ],
+    "PWM": [
+        {
+            "DATA": "P9_14"
+        },
+    ],
     "ADC": [
         {
             "DATA": "P9_39",
@@ -40,26 +68,26 @@ PIN_MAP = {
             "DATA": "P9_40",
             "MUX": None
         },
-        {
-            "DATA": "P9_33",
-            "MUX": None
-        },
-        {
-            "DATA": "P9_35",
-            "MUX": None
-        },
-        {
-            "DATA": "P9_36",
-            "MUX": None
-        },
-        {
-            "DATA": "P9_37",
-            "MUX": None
-        },
-        {
-            "DATA": "P9_38",
-            "MUX": None
-        }
+        # {
+        #     "DATA": "P9_33",
+        #     "MUX": None
+        # },
+        # {
+        #     "DATA": "P9_35",
+        #     "MUX": None
+        # },
+        # {
+        #     "DATA": "P9_36",
+        #     "MUX": None
+        # },
+        # {
+        #     "DATA": "P9_37",
+        #     "MUX": None
+        # },
+        # {
+        #     "DATA": "P9_38",
+        #     "MUX": None
+        # }
     ],
     "I2C": [
         {

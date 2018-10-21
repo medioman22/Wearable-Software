@@ -49,30 +49,12 @@ class ADC:
             return GPIO.input(pin)                              # Read the value
 
 
-    def updateValues(self):
-        """Update the values of the devices."""
-        for device in self.connectedDevices:                    # Loop all connected devices
-            for drv in self._connectedDrivers:                  # Loop all connected drivers
-                if (device['mux'] == -1):                       # Unmuxed pin
-                                                                # Match for drv and device
-                    if device['name'] == drv.getName():
-                        device['vals'] = drv.getValues()        # Update values
-                        device['timestamp'] = time.time()       # Update timestamp
-                else:
-                                                                # Match for drv and device
-                    if device['name'] == drv.getName():
-                        MuxShadow.activate(device['mux'])       # Activate mux pin
-                        device['vals'] = drv.getValues()        # Update values
-                        MuxShadow.deactivate()                  # Deactivate mux
-                        device['timestamp'] = time.time()       # Update timestamp
-
-
-
     def scan(self):
         """Update the connected devices dictionary list."""
         lastConnectedDrivers = self._connectedDrivers           # Keep last connected driver list
         self._connectedDrivers = []                             # Update connected drivers - start by clearing previous results
         self.connectedDevices = []                              # Update connected devices - start by clearing previous results
+        disconnectedDriver = []                                 # Disconnected drivers
 
         for pinConfig in PIN_MAP["ADC"]:                        # Loop all available pin configs
             pin = pinConfig["DATA"]                             # DATA pin
@@ -81,7 +63,9 @@ class ADC:
             if not self.detectMux(muxSwitch) or not MuxShadow.detect(): # Not a muxed pin or mux is not enabled
                 for lastDrv in lastConnectedDrivers:            # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
-                    if lastDrv.getPin() == pin and lastDrv.getDeviceConnected():
+                    if not lastDrv.getDeviceConnected():        # Device is disconnected
+                        disconnectedDriver.append(lastDrv)
+                    elif lastDrv.getPin() == pin:               # Device is still connected
                         self._connectedDrivers.append(lastDrv)  # Add to connected driver list
                         self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                         'mux': -1,
@@ -91,8 +75,10 @@ class ADC:
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
                                                         'mode': lastDrv.getMode(),
-                                                        'vals': [],
-                                                        'timestamp': time.time()})
+                                                        'dutyFrequency': lastDrv.getDutyFrequency(),
+                                                        'flags': lastDrv.getFlags(),
+                                                        'val': 0,
+                                                        'vals': []})
                         break                                   # Break to next device
                 else:                                           # Try new drivers if no existing was found
                     for DRIVER in DRIVERS:                      # Test all drivers
@@ -109,18 +95,20 @@ class ADC:
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),
                                                         'mode': drv.getMode(),
-                                                        'vals': [],
-                                                        'timestamp': time.time()})
+                                                        'dutyFrequency': drv.getDutyFrequency(),
+                                                        'flags': drv.getFlags(),
+                                                        'val': 0,
+                                                        'vals': []})
                         break                                   # Break to next device
                     else:
                         pass                                    # No suitable driver has been found
             else:
                 for muxedPin in range(Mux.range):               # Loop all muxed pins
-                    MuxShadow.activate(muxedPin)                # Activate mux pin
-                    time.sleep(0.005)
                     for lastDrv in lastConnectedDrivers:        # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
-                        if lastDrv.getPin() == pin and lastDrv.getMuxedPin() == muxedPin and lastDrv.getDeviceConnected():
+                        if not lastDrv.getDeviceConnected():    # Device is disconnected
+                            disconnectedDriver.append(lastDrv)
+                        elif lastDrv.getPin() == pin and lastDrv.getMuxedPin() == muxedPin: # Device is still connected
                             self._connectedDrivers.append(lastDrv) # Add to connected driver list
                             self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
@@ -130,8 +118,10 @@ class ADC:
                                                             'dir': lastDrv.getDir(),
                                                             'dim': lastDrv.getDim(),
                                                             'mode': lastDrv.getMode(),
-                                                            'vals': [],
-                                                            'timestamp': time.time()})
+                                                            'dutyFrequency': lastDrv.getDutyFrequency(),
+                                                            'flags': lastDrv.getFlags(),
+                                                            'val': 0,
+                                                            'vals': []})
                             break                               # Break to next device
                     else:                                       # Try new drivers if no existing was found
                         for DRIVER in DRIVERS:                  # Test all drivers
@@ -148,12 +138,25 @@ class ADC:
                                                             'dir': drv.getDir(),
                                                             'dim': drv.getDim(),
                                                             'mode': drv.getMode(),
-                                                            'vals': [],
-                                                            'timestamp': time.time()})
+                                                            'dutyFrequency': drv.getDutyFrequency(),
+                                                            'flags': drv.getFlags(),
+                                                            'val': 0,
+                                                            'vals': []})
                             break                               # Break to next device
                         else:
                             pass                                # No suitable driver has been found
-                    MuxShadow.deactivate()                      # Deactivate mux
+        for drv in disconnectedDriver:                          # Clean up disconnected drivers
+            drv.cleanup()
+
+    def getValues(self):
+        """Get values of a device."""
+        for device in self.connectedDevices:                    # Loop all connected devices
+            for drv in self._connectedDrivers:                  # Loop all connected drivers
+                if device['name'] == drv.getName():             # Match for drv and device
+                    values = drv.getValues()                    # Get last values from device and clear them
+                    if len(values) > 0:                         # Check if new data is available
+                        device['val'] = values[-1][1]           # Get most recent value
+                        device['vals'] = values                 # Get all new values
 
 
 
@@ -165,7 +168,7 @@ class ADC:
                 drv = el
                 break
         else:
-            raise ReferenceError('Driver not registered')
+            return
 
         if ('mode' in settingsMessage):                         # Check for mode settings
             try:                                                # Try to set the mode

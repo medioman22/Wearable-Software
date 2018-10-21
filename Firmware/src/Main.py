@@ -12,10 +12,10 @@ import Config                                                   # SoftWEAR Confi
 import CommunicationModule                                      # SoftWEAR Communication module
 import MuxModule                                                # SoftWEAR MUX module
 import InputModule                                              # SoftWEAR Input module
+import OutputModule                                             # SoftWEAR Output module
+import PWMModule                                                # SoftWEAR PWM module
 import ADCModule                                                # SoftWEAR ADC module
 import I2CModule                                                # SoftWEAR I2C module
-#import RoboADC as r_adc                                        # SoftWEAR ADC module
-#import RoboPWM as r_pwm                                        # SoftWEAR PWM module
 import json                                                     # Serializing class. All objects sent are serialized
 
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
@@ -30,6 +30,8 @@ exit = False                                                    # Exit flag to t
 c = None                                                        # Connection object
 
 inputList = []                                                  # List of connected Input devices on the GPIO pins
+outputList = []                                                 # List of connected Output devices on the GPIO pins
+pwmList = []                                                     # List of connected PWM devices on the GPIO pins
 adcList = []                                                    # List of connected ADC devices on the Analog pins
 i2cList = []                                                    # List of connected IMU devices on the I2C ports
 pwm_list = []                                                   # List of current PWM channels and their state
@@ -39,10 +41,10 @@ scanDuration = 0                                                # Cycle duration
 
 MuxShadow = MuxModule.Mux()                                     # Initialize the SoftWEAR Mux Module
 input = InputModule.Input()                                     # Initialize the SoftWEAR Input Module
+output = OutputModule.Output()                                  # Initialize the SoftWEAR Output Module
+pwm = PWMModule.PWM()                                           # Initialize the SoftWEAR PWM Module
 adc = ADCModule.ADC()                                           # Initialize the SoftWEAR ADC Module
 i2c = I2CModule.I2C()                                           # Initialize the SoftWEAR I2C Module
-#adc = r_adc.RoboADC()                                          # Initialize the SoftWEAR ADC Module
-#pwm = r_pwm.RoboPWM()                                          # Initialize the SoftWEAR PWM Module
 
 def print_func():
     """Handle all the prints to the console."""
@@ -66,25 +68,32 @@ def print_func():
     print("\nConnected Inputs: " + str(len(inputList)))
     for el in inputList:                                        # Go through all connected Input devices
         if el['mux'] != -1:                                     # Muxed pin
-            print('({}:{}) {}: {} / {}'.format(str(el['pin']), str(el['mux']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
+            print('({}:{}) {}: {} / {}'.format(str(el['pin']), str(el['mux']), el['name'], str(el['about']['dimMap']), str(el['val'])))
         else:                                                   # Unmuxed pin
-            print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
+            print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['val'])))
+
+    # Print Output informations:
+    print("\nConnected Outputs: " + str(len(outputList)))
+    for el in outputList:                                       # Go through all connected Output devices
+        print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['val'])))
+
+    # Print PWM informations:
+    print("\nConnected PWMs: " + str(len(outputList)))
+    for el in pwmList:                                          # Go through all connected PWM devices
+        print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['val'])))
+
     # Print ADC informations:
     print("\nConnected ADCs: " + str(len(adcList)))
     for el in adcList:                                          # Go through all connected ADC devices
         if el['mux'] != -1:                                     # Muxed pin
-            print('({}:{}) {}: {} / {}'.format(str(el['pin']), str(el['mux']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
+            print('({}:{}) {}: {} / {}'.format(str(el['pin']), str(el['mux']), el['name'], str(el['about']['dimMap']), str(el['val'])))
         else:                                                   # Unmuxed pin
-            print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
+            print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['val'])))
+
     # Print IMU informations:
     print("\nConnected ICSs: " + str(len(i2cList)))
     for el in i2cList:                                        # Go through all connected I2C devices
-        print('(Channel {}) {}: {} / {}'.format(str(el['channel']), el['name'], str(el['about']['dimMap']), str(el['vals'])))
-    #
-    # # Print PWM informations:
-    # print("\nPWM states:")
-    # for elem in pwm_list:                       # Print all PWM values
-    #     print("Channel: " + str(elem['chn']) + ' value: ' + str(elem['val']))
+        print('(Channel {}) {}: {} / {}'.format(str(el['channel']), el['name'], str(el['about']['dimMap']), str(el['val'])))
 
     print("\n\nManually break to exit!")                        # Print exit condition
     print(">> Ctrl-C\n")                                        # Print exit shortcut
@@ -111,11 +120,61 @@ def inputScan():
 
     return inputListRegister, inputListDeregister
 
-
 def inputUpdate():
     """Update the input devices."""
-    input.updateValues()
+    input.getValues()
 
+def outputScan():
+    """Scan for new output devices."""
+    global outputList, output
+    output.scan()                                               # Scan devices on the output pins
+    outputListPrevious = outputList                             # Keep copy of last output devices
+    outputList = []                                             # Reset list of connected Output list
+    outputListRegister = []                                     # List of new devices that need to be registered
+    outputListDeregister = []                                   # List of new devices that need to be deregistered
+
+    for el1 in output.connectedDevices:                         # Check for connected and new devices
+        if (len(filter(lambda el2: el2['name'] == el1['name'], outputListPrevious)) > 0):
+            outputList.append(el1)                              # Add to connected list
+        else:                                                   # Device is not yet registered
+            outputListRegister.append(el1)                      # Add to register list
+            outputList.append(el1)                              # Add connected list
+
+    for el1 in outputListPrevious:                              # Check for disconnected devices
+        if (len(filter(lambda el2: el2['name'] == el1['name'], outputList)) == 0):
+            outputListDeregister.append(el1)                    # Add to deregister list
+
+    return outputListRegister, outputListDeregister
+
+def outputUpdate():
+    """Update the output devices."""
+    output.getValues()
+
+def pwmScan():
+    """Scan for new pwm devices."""
+    global pwmList, pwm
+    pwm.scan()                                                  # Scan devices on the pwm pins
+    pwmListPrevious = pwmList                                   # Keep copy of last pwm devices
+    pwmList = []                                                # Reset list of connected PWM list
+    pwmListRegister = []                                        # List of new devices that need to be registered
+    pwmListDeregister = []                                      # List of new devices that need to be deregistered
+
+    for el1 in pwm.connectedDevices:                            # Check for connected and new devices
+        if (len(filter(lambda el2: el2['name'] == el1['name'], pwmListPrevious)) > 0):
+            pwmList.append(el1)                                 # Add to connected list
+        else:                                                   # Device is not yet registered
+            pwmListRegister.append(el1)                         # Add to register list
+            pwmList.append(el1)                                 # Add connected list
+
+    for el1 in pwmListPrevious:                                 # Check for disconnected devices
+        if (len(filter(lambda el2: el2['name'] == el1['name'], pwmList)) == 0):
+            pwmListDeregister.append(el1)                       # Add to deregister list
+
+    return pwmListRegister, pwmListDeregister
+
+def pwmUpdate():
+    """Update the pwm devices."""
+    pwm.getValues()
 
 def adcScan():
     """Scan for new adc devices."""
@@ -142,7 +201,7 @@ def adcScan():
 
 def adcUpdate():
     """Update the input devices."""
-    adc.updateValues()
+    adc.getValues()
 
 
 def i2cScan():
@@ -169,17 +228,7 @@ def i2cScan():
 
 def i2cUpdate():
     """Update the I2C devices."""
-    i2c.updateValues()
-
-# def pwm_aquisition_func():
-#     """ Function updates the status of all PWM channels """
-#     global pwm_list, pwm
-#     pwm_list = pwm.get_all_values()     # SoftWEAR read all PWM channels
-#     ret_list = copy.deepcopy(pwm_list)  # Deep copy the dictionary list
-#
-#     # Add the type to the return object. This will be sent on the network
-#     ret_message = {'type':'pwm_read', 'pwm_list':ret_list}
-#     return ret_message
+    i2c.getValues()
 
 def scanThread():
     """Thread dedicated to scan for new devices."""
@@ -194,6 +243,8 @@ def scanThread():
         messagesSend = []                                       # List of messages to send
 
         inputListRegister, inputListDeregister = inputScan()    # Get the Input devices and events
+        outputListRegister, outputListDeregister = outputScan() # Get the Output devices and events
+        pwmListRegister, pwmListDeregister = pwmScan()          # Get the PWM devices and events
         adcListRegister, adcListDeregister = adcScan()          # Get the ADC devices and events
         i2cListRegister, i2cListDeregister = i2cScan()          # Get the I2C devices and events
 
@@ -211,7 +262,43 @@ def scanThread():
                                             'dim': device['dim'],
                                             'about': device['about'],
                                             'settings': device['settings'],
-                                            'mode': device['mode']}))
+                                            'mode': device['mode'],
+                                            'flags': device['flags'],
+                                            'dutyFrequency': device['dutyFrequency']}))
+
+        for device in outputListDeregister:                     # Create output device deregister message
+            messagesSend.append(json.dumps({'type': 'Deregister',
+                                            'name': device['name']}))
+
+
+
+        for device in outputListRegister:                       # Create output device register message
+            messagesSend.append(json.dumps({'type': 'Register',
+                                            'name': device['name'],
+                                            'dir': device['dir'],
+                                            'dim': device['dim'],
+                                            'about': device['about'],
+                                            'settings': device['settings'],
+                                            'mode': device['mode'],
+                                            'flags': device['flags'],
+                                            'dutyFrequency': device['dutyFrequency']}))
+
+        for device in pwmListDeregister:                        # Create pwm device deregister message
+            messagesSend.append(json.dumps({'type': 'Deregister',
+                                            'name': device['name']}))
+
+
+
+        for device in pwmListRegister:                          # Create pwm device register message
+            messagesSend.append(json.dumps({'type': 'Register',
+                                            'name': device['name'],
+                                            'dir': device['dir'],
+                                            'dim': device['dim'],
+                                            'about': device['about'],
+                                            'settings': device['settings'],
+                                            'mode': device['mode'],
+                                            'flags': device['flags'],
+                                            'dutyFrequency': device['dutyFrequency']}))
 
         for device in adcListDeregister:                        # Create ADC device deregister message
             messagesSend.append(json.dumps({'type': 'Deregister',
@@ -226,7 +313,9 @@ def scanThread():
                                             'dim': device['dim'],
                                             'about': device['about'],
                                             'settings': device['settings'],
-                                            'mode': device['mode']}))
+                                            'mode': device['mode'],
+                                            'flags': device['flags'],
+                                            'dutyFrequency': device['dutyFrequency']}))
 
         for device in i2cListDeregister:                        # Create I2C device deregister message
             messagesSend.append(json.dumps({'type': 'Deregister',
@@ -242,7 +331,8 @@ def scanThread():
                                             'about': device['about'],
                                             'settings': device['settings'],
                                             'mode': device['mode'],
-                                            'flags': device['flags']}))
+                                            'flags': device['flags'],
+                                            'dutyFrequency': device['dutyFrequency']}))
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend)                        # Send the messages
@@ -265,9 +355,11 @@ def updateThread():
         messagesSend = []                                       # List of messages to send
         messagesRecv = c.getMessages()                          # Get new messages
 
-        inputUpdate()                                          # Update input devices
+        inputUpdate()                                           # Update input devices
+        outputUpdate()                                          # Update output devices
+        pwmUpdate()                                             # Update PWM devices
         adcUpdate()                                             # Update ADC devices
-        i2cUpdate()                                            # Update I2C devices
+        i2cUpdate()                                             # Update I2C devices
 
         for messageString in messagesRecv:
             message = json.loads(messageString)                 # Parse message from string to JSON
@@ -279,7 +371,29 @@ def updateThread():
                                                     'dim': device['dim'],
                                                     'about': device['about'],
                                                     'settings': device['settings'],
-                                                    'mode': device['mode']}))
+                                                    'mode': device['mode'],
+                                                    'flags': device['flags'],
+                                                    'dutyFrequency': device['dutyFrequency']}))
+                for device in outputList:
+                    messagesSend.append(json.dumps({'type': 'Register',
+                                                    'name': device['name'],
+                                                    'dir': device['dir'],
+                                                    'dim': device['dim'],
+                                                    'about': device['about'],
+                                                    'settings': device['settings'],
+                                                    'mode': device['mode'],
+                                                    'flags': device['flags'],
+                                                    'dutyFrequency': device['dutyFrequency']}))
+                for device in pwmList:
+                    messagesSend.append(json.dumps({'type': 'Register',
+                                                    'name': device['name'],
+                                                    'dir': device['dir'],
+                                                    'dim': device['dim'],
+                                                    'about': device['about'],
+                                                    'settings': device['settings'],
+                                                    'mode': device['mode'],
+                                                    'flags': device['flags'],
+                                                    'dutyFrequency': device['dutyFrequency']}))
                 for device in adcList:
                     messagesSend.append(json.dumps({'type': 'Register',
                                                     'name': device['name'],
@@ -287,7 +401,9 @@ def updateThread():
                                                     'dim': device['dim'],
                                                     'about': device['about'],
                                                     'settings': device['settings'],
-                                                    'mode': device['mode']}))
+                                                    'mode': device['mode'],
+                                                    'flags': device['flags'],
+                                                    'dutyFrequency': device['dutyFrequency']}))
                 for device in i2cList:
                     messagesSend.append(json.dumps({'type': 'Register',
                                                     'name': device['name'],
@@ -296,17 +412,19 @@ def updateThread():
                                                     'about': device['about'],
                                                     'settings': device['settings'],
                                                     'mode': device['mode'],
-                                                    'flags': device['flags']}))
+                                                    'flags': device['flags'],
+                                                    'dutyFrequency': device['dutyFrequency']}))
+            if message['type'] == 'Set':                        # Get set message for a device and check for devices
+                output.setValue(message['name'], message['dim'], message['value'])
+                pwm.setValue(message['name'], message['dim'], message['value'])
+                i2c.setValue(message['name'], message['dim'], message['value'])
+
             if message['type'] == 'Settings':                   # Change settings for a device
-                for device in inputList:
-                    if device['name'] == message['name']:       # Check for device name
-                        input.settings(message)
-                for device in adcList:
-                    if device['name'] == message['name']:       # Check for device name
-                        adc.settings(message)
-                for device in i2cList:
-                    if device['name'] == message['name']:       # Check for device name
-                        i2c.settings(message)
+                input.settings(message)
+                output.settings(message)
+                pwm.settings(message)
+                adc.settings(message)
+                i2c.settings(message)
 
             if message['type'] == 'Scan':                       # Change scan for a device
                 scanForDevices = message['value']
@@ -314,25 +432,20 @@ def updateThread():
             if message['type'] == 'Frequency':                  # Change update frequency
                 UPDATE_PERIODE = 1./message['value']
 
+        dataMessage = {'type': 'D', 'data': []}                 # Create data message
         for device in inputList:                                # Create input device data message
-            messagesSend.append(json.dumps({'type': 'Data',
-                                            'name': device['name'],
-                                            'values': device['vals'],
-                                            'timestamp': device['timestamp']}))
-
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
+        for device in outputList:                               # Create output device data message
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
+        for device in pwmList:                                  # Create pwm device data message
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
         for device in adcList:                                  # Create adc device data message
-            messagesSend.append(json.dumps({'type': 'Data',
-                                            'name': device['name'],
-                                            'values': device['vals'],
-                                            'timestamp': device['timestamp']}))
-
-
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
         for device in i2cList:                                  # Create i2c device data message
-            messagesSend.append(json.dumps({'type': 'Data',
-                                            'name': device['name'],
-                                            'values': device['vals'],
-                                            'timestamp': device['timestamp']}))
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
 
+        if len(dataMessage['data']) > 0:
+            messagesSend.append(json.dumps(dataMessage))         # Send data message
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend)                        # Send the messages
@@ -368,7 +481,7 @@ def main():
             sendMessages = [json.dumps({'type': 'CycleDuration','name':'', 'values': {'update': updateDuration, 'scan': scanDuration}})]
             c.sendMessages(sendMessages)
 
-        print_func()                                            # Call print function
+        #print_func()                                            # Call print function
         time.sleep(PRINT_PERIODE)                               # Sleep until next print period
 
     # If we reach this -> something happened. Close communication channel

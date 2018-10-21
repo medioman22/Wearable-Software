@@ -43,6 +43,8 @@ class Device():
     _settings = None
     # Mode
     _mode = None
+    # Duty frequency
+    _dutyFrequency = None
     # Flags
     _flags = None
     # Save to file
@@ -108,6 +110,8 @@ class Device():
             self._settings = data['settings']                   # Get settings for device
             if 'modes' in data['settings']:                     # Check if device provides mode-setting
                 self._mode = data['mode']                       # Get mode of device
+            if 'dutyFrequencies' in data['settings']:           # Check if device provides dutyFrequency-setting
+                self._dutyFrequency = data['dutyFrequency']     # Get dutyFrequency of device
             if 'flags' in data['settings']:                     # Check if device provides flag-setting
                 self._flags = data['flags']                     # Get flags of device
 
@@ -163,6 +167,10 @@ class Device():
     def mode(self):
         """Return the mode."""
         return self._mode
+
+    def dutyFrequency(self):
+        """Return the dutyFrequency."""
+        return self._dutyFrequency
 
     def flags(self):
         """Return the flag."""
