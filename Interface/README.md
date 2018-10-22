@@ -1,4 +1,4 @@
-# SoftWAER firmware interface
+# SoftWEAR firmware interface
  
 This interface as been develop to work along the SoftWEAR firmware. It should be used on a PC connected to a BeagleBone green wireless
 
