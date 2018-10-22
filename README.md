@@ -1,4 +1,4 @@
-# SoftWAER firmware
+# SoftWEAR firmware
 
 This firmware is supposed to be runing on a BeagleBone Green wireless. Its perpose is to help you to connect and see sensors connected to the board through a simple interface for now.
 
