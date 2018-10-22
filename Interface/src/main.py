@@ -52,18 +52,17 @@ UDP_IP = "127.0.0.1"                                            # Default host i
 UDP_PORT = 12346                                                # Default host port
 UPDATE_LOOP = 50                                                # Update rate of the stream in [ms]
 
-FREQUENCIES = {                                                 # Available frequencies
-    '1 Hz': 1,
-    '2 Hz': 2,
-    '5 Hz': 5,
-    '10 Hz': 10,
-    # '20 Hz': 20,
-    # '50 Hz': 50,
-    # '100 Hz': 100,
-    # '>100 Hz': 1000
-    # TODO: Is limited by the TCP/IP bandwidth --> improve the protocol/firmware to be able to stream more data
+PLOT_POINTS_SET = {                                             # Available plot points
+    '32 Points': 32,
+    '64 Points': 64,
+    '126 Points': 126,
+    '256 Points': 256,
+    '512 Points': 512,
+    '1024 Points': 1024,
+    '2048 Points': 2048,
+    '4096 Points': 4096
 }
-DEFAULT_FREQUENCY = '10 Hz'                                     # Default frequency
+PLOT_POINTS = '256 Points'                                      # Default plot points
 
 
 class MainWindow(QMainWindow):
@@ -167,12 +166,12 @@ class MainWindow(QMainWindow):
         self._hideIgnoreAct = hideIgnoreAct
         boardMenu.addAction(hideIgnoreAct)
 
-        # Board frequency selection menu
-        frequencyMenu = QMenu('Frequency', self)
-        for frequency, frequencyLabel in enumerate(FREQUENCIES):
-            frequencyMenu.addAction(QAction(frequencyLabel, self))
-        frequencyMenu.triggered.connect(self._setFrequencyListener)
-        boardMenu.addMenu(frequencyMenu)
+        # Plot points selection menu
+        plotPointsSelectionMenu = QMenu('Plot Points', self)
+        for plotPoints, plotPointsLabel in enumerate(PLOT_POINTS_SET):
+            plotPointsSelectionMenu.addAction(QAction(plotPointsLabel, self))
+        plotPointsSelectionMenu.triggered.connect(self._setPlotPointsListener)
+        boardMenu.addMenu(plotPointsSelectionMenu)
         boardMenu.addSeparator()
 
         # Connection option
@@ -276,6 +275,7 @@ class MainWindow(QMainWindow):
             self._onStreamStop();                               # Stop all streams
 
         self._board = next((x for x in availableBoards if x.name() == name), None)
+        self._board.setMaxPoints(PLOT_POINTS_SET[PLOT_POINTS])  # Set plot points
 
         # Throw for no board
         if (self._board == None):
@@ -515,11 +515,12 @@ class MainWindow(QMainWindow):
         self._hideIgnoreAct.setVisible(False)
 
     @pyqtSlot(QAction)
-    def _setFrequencyListener(self, action):
-        """Set frequency listener."""
-        self._connection.sendMessages([self._board.serializeMessage(Message('Frequency','', {'value': FREQUENCIES[action.text()]}))])
-        print("Set frequency {} for board".format(action.text()))
-        self._logger.info("Set frequency {} for board".format(action.text()))
+    def _setPlotPointsListener(self, action):
+        """Set plot points listener."""
+        global PLOT_POINTS
+        PLOT_POINTS = action.text()
+        self._board.setMaxPoints(PLOT_POINTS_SET[PLOT_POINTS])
+        self._logger.info("Set plot {}".format(action.text()))
 
 
 

@@ -2,7 +2,6 @@
 """
 SoftWEAR I2C module. Adds MUX features and hardware detection to normal I2C.
 """
-import time                                                     # Time keeping module to get timestamps
 
 from Config import PIN_MAP                                      # SoftWEAR Config module.
 from MuxModule import Mux                                       # SoftWEAR MUX module.
@@ -66,6 +65,7 @@ class I2C:
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
                                                         'mode': lastDrv.getMode(),
+                                                        'frequency': lastDrv.getFrequency(),
                                                         'dutyFrequency': lastDrv.getDutyFrequency(),
                                                         'flags': lastDrv.getFlags(),
                                                         'val': 0,
@@ -86,6 +86,7 @@ class I2C:
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),
                                                         'mode': drv.getMode(),
+                                                        'frequency': drv.getFrequency(),
                                                         'dutyFrequency': drv.getDutyFrequency(),
                                                         'flags': drv.getFlags(),
                                                         'val': 0,
@@ -135,9 +136,11 @@ class I2C:
             for drv in self._connectedDrivers:                  # Loop all connected drivers
                 if device['name'] == drv.getName():             # Match for drv and device
                     values = drv.getValues()                    # Get last values from device and clear them
+                    cycleDuration = drv.getCycleDuration()      # Get cycle duration for driver
                     if len(values) > 0:                         # Check if new data is available
                         device['val'] = values[-1][1]           # Get most recent value
                         device['vals'] = values                 # Get all new values
+                        device['cycle'] = cycleDuration         # Get cycle duration
 
 
     def setValue(self, name, dim, value):
@@ -166,6 +169,12 @@ class I2C:
         if ('flag' in settingsMessage):                         # Check for flag settings
             try:                                                # Try to set the flag
                 drv.setFlag(settingsMessage['flag'], settingsMessage['value'])
+            except ValueError:
+                raise ValueError                                # Pass on the value error
+
+        if ('frequency' in settingsMessage):                    # Check for frequency settings
+            try:                                                # Try to set the frequency
+                drv.setFrequency(settingsMessage['frequency'])
             except ValueError:
                 raise ValueError                                # Pass on the value error
 

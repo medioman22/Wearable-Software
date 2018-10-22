@@ -5,7 +5,6 @@ SoftWEAR ADC module.
 Adds ADC features and hardware detection capabilities
 """
 
-import time                                                     # Time keeping module to get timestamps
 import Adafruit_BBIO.GPIO as GPIO                               # Main peripheral class. Implements GPIO communication
 
 from Config import PIN_MAP                                      # SoftWEAR Config module.
@@ -75,6 +74,7 @@ class ADC:
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
                                                         'mode': lastDrv.getMode(),
+                                                        'frequency': lastDrv.getFrequency(),
                                                         'dutyFrequency': lastDrv.getDutyFrequency(),
                                                         'flags': lastDrv.getFlags(),
                                                         'val': 0,
@@ -95,6 +95,7 @@ class ADC:
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),
                                                         'mode': drv.getMode(),
+                                                        'frequency': drv.getFrequency(),
                                                         'dutyFrequency': drv.getDutyFrequency(),
                                                         'flags': drv.getFlags(),
                                                         'val': 0,
@@ -118,6 +119,7 @@ class ADC:
                                                             'dir': lastDrv.getDir(),
                                                             'dim': lastDrv.getDim(),
                                                             'mode': lastDrv.getMode(),
+                                                            'frequency': lastDrv.getFrequency(),
                                                             'dutyFrequency': lastDrv.getDutyFrequency(),
                                                             'flags': lastDrv.getFlags(),
                                                             'val': 0,
@@ -138,6 +140,7 @@ class ADC:
                                                             'dir': drv.getDir(),
                                                             'dim': drv.getDim(),
                                                             'mode': drv.getMode(),
+                                                            'frequency': drv.getFrequency(),
                                                             'dutyFrequency': drv.getDutyFrequency(),
                                                             'flags': drv.getFlags(),
                                                             'val': 0,
@@ -154,9 +157,11 @@ class ADC:
             for drv in self._connectedDrivers:                  # Loop all connected drivers
                 if device['name'] == drv.getName():             # Match for drv and device
                     values = drv.getValues()                    # Get last values from device and clear them
+                    cycleDuration = drv.getCycleDuration()      # Get cycle duration for driver
                     if len(values) > 0:                         # Check if new data is available
                         device['val'] = values[-1][1]           # Get most recent value
                         device['vals'] = values                 # Get all new values
+                        device['cycle'] = cycleDuration         # Get cycle duration
 
 
 
@@ -173,5 +178,11 @@ class ADC:
         if ('mode' in settingsMessage):                         # Check for mode settings
             try:                                                # Try to set the mode
                 drv.setMode(settingsMessage['mode'])
+            except ValueError:
+                raise ValueError                                # Pass on the value error
+
+        if ('frequency' in settingsMessage):                    # Check for frequency settings
+            try:                                                # Try to set the frequency
+                drv.setFrequency(settingsMessage['frequency'])
             except ValueError:
                 raise ValueError                                # Pass on the value error

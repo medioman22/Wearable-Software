@@ -5,7 +5,6 @@ import logging                                                  # Logging packag
 import functools                                                # Functools for extended usage
 from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
                             QSize,
-                            QRect,
                             pyqtSignal,
                             pyqtSlot)
 from PyQt5.QtWidgets import (   QWidget,                        # Widget objects for GUI from Qt
@@ -21,7 +20,7 @@ from PyQt5.QtWidgets import (   QWidget,                        # Widget objects
                                 QComboBox,
                                 QFileDialog,
                                 QMessageBox)
-from PyQt5.QtGui import (QMovie, QIcon, QRegion)                # Media elements from Qt
+from PyQt5.QtGui import (QMovie)                                # Media elements from Qt
 import pyqtgraph as pg                                          # Custom graphics package
 import numpy as np                                              # Number utility package
 from connections.connection import Message                      # Import message
@@ -140,6 +139,7 @@ class DeviceSettingsWidget(QWidget):
             dataLayout.addWidget(QLabel('Input Data'))
             for dim in range(self._device.dim()):
                 dataLabel = QLabel('–')
+                dataLabel.setMinimumWidth(180)
                 self._dataWidgets.append(dataLabel)
                 dataLayout.addWidget(dataLabel)
 
@@ -251,7 +251,7 @@ class DeviceSettingsWidget(QWidget):
 
         # Settings
         if self._device.settings() != None:
-            settingsLayout = QHBoxLayout()
+            settingsLayout = QGridLayout()
 
             # Mode setting
             if ('modes' in self._device.settings()):            # Check if modes are available
@@ -262,7 +262,20 @@ class DeviceSettingsWidget(QWidget):
                 index = modeSelectorMenu.findText(self._device.mode())
                 modeSelectorMenu.setCurrentIndex(index);
                 modeSelectorMenu.currentTextChanged.connect(self._onModeSelection)
-                settingsLayout.addWidget(modeSelectorMenu)
+                settingsLayout.addWidget(QLabel('Mode'), 0, 0, Qt.AlignLeft)
+                settingsLayout.addWidget(modeSelectorMenu, 0, 1, Qt.AlignLeft)
+
+            # Frequency setting
+            if ('frequencies' in self._device.settings()):      # Check if frequency are available
+                # Button for frequency selector menu
+                frequencySelectorMenu = QComboBox()
+                for frequency in self._device.settings()['frequencies']: # Loop all frequencies
+                    frequencySelectorMenu.addItem(frequency)
+                index = frequencySelectorMenu.findText(self._device.frequency())
+                frequencySelectorMenu.setCurrentIndex(index);
+                frequencySelectorMenu.currentTextChanged.connect(self._onFrequencySelection)
+                settingsLayout.addWidget(QLabel('Frequency'), 1, 0, Qt.AlignLeft)
+                settingsLayout.addWidget(frequencySelectorMenu, 1, 1, Qt.AlignLeft)
 
             # Duty frequency setting
             if ('dutyFrequencies' in self._device.settings()):  # Check if dutyFrequency are available
@@ -273,7 +286,8 @@ class DeviceSettingsWidget(QWidget):
                 index = dutyFrequencySelectorMenu.findText(self._device.dutyFrequency())
                 dutyFrequencySelectorMenu.setCurrentIndex(index);
                 dutyFrequencySelectorMenu.currentTextChanged.connect(self._onDutyFrequencySelection)
-                settingsLayout.addWidget(dutyFrequencySelectorMenu)
+                settingsLayout.addWidget(QLabel('Duty Frequency'), 2, 0, Qt.AlignLeft)
+                settingsLayout.addWidget(dutyFrequencySelectorMenu, 2, 1, Qt.AlignLeft)
 
             # Flag setting
             if ('flags' in self._device.settings()):            # Check if flags are available
@@ -285,7 +299,7 @@ class DeviceSettingsWidget(QWidget):
                     else:
                         flagCheckboxWidget.setChecked(False)
                     flagCheckboxWidget.stateChanged.connect(functools.partial(self._onFlagChanged, flag))
-                    settingsLayout.addWidget(flagCheckboxWidget)
+                    settingsLayout.addWidget(flagCheckboxWidget, 3, 0, Qt.AlignLeft)
 
             bodyGridLayout.addLayout(settingsLayout,            3, 0, 1, 1, Qt.AlignLeft | Qt.AlignTop)
             self._logger.debug("Device settings created")
@@ -446,6 +460,15 @@ class DeviceSettingsWidget(QWidget):
             self._logger.info("Mode '{}' selected".format(mode))
         else:
             raise ValueError('Mode {} is invalid'.format(mode))
+
+    @pyqtSlot(str)
+    def _onFrequencySelection(self, frequency):
+        """Select frequency listener."""
+        if (frequency in self._device.settings()['frequencies']):
+            self.sendMessage.emit(Message('Settings', self._device.name(), {'frequency': frequency}))
+            self._logger.info("Frequency '{}' selected".format(frequency))
+        else:
+            raise ValueError('Frequency {} is invalid'.format(frequency))
 
     @pyqtSlot(str)
     def _onDutyFrequencySelection(self, dutyFrequency):

@@ -49,23 +49,6 @@ class Input:
             return GPIO.input(pin)                              # Read the value
 
 
-    def updateValues(self):
-        """Update the values of the devices."""
-        for device in self.connectedDevices:                    # Loop all connected devices
-            for drv in self._connectedDrivers:                  # Loop all connected drivers
-                if (device['mux'] == -1):                       # Unmuxed pin
-                    if device['name'] == drv.getName():         # Match for drv and device
-                        device['vals'] = drv.getValues()        # Update values
-                        device['timestamp'] = time.time()       # Update timestamp
-                else:
-                    if device['name'] == drv.getName():         # Match for drv and device
-                        MuxShadow.activate(device['mux'])       # Activate mux pin
-                        device['vals'] = drv.getValues()        # Update values
-                        MuxShadow.deactivate()                  # Deactivate mux
-                        device['timestamp'] = time.time()       # Update timestamp
-
-
-
     def scan(self):
         """Update the connected devices dictionary list."""
         lastConnectedDrivers = self._connectedDrivers           # Keep last connected driver list
@@ -92,6 +75,7 @@ class Input:
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
                                                         'mode': lastDrv.getMode(),
+                                                        'frequency': lastDrv.getFrequency(),
                                                         'dutyFrequency': lastDrv.getDutyFrequency(),
                                                         'flags': lastDrv.getFlags(),
                                                         'val': 0,
@@ -112,6 +96,7 @@ class Input:
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),
                                                         'mode': drv.getMode(),
+                                                        'frequency': drv.getFrequency(),
                                                         'dutyFrequency': drv.getDutyFrequency(),
                                                         'flags': drv.getFlags(),
                                                         'val': 0,
@@ -135,6 +120,7 @@ class Input:
                                                             'dir': lastDrv.getDir(),
                                                             'dim': lastDrv.getDim(),
                                                             'mode': lastDrv.getMode(),
+                                                            'frequency': lastDrv.getFrequency(),
                                                             'dutyFrequency': lastDrv.getDutyFrequency(),
                                                             'flags': lastDrv.getFlags(),
                                                             'val': 0,
@@ -158,6 +144,7 @@ class Input:
                                                             'dir': drv.getDir(),
                                                             'dim': drv.getDim(),
                                                             'mode': drv.getMode(),
+                                                            'frequency': drv.getFrequency(),
                                                             'dutyFrequency': drv.getDutyFrequency(),
                                                             'flags': drv.getFlags(),
                                                             'val': 0,
@@ -174,9 +161,11 @@ class Input:
             for drv in self._connectedDrivers:                  # Loop all connected drivers
                 if device['name'] == drv.getName():             # Match for drv and device
                     values = drv.getValues()                    # Get last values from device and clear them
+                    cycleDuration = drv.getCycleDuration()      # Get cycle duration for driver
                     if len(values) > 0:                         # Check if new data is available
                         device['val'] = values[-1][1]           # Get most recent value
                         device['vals'] = values                 # Get all new values
+                        device['cycle'] = cycleDuration         # Get cycle duration
 
 
     def settings(self, settingsMessage):
@@ -192,5 +181,11 @@ class Input:
         if ('mode' in settingsMessage):                         # Check for mode settings
             try:                                                # Try to set the mode
                 drv.setMode(settingsMessage['mode'])
+            except ValueError:
+                raise ValueError                                # Pass on the value error
+
+        if ('frequency' in settingsMessage):                    # Check for frequency settings
+            try:                                                # Try to set the frequency
+                drv.setFrequency(settingsMessage['frequency'])
             except ValueError:
                 raise ValueError                                # Pass on the value error

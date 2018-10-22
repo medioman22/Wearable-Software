@@ -78,7 +78,21 @@ class BNO055:
 
     # Settings of the driver
     _settings = {
-        'frequencies': [],
+        'frequencies': [
+            '1 Hz',
+            '2 Hz',
+            '3 Hz',
+            '4 Hz',
+            '5 Hz',
+            '6 Hz',
+            '10 Hz',
+            '20 Hz',
+            '30 Hz',
+            '40 Hz',
+            '50 Hz',
+            '60 Hz',
+            '100 Hz'
+        ],
         'modes': [
             'ACCONLY',
             'MAGONLY',
@@ -117,6 +131,9 @@ class BNO055:
     # Flags
     _flags = None
 
+    # Frequency for the thread
+    _frequency = '10 Hz'
+
     # Period for the thread
     _period = 0.1
 
@@ -125,6 +142,9 @@ class BNO055:
 
     # Thread for the inner loop
     _thread = None
+
+    # Duration needed for an update cycle
+    _cycleDuration = 0
 
 
     def __init__(self, channel, muxedChannel = None, ADRSet = False):
@@ -205,6 +225,7 @@ class BNO055:
 
             endT = time.time()                                  # Save start time of loop cycle
             deltaT = endT - beginT                              # Calculate time used for loop cycle
+            self._cycleDuration = deltaT                        # Save time needed for a cycle
             if (deltaT < self._period):
                 time.sleep(self._period - deltaT)               # Sleep until next loop period
 
@@ -224,27 +245,34 @@ class BNO055:
     def getDevice(self):
         """Return device name."""
         return self._name
+
     def getName(self):
         """Return device name."""
         if self._muxedChannel == None:
             return '{}@I2C[{}]'.format(self._name, self._channel)
         else:
             return '{}@I2C[{}:{}]'.format(self._name, self._channel, self._muxedChannel)
+
     def getDir(self):
         """Return device direction."""
         return self._dir
+
     def getDim(self):
         """Return device dimension."""
         return self._dim
+
     def getDimMap(self):
         """Return device dimension map."""
         return self._dimMap[:]
+
     def getChannel(self):
         """Return device channel."""
         return self._channel
+
     def getMuxedChannel(self):
         """Return device muxed channel."""
         return self._muxedChannel
+
     def getAbout(self):
         """Return device settings."""
         return {
@@ -254,9 +282,14 @@ class BNO055:
             'dataType': self._dataType,
             'dataRange': self._dataRange[:]
         }
+
     def getSettings(self):
         """Return device settings."""
         return self._settings
+
+    def getCycleDuration(self):
+        """Return device cycle duration."""
+        return self._cycleDuration
 
     def getMode(self):
         """Return device mode."""
@@ -290,6 +323,18 @@ class BNO055:
                 self._flags.remove(flag)                            # Remove the flag
         else:
             raise ValueError('flag {} is not allowed'.format(flag))
+
+    def getFrequency(self):
+        """Return device frequency."""
+        return self._frequency
+
+    def setFrequency(self, frequency):
+        """Set device frequency."""
+        if (frequency in self._settings['frequencies']):
+            self._frequency = frequency
+            self._period = 1./int(self._frequency[:-3])
+        else:
+            raise ValueError('frequency {} is not allowed'.format(frequency))
 
     def getDutyFrequency(self):
         """Return device duty frequency."""

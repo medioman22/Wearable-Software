@@ -12,7 +12,7 @@ import logging                                                  # This class log
 # Allowed directions for the dataflow
 allowedDirTypes = ['in', 'out']
 # Max past points stored
-maxPoints = 256
+MAX_POINTS = 256
 
 LOG_LEVEL_PRINT = logging.WARN
 LOG_LEVEL_SAVE = logging.DEBUG
@@ -43,6 +43,8 @@ class Device():
     _settings = None
     # Mode
     _mode = None
+    # Frequency
+    _frequency = None
     # Duty frequency
     _dutyFrequency = None
     # Flags
@@ -110,6 +112,8 @@ class Device():
             self._settings = data['settings']                   # Get settings for device
             if 'modes' in data['settings']:                     # Check if device provides mode-setting
                 self._mode = data['mode']                       # Get mode of device
+            if 'frequencies' in data['settings']:               # Check if device provides frequency-setting
+                self._frequency = data['frequency']             # Get frequency of device
             if 'dutyFrequencies' in data['settings']:           # Check if device provides dutyFrequency-setting
                 self._dutyFrequency = data['dutyFrequency']     # Get dutyFrequency of device
             if 'flags' in data['settings']:                     # Check if device provides flag-setting
@@ -168,6 +172,10 @@ class Device():
         """Return the mode."""
         return self._mode
 
+    def frequency(self):
+        """Return the frequency."""
+        return self._frequency
+
     def dutyFrequency(self):
         """Return the dutyFrequency."""
         return self._dutyFrequency
@@ -191,7 +199,7 @@ class Device():
         else:
             for i, dataI in enumerate(self._data):              # Store new data
                 self._pastData[i].append(dataI)                 # Add current data to past data
-                while (maxPoints < len(self._pastData[i])):     # Create overflow for past data
+                while (MAX_POINTS < len(self._pastData[i])):     # Create overflow for past data
                     self._pastData[i].pop(0)
 
             self._data = data                                   # Set most recent data
@@ -347,11 +355,11 @@ class Board():
                         registeredDevice._activeDim[i] = True   # Activate dim
                                                                 # Add current timestamp to past timestamps of 'friend' object
                 registeredDevice._pastTimestamps.append(registeredDevice._timestamp)
-                while (maxPoints < len(registeredDevice._pastTimestamps)): # Create overflow for past timestamps of 'friend' object
+                while (MAX_POINTS < len(registeredDevice._pastTimestamps)): # Create overflow for past timestamps of 'friend' object
                     registeredDevice._pastTimestamps.pop(0)
                 for i, dataI in enumerate(registeredDevice._data): # Access private field of 'friend' object
                     registeredDevice._pastData[i].append(dataI) # Add current data to past data of 'friend' object
-                    while (maxPoints < len(registeredDevice._pastData[i])): # Create overflow for past values of 'friend' object
+                    while (MAX_POINTS < len(registeredDevice._pastData[i])): # Create overflow for past values of 'friend' object
                         registeredDevice._pastData[i].pop(0)
 
                 registeredDevice._data = data                   # Set most recent data
@@ -361,6 +369,11 @@ class Board():
                 break
         else:                                                   # Tried to update data for a non-registered device
             self._logger.debug('device {} is not registered'.format(name))
+
+    def setMaxPoints(self, maxPoints):
+        """Set the max points."""
+        global MAX_POINTS
+        MAX_POINTS = maxPoints                                  # Set the max points
 
     def reset(self):
         """Reset the board to default."""

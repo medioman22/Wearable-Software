@@ -50,7 +50,21 @@ class ADCBasic:
 
     # Settings of the driver
     _settings = {
-        'frequencies': [],
+        'frequencies': [
+            '1 Hz',
+            '2 Hz',
+            '3 Hz',
+            '4 Hz',
+            '5 Hz',
+            '6 Hz',
+            '10 Hz',
+            '20 Hz',
+            '30 Hz',
+            '40 Hz',
+            '50 Hz',
+            '60 Hz',
+            '100 Hz'
+        ],
         'modes': ['Auto Detection', 'Manual Detection']
     }
 
@@ -75,6 +89,9 @@ class ADCBasic:
     # Flags
     _flags = None
 
+    # Frequency for the thread
+    _frequency = '10 Hz'
+
     # Period for the thread
     _period = 0.1
 
@@ -84,7 +101,8 @@ class ADCBasic:
     # Thread for the inner loop
     _thread = None
 
-
+    # Duration needed for an update cycle
+    _cycleDuration = 0
 
 
     def __init__(self, pin, muxedPin = None):
@@ -157,6 +175,7 @@ class ADCBasic:
 
             endT = time.time()                                  # Save start time of loop cycle
             deltaT = endT - beginT                              # Calculate time used for loop cycle
+            self._cycleDuration = deltaT                        # Save time needed for a cycle
             if (deltaT < self._period):
                 time.sleep(self._period - deltaT)               # Sleep until next loop period
 
@@ -175,27 +194,34 @@ class ADCBasic:
     def getDevice(self):
         """Return device name."""
         return self._name
+
     def getName(self):
         """Return device name."""
         if self._muxedPin == None:
             return '{}@ADC[{}]'.format(self._name, self._pin)
         else:
             return '{}@ADC[{}:{}]'.format(self._name, self._pin, self._muxedPin)
+
     def getDir(self):
         """Return device direction."""
         return self._dir
+
     def getDim(self):
         """Return device dimension."""
         return self._dim
+
     def getDimMap(self):
         """Return device dimension map."""
         return self._dimMap[:]
+
     def getPin(self):
         """Return device pin."""
         return self._pin
+
     def getMuxedPin(self):
         """Return device muxed pin."""
         return self._muxedPin
+
     def getAbout(self):
         """Return device settings."""
         return {
@@ -205,9 +231,14 @@ class ADCBasic:
             'dataType': self._dataType,
             'dataRange': self._dataRange[:]
         }
+
     def getSettings(self):
         """Return device settings."""
         return self._settings
+
+    def getCycleDuration(self):
+        """Return device cycle duration."""
+        return self._cycleDuration
 
     def getMode(self):
         """Return device mode."""
@@ -231,6 +262,18 @@ class ADCBasic:
     def setFlag(self, flag, value):
         """Set device flag."""
         raise ValueError('flag {} is not allowed'.format(flag))
+
+    def getFrequency(self):
+        """Return device frequency."""
+        return self._frequency
+
+    def setFrequency(self, frequency):
+        """Set device frequency."""
+        if (frequency in self._settings['frequencies']):
+            self._frequency = frequency
+            self._period = 1./int(self._frequency[:-3])
+        else:
+            raise ValueError('frequency {} is not allowed'.format(frequency))
 
     def getDutyFrequency(self):
         """Return device duty frequency."""

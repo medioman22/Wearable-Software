@@ -6,6 +6,7 @@ and their status is reported to the remote location.
 """
 
 import os                                                       # Required for clearing the system display
+import sys                                                      # Required for get input args
 import time                                                     # Required for controllng the sampling period
 import threading                                                # Threading class for the threads
 import Config                                                   # SoftWEAR Config
@@ -17,9 +18,12 @@ import PWMModule                                                # SoftWEAR PWM m
 import ADCModule                                                # SoftWEAR ADC module
 import I2CModule                                                # SoftWEAR I2C module
 import json                                                     # Serializing class. All objects sent are serialized
+from termcolor import colored                                   # Color printing in the console
 
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
 SOFTWARE = "SoftWEAR/Firmware-BeagleboneGreenWireless(v0.1)"    # Identifier of the Software
+
+LIVE_PRINT = False                                              # Flag whether live printing should be enabled in the console
 
 PRINT_PERIODE = 0.2                                             # Print periode to display values of devices in terminal
 UPDATE_PERIODE = 0.1                                            # Update periode to refresh values
@@ -45,58 +49,6 @@ output = OutputModule.Output()                                  # Initialize the
 pwm = PWMModule.PWM()                                           # Initialize the SoftWEAR PWM Module
 adc = ADCModule.ADC()                                           # Initialize the SoftWEAR ADC Module
 i2c = I2CModule.I2C()                                           # Initialize the SoftWEAR I2C Module
-
-def print_func():
-    """Handle all the prints to the console."""
-    global connectionState                                      # Uses the message global variables
-    os.system('clear')                                          # Clear console output
-    print("****************************************************************")
-    print("* Hardware:    {}                  *".format(BOARD))                                        # Display hardware information
-    print("* Software:    {} *".format(SOFTWARE))                                                      # Display software information
-    print("* Layout:      {}                                       *".format(Config.LAYOUT))           # Display layout information
-    print("****************************************************************")
-    print("")
-    print("Connection:  {}".format(connectionState))            # Print connection status
-    print("")
-    print("Update cycle:  {:.2f} ms / {:.2f} ms".format(updateDuration * 1000, UPDATE_PERIODE * 1000)) # Print update cycle time
-    if scanForDevices:
-        print("Scan   cycle:  {:.2f} ms / {:.2f} ms".format(scanDuration * 1000, SCAN_PERIODE * 1000)) # Print scan cycle time
-    else:
-        print("Scan   cycle: -") # Print scan disabled
-
-    # Print Input informations:
-    print("\nConnected Inputs: " + str(len(inputList)))
-    for el in inputList:                                        # Go through all connected Input devices
-        if el['mux'] != -1:                                     # Muxed pin
-            print('({}:{}) {}: {} / {}'.format(str(el['pin']), str(el['mux']), el['name'], str(el['about']['dimMap']), str(el['val'])))
-        else:                                                   # Unmuxed pin
-            print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['val'])))
-
-    # Print Output informations:
-    print("\nConnected Outputs: " + str(len(outputList)))
-    for el in outputList:                                       # Go through all connected Output devices
-        print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['val'])))
-
-    # Print PWM informations:
-    print("\nConnected PWMs: " + str(len(outputList)))
-    for el in pwmList:                                          # Go through all connected PWM devices
-        print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['val'])))
-
-    # Print ADC informations:
-    print("\nConnected ADCs: " + str(len(adcList)))
-    for el in adcList:                                          # Go through all connected ADC devices
-        if el['mux'] != -1:                                     # Muxed pin
-            print('({}:{}) {}: {} / {}'.format(str(el['pin']), str(el['mux']), el['name'], str(el['about']['dimMap']), str(el['val'])))
-        else:                                                   # Unmuxed pin
-            print('({}) {}: {} / {}'.format(str(el['pin']), el['name'], str(el['about']['dimMap']), str(el['val'])))
-
-    # Print IMU informations:
-    print("\nConnected ICSs: " + str(len(i2cList)))
-    for el in i2cList:                                        # Go through all connected I2C devices
-        print('(Channel {}) {}: {} / {}'.format(str(el['channel']), el['name'], str(el['about']['dimMap']), str(el['val'])))
-
-    print("\n\nManually break to exit!")                        # Print exit condition
-    print(">> Ctrl-C\n")                                        # Print exit shortcut
 
 def inputScan():
     """Scan for new input devices."""
@@ -264,6 +216,7 @@ def scanThread():
                                             'settings': device['settings'],
                                             'mode': device['mode'],
                                             'flags': device['flags'],
+                                            'frequency': device['frequency'],
                                             'dutyFrequency': device['dutyFrequency']}))
 
         for device in outputListDeregister:                     # Create output device deregister message
@@ -281,6 +234,7 @@ def scanThread():
                                             'settings': device['settings'],
                                             'mode': device['mode'],
                                             'flags': device['flags'],
+                                            'frequency': device['frequency'],
                                             'dutyFrequency': device['dutyFrequency']}))
 
         for device in pwmListDeregister:                        # Create pwm device deregister message
@@ -298,6 +252,7 @@ def scanThread():
                                             'settings': device['settings'],
                                             'mode': device['mode'],
                                             'flags': device['flags'],
+                                            'frequency': device['frequency'],
                                             'dutyFrequency': device['dutyFrequency']}))
 
         for device in adcListDeregister:                        # Create ADC device deregister message
@@ -315,6 +270,7 @@ def scanThread():
                                             'settings': device['settings'],
                                             'mode': device['mode'],
                                             'flags': device['flags'],
+                                            'frequency': device['frequency'],
                                             'dutyFrequency': device['dutyFrequency']}))
 
         for device in i2cListDeregister:                        # Create I2C device deregister message
@@ -332,6 +288,7 @@ def scanThread():
                                             'settings': device['settings'],
                                             'mode': device['mode'],
                                             'flags': device['flags'],
+                                            'frequency': device['frequency'],
                                             'dutyFrequency': device['dutyFrequency']}))
 
         if c.getState() == 'Connected':
@@ -373,6 +330,7 @@ def updateThread():
                                                     'settings': device['settings'],
                                                     'mode': device['mode'],
                                                     'flags': device['flags'],
+                                                    'frequency': device['frequency'],
                                                     'dutyFrequency': device['dutyFrequency']}))
                 for device in outputList:
                     messagesSend.append(json.dumps({'type': 'Register',
@@ -383,6 +341,7 @@ def updateThread():
                                                     'settings': device['settings'],
                                                     'mode': device['mode'],
                                                     'flags': device['flags'],
+                                                    'frequency': device['frequency'],
                                                     'dutyFrequency': device['dutyFrequency']}))
                 for device in pwmList:
                     messagesSend.append(json.dumps({'type': 'Register',
@@ -393,6 +352,7 @@ def updateThread():
                                                     'settings': device['settings'],
                                                     'mode': device['mode'],
                                                     'flags': device['flags'],
+                                                    'frequency': device['frequency'],
                                                     'dutyFrequency': device['dutyFrequency']}))
                 for device in adcList:
                     messagesSend.append(json.dumps({'type': 'Register',
@@ -403,6 +363,7 @@ def updateThread():
                                                     'settings': device['settings'],
                                                     'mode': device['mode'],
                                                     'flags': device['flags'],
+                                                    'frequency': device['frequency'],
                                                     'dutyFrequency': device['dutyFrequency']}))
                 for device in i2cList:
                     messagesSend.append(json.dumps({'type': 'Register',
@@ -413,6 +374,7 @@ def updateThread():
                                                     'settings': device['settings'],
                                                     'mode': device['mode'],
                                                     'flags': device['flags'],
+                                                    'frequency': device['frequency'],
                                                     'dutyFrequency': device['dutyFrequency']}))
             if message['type'] == 'Set':                        # Get set message for a device and check for devices
                 output.setValue(message['name'], message['dim'], message['value'])
@@ -428,9 +390,6 @@ def updateThread():
 
             if message['type'] == 'Scan':                       # Change scan for a device
                 scanForDevices = message['value']
-
-            if message['type'] == 'Frequency':                  # Change update frequency
-                UPDATE_PERIODE = 1./message['value']
 
         dataMessage = {'type': 'D', 'data': []}                 # Create data message
         for device in inputList:                                # Create input device data message
@@ -458,10 +417,74 @@ def updateThread():
         if exit:                                                # Exit
             break;
 
+
+def livePrint():
+    """Handle all the prints to the console."""
+    global connectionState                                      # Uses the message global variables
+    stringToPrint = ""                                          # String to print
+    stringToPrint += colored("****************************************************************\n", 'green')
+    stringToPrint += colored("* Hardware:    {}                  *\n".format(BOARD), 'green') # Display hardware information
+    stringToPrint += colored("* Software:    {} *\n".format(SOFTWARE), 'green') # Display software information
+    stringToPrint += colored("* Layout:      {}                                       *\n".format(Config.LAYOUT), 'green') # Display layout information
+    stringToPrint += colored("****************************************************************\n", 'green')
+    stringToPrint += "\n"
+    stringToPrint += "Connection:  {}".format(colored(connectionState, attrs=['bold', 'dark'])) # Print connection status
+    stringToPrint += "\n"
+    stringToPrint += "Update cycle:  "                          # Print update cycle time
+    stringToPrint += colored("{:.2f} ms / {:.2f} ms\n".format(updateDuration * 1000, UPDATE_PERIODE * 1000), 'grey') # Print update cycle time
+    if scanForDevices:
+        stringToPrint += "Scan   cycle:  "                      # Print scan cycle time
+        stringToPrint += colored("{:.2f} ms / {:.2f} ms\n".format(scanDuration * 1000, SCAN_PERIODE * 1000), 'grey') # Print scan cycle time
+    else:
+        stringToPrint += "Scan   cycle: -\n"                    # Print scan disabled
+
+    # Print Input informations:
+    stringToPrint += "\nConnected Inputs: {}\n".format(colored(len(inputList), attrs=['bold', 'dark']))
+    for el in inputList:                                        # Go through all connected Input devices
+        if ('mux' in el and 'pin' in el and 'name' in el and 'about' in el and 'val' in el and 'cycle' in el):
+            if el['mux'] != -1:                                 # Muxed pin
+                stringToPrint += '({}:{}) {}: {} / {} | {:.2f} ms\n'.format(str(el['pin']), str(el['mux']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
+            else:                                               # Unmuxed pin
+                stringToPrint += '({}) {}: {} / {} | {:.2f} ms\n'.format(str(el['pin']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
+
+    # Print Output informations:
+    stringToPrint += "\nConnected Outputs: {}\n".format(colored(len(outputList), attrs=['bold', 'dark']))
+    for el in outputList:                                       # Go through all connected Output devices
+        if ('pin' in el and 'name' in el and 'about' in el and 'val' in el and 'cycle' in el):
+            stringToPrint += '({}) {}: {} / {} | {:.2f} ms\n'.format(str(el['pin']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
+
+    # Print PWM informations:
+    stringToPrint += "\nConnected PWMs: {}\n".format(colored(len(pwmList), attrs=['bold', 'dark']))
+    for el in pwmList:                                          # Go through all connected PWM devices
+        if ('pin' in el and 'name' in el and 'about' in el and 'val' in el and 'cycle' in el):
+            stringToPrint += '({}) {}: {} / {} | {:.2f} ms\n'.format(str(el['pin']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
+
+    # Print ADC informations:
+    stringToPrint += "\nConnected ADCs: {}\n".format(colored(len(adcList), attrs=['bold', 'dark']))
+    for el in adcList:                                          # Go through all connected ADC devices
+        if ('mux' in el and 'pin' in el and 'name' in el and 'about' in el and 'val' in el and 'cycle' in el):
+            if el['mux'] != -1:                                 # Muxed pin
+                stringToPrint += '({}:{}) {}: {} / {} | {:.2f} ms\n'.format(str(el['pin']), str(el['mux']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
+            else:                                               # Unmuxed pin
+                stringToPrint += '({}) {}: {} / {} | {:.2f} ms\n'.format(str(el['pin']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
+
+    # Print IMU informations:
+    stringToPrint += "\nConnected I2Cs: {}\n".format(colored(len(i2cList), attrs=['bold', 'dark']))
+    for el in i2cList:                                        # Go through all connected I2C devices
+        if ('channel' in el and 'name' in el and 'about' in el and 'val' in el and 'cycle' in el):
+            stringToPrint += '(Channel {}) {}: {} / {} | {:.2f} ms\n'.format(str(el['channel']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
+
+    stringToPrint += "\n\nManually break to exit!\n"            # Print exit condition
+    stringToPrint += ">> Ctrl-C\n"                              # Print exit shortcut
+    os.system('clear')                                          # Clear console output
+    print(stringToPrint)                                        # Print live data
+
 def main():
     """Infinite loop function, reads all devices and manages the connection."""
-    global connectionState, c, exit
+    global connectionState, c, exit, LIVE_PRINT
 
+    if ('live' in sys.argv or 'l' in sys.argv):                 # Check live plot parameter
+        LIVE_PRINT = True
                                                                 # Create the communication class. Using 'with' to ensure correct termination.
     c = CommunicationModule.CommunicationConnection()           # Create the communication
     c.connect()                                                 # Start communication thread
@@ -481,7 +504,8 @@ def main():
             sendMessages = [json.dumps({'type': 'CycleDuration','name':'', 'values': {'update': updateDuration, 'scan': scanDuration}})]
             c.sendMessages(sendMessages)
 
-        #print_func()                                            # Call print function
+        if LIVE_PRINT:                                                # Check for live plotting
+            livePrint()                                         # Call print function
         time.sleep(PRINT_PERIODE)                               # Sleep until next print period
 
     # If we reach this -> something happened. Close communication channel
