@@ -7,7 +7,7 @@ import time                                                     # Time keeping m
 from Config import PIN_MAP                                      # SoftWEAR Config module.
 from MuxModule import Mux                                       # SoftWEAR MUX module.
 
-from I2C_BNO055 import BNO055                                   # Driver module for the BNO055 device
+from drivers.I2C_BNO055 import BNO055                           # Driver module for the BNO055 device
 #import I2C_MPU6050                                             # Driver for the MPU6050 device
 
 
@@ -75,6 +75,7 @@ class I2C:
                         self.connectedDevices.append({  'channel': channel, # Add to connected device list
                                                         'mux': -1,
                                                         'name': lastDrv.getName(),
+                                                        'about': lastDrv.getAbout(),
                                                         'settings': lastDrv.getSettings(),
                                                         'dir': lastDrv.getDir(),
                                                         'dim': lastDrv.getDim(),
@@ -93,6 +94,7 @@ class I2C:
                         self.connectedDevices.append({  'channel': channel, # Add to connected device list
                                                         'mux': -1,
                                                         'name': drv.getName(),
+                                                        'about': drv.getAbout(),
                                                         'settings': drv.getSettings(),
                                                         'dir': drv.getDir(),
                                                         'dim': drv.getDim(),

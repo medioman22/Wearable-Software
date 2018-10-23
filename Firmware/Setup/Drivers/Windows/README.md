@@ -1,0 +1,1 @@
+You may need to disable the "signature authentification for drivers" in windows for you to be able to install the drivers.

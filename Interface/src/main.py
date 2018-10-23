@@ -68,6 +68,8 @@ class MainWindow(QMainWindow):
     _connectionIteratorTimer = None
     # The UPD broadcast
     _broadcast = None
+    # Flag whether ignored devices should be shown or hidden
+    _showIgnoredDevices = False
     # Logger module
     _logger = None
 
@@ -138,6 +140,21 @@ class MainWindow(QMainWindow):
         selectMenu.triggered.connect(self._selectBoardListener)
         boardMenu.addMenu(selectMenu)
 
+        # Ignore menu
+        showIgnoreAct = QAction('&Show Ignored Devices', self)
+        showIgnoreAct.setStatusTip('Show Ignored Devices')
+        showIgnoreAct.triggered.connect(self._onShowIgnored)
+        showIgnoreAct.setVisible(True)
+        self._showIgnoreAct = showIgnoreAct
+        boardMenu.addAction(showIgnoreAct)
+        hideIgnoreAct = QAction('&Hide Ignored Devices', self)
+        hideIgnoreAct.setStatusTip('Hide Ignored Devices')
+        hideIgnoreAct.triggered.connect(self._onHideIgnored)
+        hideIgnoreAct.setVisible(False)
+        self._hideIgnoreAct = hideIgnoreAct
+        boardMenu.addAction(hideIgnoreAct)
+        boardMenu.addSeparator()
+
         # Connection option
         connectionAct = QAction('&Connect', self)
         connectionAct.setShortcut('Ctrl+Shift+C')
@@ -152,6 +169,7 @@ class MainWindow(QMainWindow):
         configureConnectionAct.setStatusTip('Edit Connection Settings (IP/Port)')
         configureConnectionAct.triggered.connect(self._showConnectionDialogListener)
         boardMenu.addAction(configureConnectionAct)
+        boardMenu.addSeparator()
 
         # Stream menu
         streamMenu = QMenu('Stream', self)
@@ -171,6 +189,7 @@ class MainWindow(QMainWindow):
         streamStopAct.setVisible(False)
         self._streamStopAct = streamStopAct
         boardMenu.addAction(streamStopAct)
+        boardMenu.addSeparator()
 
         # Scan menu
         scanStopAct = QAction('&Stop Scan', self)
@@ -185,6 +204,7 @@ class MainWindow(QMainWindow):
         scanStartAct.setVisible(False)
         self._scanStartAct = scanStartAct
         boardMenu.addAction(scanStartAct)
+        boardMenu.addSeparator()
 
         # Quit option
         quitAct = QAction('&Quit Application', self)
@@ -206,6 +226,7 @@ class MainWindow(QMainWindow):
         interface.configureConnectionClicked.connect(self._showConnectionDialogListener)
         interface.connect.connect(self._connectListener)
         interface.sendMessage.connect(self._sendMessageListener)
+        interface.update.connect(self._updateInterfaceListener)
         self._interface = interface
         self.setCentralWidget(interface)
         self._logger.debug("Main UI interface created")
@@ -291,9 +312,9 @@ class MainWindow(QMainWindow):
         self._interface.setStatus(self._connection.status())    # Set current connection status
         self._interface.setScanLabel(self._connection.status() == 'Connected') # Set scan label
 
-    def updateDeviceList(self):
+    def updateDeviceList(self):                                 # Filter device list by ignored devices
         """Update device lists."""
-        self._interface.updateDeviceList(self._board.deviceList())
+        self._interface.updateDeviceList(list(filter(lambda x: not x.ignore() or self._showIgnoredDevices, self._board.deviceList())))
 
     def center(self):
         """Center the main window."""
@@ -453,6 +474,26 @@ class MainWindow(QMainWindow):
         self._scanStartAct.setVisible(False)
         self._scanStopAct.setVisible(True)
 
+    @pyqtSlot()
+    def _onShowIgnored(self):
+        """Show ignored devices."""
+        self._showIgnoredDevices = True
+        self.updateDeviceList()
+        self._logger.info("Show ignored devices")
+
+        self._showIgnoreAct.setVisible(False)
+        self._hideIgnoreAct.setVisible(True)
+
+    @pyqtSlot()
+    def _onHideIgnored(self):
+        """Hide ignored devices."""
+        self._showIgnoredDevices = False
+        self.updateDeviceList()
+        self._logger.info("Hide ignored devices")
+
+        self._showIgnoreAct.setVisible(True)
+        self._hideIgnoreAct.setVisible(False)
+
 
 
     @pyqtSlot()
@@ -540,6 +581,11 @@ class MainWindow(QMainWindow):
     def _sendMessageListener(self, message):
         """Listen to send message event from the interface and pass them to the connection."""
         self._connection.sendMessages([self._board.serializeMessage(message)])
+
+    @pyqtSlot()
+    def _updateInterfaceListener(self):
+        """Listen to update from the interface."""
+        self.updateDeviceList()
 
 
     def saveFileDialog(self):
