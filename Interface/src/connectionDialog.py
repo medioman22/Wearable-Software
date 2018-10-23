@@ -1,5 +1,6 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 
 import logging                                              # Logging package
 from PyQt5.QtCore import (  pyqtSignal,                     # Core functionality from Qt

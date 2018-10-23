@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 SoftWEAR I2C module. Adds MUX features and hardware detection to normal I2C.
 """

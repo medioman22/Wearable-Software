@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 SoftWEAR demo program displaying the main features. This scripts executes on the
 beagle bone. Starts a server and ADC, PWM and I2C SoftWEAR modules are polled;

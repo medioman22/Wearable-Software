@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 Configuration file for the Firmware of the Wearable SoftWEAR. PLEASE DO NOT CHANGE AT RUNTIME.
 """

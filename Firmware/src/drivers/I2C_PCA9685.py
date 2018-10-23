@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 Driver file for the PCA9685 16-channel PWM controller. Communicates
 with the device via I2C and implements the basic functions for integrating into
