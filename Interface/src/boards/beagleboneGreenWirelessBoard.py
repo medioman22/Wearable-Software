@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """A representation of the physical Beaglebone Green Wireless board connected."""
 
 import json
@@ -26,4 +28,6 @@ class BeagleboneGreenWirelessBoard(Board):
     def unserializeMessage(self, messageString):
         """Return parsed message as dict."""
         d = json.loads(messageString)
+        if ('name' not in d):
+            d['name'] = self._name
         return Message(d['type'], d['name'], d)

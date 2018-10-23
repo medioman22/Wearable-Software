@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 
 import logging                                                  # Logging package
 from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
@@ -35,6 +37,8 @@ class InterfaceWidget(QWidget):
     connect = pyqtSignal()
     # Signal for mode change
     sendMessage = pyqtSignal(Message)
+    # Signal for update
+    update = pyqtSignal()
 
     # Board label
     _boardLabel = None
@@ -42,6 +46,8 @@ class InterfaceWidget(QWidget):
     _boardStatusLabel = None
     # Board ip and port label
     _boardIpPortLabel = None
+    # Board cycle durations
+    _boardCycleDurations = None
     # Board Device stack
     _deviceStack = None
     # Board Device list
@@ -58,11 +64,11 @@ class InterfaceWidget(QWidget):
         # Configure the logger
         self._logger = logging.getLogger('Interfaces')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/Interface.log', 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/Interface.log', 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         self._logger.info("Interface initializing …")
 
@@ -102,7 +108,11 @@ class InterfaceWidget(QWidget):
         boardIpPortLabel = QLabel('IP: <b>–</b>')
         boardIpPortLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self._boardIpPortLabel = boardIpPortLabel
-        self._logger.debug("Interface UI labels created")
+
+        # Label of current board ip and port
+        boardCycleDurationLabel = QLabel('')
+        boardCycleDurationLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self._boardCycleDurationLabel = boardCycleDurationLabel
 
         # Stream label
         streamLabel = QLabel('Stream ()')
@@ -119,6 +129,8 @@ class InterfaceWidget(QWidget):
         self._streamGifLabel = streamGifLabel
 
         # Scan indicator
+        scanLabel = QLabel('Scanning')
+        self._scanLabel = scanLabel
         scanGifLabel = QLabel()
         scanGif = QMovie("assets/scan.gif")
         scanGif.setScaledSize(QSize(24,24))
@@ -126,6 +138,7 @@ class InterfaceWidget(QWidget):
         scanGifLabel.setVisible(False)
         scanGif.start()
         self._scanGifLabel = scanGifLabel
+        self._logger.debug("Interface UI labels created")
 
 
         # List of connected devices
@@ -145,11 +158,13 @@ class InterfaceWidget(QWidget):
         informationGridLayout.addWidget(boardConnectionTypeLabel,   0, 0, 1, 4, Qt.AlignLeft)
         informationGridLayout.addWidget(boardStatusLabel,           1, 0, Qt.AlignLeft)
         informationGridLayout.addWidget(boardIpPortLabel,           1, 1, Qt.AlignLeft)
-        informationGridLayout.addWidget(streamLabel,                1, 2, Qt.AlignLeft)
-        informationGridLayout.addWidget(streamGifLabel,             1, 3, Qt.AlignLeft)
-        informationGridLayout.addWidget(connectButton,              2, 0, Qt.AlignLeft)
-        informationGridLayout.addWidget(configureButton,            2, 1, Qt.AlignLeft)
-        informationGridLayout.addWidget(scanGifLabel,               2, 2, Qt.AlignLeft)
+        informationGridLayout.addWidget(scanLabel,                  2, 0, Qt.AlignLeft)
+        informationGridLayout.addWidget(scanGifLabel,               2, 1, Qt.AlignLeft)
+        informationGridLayout.addWidget(boardCycleDurationLabel,    2, 2, Qt.AlignLeft)
+        informationGridLayout.addWidget(streamLabel,                2, 3, Qt.AlignLeft)
+        informationGridLayout.addWidget(streamGifLabel,             2, 4, Qt.AlignLeft)
+        informationGridLayout.addWidget(connectButton,              3, 0, Qt.AlignLeft)
+        informationGridLayout.addWidget(configureButton,            3, 1, Qt.AlignLeft)
 
         # Group informations
         groupLayout = QGroupBox('Information')
@@ -210,9 +225,17 @@ class InterfaceWidget(QWidget):
     def setScanLabel(self, scan):
         """Set scan label and channel."""
         if scan:                                                # Show scan label
+            self._scanLabel.setVisible(True)
             self._scanGifLabel.setVisible(True)
         else:                                                   # Hide scan label
+            self._scanLabel.setVisible(False)
             self._scanGifLabel.setVisible(False)
+        self._logger.debug("Interface UI scan updated")
+
+    def setCycleDurationLabel(self, cycleDurations):
+        """Set cycle duration label and channel."""
+        self._boardCycleDurations = cycleDurations
+        self._boardCycleDurationLabel.setText('Update <b>{:06.2f} ms</b> | Scan <b>{:06.2f} ms</b>'.format(cycleDurations['update'] * 1000, cycleDurations['scan'] * 1000))
         self._logger.debug("Interface UI scan updated")
 
     def updateDeviceList(self, devices):
@@ -229,6 +252,7 @@ class InterfaceWidget(QWidget):
             deviceListItem = QListWidgetItem(device.name())
             deviceWidget = DeviceSettingsWidget(device)
             deviceWidget.sendMessage.connect(self.onSendMessage)
+            deviceWidget.ignore.connect(self.onIgnoreDevice)
             self._deviceList.addItem(deviceListItem)
             self._deviceStack.addWidget(deviceWidget)
             if (device.name() == self._selectedDeviceName):     # Check for previous selection
@@ -282,3 +306,8 @@ class InterfaceWidget(QWidget):
     def onSendMessage(self, message):
         """Listen to send message event from device widgets and pass them to the main."""
         self.sendMessage.emit(message)
+
+    @pyqtSlot()
+    def onIgnoreDevice(self):
+        """Listen to ignore flag of a device to pass it to the main."""
+        self.update.emit()

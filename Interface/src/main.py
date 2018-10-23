@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 Wearable Software Interface
 
@@ -52,6 +54,18 @@ UDP_IP = "127.0.0.1"                                            # Default host i
 UDP_PORT = 12346                                                # Default host port
 UPDATE_LOOP = 50                                                # Update rate of the stream in [ms]
 
+PLOT_POINTS_SET = {                                             # Available plot points
+    '32 Points': 32,
+    '64 Points': 64,
+    '126 Points': 126,
+    '256 Points': 256,
+    '512 Points': 512,
+    '1024 Points': 1024,
+    '2048 Points': 2048,
+    '4096 Points': 4096
+}
+PLOT_POINTS = '256 Points'                                      # Default plot points
+
 
 class MainWindow(QMainWindow):
     """The main window of the application."""
@@ -68,6 +82,8 @@ class MainWindow(QMainWindow):
     _connectionIteratorTimer = None
     # The UPD broadcast
     _broadcast = None
+    # Flag whether ignored devices should be shown or hidden
+    _showIgnoredDevices = False
     # Logger module
     _logger = None
 
@@ -78,11 +94,11 @@ class MainWindow(QMainWindow):
         # Configure the logger
         self._logger = logging.getLogger('Main')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/Main.log', 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/Main.log', 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         self._logger.info("Main initializing …")
 
@@ -138,6 +154,28 @@ class MainWindow(QMainWindow):
         selectMenu.triggered.connect(self._selectBoardListener)
         boardMenu.addMenu(selectMenu)
 
+        # Ignore menu
+        showIgnoreAct = QAction('&Show Ignored Devices', self)
+        showIgnoreAct.setStatusTip('Show Ignored Devices')
+        showIgnoreAct.triggered.connect(self._onShowIgnored)
+        showIgnoreAct.setVisible(True)
+        self._showIgnoreAct = showIgnoreAct
+        boardMenu.addAction(showIgnoreAct)
+        hideIgnoreAct = QAction('&Hide Ignored Devices', self)
+        hideIgnoreAct.setStatusTip('Hide Ignored Devices')
+        hideIgnoreAct.triggered.connect(self._onHideIgnored)
+        hideIgnoreAct.setVisible(False)
+        self._hideIgnoreAct = hideIgnoreAct
+        boardMenu.addAction(hideIgnoreAct)
+
+        # Plot points selection menu
+        plotPointsSelectionMenu = QMenu('Plot Points', self)
+        for plotPoints, plotPointsLabel in enumerate(PLOT_POINTS_SET):
+            plotPointsSelectionMenu.addAction(QAction(plotPointsLabel, self))
+        plotPointsSelectionMenu.triggered.connect(self._setPlotPointsListener)
+        boardMenu.addMenu(plotPointsSelectionMenu)
+        boardMenu.addSeparator()
+
         # Connection option
         connectionAct = QAction('&Connect', self)
         connectionAct.setShortcut('Ctrl+Shift+C')
@@ -152,6 +190,7 @@ class MainWindow(QMainWindow):
         configureConnectionAct.setStatusTip('Edit Connection Settings (IP/Port)')
         configureConnectionAct.triggered.connect(self._showConnectionDialogListener)
         boardMenu.addAction(configureConnectionAct)
+        boardMenu.addSeparator()
 
         # Stream menu
         streamMenu = QMenu('Stream', self)
@@ -171,6 +210,7 @@ class MainWindow(QMainWindow):
         streamStopAct.setVisible(False)
         self._streamStopAct = streamStopAct
         boardMenu.addAction(streamStopAct)
+        boardMenu.addSeparator()
 
         # Scan menu
         scanStopAct = QAction('&Stop Scan', self)
@@ -185,6 +225,7 @@ class MainWindow(QMainWindow):
         scanStartAct.setVisible(False)
         self._scanStartAct = scanStartAct
         boardMenu.addAction(scanStartAct)
+        boardMenu.addSeparator()
 
         # Quit option
         quitAct = QAction('&Quit Application', self)
@@ -206,6 +247,7 @@ class MainWindow(QMainWindow):
         interface.configureConnectionClicked.connect(self._showConnectionDialogListener)
         interface.connect.connect(self._connectListener)
         interface.sendMessage.connect(self._sendMessageListener)
+        interface.update.connect(self._updateInterfaceListener)
         self._interface = interface
         self.setCentralWidget(interface)
         self._logger.debug("Main UI interface created")
@@ -235,6 +277,7 @@ class MainWindow(QMainWindow):
             self._onStreamStop();                               # Stop all streams
 
         self._board = next((x for x in availableBoards if x.name() == name), None)
+        self._board.setMaxPoints(PLOT_POINTS_SET[PLOT_POINTS])  # Set plot points
 
         # Throw for no board
         if (self._board == None):
@@ -291,9 +334,9 @@ class MainWindow(QMainWindow):
         self._interface.setStatus(self._connection.status())    # Set current connection status
         self._interface.setScanLabel(self._connection.status() == 'Connected') # Set scan label
 
-    def updateDeviceList(self):
+    def updateDeviceList(self):                                 # Filter device list by ignored devices
         """Update device lists."""
-        self._interface.updateDeviceList(self._board.deviceList())
+        self._interface.updateDeviceList(list(filter(lambda x: not x.ignore() or self._showIgnoredDevices, self._board.deviceList())))
 
     def center(self):
         """Center the main window."""
@@ -453,6 +496,36 @@ class MainWindow(QMainWindow):
         self._scanStartAct.setVisible(False)
         self._scanStopAct.setVisible(True)
 
+    @pyqtSlot()
+    def _onShowIgnored(self):
+        """Show ignored devices."""
+        self._showIgnoredDevices = True
+        self.updateDeviceList()
+        self._logger.info("Show ignored devices")
+
+        self._showIgnoreAct.setVisible(False)
+        self._hideIgnoreAct.setVisible(True)
+
+    @pyqtSlot()
+    def _onHideIgnored(self):
+        """Hide ignored devices."""
+        self._showIgnoredDevices = False
+        self.updateDeviceList()
+        self._logger.info("Hide ignored devices")
+
+        self._showIgnoreAct.setVisible(True)
+        self._hideIgnoreAct.setVisible(False)
+
+    @pyqtSlot(QAction)
+    def _setPlotPointsListener(self, action):
+        """Set plot points listener."""
+        global PLOT_POINTS
+        PLOT_POINTS = action.text()
+        self._board.setMaxPoints(PLOT_POINTS_SET[PLOT_POINTS])
+        self._logger.info("Set plot {}".format(action.text()))
+
+
+
 
 
     @pyqtSlot()
@@ -477,29 +550,61 @@ class MainWindow(QMainWindow):
                         self._board.deregisterDevice(Device(message.name)) # Deregister device
                         self._logger.info('Deregister Device: {}'.format(message.name))
                         self._statusBar.showMessage('Deregister Device: {}'.format(message.name))
-                    elif (message.type == 'Data'):              # Message with new data for a device (',' are escaped to '-')
+                    elif (message.type == 'D'):
                         data = True                             # Raise data refresh flag
                                                                 # Update the data
-                        self._board.updateData(message.name, message.data['values'], message.data['timestamp'])
-                        if (self._board.fileName() != None):    # Stream data to file
-                            with open(self._board.fileName(), "a") as fh: # Open the file
-                                for i in range(len(message.data['values'])): # Loop through all dimensions
-                                    for device in self._board.deviceList(): # Look for correct device
-                                        if (device.name() == message.name and not device.ignore()): # Check if it exists and should be ignored
-                                            fh.write(','.join([ message.name.replace(',','-'), # Write data entry
-                                                                str(i),
-                                                                str(message.data['timestamp']),
-                                                                str(message.data['values'][i])]) + '\n')
-
-                        if (self._broadcast != None):           # Stream data to UDP using same format as for the CSV files
-                            for i in range(len(message.data['values'])): # Loop through all dimensions
-                                for device in self._board.deviceList(): # Look for correct device
-                                    if (device.name() == message.name and not device.ignore()): # Check if it exists and should be ignored
-                                        self._broadcast.send(','.join([ message.name.replace(',','-'), # Send data entry
+                        for messageData in message.data['data']: # Loop through all data blocks
+                            name = messageData['name']          # Name of the device
+                            valuesArray = messageData['values'] # New values of the device
+                            for values in valuesArray:          # Loop all new values (timestamp, [values])
+                                self._board.updateData(name, values[1], values[0])
+                                if (self._board.fileName() != None): # Stream data to file
+                                    with open(self._board.fileName(), "a") as fh: # Open the file
+                                        for i in range(len(values[1])): # Loop through all dimensions
+                                                                # Look for correct device
+                                            for device in self._board.deviceList():
+                                                                # Check if it exists and should be ignored
+                                                if (device.name() == name and not device.ignore()):
+                                                    fh.write(','.join([ name.replace(',','-'), # Write data entry
                                                                         str(i),
-                                                                        str(message.data['timestamp']),
-                                                                        str(message.data['values'][i])]))
+                                                                        str(values[0]),
+                                                                        str(values[1][i])]) + '\n')
 
+                                if (self._broadcast != None):   # Stream data to UDP using same format as for the CSV files
+                                    for i in range(len(values[0])): # Loop through all dimensions
+                                        for device in self._board.deviceList(): # Look for correct device
+                                                                # Check if it exists and should be ignored
+                                            if (device.name() == name and not device.ignore()):
+                                                self._broadcast.send(','.join([ name.replace(',','-'), # Send data entry
+                                                                                str(i),
+                                                                                str(values[0]),
+                                                                                str(values[1][i])]))
+                    # elif (message.type == 'Data'):              # Message with new data for a device (',' are escaped to '-')
+                    #     data = True                             # Raise data refresh flag
+                    #                                             # Update the data
+                    #     self._board.updateData(message.name, message.data['values'], message.data['timestamp'])
+                    #     if (self._board.fileName() != None):    # Stream data to file
+                    #         with open(self._board.fileName(), "a") as fh: # Open the file
+                    #             for i in range(len(message.data['values'])): # Loop through all dimensions
+                    #                 for device in self._board.deviceList(): # Look for correct device
+                    #                     if (device.name() == message.name and not device.ignore()): # Check if it exists and should be ignored
+                    #                         fh.write(','.join([ message.name.replace(',','-'), # Write data entry
+                    #                                             str(i),
+                    #                                             str(message.data['timestamp']),
+                    #                                             str(message.data['values'][i])]) + '\n')
+                    #
+                    #     if (self._broadcast != None):           # Stream data to UDP using same format as for the CSV files
+                    #         for i in range(len(message.data['values'])): # Loop through all dimensions
+                    #             for device in self._board.deviceList(): # Look for correct device
+                    #                 if (device.name() == message.name and not device.ignore()): # Check if it exists and should be ignored
+                    #                     self._broadcast.send(','.join([ message.name.replace(',','-'), # Send data entry
+                    #                                                     str(i),
+                    #                                                     str(message.data['timestamp']),
+                    #                                                     str(message.data['values'][i])]))
+                    #
+                    elif (message.type == 'CycleDuration'):       # Cycle duration message
+                        self._logger.debug('Cycle durations: {}', str(message.data['values']))
+                        self._interface.setCycleDurationLabel(message.data['values'])
                     elif (message.type == 'Ping'):              # Ping message
                         self._logger.debug('PING')
 
@@ -533,6 +638,7 @@ class MainWindow(QMainWindow):
             if (len(messagesSend) > 0):                         # Send and serialize messages
                 self._connection.sendMessages(list(map(lambda x: self._board.serializeMessage(x), messagesSend)))
 
+            self.update()                                       # Update all GUI
             """Ping"""
             # self._connection.sendMessages([self._board.serializeMessage(Message('Ping',''))]);
 
@@ -540,6 +646,11 @@ class MainWindow(QMainWindow):
     def _sendMessageListener(self, message):
         """Listen to send message event from the interface and pass them to the connection."""
         self._connection.sendMessages([self._board.serializeMessage(message)])
+
+    @pyqtSlot()
+    def _updateInterfaceListener(self):
+        """Listen to update from the interface."""
+        self.updateDeviceList()
 
 
     def saveFileDialog(self):

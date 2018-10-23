@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 A representation of the connection to the physical board.
 
@@ -12,7 +14,7 @@ import logging                                                  # This class log
 # Allowed directions for the dataflow
 allowedDirTypes = ['in', 'out']
 # Max past points stored
-maxPoints = 256
+MAX_POINTS = 256
 
 LOG_LEVEL_PRINT = logging.WARN
 LOG_LEVEL_SAVE = logging.DEBUG
@@ -37,10 +39,16 @@ class Device():
     _pastData = None
     # Past timestamps
     _pastTimestamps = None
+    # About the device
+    _about = None
     # Settings of the device
     _settings = None
     # Mode
     _mode = None
+    # Frequency
+    _frequency = None
+    # Duty frequency
+    _dutyFrequency = None
     # Flags
     _flags = None
     # Save to file
@@ -65,11 +73,11 @@ class Device():
         # Configure the logger
         self._logger = logging.getLogger('Device')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/Device({}).log'.format(name), 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/Device({}).log'.format(name), 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         # Set device name
         self._name = name;
@@ -97,11 +105,19 @@ class Device():
         self._timestamp = None
         self._pastTimestamps = []
 
+        # Get about
+        if 'about' in data:                                     # Check if device provides any settings
+            self._about = data['about']                         # Information about the device
+
         # Get settings
         if 'settings' in data:                                  # Check if device provides any settings
             self._settings = data['settings']                   # Get settings for device
             if 'modes' in data['settings']:                     # Check if device provides mode-setting
                 self._mode = data['mode']                       # Get mode of device
+            if 'frequencies' in data['settings']:               # Check if device provides frequency-setting
+                self._frequency = data['frequency']             # Get frequency of device
+            if 'dutyFrequencies' in data['settings']:           # Check if device provides dutyFrequency-setting
+                self._dutyFrequency = data['dutyFrequency']     # Get dutyFrequency of device
             if 'flags' in data['settings']:                     # Check if device provides flag-setting
                 self._flags = data['flags']                     # Get flags of device
 
@@ -144,6 +160,10 @@ class Device():
         """Return a shallow copy of the past timestamp list."""
         return self._pastTimestamps.copy()
 
+    def about(self):
+        """Return a shallow copy of the about information."""
+        return self._about.copy()
+
     def settings(self):
         """Return a shallow copy of the settings."""
         if self._settings == None:
@@ -153,6 +173,14 @@ class Device():
     def mode(self):
         """Return the mode."""
         return self._mode
+
+    def frequency(self):
+        """Return the frequency."""
+        return self._frequency
+
+    def dutyFrequency(self):
+        """Return the dutyFrequency."""
+        return self._dutyFrequency
 
     def flags(self):
         """Return the flag."""
@@ -173,7 +201,7 @@ class Device():
         else:
             for i, dataI in enumerate(self._data):              # Store new data
                 self._pastData[i].append(dataI)                 # Add current data to past data
-                while (maxPoints < len(self._pastData[i])):     # Create overflow for past data
+                while (MAX_POINTS < len(self._pastData[i])):     # Create overflow for past data
                     self._pastData[i].pop(0)
 
             self._data = data                                   # Set most recent data
@@ -245,11 +273,11 @@ class Board():
         # Configure the logger
         self._logger = logging.getLogger('Board')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/Board({}).log'.format(name), 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/Board({}).log'.format(name), 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         self._name = name
         self._connectionType = connectionType
@@ -329,11 +357,11 @@ class Board():
                         registeredDevice._activeDim[i] = True   # Activate dim
                                                                 # Add current timestamp to past timestamps of 'friend' object
                 registeredDevice._pastTimestamps.append(registeredDevice._timestamp)
-                while (maxPoints < len(registeredDevice._pastTimestamps)): # Create overflow for past timestamps of 'friend' object
+                while (MAX_POINTS < len(registeredDevice._pastTimestamps)): # Create overflow for past timestamps of 'friend' object
                     registeredDevice._pastTimestamps.pop(0)
                 for i, dataI in enumerate(registeredDevice._data): # Access private field of 'friend' object
                     registeredDevice._pastData[i].append(dataI) # Add current data to past data of 'friend' object
-                    while (maxPoints < len(registeredDevice._pastData[i])): # Create overflow for past values of 'friend' object
+                    while (MAX_POINTS < len(registeredDevice._pastData[i])): # Create overflow for past values of 'friend' object
                         registeredDevice._pastData[i].pop(0)
 
                 registeredDevice._data = data                   # Set most recent data
@@ -343,6 +371,11 @@ class Board():
                 break
         else:                                                   # Tried to update data for a non-registered device
             self._logger.debug('device {} is not registered'.format(name))
+
+    def setMaxPoints(self, maxPoints):
+        """Set the max points."""
+        global MAX_POINTS
+        MAX_POINTS = maxPoints                                  # Set the max points
 
     def reset(self):
         """Reset the board to default."""
