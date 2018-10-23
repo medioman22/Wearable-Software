@@ -144,7 +144,7 @@ class PCA9685:
 
         try:
             self._pca = PCA9685_DRIVER.PCA9685(address=ADDRESS,busnum=BUSNUM) # Create the driver object
-        except IOError:
+        except:
             self._connected = False
 
     def cleanup(self):
@@ -160,7 +160,7 @@ class PCA9685:
         """Return True if the device is connected, false otherwise."""
         try:
             self._connected = self._pca.status()                # Device is connected and has no error
-        except IOError:
+        except:
             self._connected = False                             # Device disconnected
         return self._connected
 
