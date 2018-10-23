@@ -26,4 +26,6 @@ class BeagleboneGreenWirelessBoard(Board):
     def unserializeMessage(self, messageString):
         """Return parsed message as dict."""
         d = json.loads(messageString)
+        if ('name' not in d):
+            d['name'] = self._name
         return Message(d['type'], d['name'], d)

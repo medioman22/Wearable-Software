@@ -12,8 +12,6 @@ import Adafruit_BBIO.GPIO as GPIO                               # Main periphera
 
 from Config import PIN_MAP                                      # SoftWEAR Config module.
 
-#import RoboUtil as util                                        # Utility library to keep track of used I/O pins
-
 # Constants
 MUX_ADDRESS_LENGTH = 3                                          # How many pin are needed to address
 MUX_RANGE = 8                                                   # How many pins can me muxed
