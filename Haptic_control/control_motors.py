@@ -11,8 +11,8 @@ import haptic_device
 
 
 
-north = np.array([8,5,2])
-south = np.array([2,5,8])
+north = np.array([2,5,8])
+south = np.array([8,5,2])
 east = np.array([4,5,6])
 west = np.array([6,5,4])
 northwest = np.array([1,5,9])
@@ -21,6 +21,6 @@ southest = np.array([9,5,1])
 southwest = np.array([7,5,3])
 
 
-
 my_device = haptic_device.haptic_device() 
-while True : my_device.impulsion_command(1, 'linear',1, southwest)
+while True : my_device.impulsion_command(1, 'linear',1, southest)
+

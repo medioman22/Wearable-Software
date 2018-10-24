@@ -12,12 +12,17 @@ import numpy as np
 from pyqtgraph.Qt import QtGui
 import pyqtgraph as pg
 
+hor = 1800
+ver = 300
 
 app = QtGui.QApplication([])
 
 win1 = pg.GraphicsWindow(title="Motors 1 2 3") #now window for real time plot of motor 1
+win1.resize(hor,ver)
 win2 = pg.GraphicsWindow(title="Motors 4 5 6") #now window for real time plot of motor 1
+win2.resize(hor,ver)
 win3 = pg.GraphicsWindow(title="Motors  7 8 9") #now window for real time plot of motor 1
+win3.resize(hor,ver)
 
 p1 = win1.addPlot(title="Realtime plot") #empty space for real time plot
 p1.setYRange(0,1.5, padding = None)
@@ -48,19 +53,12 @@ curve7 = p7.plot()
 curve8 = p8.plot()
 curve9 = p9.plot() 
 
-"""
-win2 = pg.GraphicsWindow(title="Motor 2")
-p2 = win2.addPlot(title="Realtime plot")
-win3 = pg.GraphicsWindow(title="Motor 3")
-p3 = win3.addPlot(title="Realtime plot")
-curve2 = p2.plot() 
-curve3 = p3.plot() """
-
 time_pointer = 0
 windowWidth = 10
-np.linspace(0,0,windowWidth)       
+nbOfData = 100
+time_tab = np.linspace(0,0,nbOfData)    
                  # width of the window displaying the curve
-Xm1,Xm2,Xm3,Xm4,Xm5,Xm6,Xm7,Xm8,Xm9 = np.linspace(0,0,windowWidth),np.linspace(0,0,windowWidth),np.linspace(0,0,windowWidth),np.linspace(0,0,windowWidth),np.linspace(0,0,windowWidth),np.linspace(0,0,windowWidth),np.linspace(0,0,windowWidth),np.linspace(0,0,windowWidth),np.linspace(0,0,windowWidth)       # create array that will contain the relevant time series     
+Xm1,Xm2,Xm3,Xm4,Xm5,Xm6,Xm7,Xm8,Xm9 = np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData)       # create array that will contain the relevant time series     
 
 motors = [0,0,0,0,0,0,0,0,0]
 
@@ -72,7 +70,8 @@ class haptic_device():
     """
     
     ### CLASS FUNCTIONS ###
-    
+   
+        
     def __init__(self):
         self.motor_number = 9
         self.matteo = 'nice guy !'
@@ -80,7 +79,7 @@ class haptic_device():
         self.motor_state = [0, 0, 0,
                             0, 0, 0,
                             0, 0, 0]
-        
+#     def _init_windows(self) :    
         
     ### PRIVATE FUNCTIONS ###
     
@@ -101,7 +100,6 @@ class haptic_device():
         self.update()
     
     def motor_control_flat(self, length, duty, direction):
-        
         self.motor_activation(direction[0],duty)        
         self.waitAndUpdate(length/3)
         self.motor_activation(direction[0],0)
@@ -111,29 +109,25 @@ class haptic_device():
         self.motor_activation(direction[2],duty)
         self.waitAndUpdate(length/3)
         self.motor_activation(direction[2],0)
+        self.waitAndUpdate(2)
         
     def motor_control_linear(self, length, duty, direction):
         fraction = 10
-        print(time_pointer)
         for i in range(1,fraction+1):
             self.motor_activation(direction[0],i*duty/fraction)
             self.wait(length/(4*fraction)) #4 is coming from the 4 different phases
-        print(time_pointer)
         for i in range(1,fraction+1):
             self.motor_activation(direction[0],(fraction-i)*duty/fraction)
             self.motor_activation(direction[1],i*duty/fraction)
             self.wait(length/(4*fraction))
-        print(time_pointer)
         for i in range(1,fraction+1):
             self.motor_activation(direction[1],(fraction-i)*duty/fraction)
             self.motor_activation(direction[2],i*duty/fraction)
             self.wait(length/(4*fraction))
-        print(time_pointer)
         for i in range(1,fraction+1):
             self.motor_activation(direction[2],(fraction-i)*duty/fraction)
             self.wait(length/(4*fraction))
-        print(time_pointer)
-            
+        self.waitAndUpdate(2)    #just to set a little break between the impulsions         
         
     def motor_control_sinus(self, length, duty, direction):
         print('sinus motor control')
@@ -153,16 +147,21 @@ class haptic_device():
         
    # Realtime data plot. Each time this function is called, the data display is updated
     def update(self):
-        global curve1, Xm1,curve2, Xm2, time_pointer
-        Xm1[:-1] = Xm1[1:]                      # shift data in the temporal mean 1 sample left
-        Xm2[:-1] = Xm2[1:]
-        Xm3[:-1] = Xm3[1:]
-        Xm4[:-1] = Xm4[1:]
-        Xm5[:-1] = Xm5[1:]
-        Xm6[:-1] = Xm6[1:]
-        Xm7[:-1] = Xm7[1:]
-        Xm8[:-1] = Xm8[1:]
-        Xm9[:-1] = Xm9[1:]
+        global curve1,curve2,curve3,curve4,curve5,curve6,curve7,curve8,curve9, Xm1,Xm2,Xm3,Xm4,Xm5,Xm6,Xm7,Xm8,Xm9, time_pointer, nbOfData, time_tab
+        
+        time_tab = np.roll(time_tab,-1)
+        time_tab[-1] = time_pointer
+
+        Xm1 = np.roll(Xm1,-1)                      # shift data in the temporal mean 1 sample left
+        Xm2 = np.roll(Xm2,-1)                      # shift data in the temporal mean 1 sample left
+        Xm3 = np.roll(Xm3,-1)                      # shift data in the temporal mean 1 sample left
+        Xm4 = np.roll(Xm4,-1)                      # shift data in the temporal mean 1 sample left
+        Xm5 = np.roll(Xm5,-1)                      # shift data in the temporal mean 1 sample left
+        Xm6 = np.roll(Xm6,-1)                      # shift data in the temporal mean 1 sample left
+        Xm7 = np.roll(Xm7,-1)                      # shift data in the temporal mean 1 sample left
+        Xm8 = np.roll(Xm8,-1)                      # shift data in the temporal mean 1 sample left
+        Xm9 = np.roll(Xm9,-1)                      # shift data in the temporal mean 1 sample left
+      
         
         Xm1[-1] = float(self.motor_state[0])                  # vector containing the instantaneous values      
         Xm2[-1] = float(self.motor_state[1])
@@ -174,25 +173,15 @@ class haptic_device():
         Xm8[-1] = float(self.motor_state[7])
         Xm9[-1] = float(self.motor_state[8])
         
-
-        curve1.setData(Xm1)                     # set the curve with this data
-        curve1.setPos(time_pointer,0)           # set x position in the graph to 0
-        curve2.setData(Xm2)                 
-        curve2.setPos(time_pointer,0)
-        curve3.setData(Xm3)
-        curve3.setPos(time_pointer,0)
-        curve4.setData(Xm4)
-        curve4.setPos(time_pointer,0)
-        curve5.setData(Xm5)
-        curve5.setPos(time_pointer,0)
-        curve6.setData(Xm6)
-        curve6.setPos(time_pointer,0)
-        curve7.setData(Xm7)
-        curve7.setPos(time_pointer,0)
-        curve8.setData(Xm8)
-        curve8.setPos(time_pointer,0)
-        curve9.setData(Xm9)
-        curve9.setPos(time_pointer,0)
+        curve1.setData(time_tab,Xm1)            # set the curve with the table of the motor value and the table of the time 
+        curve2.setData(time_tab,Xm2)                 
+        curve3.setData(time_tab,Xm3)
+        curve4.setData(time_tab,Xm4)
+        curve5.setData(time_tab,Xm5)
+        curve6.setData(time_tab,Xm6)
+        curve7.setData(time_tab,Xm7)
+        curve8.setData(time_tab,Xm8)
+        curve9.setData(time_tab,Xm9)
 
         
         QtGui.QApplication.processEvents()    # you MUST process the plot now 
@@ -204,11 +193,12 @@ class haptic_device():
         self.wait(sec/4)
         self.update()
         self.wait(sec/4)
+        self.update()
+        self.wait(sec/4)
      
     
     def wait(self, sec):
 #        print('waiting ', str(sec), ' seconds')
         global time_pointer
-        
         time_pointer += sec
         time.sleep(sec)
