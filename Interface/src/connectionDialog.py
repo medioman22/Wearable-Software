@@ -1,5 +1,6 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 
 import logging                                              # Logging package
 from PyQt5.QtCore import (  pyqtSignal,                     # Core functionality from Qt
@@ -35,11 +36,11 @@ class ConnectionDialog(QDialog):
         # Configure the logger
         self._logger = logging.getLogger('ConnectionDialog')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/ConnectionDialog.log', 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/ConnectionDialog.log', 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         self._logger.info("Connection dialog initializing …")
 

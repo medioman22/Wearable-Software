@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 SoftWEAR Communications module. The API provided by this class is asynchronous;
 i.e. there is a background thread doing all the work and calls are non-blocking.
@@ -65,11 +67,11 @@ class BeagleboneGreenWirelessConnection(Connection):
         # Configure the logger
         self._logger = logging.getLogger('BeagleboneGreenWirelessConnection')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL} level or above will be saved
-        fh = logging.FileHandler('../Logs/BeagleboneGreenWirelessConnection.log', 'w')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        fh.setFormatter(formatter)
-        fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
-        self._logger.addHandler(fh)
+        # fh = logging.FileHandler('../Logs/BeagleboneGreenWirelessConnection.log', 'w')
+        # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        # fh.setFormatter(formatter)
+        # fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL} level or above will be saved
+        # self._logger.addHandler(fh)
 
         # Set ip and port
         self._port = 12345

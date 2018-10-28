@@ -2,31 +2,24 @@
 # Author: Cyrill Lippuner
 # Date: October 2018
 """
-Driver file for the BASIC INPUT. Read the value from a input pin for integrating into
-the SoftWEAR package.
+Driver file for the BASIC OUTPUT. Set the value of a output pin for integrating into the SoftWEAR package.
 """
-#import Adafruit_GPIO.AdafruitBBIOAdapter as AdafruitBBIOAdapter # Main peripheral class. Implements GPIO read out
 import Adafruit_BBIO.GPIO as GPIO
 import threading                                                # Threading class for the threads
 import time                                                     # Required for controllng the sampling period
 
-from MuxModule import Mux                                       # SoftWEAR MUX module.
 
-# Create a MUX shadow instance as there is only one Mux
-MuxShadow = Mux()
-
-
-class InputBasic:
-    """Driver for BASIC INPUT."""
+class OutputBasic:
+    """Driver for BASIC OUTPUT."""
 
     # Name of the device
-    _name = 'INPUT_BASIC'
+    _name = 'OUTPUT_BASIC'
 
     # Info of the device
-    _info = 'Basic Input device reading digital voltage values on a single pin. Optional multiplexing available.'
+    _info = 'Basic Output device driving a On/Off-Signal on a single pin.'
 
     # Direction of the driver (in/out)
-    _dir = 'in'
+    _dir = 'out'
 
     # Dimension of the driver (0-#)
     _dim = 1
@@ -39,9 +32,6 @@ class InputBasic:
 
     # Pin
     _pin = None
-
-    # Muxed pin
-    _muxedPin = None
 
     # Settings of the driver
     _settings = {
@@ -59,8 +49,7 @@ class InputBasic:
             '50 Hz',
             '60 Hz',
             '100 Hz'
-        ],
-        'modes': ['State', 'Rising Edge', 'Falling Edge']
+        ]
     }
 
     # Data type of values
@@ -72,9 +61,6 @@ class InputBasic:
     # Value to set
     _currentValue = 0
 
-    # Value history
-    _values = None
-
     # Mode
     _mode = None
 
@@ -83,6 +69,12 @@ class InputBasic:
 
     # Flags
     _flags = None
+
+    # Value history
+    _values = []
+
+    # Flag whether the values needs to be updated
+    _update = True
 
     # Frequency for the thread
     _frequency = '10 Hz'
@@ -100,12 +92,10 @@ class InputBasic:
     _cycleDuration = 0
 
 
-    def __init__(self, pin, muxedPin = None):
+    def __init__(self, pin):
         """Device supports a pin."""
         self._pin = pin                                         # Set pin
-        self._muxedPin = muxedPin                               # Set muxed pin
         self._values = []                                       # Set empty values array
-        self._mode = self._settings['modes'][0]                 # Set default mode
         self._flags = []                                        # Set default flag list
 
     def cleanup(self):
@@ -119,7 +109,8 @@ class InputBasic:
 
     def configureDevice(self):
         """Once the device is connected, it must be configured."""
-        GPIO.setup(self._pin, GPIO.IN, GPIO.PUD_DOWN)           # Init the pin and set it as input
+        GPIO.setup(self._pin, GPIO.OUT)                         # Init the pin and set it as output
+        GPIO.output(self._pin, GPIO.LOW)                        # Set default to low
         self._threadActive = True                               # Set thread active flag
         self._thread = threading.Thread(target=self._loop, name=self._name) # Create thread
         self._thread.daemon = True                              # Set thread as daemonic
@@ -130,18 +121,12 @@ class InputBasic:
         while True:
             beginT = time.time()                                # Save start time of loop cycle
 
-            if self._mode == 'State':
-                if (self._muxedPin != None):
-                    MuxShadow.activate(self._muxedPin)          # Activate mux pin
-                self._currentValue = GPIO.input(self._pin)      # Read the value
-                if (self._muxedPin != None):
-                    MuxShadow.deactivate()                      # Deactivate mux
-            elif self._mode == 'Rising Edge' or self._mode == 'Falling Edge':
-                if GPIO.event_detected(self._pin):
-                    self._currentValue = 1                      # Return 1 for event
-                else:
-                    self._currentValue = 0                      # Return 0 for no event
-
+            if self._update:
+                if self._currentValue == 1:                     # Set output to HIGH
+                    GPIO.output(self._pin, GPIO.HIGH)
+                else:                                           # Set output to LOW
+                    GPIO.output(self._pin, GPIO.LOW)
+                self._update = False
             self._values.append([time.time(), [self._currentValue]]) # Save timestamp and value
 
             endT = time.time()                                  # Save start time of loop cycle
@@ -154,7 +139,7 @@ class InputBasic:
                 return
 
     def getValues(self, clear=True):
-        """Get values for the basic input device."""
+        """Get values for the basic output device."""
         if self._values == None:                                # Return empty array for no values
             return []
         values = self._values[:]                                # Get the values
@@ -162,7 +147,10 @@ class InputBasic:
             self._values = []                                   # Reset values
         return values                                           # Return the values
 
-
+    def setValue(self, dim, value):
+        """Set values for the basic output device."""
+        self._currentValue = value                              # Get the value and update the current value of the driver
+        self._update = True                                     # Raise update flag
 
     def getDevice(self):
         """Return device name."""
@@ -170,10 +158,7 @@ class InputBasic:
 
     def getName(self):
         """Return device name."""
-        if self._muxedPin == None:
-            return '{}@Input[{}]'.format(self._name, self._pin)
-        else:
-            return '{}@Input[{}:{}]'.format(self._name, self._pin, self._muxedPin)
+        return '{}@Output[{}]'.format(self._name, self._pin)
 
     def getDir(self):
         """Return device direction."""
@@ -191,10 +176,6 @@ class InputBasic:
         """Return device pin."""
         return self._pin
 
-    def getMuxedPin(self):
-        """Return device muxed pin."""
-        return self._muxedPin
-
     def getAbout(self):
         """Return device settings."""
         return {
@@ -204,6 +185,7 @@ class InputBasic:
             'dataType': self._dataType,
             'dataRange': self._dataRange[:]
         }
+
     def getSettings(self):
         """Return device settings."""
         return self._settings
@@ -218,18 +200,7 @@ class InputBasic:
 
     def setMode(self, mode):
         """Set device mode."""
-        if (mode in self._settings['modes']):
-            self._mode = mode
-            if mode == 'State':
-                GPIO.remove_event_detect(self._pin)                 # Remove event detection
-            elif mode == 'Rising Edge':
-                GPIO.remove_event_detect(self._pin)                 # Remove event detection
-                GPIO.add_event_detect(self._pin, GPIO.RISING)       # Set rising edge detection
-            elif mode == 'Falling Edge':
-                GPIO.remove_event_detect(self._pin)                 # Remove event detection
-                GPIO.add_event_detect(self._pin, GPIO.FALLING)      # Set falling edge detection
-        else:
-            raise ValueError('mode {} is not allowed'.format(mode))
+        raise ValueError('mode {} is not allowed'.format(mode))
 
     def getFlags(self):
         """Return device mode."""

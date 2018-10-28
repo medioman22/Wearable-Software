@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 SoftWEAR Multiplexer module.
 
@@ -11,8 +13,6 @@ import threading                                                # Threading clas
 import Adafruit_BBIO.GPIO as GPIO                               # Main peripheral class. Implements GPIO communication
 
 from Config import PIN_MAP                                      # SoftWEAR Config module.
-
-#import RoboUtil as util                                        # Utility library to keep track of used I/O pins
 
 # Constants
 MUX_ADDRESS_LENGTH = 3                                          # How many pin are needed to address
