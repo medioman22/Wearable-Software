@@ -1,4 +1,13 @@
-﻿using System.Collections;
+﻿/*
+
+Author: Victor Faraut
+Date: 28.10.2018
+
+
+*/
+
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 

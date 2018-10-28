@@ -1,4 +1,13 @@
-﻿using UnityEngine;
+﻿/*
+
+Author: Victor Faraut
+Date: 28.10.2018
+
+
+*/
+
+
+using UnityEngine;
 using System.Collections;
 
 using System;
