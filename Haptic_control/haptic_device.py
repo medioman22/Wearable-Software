@@ -111,8 +111,8 @@ class haptic_device():
         self.motor_activation(direction[2],0)
         self.waitAndUpdate(2)
         
-    def motor_control_linear(self, length, duty, direction):
-        fraction = 10
+    def motor_control_linear(self, length, duty, direction, fraction = 10):
+
         for i in range(1,fraction+1):
             self.motor_activation(direction[0],i*duty/fraction)
             self.wait(length/(4*fraction)) #4 is coming from the 4 different phases
