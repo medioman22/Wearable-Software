@@ -22,5 +22,5 @@ southwest = np.array([7,5,3])
 
 
 my_device = haptic_device.haptic_device() 
-while True : my_device.impulsion_command(1, 'linear',1, southest)
+while True : my_device.impulsion_command(north)
 

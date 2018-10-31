@@ -24,6 +24,19 @@ win2.resize(hor,ver)
 win3 = pg.GraphicsWindow(title="Motors  7 8 9") #now window for real time plot of motor 1
 win3.resize(hor,ver)
 
+p = []
+for i in range(0,2):
+    title_plot = "Realtime plot (%d)" %i
+    p.append(win1.addPlot(title=title_plot))
+for i in range(3,5):
+    title_plot = "Realtime plot (%d)" %i
+    p.append(win2.addPlot(title=title_plot))
+for i in range(6,8):
+    title_plot = "Realtime plot (%d)" %i
+    p.append(win2.addPlot(title=title_plot))
+
+#print(p)
+    
 p1 = win1.addPlot(title="Realtime plot") #empty space for real time plot
 p1.setYRange(0,1.5, padding = None)
 p2 = win1.addPlot(title ="Realtime plot 2")
@@ -55,10 +68,18 @@ curve9 = p9.plot()
 
 time_pointer = 0
 windowWidth = 10
-nbOfData = 100
+nbOfData = 40
 time_tab = np.linspace(0,0,nbOfData)    
                  # width of the window displaying the curve
-Xm1,Xm2,Xm3,Xm4,Xm5,Xm6,Xm7,Xm8,Xm9 = np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData)       # create array that will contain the relevant time series     
+Y1,Y2,Y3,Y4,Y5,Y6,Y7,Y8,Y9 = np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData),np.linspace(0,0,nbOfData)       # create array that will contain the relevant time series     
+
+
+listOfMotorSignals = [];
+for i in range(0,9):
+    Yi = [0]*nbOfData;
+    listOfMotorSignals.append(Yi);
+
+print (listOfMotorSignals)
 
 motors = [0,0,0,0,0,0,0,0,0]
 
@@ -109,7 +130,7 @@ class haptic_device():
         self.motor_activation(direction[2],duty)
         self.waitAndUpdate(length/3)
         self.motor_activation(direction[2],0)
-        self.waitAndUpdate(2)
+        self.waitAndUpdate(1)
         
     def motor_control_linear(self, length, duty, direction, fraction = 10):
 
@@ -127,14 +148,14 @@ class haptic_device():
         for i in range(1,fraction+1):
             self.motor_activation(direction[2],(fraction-i)*duty/fraction)
             self.wait(length/(4*fraction))
-        self.waitAndUpdate(2)    #just to set a little break between the impulsions         
+        #self.waitAndUpdate(2)    #just to set a little break between the impulsions         
         
     def motor_control_sinus(self, length, duty, direction):
         print('sinus motor control')
         
         
         
-    def impulsion_command(self, length, signalType, duty, direction):
+    def impulsion_command(self, direction,length = 1, signalType = 'linear', duty = 1):
         
         if signalType == 'flat':
             self.motor_control_flat(length,duty,direction)
@@ -147,41 +168,45 @@ class haptic_device():
         
    # Realtime data plot. Each time this function is called, the data display is updated
     def update(self):
-        global curve1,curve2,curve3,curve4,curve5,curve6,curve7,curve8,curve9, Xm1,Xm2,Xm3,Xm4,Xm5,Xm6,Xm7,Xm8,Xm9, time_pointer, nbOfData, time_tab
+        global curve1,curve2,curve3,curve4,curve5,curve6,curve7,curve8,curve9, Y1,Y2,Y3,Y4,Y5,Y6,Y7,Y8,Y9, time_pointer, nbOfData, time_tab
         
         time_tab = np.roll(time_tab,-1)
         time_tab[-1] = time_pointer
 
-        Xm1 = np.roll(Xm1,-1)                      # shift data in the temporal mean 1 sample left
-        Xm2 = np.roll(Xm2,-1)                      # shift data in the temporal mean 1 sample left
-        Xm3 = np.roll(Xm3,-1)                      # shift data in the temporal mean 1 sample left
-        Xm4 = np.roll(Xm4,-1)                      # shift data in the temporal mean 1 sample left
-        Xm5 = np.roll(Xm5,-1)                      # shift data in the temporal mean 1 sample left
-        Xm6 = np.roll(Xm6,-1)                      # shift data in the temporal mean 1 sample left
-        Xm7 = np.roll(Xm7,-1)                      # shift data in the temporal mean 1 sample left
-        Xm8 = np.roll(Xm8,-1)                      # shift data in the temporal mean 1 sample left
-        Xm9 = np.roll(Xm9,-1)                      # shift data in the temporal mean 1 sample left
+        Y1 = np.roll(Y1,-1)                      # shift data in the temporal mean 1 sample left
+        Y2 = np.roll(Y2,-1)                      # shift data in the temporal mean 1 sample left
+        Y3 = np.roll(Y3,-1)                      # shift data in the temporal mean 1 sample left
+        Y4 = np.roll(Y4,-1)                      # shift data in the temporal mean 1 sample left
+        Y5 = np.roll(Y5,-1)                      # shift data in the temporal mean 1 sample left
+        Y6 = np.roll(Y6,-1)                      # shift data in the temporal mean 1 sample left
+        Y7 = np.roll(Y7,-1)                      # shift data in the temporal mean 1 sample left
+        Y8 = np.roll(Y8,-1)                      # shift data in the temporal mean 1 sample left
+        Y9 = np.roll(Y9,-1)                      # shift data in the temporal mean 1 sample left
       
+        for i in range(0,9):
+            listOfMotorSignals[i] = np.roll(listOfMotorSignals[i],-1)
+            listOfMotorSignals[i][-1] = float(self.motor_state[i])
+            
         
-        Xm1[-1] = float(self.motor_state[0])                  # vector containing the instantaneous values      
-        Xm2[-1] = float(self.motor_state[1])
-        Xm3[-1] = float(self.motor_state[2])
-        Xm4[-1] = float(self.motor_state[3])                   
-        Xm5[-1] = float(self.motor_state[4])
-        Xm6[-1] = float(self.motor_state[5])
-        Xm7[-1] = float(self.motor_state[6])                    
-        Xm8[-1] = float(self.motor_state[7])
-        Xm9[-1] = float(self.motor_state[8])
+        Y1[-1] = float(self.motor_state[0])                  # vector containing the instantaneous values      
+        Y2[-1] = float(self.motor_state[1])
+        Y3[-1] = float(self.motor_state[2])
+        Y4[-1] = float(self.motor_state[3])                   
+        Y5[-1] = float(self.motor_state[4])
+        Y6[-1] = float(self.motor_state[5])
+        Y7[-1] = float(self.motor_state[6])                    
+        Y8[-1] = float(self.motor_state[7])
+        Y9[-1] = float(self.motor_state[8])
         
-        curve1.setData(time_tab,Xm1)            # set the curve with the table of the motor value and the table of the time 
-        curve2.setData(time_tab,Xm2)                 
-        curve3.setData(time_tab,Xm3)
-        curve4.setData(time_tab,Xm4)
-        curve5.setData(time_tab,Xm5)
-        curve6.setData(time_tab,Xm6)
-        curve7.setData(time_tab,Xm7)
-        curve8.setData(time_tab,Xm8)
-        curve9.setData(time_tab,Xm9)
+        curve1.setData(time_tab,listOfMotorSignals[0])            # set the curve with the table of the motor value and the table of the time 
+        curve2.setData(time_tab,listOfMotorSignals[1])               
+        curve3.setData(time_tab,listOfMotorSignals[2])
+        curve4.setData(time_tab,listOfMotorSignals[3])
+        curve5.setData(time_tab,listOfMotorSignals[4])
+        curve6.setData(time_tab,listOfMotorSignals[5])
+        curve7.setData(time_tab,listOfMotorSignals[6])
+        curve8.setData(time_tab,listOfMotorSignals[7])
+        curve9.setData(time_tab,listOfMotorSignals[8])
 
         
         QtGui.QApplication.processEvents()    # you MUST process the plot now 
