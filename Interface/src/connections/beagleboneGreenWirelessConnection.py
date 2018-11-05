@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 SoftWEAR Communications module. The API provided by this class is asynchronous;
 i.e. there is a background thread doing all the work and calls are non-blocking.

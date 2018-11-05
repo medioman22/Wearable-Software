@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 SoftWEAR PWM module.
 

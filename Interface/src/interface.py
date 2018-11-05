@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 
 import logging                                                  # Logging package
 from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
