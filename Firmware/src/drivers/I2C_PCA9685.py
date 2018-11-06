@@ -10,14 +10,14 @@ import time                                                     # Imported for d
 import drivers._PCA9685 as PCA9685_DRIVER                       # Import official driver
 import threading                                                # Threading class for the threads
 
-from MuxModule import Mux                                       # SoftWEAR MUX module.
+from MuxModule import GetMux                                    # SoftWEAR MUX module.
 
-# Create a MUX shadow instance as there is only one Mux
-MuxShadow = Mux()
+# Mux Module to switch channels
+MuxModule = GetMux()
 
-# Addresses
-ADDRESS = PCA9685_DRIVER.PCA9685_ADDRESS
-BUSNUM = 2
+# Constants
+PCA9685_ADDRESS    = [0x40]
+PCA9685_BUSNUM     = [1, 2]
 
 
 
@@ -43,11 +43,11 @@ class PCA9685:
     # Dimension unit of the driver (0-#)
     _dimUnit = ['%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%']
 
-    # Channel
-    _channel = None
-
     # Muxed channel
     _muxedChannel = None
+
+    # Mux name
+    _muxName = None
 
     # The driver object
     _pca = None
@@ -96,7 +96,7 @@ class PCA9685:
     _dataType = 'Range'
 
     # Data range for values
-    _dataRange = [0,100]
+    _dataRange = [0,99]
 
     # Value to set
     _currentValue = []
@@ -131,23 +131,44 @@ class PCA9685:
     # Duration needed for an update cycle
     _cycleDuration = 0
 
+    # Address of the driver
+    _address = None
 
-    def __init__(self, channel, muxedChannel = None):
+    # Bus num of the driver
+    _busnum = None
+
+    # Lock for the driver, used in scan and loop thread
+    LOCK = threading.Lock()
+
+    def __init__(self, pinConfig, muxedChannel = None, muxName = None):
         """Init the device."""
-        self._channel = channel                                 # Set pin
-        self._muxedChannel = muxedChannel                       # Set muxed pin
-
-        self._currentValue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize current value
-        self._values = []                                       # Set empty values array
-
-        self._dutyFrequency = self._settings['dutyFrequencies'][7] # Set default dutyFrequency
-        #self._mode = self._settings['modes'][0]                 # Set default mode
-        self._flags = []                                        # Set default flag list
-
         try:
-            self._pca = PCA9685_DRIVER.PCA9685(address=ADDRESS,busnum=BUSNUM) # Create the driver object
+            if (muxedChannel != None):
+                MuxModule.activate(muxName, muxedChannel)       # Activate mux channel
+            if "ADDRESS" in pinConfig and pinConfig["ADDRESS"] == None or pinConfig["ADDRESS"] not in PCA9685_ADDRESS:
+                raise ValueError('address is invalid')
+            if "BUSNUM" in pinConfig and pinConfig["BUSNUM"] == None or pinConfig["BUSNUM"] not in PCA9685_BUSNUM:
+                raise ValueError('busnum is invalid')
+
+            self._address = pinConfig["ADDRESS"]                # Set address
+            self._busnum = pinConfig["BUSNUM"]                  # Set bus
+            self._muxedChannel = muxedChannel                   # Set muxed pin
+            self._muxName = muxName                             # Set mux name
+
+            self._currentValue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize current value
+            self._values = []                                   # Set empty values array
+
+            self._dutyFrequency = self._settings['dutyFrequencies'][7] # Set default dutyFrequency
+            #self._mode = self._settings['modes'][0]             # Set default mode
+            self._flags = []                                    # Set default flag list
+
+            self._pca = PCA9685_DRIVER.PCA9685(address=self._address,busnum=self._busnum) # Create the driver object
+            if (muxedChannel != None):
+                MuxModule.deactivate(muxName)                   # Deactivate mux
         except:
             self._connected = False
+            if (muxedChannel != None):
+                MuxModule.deactivate(muxName)                   # Deactivate mux
 
     def cleanup(self):
         """Clean up driver when no longer needed."""
@@ -161,9 +182,18 @@ class PCA9685:
     def getDeviceConnected(self):
         """Return True if the device is connected, false otherwise."""
         try:
+            self.LOCK.acquire()                                 # Lock the driver for scanning
+            if (self._muxedChannel != None):
+                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
             self._connected = self._pca.status()                # Device is connected and has no error
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
+            self.LOCK.release()                                 # Release driver
         except:
             self._connected = False                             # Device disconnected
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
+            self.LOCK.release()                                 # Release driver
         return self._connected
 
     def configureDevice(self):
@@ -179,22 +209,36 @@ class PCA9685:
         while True:
             beginT = time.time()                                # Save start time of loop cycle
 
-            if self._update:
-                if 'INVERSE_PARITY' in self._flags:             # Check for parity flag
-                    for i, val in enumerate(self._currentValue): # Loop all values
-                        setDuty(self._pca, i, 100. - val)       # Set duty for channel
-                else:
-                    for i, val in enumerate(self._currentValue): # Loop all values
-                        setDuty(self._pca, i, val)              # Set duty for channel
+            try:
+                self.LOCK.acquire()                             # Lock the driver for loop
+                if (self._muxedChannel != None):
+                    MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
+                if self._update:
+                    if 'INVERSE_PARITY' in self._flags:         # Check for parity flag
+                        for i, val in enumerate(self._currentValue): # Loop all values
+                            setDuty(self._pca, i, 100. - val)   # Set duty for channel
+                    else:
+                        for i, val in enumerate(self._currentValue): # Loop all values
+                            setDuty(self._pca, i, val)          # Set duty for channel
 
 
-                self._update = False                            # Clear update flag
+                    self._update = False                        # Clear update flag
 
-            self._values.append([time.time(), self._currentValue]) # Save timestamp and value
+                self._values.append([time.time(), self._currentValue]) # Save timestamp and value
 
-            endT = time.time()                                  # Save start time of loop cycle
-            deltaT = endT - beginT                              # Calculate time used for loop cycle
-            self._cycleDuration = deltaT                        # Save time needed for a cycle
+                endT = time.time()                              # Save start time of loop cycle
+                deltaT = endT - beginT                          # Calculate time used for loop cycle
+                self._cycleDuration = deltaT                    # Save time needed for a cycle
+
+                if (self._muxedChannel != None):
+                    MuxModule.deactivate(self._muxName)         # Deactivate mux
+                self.LOCK.release()                             # Release driver
+            except:
+                self._connected = False                         # Device disconnected
+                if (self._muxedChannel != None):
+                    MuxModule.deactivate(self._muxName)         # Deactivate mux
+                self.LOCK.release()                             # Release driver
+
             if (deltaT < self._period):
                 time.sleep(self._period - deltaT)               # Sleep until next loop period
 
@@ -224,9 +268,9 @@ class PCA9685:
     def getName(self):
         """Return device name."""
         if self._muxedChannel == None:
-            return '{}@I2C[{}]'.format(self._name, self._channel)
+            return '{}@I2C[{},{}]'.format(self._name, self._address, self._busnum)
         else:
-            return '{}@I2C[{}:{}]'.format(self._name, self._channel, self._muxedChannel)
+            return '{}@I2C[{},{}]#{}[{}]'.format(self._name, self._address, self._busnum, self._muxName, self._muxedChannel)
 
     def getDir(self):
         """Return device direction."""
@@ -242,7 +286,7 @@ class PCA9685:
 
     def getChannel(self):
         """Return device channel."""
-        return self._channel
+        return self._busnum
 
     def getMuxedChannel(self):
         """Return device muxed channel."""
@@ -312,12 +356,29 @@ class PCA9685:
     def setDutyFrequency(self, dutyFrequency):
         """Set device duty frequency."""
         if (dutyFrequency in self._settings['dutyFrequencies']):
-            self._dutyFrequency = dutyFrequency
-            self._pca.set_pwm_freq(int(self._dutyFrequency[:-3]))
-            self._update = True                                     # Raise update flag
+            try:
+                if (self._muxedChannel != None):
+                    MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
+                self._dutyFrequency = dutyFrequency
+                self._pca.set_pwm_freq(int(self._dutyFrequency[:-3]))
+                self._update = True                             # Raise update flag
+                if (self._muxedChannel != None):
+                    MuxModule.deactivate(self._muxName)         # Deactivate mux
+            except:
+                self._connected = False                         # Device disconnected
+                if (self._muxedChannel != None):
+                    MuxModule.deactivate(self._muxName)         # Deactivate mux
         else:
             raise ValueError('duty frequency {} is not allowed'.format(dutyFrequency))
 
+
+    def comparePinConfig(self, pinConfig, muxedChannel = None):
+        """Check if the same pin config."""
+        return ("ADDRESS" in pinConfig and
+                "BUSNUM" in pinConfig and
+                pinConfig["ADDRESS"] == self._address and
+                pinConfig["BUSNUM"] == self._busnum and
+                muxedChannel == self._muxedChannel)
 
 
 def setDuty(pca, channel, duty):
@@ -325,4 +386,5 @@ def setDuty(pca, channel, duty):
     res = 4096                                                      # 12 bits of resolution
     on = 0                                                          # Duty on
     off = int(duty / 100. * res)                                    # Duty off
+    print('set', channel, on, off)
     pca.set_pwm(channel, on, off)                                   # Send the values to the pca

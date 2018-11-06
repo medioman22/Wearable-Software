@@ -2,7 +2,7 @@
 # Author: Cyrill Lippuner
 # Date: October 2018
 """
-Wearable Software Interface
+Graphical User Interface
 
 This application provides an interface to the firmware loaded on the BBB
 
@@ -125,14 +125,14 @@ class MainWindow(QMainWindow):
     def initUI(self):
         """Initialize the ui of the main window."""
         # Initialize the window
-        self.setWindowTitle('SoftWEAR Interface')
+        self.setWindowTitle('Graphical User Interface')
         self.setWindowIcon(QIcon('assets/Icon.png'))
         try:                                                    # OSX, Linux
-            sys.stdout.write("\x1b]2;SoftWEAR Interface\x07")
+            sys.stdout.write("\x1b]2;Graphical User Interface\x07")
         except:
             pass
         try:                                                    # Windows
-            os.system("title SoftWEAR Interface")
+            os.system("title Graphical User Interface")
         except:
             pass
         self.resize(960, 720)

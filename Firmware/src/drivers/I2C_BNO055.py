@@ -10,18 +10,19 @@ import time                                                     # Imported for d
 import drivers._BNO055 as BNO055_DRIVER                         # Import official driver
 import threading                                                # Threading class for the threads
 
-from MuxModule import Mux                                       # SoftWEAR MUX module.
+from MuxModule import GetMux                                    # SoftWEAR MUX module.
 
-# Create a MUX shadow instance as there is only one Mux
-MuxShadow = Mux()
+# Mux Module to switch channels
+MuxModule = GetMux()
 
 # Unique identifier of the sensor
 IDENTIFIER = BNO055_DRIVER.BNO055_ID
 
-# Addresses
-ADDRESS_1 = BNO055_DRIVER.BNO055_ADDRESS_A
-ADDRESS_2 = BNO055_DRIVER.BNO055_ADDRESS_B
-BUSNUM = 2
+
+# Constants
+BNO055_ADDRESS    = [0x28, 0x29]
+BNO055_BUSNUM     = [1, 2]
+
 
 # Mode Map
 MODE_MAP = {
@@ -37,6 +38,8 @@ MODE_MAP = {
     'M4G':          BNO055_DRIVER.OPERATION_MODE_M4G,
     'NDOF_FMC_OFF': BNO055_DRIVER.OPERATION_MODE_NDOF_FMC_OFF,
     #'NDOF':         BNO055_DRIVER.OPERATION_MODE_NDOF
+    '*EULONLY':     BNO055_DRIVER.OPERATION_MODE_NDOF_FMC_OFF,
+    '*QUATONLY':    BNO055_DRIVER.OPERATION_MODE_NDOF_FMC_OFF,
 }
 ################################################################
 # WARNING: NDOF                                                #
@@ -66,11 +69,11 @@ class BNO055:
     # Dimension unit of the driver (0-#)
     _dimUnit = ['m/s^2', 'm/s^2', 'm/s^2', 'uT', 'uT', 'uT', '°/s', '°/s', '°/s', '°', '°', '°', '', '', '', '', '°C']
 
-    # Channel
-    _channel = None
-
     # Muxed channel
     _muxedChannel = None
+
+    # Mux name
+    _muxName = None
 
     # The driver object
     _bno = None
@@ -107,7 +110,9 @@ class BNO055:
             'COMPASS',
             'M4G',
             'NDOF_FMC_OFF',
-            #'NDOF'
+            #'NDOF',
+            '*EULONLY',
+            '*QUATONLY'
         ],
         'flags': ['TEMPERATURE']
     }
@@ -148,30 +153,52 @@ class BNO055:
     # Duration needed for an update cycle
     _cycleDuration = 0
 
+    # Address of the driver
+    _address = None
 
-    def __init__(self, channel, muxedChannel = None, ADRSet = False):
+    # Bus num of the driver
+    _busnum = None
+
+    # Lock for the driver, used in scan and loop thread
+    LOCK = threading.Lock()
+
+    def __init__(self, pinConfig, muxedChannel = None, muxName = None):
         """Device supports an address pin, one can represent this with a 'True' value of ADRSet."""
-        self._channel = channel                                 # Set pin
-        self._muxedChannel = muxedChannel                       # Set muxed pin
-
-        self._values = []                                       # Set empty values array
-
-        self._mode = self._settings['modes'][0]                 # Set default mode
-        #########################################################
-        # self._mode = self._settings['modes'][<NDOF_INDEX>]    # USE THIS LINE FOR NDOF
-        #########################################################
-        self._flags = []                                        # Set default flag list
-
-        # self._bno = BNO055_DRIVER.BNO055(rst='P9_12')         # Use that line for hardware reset pin
-                                                                # otherwise software reset is used
-        self._bno = BNO055_DRIVER.BNO055(address=ADDRESS_1,busnum=BUSNUM) # Create the driver object
+        if (muxedChannel != None):
+            MuxModule.activate(muxName, muxedChannel)           # Activate mux channel
         try:
-            self._connected = self._bno.begin()                 # Connect to the device
+
+            if "ADDRESS" in pinConfig and pinConfig["ADDRESS"] == None or pinConfig["ADDRESS"] not in BNO055_ADDRESS:
+                raise ValueError('address is invalid')
+            if "BUSNUM" in pinConfig and pinConfig["BUSNUM"] == None or pinConfig["BUSNUM"] not in BNO055_BUSNUM:
+                raise ValueError('busnum is invalid')
+
+            self._address = pinConfig["ADDRESS"]                    # Set address
+            self._busnum = pinConfig["BUSNUM"]                      # Set bus
+            self._muxName = muxName                                 # Set mux name
+            self._muxedChannel = muxedChannel                       # Set muxed pin
+
+            self._values = []                                       # Set empty values array
+
+            self._mode = self._settings['modes'][0]                 # Set default mode
+            #########################################################
+            # self._mode = self._settings['modes'][<NDOF_INDEX>]    # USE THIS LINE FOR NDOF
+            #########################################################
+            self._flags = []                                        # Set default flag list
+            # self._bno = BNO055_DRIVER.BNO055(rst='P9_12')         # Use that line for hardware reset pin
+                                                                    # otherwise software reset is used
+            self._bno = BNO055_DRIVER.BNO055(address=self._address,busnum=self._busnum) # Create the driver object
+
+            self._connected = self._bno.begin()                     # Connect to the device
             #####################################################
             # self._connected = self._bno.begin(MODE_MAP[self._mode]) # USE THIS LINE FOR NDOF
             #####################################################
-        except IOError:
+        except:
             self._connected = False
+
+        if (muxedChannel != None):
+            MuxModule.deactivate(muxName)                       # Deactivate mux
+
 
     def cleanup(self):
         """Clean up driver when no longer needed."""
@@ -180,18 +207,32 @@ class BNO055:
 
     def getDeviceConnected(self):
         """Return True if the device is connected, false otherwise."""
+        self.LOCK.acquire()                                     # Lock the driver for scanning
         try:
+            if (self._muxedChannel != None):
+                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
             status, self_test, error = self._bno.get_system_status(False) # Get status
             self._connected = (error == 0)                      # Device is connected and has no error
-        except IOError:
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
+        except:
             self._connected = False                             # Device disconnected
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
+        self.LOCK.release()                                     # Release driver
         return self._connected
 
     def configureDevice(self):
         """Once the device is connected, it must be configured."""
         try:
+            if (self._muxedChannel != None):
+                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
             self._bno.set_mode(MODE_MAP[self._mode])            # Set device as to default mode
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
         except:                                                 # Device disconnected in the meantime
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
             raise IOError('Error on i2c device while switching mode')
         self._threadActive = True                               # Set thread active flag
         self._thread = threading.Thread(target=self._loop, name=self._name) # Create thread
@@ -202,34 +243,49 @@ class BNO055:
         """Inner loop of the driver."""
         while True:
             beginT = time.time()                                # Save start time of loop cycle
+            deltaT = 0
 
-            acc = [None,None,None]
-            mag = [None,None,None]
-            gyr = [None,None,None]
-            eul = [None,None,None]
-            qua = [None,None,None,None]
-            tem = [None]
-            if self._mode in ['ACCONLY', 'ACCMAG', 'ACCGYRO', 'AMG', 'IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
-                acc = list(self._bno.read_accelerometer())      # Get acc data
-            if self._mode in ['MAGONLY', 'ACCMAG', 'MAGGYRO', 'AMG', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
-                mag = list(self._bno.read_magnetometer())       # Get mag data
-            if self._mode in ['GYRONLY', 'ACCGYRO', 'MAGGYRO', 'AMG', 'IMU', 'NDOF_FMC_OFF', 'NDOF']:
-                gyr = list(self._bno.read_gyroscope())          # Get gyr data
-            if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
-                eul = list(self._bno.read_euler())              # Get eul data
-            if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
-                qua = list(self._bno.read_quaternion())         # Get qua data
-            if 'TEMPERATURE' in self._flags:
-                tem = [self._bno.read_temp()]                   # Get tem data
-            self._currentValue = acc + mag + gyr + eul + qua + tem
+            self.LOCK.acquire()                                 # Lock the driver for loop
+            if (self._muxedChannel != None):
+                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
+            try:
+                acc = [None,None,None]
+                mag = [None,None,None]
+                gyr = [None,None,None]
+                eul = [None,None,None]
+                qua = [None,None,None,None]
+                tem = [None]
+                if self._mode in ['ACCONLY', 'ACCMAG', 'ACCGYRO', 'AMG', 'IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
+                    acc = list(self._bno.read_accelerometer())  # Get acc data
+                if self._mode in ['MAGONLY', 'ACCMAG', 'MAGGYRO', 'AMG', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
+                    mag = list(self._bno.read_magnetometer())   # Get mag data
+                if self._mode in ['GYRONLY', 'ACCGYRO', 'MAGGYRO', 'AMG', 'IMU', 'NDOF_FMC_OFF', 'NDOF']:
+                    gyr = list(self._bno.read_gyroscope())      # Get gyr data
+                if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF', '*EULONLY']:
+                    eul = list(self._bno.read_euler())          # Get eul data
+                if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF', '*QUATONLY']:
+                    qua = list(self._bno.read_quaternion())     # Get qua data
+                if 'TEMPERATURE' in self._flags:
+                    tem = [self._bno.read_temp()]               # Get tem data
+                self._currentValue = acc + mag + gyr + eul + qua + tem
 
-            self._values.append([time.time(), self._currentValue]) # Save timestamp and value
+                self._values.append([time.time(), self._currentValue]) # Save timestamp and value
 
-            endT = time.time()                                  # Save start time of loop cycle
-            deltaT = endT - beginT                              # Calculate time used for loop cycle
-            self._cycleDuration = deltaT                        # Save time needed for a cycle
+                endT = time.time()                              # Save start time of loop cycle
+                deltaT = endT - beginT                          # Calculate time used for loop cycle
+                self._cycleDuration = deltaT                    # Save time needed for a cycle
+
+            except:
+                self._connected = False                         # Device disconnected
+
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
+            self.LOCK.release()                                 # Release driver
+
+
             if (deltaT < self._period):
                 time.sleep(self._period - deltaT)               # Sleep until next loop period
+
 
             if not self._threadActive:                          # Stop the thread
                 return
@@ -251,9 +307,9 @@ class BNO055:
     def getName(self):
         """Return device name."""
         if self._muxedChannel == None:
-            return '{}@I2C[{}]'.format(self._name, self._channel)
+            return '{}@I2C[{},{}]'.format(self._name, self._address, self._busnum)
         else:
-            return '{}@I2C[{}:{}]'.format(self._name, self._channel, self._muxedChannel)
+            return '{}@I2C[{},{}]#{}[{}]'.format(self._name, self._address, self._busnum, self._muxName, self._muxedChannel)
 
     def getDir(self):
         """Return device direction."""
@@ -269,7 +325,7 @@ class BNO055:
 
     def getChannel(self):
         """Return device channel."""
-        return self._channel
+        return self._busnum
 
     def getMuxedChannel(self):
         """Return device muxed channel."""
@@ -302,8 +358,14 @@ class BNO055:
         if (mode in self._settings['modes']):
             self._mode = mode
             try:
+                if (self._muxedChannel != None):
+                    MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
                 self._bno.set_mode(MODE_MAP[self._mode])            # Set device to mode
+                if (self._muxedChannel != None):
+                    MuxModule.deactivate(self._muxName)             # Deactivate mux
             except:                                                 # Device disconnected in the meantime
+                if (self._muxedChannel != None):
+                    MuxModule.deactivate(self._muxName)             # Deactivate mux
                 raise IOError('Error on i2c device while switching mode')
         else:
             raise ValueError('mode {} is not allowed'.format(mode))
@@ -345,3 +407,12 @@ class BNO055:
     def setDutyFrequency(self, dutyFrequency):
         """Set device duty frequency."""
         raise ValueError('duty frequency {} is not allowed'.format(dutyFrequency))
+
+
+    def comparePinConfig(self, pinConfig, muxedChannel = None):
+        """Check if the same pin config."""
+        return ("ADDRESS" in pinConfig and
+                "BUSNUM" in pinConfig and
+                pinConfig["ADDRESS"] == self._address and
+                pinConfig["BUSNUM"] == self._busnum and
+                muxedChannel == self._muxedChannel)
