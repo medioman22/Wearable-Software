@@ -9,18 +9,17 @@ Created on Tue Oct 16 10:16:00 2018
 import numpy as np
 import haptic_device
 
-
-
-north = np.array([2,5,8])
-south = np.array([8,5,2])
+north = np.array([8,5,2])
+south = np.array([2,5,8])
 east = np.array([4,5,6])
 west = np.array([6,5,4])
 northwest = np.array([1,5,9])
-northest = np.array([3,5,7])
+northest = np.array([10,5,7])
 southest = np.array([9,5,1])
-southwest = np.array([7,5,3])
-
+southwest = np.array([7,5,10])
 
 my_device = haptic_device.haptic_device() 
-while True : my_device.impulsion_command(north)
+my_device.connection()
 
+#for i in xrange(2):
+my_device.impulsion_command(southest, length = 1, signalType = 'flat')
