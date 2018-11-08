@@ -21,6 +21,7 @@ import ADCModule                                                # SoftWEAR ADC m
 import I2CModule                                                # SoftWEAR I2C module
 import json                                                     # Serializing class. All objects sent are serialized
 from termcolor import colored                                   # Color printing in the console
+import cProfile                                                 # Used to profile the script
 
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
 SOFTWARE = "SoftWEAR/Firmware-BeagleboneGreenWireless(v0.1)"    # Identifier of the Software
@@ -580,4 +581,9 @@ def main():
     c.stopAndFreeResources()
 
 # Just call the main function.
-main()
+if ('p' in sys.argv):                                           # Check profile parameter
+    with open("../Logs/stats.log", "w"):                        # Clear log file
+        pass                                                    # Write message
+    cProfile.run('main()', '../Logs/stats.log')
+else:
+    main()
