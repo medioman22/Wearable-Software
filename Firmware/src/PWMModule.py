@@ -42,9 +42,9 @@ class PWM:
 
     def scan(self):
         """Update the connected devices dictionary list."""
-        lastConnectedDrivers = self._connectedDrivers[:]        # Keep last connected driver list
-        connectedDrivers = []                                   # New connected driver list
-        connectedDevices = []                                   # New connected devices list
+        lastConnectedDrivers = self._connectedDrivers           # Keep last connected driver list
+        self._connectedDrivers = []                             # Update connected drivers - start by clearing previous results
+        self.connectedDevices = []                              # Update connected devices - start by clearing previous results
         disconnectedDriver = []                                 # Disconnected drivers
 
         for pinConfig in PIN_MAP["PWM"]:                        # Loop all available pin configs
@@ -54,21 +54,21 @@ class PWM:
                                                                 # Check if drv already loaded and still connected
                 if not lastDrv.getDeviceConnected():            # Device is disconnected
                     disconnectedDriver.append(lastDrv)
-                elif lastDrv.getPin() == pin:                   # Device is still connected
-                    connectedDrivers.append(lastDrv)            # Add to connected driver list
-                    connectedDevices.append({   'pin': pin,     # Add to connected device list
-                                                'mux': None,
-                                                'name': lastDrv.getName(),
-                                                'about': lastDrv.getAbout(),
-                                                'settings': lastDrv.getSettings(),
-                                                'dir': lastDrv.getDir(),
-                                                'dim': lastDrv.getDim(),
-                                                'mode': lastDrv.getMode(),
-                                                'frequency': lastDrv.getFrequency(),
-                                                'dutyFrequency': lastDrv.getDutyFrequency(),
-                                                'flags': lastDrv.getFlags(),
-                                                'val': 0,
-                                                'vals': []})
+                elif lastDrv.getPin() == pin:                   #Device is still connected
+                    self._connectedDrivers.append(lastDrv)      # Add to connected driver list
+                    self.connectedDevices.append({  'pin': pin, # Add to connected device list
+                                                    'mux': None,
+                                                    'name': lastDrv.getName(),
+                                                    'about': lastDrv.getAbout(),
+                                                    'settings': lastDrv.getSettings(),
+                                                    'dir': lastDrv.getDir(),
+                                                    'dim': lastDrv.getDim(),
+                                                    'mode': lastDrv.getMode(),
+                                                    'frequency': lastDrv.getFrequency(),
+                                                    'dutyFrequency': lastDrv.getDutyFrequency(),
+                                                    'flags': lastDrv.getFlags(),
+                                                    'val': 0,
+                                                    'vals': []})
                     break                                       # Break to next device
             else:                                               # Try new drivers if no existing was found
                 for DRIVER in DRIVERS:                          # Test all drivers
@@ -76,27 +76,25 @@ class PWM:
                     if not drv.getDeviceConnected():            # Validate driver connected
                         continue                                # Try next driver until none is left
                     drv.configureDevice()                       # Configure device
-                    connectedDrivers.append(drv)                # Add to connected driver list
-                    connectedDevices.append({   'pin': pin,     # Add to connected device list
-                                                'mux': None,
-                                                'name': drv.getName(),
-                                                'about': drv.getAbout(),
-                                                'settings': drv.getSettings(),
-                                                'dir': drv.getDir(),
-                                                'dim': drv.getDim(),
-                                                'mode': drv.getMode(),
-                                                'frequency': drv.getFrequency(),
-                                                'dutyFrequency': drv.getDutyFrequency(),
-                                                'flags': drv.getFlags(),
-                                                'val':  0,
-                                                'vals': []})
+                    self._connectedDrivers.append(drv)          # Add to connected driver list
+                    self.connectedDevices.append({  'pin': pin, # Add to connected device list
+                                                    'mux': None,
+                                                    'name': drv.getName(),
+                                                    'about': drv.getAbout(),
+                                                    'settings': drv.getSettings(),
+                                                    'dir': drv.getDir(),
+                                                    'dim': drv.getDim(),
+                                                    'mode': drv.getMode(),
+                                                    'frequency': drv.getFrequency(),
+                                                    'dutyFrequency': drv.getDutyFrequency(),
+                                                    'flags': drv.getFlags(),
+                                                    'val':  0,
+                                                    'vals': []})
                     break                                       # Break to next device
                 else:
                     pass                                        # No suitable driver has been found
         for drv in disconnectedDriver:                          # Clean up disconnected drivers
             drv.cleanup()
-        self._connectedDrivers = connectedDrivers
-        self.connectedDevices = connectedDevices
 
 
     def getValues(self):

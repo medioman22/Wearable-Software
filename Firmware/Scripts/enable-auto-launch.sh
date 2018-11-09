@@ -13,7 +13,7 @@ cat <<EOF >/etc/rc.local
 #
 # By default this script does nothing.
 
-sudo python $PWD/../src/Main.py $0 &
+sudo python $PWD/../src/Main.py &
 
 exit 0
 EOF

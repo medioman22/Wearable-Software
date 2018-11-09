@@ -10,10 +10,10 @@ import Adafruit_BBIO.GPIO as GPIO
 import threading                                                # Threading class for the threads
 import time                                                     # Required for controllng the sampling period
 
-from MuxModule import GetMux                                    # SoftWEAR MUX module.
+from MuxModule import Mux                                       # SoftWEAR MUX module.
 
 # Create a MUX shadow instance as there is only one Mux
-MuxModule = GetMux()
+MuxShadow = Mux()
 
 
 class InputBasic:
@@ -42,9 +42,6 @@ class InputBasic:
 
     # Muxed pin
     _muxedPin = None
-
-    # Mux name
-    _muxName = None
 
     # Settings of the driver
     _settings = {
@@ -103,11 +100,10 @@ class InputBasic:
     _cycleDuration = 0
 
 
-    def __init__(self, pin, muxedPin = None, muxName = None):
+    def __init__(self, pin, muxedPin = None):
         """Device supports a pin."""
         self._pin = pin                                         # Set pin
         self._muxedPin = muxedPin                               # Set muxed pin
-        self._muxName = muxName                                 # Set mux name
         self._values = []                                       # Set empty values array
         self._mode = self._settings['modes'][0]                 # Set default mode
         self._flags = []                                        # Set default flag list
@@ -136,10 +132,10 @@ class InputBasic:
 
             if self._mode == 'State':
                 if (self._muxedPin != None):
-                    MuxModule.activate(self._muxName, self._muxedPin) # Activate mux pin
+                    MuxShadow.activate(self._muxedPin)          # Activate mux pin
                 self._currentValue = GPIO.input(self._pin)      # Read the value
                 if (self._muxedPin != None):
-                    MuxModule.deactivate(self._muxName)         # Deactivate mux
+                    MuxShadow.deactivate()                      # Deactivate mux
             elif self._mode == 'Rising Edge' or self._mode == 'Falling Edge':
                 if GPIO.event_detected(self._pin):
                     self._currentValue = 1                      # Return 1 for event
@@ -177,7 +173,7 @@ class InputBasic:
         if self._muxedPin == None:
             return '{}@Input[{}]'.format(self._name, self._pin)
         else:
-            return '{}@Input[{}]#{}[{}]'.format(self._name, self._pin, self._muxName, self._muxedPin)
+            return '{}@Input[{}:{}]'.format(self._name, self._pin, self._muxedPin)
 
     def getDir(self):
         """Return device direction."""

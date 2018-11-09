@@ -10,10 +10,10 @@ import Adafruit_BBIO.ADC as ADC
 import threading                                                # Threading class for the threads
 import time                                                     # Required for controllng the sampling period
 
-from MuxModule import GetMux                                    # SoftWEAR MUX module.
+from MuxModule import Mux                                       # SoftWEAR MUX module.
 
 # Create a MUX shadow instance as there is only one Mux
-MuxModule = GetMux()
+MuxShadow = Mux()
 
 # Timeout device
 TIMEOUT_TICKS = 10
@@ -46,9 +46,6 @@ class ADCBasic:
 
     # Muxed pin
     _muxedPin = None
-
-    # Mux name
-    _muxName = None
 
     # Zero counter
     _zeroCounter = 0
@@ -110,11 +107,10 @@ class ADCBasic:
     _cycleDuration = 0
 
 
-    def __init__(self, pin, muxedPin = None, muxName = None):
+    def __init__(self, pin, muxedPin = None):
         """Device supports a pin."""
         self._pin = pin                                         # Set pin
         self._muxedPin = muxedPin                               # Set muxed pin
-        self._muxName = muxName                                 # Set mux name
         self._zeroCounter = 0                                   # Set zero counter to 0
         self._mode = self._settings['modes'][0]                 # Set default mode
         self._flags = []                                        # Set default flag list
@@ -133,17 +129,17 @@ class ADCBasic:
 
         # BUG: Due to a bug in the ADC driver, read the values 2 times to get the most recent
         if (self._muxedPin != None):
-            MuxModule.activate(self._muxName, self._muxedPin)   # Activate mux pin
+            MuxShadow.activate(self._muxedPin)                  # Activate mux pin
         ADC.read(self._pin)
         if (self._muxedPin != None):
-            MuxModule.deactivate(self._muxName)                 # Deactivate mux
+            MuxShadow.deactivate()                              # Deactivate mux
 
         if self._mode == 'Auto Detection':                      # Got for >0 detection
             if (self._muxedPin != None):
-                MuxModule.activate(self._muxName, self._muxedPin) # Activate mux pin
+                MuxShadow.activate(self._muxedPin)              # Activate mux pin
             currentValueZero = ADC.read(self._pin) < TIMEOUT_THRESHOLD # Check if current value is different to zero
             if (self._muxedPin != None):
-                MuxModule.deactivate(self._muxName)             # Deactivate mux
+                MuxShadow.deactivate()                          # Deactivate mux
             pastValuesZero = self._zeroCounter < TIMEOUT_TICKS  # Check if past values are constant zero
 
             return not (currentValueZero and pastValuesZero)    # Return False to deconnect device
@@ -164,11 +160,11 @@ class ADCBasic:
 
             # BUG: Due to a bug in the ADC driver, read the values 2 times to get the most recent
             if (self._muxedPin != None):
-                MuxModule.activate(self._muxName, self._muxedPin) # Activate mux pin
+                MuxShadow.activate(self._muxedPin)              # Activate mux pin
             ADC.read(self._pin)
             self._currentValue = ADC.read(self._pin)
             if (self._muxedPin != None):
-                MuxModule.deactivate(self._muxName)             # Deactivate mux
+                MuxShadow.deactivate()                          # Deactivate mux
             if self._mode == 'Auto Detection':                  # Go for detection
                 if self._currentValue < TIMEOUT_THRESHOLD:      # Count how many times the values is zero
                     self._zeroCounter += 1                      # Increase zero counter
@@ -206,7 +202,7 @@ class ADCBasic:
         if self._muxedPin == None:
             return '{}@ADC[{}]'.format(self._name, self._pin)
         else:
-            return '{}@ADC[{}]#{}[{}]'.format(self._name, self._pin, self._muxName, self._muxedPin)
+            return '{}@ADC[{}:{}]'.format(self._name, self._pin, self._muxedPin)
 
     def getDir(self):
         """Return device direction."""

@@ -2,12 +2,12 @@
 # Author: Cyrill Lippuner
 # Date: October 2018
 """
-Driver file for the PCA9685 16-channel PWM controller. Communicates
+Driver file for the BNO055 accelerometer / gyroscope / magnetometer. Communicates
 with the device via I2C and implements the basic functions for integrating into
 the SoftWEAR package.
 """
 import time                                                     # Imported for delay reasons
-import drivers._PCA9685 as PCA9685_DRIVER                       # Import official driver
+import drivers._BNO055 as BNO055_DRIVER                         # Import official driver
 import threading                                                # Threading class for the threads
 
 from MuxModule import Mux                                       # SoftWEAR MUX module.
@@ -15,33 +15,56 @@ from MuxModule import Mux                                       # SoftWEAR MUX m
 # Create a MUX shadow instance as there is only one Mux
 MuxShadow = Mux()
 
+# Unique identifier of the sensor
+IDENTIFIER = BNO055_DRIVER.BNO055_ID
+
 # Addresses
-ADDRESS = PCA9685_DRIVER.PCA9685_ADDRESS
+ADDRESS_1 = BNO055_DRIVER.BNO055_ADDRESS_A
+ADDRESS_2 = BNO055_DRIVER.BNO055_ADDRESS_B
 BUSNUM = 2
 
+# Mode Map
+MODE_MAP = {
+    'ACCONLY':      BNO055_DRIVER.OPERATION_MODE_ACCONLY,
+    'MAGONLY':      BNO055_DRIVER.OPERATION_MODE_MAGONLY,
+    'GYRONLY':      BNO055_DRIVER.OPERATION_MODE_GYRONLY,
+    'ACCMAG':       BNO055_DRIVER.OPERATION_MODE_ACCMAG,
+    'ACCGYRO':      BNO055_DRIVER.OPERATION_MODE_ACCGYRO,
+    'MAGGYRO':      BNO055_DRIVER.OPERATION_MODE_MAGGYRO,
+    'AMG':          BNO055_DRIVER.OPERATION_MODE_AMG,
+    'IMU':          BNO055_DRIVER.OPERATION_MODE_IMUPLUS,
+    'COMPASS':      BNO055_DRIVER.OPERATION_MODE_COMPASS,
+    'M4G':          BNO055_DRIVER.OPERATION_MODE_M4G,
+    'NDOF_FMC_OFF': BNO055_DRIVER.OPERATION_MODE_NDOF_FMC_OFF,
+    #'NDOF':         BNO055_DRIVER.OPERATION_MODE_NDOF
+}
+################################################################
+# WARNING: NDOF                                                #
+# NDOF mode cannot be selected during runtime. Please change driver to initialize to NDOF mode at the beginning if needed and do not change it afterwards. More documentation in the official driver _BNO055.py
+################################################################
 
 
-class PCA9685:
-    """Driver for PCA9685."""
+
+class BNO055:
+    """Driver for BNO055."""
 
     # Name of the device
-    _name = 'PCA9685'
+    _name = 'BNO055'
 
     # Info of the device
-    _info = 'The PCA9685 is an I2C-bus controlled 16-channel LED controller optimized for Red/Green/Blue/Amber (RGBA) color backlighting applications. Each LED output has its own 12-bit resolution (4096 steps) fixed frequency individual PWM controller that operates at a programmable frequency from a typical of 24 Hz to 1526 Hz with a duty cycle that is adjustable from 0 % to 100 % to allow the LED to be set to a specific brightness value. All outputs are set to the same PWM frequency.'
-
+    _info = 'The BNO055 is the first in a new family of Application Specific Sensor Nodes (ASSN) implementing an intelligent 9-axis Absolute Orientation Sensor, which includes sensors and sensor fusion in a single package.'
 
     # Direction of the driver (in/out)
-    _dir = 'out'
+    _dir = 'in'
 
     # Dimension of the driver (0-#)
-    _dim = 16
+    _dim = 17
 
     # Dimension map of the driver (0-#)
-    _dimMap = ['PWM 00', 'PWM 01', 'PWM 02', 'PWM 03', 'PWM 04', 'PWM 05', 'PWM 06', 'PWM 07', 'PWM 08', 'PWM 09', 'PWM 10', 'PWM 11', 'PWM 12', 'PWM 13', 'PWM 14', 'PWM 15']
+    _dimMap = ['Acc X', 'Acc Y', 'Acc Z', 'Mag X', 'Mag Y', 'Mag Z', 'Gyr X', 'Gyr Y', 'Gyr Z', 'Euler Head', 'Euler Roll', 'Euler Pitch', 'Quat W', 'Quat X', 'Quat Y', 'Quat Z', 'Temp']
 
     # Dimension unit of the driver (0-#)
-    _dimUnit = ['%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%']
+    _dimUnit = ['m/s^2', 'm/s^2', 'm/s^2', 'uT', 'uT', 'uT', '°/s', '°/s', '°/s', '°', '°', '°', '', '', '', '', '°C']
 
     # Channel
     _channel = None
@@ -50,30 +73,13 @@ class PCA9685:
     _muxedChannel = None
 
     # The driver object
-    _pca = None
+    _bno = None
 
     # Flag whether the driver is connected
     _connected = False
 
     # Settings of the driver
     _settings = {
-        'dutyFrequencies': [
-            '24 Hz',
-            '40 Hz',
-            '50 Hz',
-            '60 Hz',
-            '100 Hz',
-            '120 Hz',
-            '150 Hz',
-            '200 Hz',
-            '250 Hz',
-            '300 Hz',
-            '400 Hz',
-            '500 Hz',
-            '1000 Hz',
-            '1500 Hz',
-            '1526 Hz'
-        ],
         'frequencies': [
             '1 Hz',
             '2 Hz',
@@ -89,23 +95,34 @@ class PCA9685:
             '60 Hz',
             '100 Hz'
         ],
-        'flags': ['INVERSE_PARITY']
+        'modes': [
+            'ACCONLY',
+            'MAGONLY',
+            'GYRONLY',
+            'ACCMAG',
+            'ACCGYRO',
+            'MAGGYRO',
+            'AMG',
+            'IMU',
+            'COMPASS',
+            'M4G',
+            'NDOF_FMC_OFF',
+            #'NDOF'
+        ],
+        'flags': ['TEMPERATURE']
     }
 
     # Data type of values
     _dataType = 'Range'
 
     # Data range for values
-    _dataRange = [0,100]
+    _dataRange = []
 
     # Value to set
-    _currentValue = []
+    _currentValue = 0
 
     # Value history
     _values = None
-
-    # Flag whether the values needs to be updated
-    _update = True
 
     # Mode
     _mode = None
@@ -132,43 +149,50 @@ class PCA9685:
     _cycleDuration = 0
 
 
-    def __init__(self, channel, muxedChannel = None):
-        """Init the device."""
+    def __init__(self, channel, muxedChannel = None, ADRSet = False):
+        """Device supports an address pin, one can represent this with a 'True' value of ADRSet."""
         self._channel = channel                                 # Set pin
         self._muxedChannel = muxedChannel                       # Set muxed pin
 
-        self._currentValue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize current value
         self._values = []                                       # Set empty values array
 
-        self._dutyFrequency = self._settings['dutyFrequencies'][7] # Set default dutyFrequency
-        #self._mode = self._settings['modes'][0]                 # Set default mode
+        self._mode = self._settings['modes'][0]                 # Set default mode
+        #########################################################
+        # self._mode = self._settings['modes'][<NDOF_INDEX>]    # USE THIS LINE FOR NDOF
+        #########################################################
         self._flags = []                                        # Set default flag list
 
+        # self._bno = BNO055_DRIVER.BNO055(rst='P9_12')         # Use that line for hardware reset pin
+                                                                # otherwise software reset is used
+        self._bno = BNO055_DRIVER.BNO055(address=ADDRESS_1,busnum=BUSNUM) # Create the driver object
         try:
-            self._pca = PCA9685_DRIVER.PCA9685(address=ADDRESS,busnum=BUSNUM) # Create the driver object
-        except:
+            self._connected = self._bno.begin()                 # Connect to the device
+            #####################################################
+            # self._connected = self._bno.begin(MODE_MAP[self._mode]) # USE THIS LINE FOR NDOF
+            #####################################################
+        except IOError:
             self._connected = False
 
     def cleanup(self):
         """Clean up driver when no longer needed."""
         self._connected = False                                 # Device disconnected
-        self._threadActive = False                              # Unset thread active
-        try:
-            self._pca.cleanup()                                 # Set PWM to sleep
-        except:
-            pass
+        self._threadActive = False                              # Unset thread active flag
 
     def getDeviceConnected(self):
         """Return True if the device is connected, false otherwise."""
         try:
-            self._connected = self._pca.status()                # Device is connected and has no error
-        except:
+            status, self_test, error = self._bno.get_system_status(False) # Get status
+            self._connected = (error == 0)                      # Device is connected and has no error
+        except IOError:
             self._connected = False                             # Device disconnected
         return self._connected
 
     def configureDevice(self):
         """Once the device is connected, it must be configured."""
-        # Device gets configured already at initialization, therefore no need to configure further
+        try:
+            self._bno.set_mode(MODE_MAP[self._mode])            # Set device as to default mode
+        except:                                                 # Device disconnected in the meantime
+            raise IOError('Error on i2c device while switching mode')
         self._threadActive = True                               # Set thread active flag
         self._thread = threading.Thread(target=self._loop, name=self._name) # Create thread
         self._thread.daemon = True                              # Set thread as daemonic
@@ -179,16 +203,25 @@ class PCA9685:
         while True:
             beginT = time.time()                                # Save start time of loop cycle
 
-            if self._update:
-                if 'INVERSE_PARITY' in self._flags:             # Check for parity flag
-                    for i, val in enumerate(self._currentValue): # Loop all values
-                        setDuty(self._pca, i, 100. - val)       # Set duty for channel
-                else:
-                    for i, val in enumerate(self._currentValue): # Loop all values
-                        setDuty(self._pca, i, val)              # Set duty for channel
-
-
-                self._update = False                            # Clear update flag
+            acc = [None,None,None]
+            mag = [None,None,None]
+            gyr = [None,None,None]
+            eul = [None,None,None]
+            qua = [None,None,None,None]
+            tem = [None]
+            if self._mode in ['ACCONLY', 'ACCMAG', 'ACCGYRO', 'AMG', 'IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
+                acc = list(self._bno.read_accelerometer())      # Get acc data
+            if self._mode in ['MAGONLY', 'ACCMAG', 'MAGGYRO', 'AMG', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
+                mag = list(self._bno.read_magnetometer())       # Get mag data
+            if self._mode in ['GYRONLY', 'ACCGYRO', 'MAGGYRO', 'AMG', 'IMU', 'NDOF_FMC_OFF', 'NDOF']:
+                gyr = list(self._bno.read_gyroscope())          # Get gyr data
+            if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
+                eul = list(self._bno.read_euler())              # Get eul data
+            if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
+                qua = list(self._bno.read_quaternion())         # Get qua data
+            if 'TEMPERATURE' in self._flags:
+                tem = [self._bno.read_temp()]                   # Get tem data
+            self._currentValue = acc + mag + gyr + eul + qua + tem
 
             self._values.append([time.time(), self._currentValue]) # Save timestamp and value
 
@@ -209,12 +242,6 @@ class PCA9685:
         if clear:
             self._values = []                                   # Reset values
         return values                                           # Return the values
-
-    def setValue(self, dim, value):
-        """Set values for the i2c device."""
-        self._currentValue[dim] = min(100., max(0., value))     # Get the value and update the dim current value of the driver
-                                                                # Value is limited to range [0,100]
-        self._update = True                                     # Raise update flag
 
 
     def getDevice(self):
@@ -272,7 +299,14 @@ class PCA9685:
 
     def setMode(self, mode):
         """Set device mode."""
-        raise ValueError('mode {} is not allowed'.format(mode))
+        if (mode in self._settings['modes']):
+            self._mode = mode
+            try:
+                self._bno.set_mode(MODE_MAP[self._mode])            # Set device to mode
+            except:                                                 # Device disconnected in the meantime
+                raise IOError('Error on i2c device while switching mode')
+        else:
+            raise ValueError('mode {} is not allowed'.format(mode))
 
     def getFlags(self):
         """Return device mode."""
@@ -289,7 +323,6 @@ class PCA9685:
                 self._flags.append(flag)                            # Add the flag
             else:
                 self._flags.remove(flag)                            # Remove the flag
-            self._update = True                                     # Raise update flag
         else:
             raise ValueError('flag {} is not allowed'.format(flag))
 
@@ -311,18 +344,4 @@ class PCA9685:
 
     def setDutyFrequency(self, dutyFrequency):
         """Set device duty frequency."""
-        if (dutyFrequency in self._settings['dutyFrequencies']):
-            self._dutyFrequency = dutyFrequency
-            self._pca.set_pwm_freq(int(self._dutyFrequency[:-3]))
-            self._update = True                                     # Raise update flag
-        else:
-            raise ValueError('duty frequency {} is not allowed'.format(dutyFrequency))
-
-
-
-def setDuty(pca, channel, duty):
-    """Help function to make setting a duty width simpler."""
-    res = 4096                                                      # 12 bits of resolution
-    on = 0                                                          # Duty on
-    off = int(duty / 100. * res)                                    # Duty off
-    pca.set_pwm(channel, on, off)                                   # Send the values to the pca
+        raise ValueError('duty frequency {} is not allowed'.format(dutyFrequency))

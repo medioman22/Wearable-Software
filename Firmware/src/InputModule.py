@@ -11,14 +11,14 @@ import time                                                     # Time keeping m
 import Adafruit_BBIO.GPIO as GPIO                               # Main peripheral class. Implements GPIO communication
 
 from Config import PIN_MAP                                      # SoftWEAR Config module.
-from MuxModule import GetMux                                    # SoftWEAR MUX module.
+from MuxModule import Mux                                       # SoftWEAR MUX module.
 
 from drivers.INPUT_BASIC import InputBasic                      # Driver module for basic input
 
 # TODO: Special drivers for inputs
 
 # Create a MUX shadow instance as there is only one Mux
-MuxModule = GetMux()
+MuxShadow = Mux()
 
 # List of all possible drivers
 DRIVERS = [InputBasic]
@@ -53,38 +53,35 @@ class Input:
 
     def scan(self):
         """Update the connected devices dictionary list."""
-        lastConnectedDrivers = self._connectedDrivers[:]        # Keep last connected driver list
-        connectedDrivers = []                                   # New connected driver list
-        connectedDevices = []                                   # New connected devices list
+        lastConnectedDrivers = self._connectedDrivers           # Keep last connected driver list
+        self._connectedDrivers = []                             # Update connected drivers - start by clearing previous results
+        self.connectedDevices = []                              # Update connected devices - start by clearing previous results
         disconnectedDriver = []                                 # Disconnected drivers
-
-        muxList = MuxModule.listFor('Input')                    # Get a list of muxes registered for Input
 
         for pinConfig in PIN_MAP["INPUT"]:                      # Loop all available pin configs
             pin = pinConfig["DATA"]                             # DATA pin
             muxSwitch = pinConfig["MUX"]                        # MUX switch pin
 
-            if not self.detectMux(muxSwitch) or len(muxList) == 0: # Not a muxed pin or mux is not enabled
+            if not self.detectMux(muxSwitch) or not MuxShadow.detect(): # Not a muxed pin or mux is not enabled
                 for lastDrv in lastConnectedDrivers:            # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
                     if not lastDrv.getDeviceConnected():        # Device is disconnected
                         disconnectedDriver.append(lastDrv)
                     elif lastDrv.getPin() == pin:               # Device is still connected
-                        connectedDrivers.append(lastDrv)        # Add to connected driver list
-                        connectedDevices.append({   'pin': pin, # Add to connected device list
-                                                    'mux': -1,
-                                                    'name': lastDrv.getName(),
-                                                    'muxName': None,
-                                                    'about': lastDrv.getAbout(),
-                                                    'settings': lastDrv.getSettings(),
-                                                    'dir': lastDrv.getDir(),
-                                                    'dim': lastDrv.getDim(),
-                                                    'mode': lastDrv.getMode(),
-                                                    'frequency': lastDrv.getFrequency(),
-                                                    'dutyFrequency': lastDrv.getDutyFrequency(),
-                                                    'flags': lastDrv.getFlags(),
-                                                    'val': 0,
-                                                    'vals': []})
+                        self._connectedDrivers.append(lastDrv)  # Add to connected driver list
+                        self.connectedDevices.append({  'pin': pin, # Add to connected device list
+                                                        'mux': -1,
+                                                        'name': lastDrv.getName(),
+                                                        'about': lastDrv.getAbout(),
+                                                        'settings': lastDrv.getSettings(),
+                                                        'dir': lastDrv.getDir(),
+                                                        'dim': lastDrv.getDim(),
+                                                        'mode': lastDrv.getMode(),
+                                                        'frequency': lastDrv.getFrequency(),
+                                                        'dutyFrequency': lastDrv.getDutyFrequency(),
+                                                        'flags': lastDrv.getFlags(),
+                                                        'val': 0,
+                                                        'vals': []})
                         break                                   # Break to next device
                 else:                                           # Try new drivers if no existing was found
                     for DRIVER in DRIVERS:                      # Test all drivers
@@ -92,38 +89,34 @@ class Input:
                         if not drv.getDeviceConnected():        # Validate driver connected
                             continue                            # Try next driver until none is left
                         drv.configureDevice()                   # Configure device
-                        connectedDrivers.append(drv)            # Add to connected driver list
-                        connectedDevices.append({   'pin': pin, # Add to connected device list
-                                                    'mux': -1,
-                                                    'name': drv.getName(),
-                                                    'muxName': None,
-                                                    'about': drv.getAbout(),
-                                                    'settings': drv.getSettings(),
-                                                    'dir': drv.getDir(),
-                                                    'dim': drv.getDim(),
-                                                    'mode': drv.getMode(),
-                                                    'frequency': drv.getFrequency(),
-                                                    'dutyFrequency': drv.getDutyFrequency(),
-                                                    'flags': drv.getFlags(),
-                                                    'val': 0,
-                                                    'vals': []})
+                        self._connectedDrivers.append(drv)      # Add to connected driver list
+                        self.connectedDevices.append({  'pin': pin, # Add to connected device list
+                                                        'mux': -1,
+                                                        'name': drv.getName(),
+                                                        'about': drv.getAbout(),
+                                                        'settings': drv.getSettings(),
+                                                        'dir': drv.getDir(),
+                                                        'dim': drv.getDim(),
+                                                        'mode': drv.getMode(),
+                                                        'frequency': drv.getFrequency(),
+                                                        'dutyFrequency': drv.getDutyFrequency(),
+                                                        'flags': drv.getFlags(),
+                                                        'val': 0,
+                                                        'vals': []})
                         break                                   # Break to next device
                     else:
                         pass                                    # No suitable driver has been found
             else:
-                for muxName in muxList:                         # Loop all muxes
-                    muxRange = MuxModule.about(muxName)['range'] # Get mux range
-                    for muxedPin in range(muxRange):            # Loop all muxed pins
-                        for lastDrv in lastConnectedDrivers:    # Test last connected drivers
+                for muxedPin in range(Mux.range):               # Loop all muxed pins
+                    for lastDrv in lastConnectedDrivers:        # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
-                            if not lastDrv.getDeviceConnected(): # Device is disconnected
-                                disconnectedDriver.append(lastDrv)
-                            elif lastDrv.getPin() == pin and lastDrv.getMuxedPin() == muxedPin: # Device is still connected
-                                connectedDrivers.append(lastDrv) # Add to connected driver list
-                                connectedDevices.append({   'pin': pin, # Add to connected device list
+                        if not lastDrv.getDeviceConnected():    # Device is disconnected
+                            disconnectedDriver.append(lastDrv)
+                        elif lastDrv.getPin() == pin and lastDrv.getMuxedPin() == muxedPin: # Device is still connected
+                            self._connectedDrivers.append(lastDrv) # Add to connected driver list
+                            self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
                                                             'name': lastDrv.getName(),
-                                                            'muxName': muxName,
                                                             'about': lastDrv.getAbout(),
                                                             'settings': lastDrv.getSettings(),
                                                             'dir': lastDrv.getDir(),
@@ -134,18 +127,20 @@ class Input:
                                                             'flags': lastDrv.getFlags(),
                                                             'val': 0,
                                                             'vals': []})
-                                break                           # Break to next device
-                        else:                                   # Try new drivers if no existing was found
-                            for DRIVER in DRIVERS:              # Test all drivers
-                                drv = DRIVER(pin, muxedPin, muxName) # Test the different drivers
-                                if not drv.getDeviceConnected(): # Validate driver connected
-                                    continue                    # Try next driver until none is left
-                                drv.configureDevice()           # Configure device
-                                connectedDrivers.append(drv) # Add to connected driver list
-                                connectedDevices.append({   'pin': pin, # Add to connected device list
+                            break                               # Break to next device
+                        else:                                   # Destroy the driver
+                            lastDrv.cleanup()
+
+                    else:                                       # Try new drivers if no existing was found
+                        for DRIVER in DRIVERS:                  # Test all drivers
+                            drv = DRIVER(pin, muxedPin)         # Test the different drivers
+                            if not drv.getDeviceConnected():    # Validate driver connected
+                                continue                        # Try next driver until none is left
+                            drv.configureDevice()               # Configure device
+                            self._connectedDrivers.append(drv)  # Add to connected driver list
+                            self.connectedDevices.append({  'pin': pin, # Add to connected device list
                                                             'mux': muxedPin,
                                                             'name': drv.getName(),
-                                                            'muxName': muxName,
                                                             'about': drv.getAbout(),
                                                             'settings': drv.getSettings(),
                                                             'dir': drv.getDir(),
@@ -156,13 +151,11 @@ class Input:
                                                             'flags': drv.getFlags(),
                                                             'val': 0,
                                                             'vals': []})
-                                break                           # Break to next device
-                            else:
-                                pass                            # No suitable driver has been found
+                            break                               # Break to next device
+                        else:
+                            pass                                # No suitable driver has been found
         for drv in disconnectedDriver:                          # Clean up disconnected drivers
             drv.cleanup()
-        self._connectedDrivers = connectedDrivers
-        self.connectedDevices = connectedDevices
 
     def getValues(self):
         """Get values of a device."""

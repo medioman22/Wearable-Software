@@ -5,7 +5,6 @@
 Configuration file for the Firmware of the Wearable SoftWEAR. PLEASE DO NOT CHANGE AT RUNTIME.
 """
 
-################################################################################
 # Pin assignments on the board
 """
              'P8_07':7, 'P8_08':8,
@@ -17,43 +16,17 @@ Configuration file for the Firmware of the Wearable SoftWEAR. PLEASE DO NOT CHAN
              'P9_12':58, 'P9_14':60, 'P9_15':61, 'P9_16':62, 'P9_23':69, 'P9_25':71,
              'P9_27':73, 'P9_41':87
 """
-################################################################################
 
 # Layout configuration
 LAYOUT = "DevLayout"
 
-################################################################################
-# Used I2C addresses
-ADDRESSES = []
-# I2C MUX TCA9548A
-ADDRESSES += [0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77]
-# I2C MUX PCA9685
-ADDRESSES += [0x40]
-# I2C MUX BNO055
-ADDRESSES += [0x28, 0x29]
-################################################################################
-
-
-
-
-################################################################################
-# Pin mapping
 PIN_MAP = {
-    "MUX": [
-        {
-            # Basic
-            "A": "P8_41",
-            "B": "P8_42",
-            "C": "P8_43",
-            "DETECT": "P8_44"
-        },
-        {
-            # I2C
-            "ADDRESS": 0x70,
-            "BUSNUM": 2
-        }
-    ],
-
+    "MUX": {
+        "A": "P8_41",
+        "B": "P8_42",
+        "C": "P8_43",
+        "DETECT": "P8_44"
+    },
     "INPUT": [
         {
             "DATA": "P8_40",
@@ -119,31 +92,9 @@ PIN_MAP = {
         # }
     ],
     "I2C": [
-        # {
-        #     "ADDRESS": 0x40,
-        #     "BUSNUM": 1
-        # },
         {
-            "ADDRESS": 0x40,
-            "BUSNUM": 2
-        },
-        # {
-        #     "ADDRESS": 0x28,
-        #     "BUSNUM": 1
-        # },
-        {
-            "ADDRESS": 0x28,
-            "BUSNUM": 2
-        },
-        # {
-        #     "ADDRESS": 0x29,
-        #     "BUSNUM": 1
-        # },
-        {
-            "ADDRESS": 0x29,
-            "BUSNUM": 2
-        },
+            "CHANNEL": "1"
+        }
     ]
 
 }
-################################################################################

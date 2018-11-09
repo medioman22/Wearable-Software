@@ -21,19 +21,15 @@ import ADCModule                                                # SoftWEAR ADC m
 import I2CModule                                                # SoftWEAR I2C module
 import json                                                     # Serializing class. All objects sent are serialized
 from termcolor import colored                                   # Color printing in the console
-import cProfile                                                 # Used to profile the script
 
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
 SOFTWARE = "SoftWEAR/Firmware-BeagleboneGreenWireless(v0.1)"    # Identifier of the Software
 
 LIVE_PRINT = False                                              # Flag whether live printing should be enabled in the console
-DIAG_LOG = False                                                # Flag whether diagnostics should be logged to a file
-DATA_LOG = False                                                # Flag whether data should be logged to a file
-EVENT_LOG = False                                               # Flag whether events should be logged to a file
 
 PRINT_PERIODE = 0.2                                             # Print periode to display values of devices in terminal
 UPDATE_PERIODE = 0.1                                            # Update periode to refresh values
-SCAN_PERIODE = 2                                                # Scan periode to refresh values
+SCAN_PERIODE = 1                                                # Scan periode to refresh values
 
 scanForDevices = True                                           # Scanning enabled as default
 exit = False                                                    # Exit flag to terminate all threads
@@ -44,21 +40,17 @@ outputList = []                                                 # List of connec
 pwmList = []                                                     # List of connected PWM devices on the GPIO pins
 adcList = []                                                    # List of connected ADC devices on the Analog pins
 i2cList = []                                                    # List of connected IMU devices on the I2C ports
+pwm_list = []                                                   # List of current PWM channels and their state
 connectionState = ""                                            # Current connection state to be displayed
 updateDuration = 0                                              # Cycle duration needed to update values
 scanDuration = 0                                                # Cycle duration needed to scan for new devices
 
-mux = MuxModule.GetMux()                                        # Initialize the SoftWEAR Mux Module
+MuxShadow = MuxModule.Mux()                                     # Initialize the SoftWEAR Mux Module
 input = InputModule.Input()                                     # Initialize the SoftWEAR Input Module
 output = OutputModule.Output()                                  # Initialize the SoftWEAR Output Module
 pwm = PWMModule.PWM()                                           # Initialize the SoftWEAR PWM Module
 adc = ADCModule.ADC()                                           # Initialize the SoftWEAR ADC Module
 i2c = I2CModule.I2C()                                           # Initialize the SoftWEAR I2C Module
-
-def muxScan():
-    """Scan for new mux devices."""
-    global mux
-    mux.scan()                                                  # Scan devices on the mux pins
 
 def inputScan():
     """Scan for new input devices."""
@@ -204,7 +196,6 @@ def scanThread():
 
         messagesSend = []                                       # List of messages to send
 
-        muxScan()                                               # Scan for muxes
         inputListRegister, inputListDeregister = inputScan()    # Get the Input devices and events
         outputListRegister, outputListDeregister = outputScan() # Get the Output devices and events
         pwmListRegister, pwmListDeregister = pwmScan()          # Get the PWM devices and events
@@ -304,8 +295,6 @@ def scanThread():
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend)                        # Send the messages
-        if EVENT_LOG:                                           # Check for event log
-            eventLog(messagesSend)                              # Call event log function
 
         endTime = time.time()                                   # Save end time of update cycle
         scanDuration = endTime - startTime                      # Calculate time used to scan for devices
@@ -421,8 +410,6 @@ def updateThread():
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend)                        # Send the messages
-        if DATA_LOG:                                            # Check for data log
-            dataLog(messagesSend)                               # Call data log function
         endTime = time.time()                                   # Save end time of update cycle
         updateDuration = endTime - startTime                    # Calculate time used to update values
 
@@ -483,74 +470,23 @@ def livePrint():
             else:                                               # Unmuxed pin
                 stringToPrint += '({}) {}: {} / {} | {:.2f} ms\n'.format(str(el['pin']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
 
-    # Print I2C informations:
+    # Print IMU informations:
     stringToPrint += "\nConnected I2Cs: {}\n".format(colored(len(i2cList), attrs=['bold', 'dark']))
     for el in i2cList:                                        # Go through all connected I2C devices
-        if ('bus' in el and 'name' in el and 'about' in el and 'val' in el and 'cycle' in el):
-            stringToPrint += '(BUS {}) {}: {} / {} | {:.2f} ms\n'.format(str(el['bus']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
+        if ('channel' in el and 'name' in el and 'about' in el and 'val' in el and 'cycle' in el):
+            stringToPrint += '(Channel {}) {}: {} / {} | {:.2f} ms\n'.format(str(el['channel']), el['name'], colored(str(el['about']['dimMap']), 'blue'), colored(str(el['val']), 'blue'), el['cycle'] * 1000.)
 
     stringToPrint += "\n\nManually break to exit!\n"            # Print exit condition
     stringToPrint += ">> Ctrl-C\n"                              # Print exit shortcut
     os.system('clear')                                          # Clear console output
     print(stringToPrint)                                        # Print live data
 
-def diagLog():
-    """Log diagnostics of the firmware."""
-    with open("../Logs/diag.log", "a") as f:                    # Open diag file
-        f.write("System,Scan,{}\n".format(scanDuration))        # Log scan duration
-        f.write("System,Update,{}\n".format(updateDuration))    # Log update duration
-        for el in inputList:                                    # Loop input device
-            if ('name' in el and 'cycle' in el):                # Check for values
-                f.write("Device,{},{}\n".format(el['name'], el['cycle'] * 1000.)) # Log device loop duration
-        for el in outputList:                                   # Loop output device
-            if ('name' in el and 'cycle' in el):                # Check for values
-                f.write("Device,{},{}\n".format(el['name'], el['cycle'] * 1000.)) # Log device loop duration
-        for el in pwmList:                                      # Loop pwm device
-            if ('name' in el and 'cycle' in el):                # Check for values
-                f.write("Device,{},{}\n".format(el['name'], el['cycle'] * 1000.)) # Log device loop duration
-        for el in adcList:                                      # Loop adc device
-            if ('name' in el and 'cycle' in el):                # Check for values
-                f.write("Device,{},{}\n".format(el['name'], el['cycle'] * 1000.)) # Log device loop duration
-        for el in i2cList:                                      # Loop i2c device
-            if ('name' in el and 'cycle' in el):                # Check for values
-                f.write("Device,{},{}\n".format(el['name'], el['cycle'] * 1000.)) # Log device loop duration
-
-
-
-
-def dataLog(messages):
-    """Log data streamed by the firmware."""
-    with open("../Logs/data.log", "a") as f:                    # Open log file
-        for message in messages:                                # Loop all messages
-            f.write(message)                                    # Write message
-            f.write('\n')                                       # Next line
-
-def eventLog(messages):
-    """Log events streamed by the firmware."""
-    with open("../Logs/event.log", "a") as f:                   # Open log file
-        for message in messages:                                # Loop all messages
-            f.write(message)                                    # Write message
-            f.write('\n')                                       # Next line
-
 def main():
     """Infinite loop function, reads all devices and manages the connection."""
-    global connectionState, c, exit, LIVE_PRINT, DIAG_LOG, DATA_LOG, EVENT_LOG
+    global connectionState, c, exit, LIVE_PRINT
 
-    if ('l' in sys.argv):                                       # Check live plot parameter
+    if ('live' in sys.argv or 'l' in sys.argv):                 # Check live plot parameter
         LIVE_PRINT = True
-    if ('d' in sys.argv):                                       # Check diag log parameter
-        DIAG_LOG = True
-        with open("../Logs/diag.log", "w"):                     # Clear diag file
-            pass                                                # Write message
-    if ('m' in sys.argv):                                       # Check data log parameter
-        DATA_LOG = True
-        with open("../Logs/data.log", "w"):                     # Clear log file
-            pass                                                # Write message
-    if ('e' in sys.argv):                                       # Check event log parameter
-        EVENT_LOG = True
-        with open("../Logs/event.log", "w"):                    # Clear log file
-            pass                                                # Write message
-
                                                                 # Create the communication class. Using 'with' to ensure correct termination.
     c = CommunicationModule.CommunicationConnection()           # Create the communication
     c.connect()                                                 # Start communication thread
@@ -570,10 +506,8 @@ def main():
             sendMessages = [json.dumps({'type': 'CycleDuration','name':'', 'values': {'update': updateDuration, 'scan': scanDuration}})]
             c.sendMessages(sendMessages)
 
-        if LIVE_PRINT:                                          # Check for live plotting
+        if LIVE_PRINT:                                                # Check for live plotting
             livePrint()                                         # Call print function
-        if DIAG_LOG:                                            # Check for diag log
-            diagLog()                                           # Call diag function
         time.sleep(PRINT_PERIODE)                               # Sleep until next print period
 
     # If we reach this -> something happened. Close communication channel
@@ -581,9 +515,4 @@ def main():
     c.stopAndFreeResources()
 
 # Just call the main function.
-if ('p' in sys.argv):                                           # Check profile parameter
-    with open("../Logs/stats.log", "w"):                        # Clear log file
-        pass                                                    # Write message
-    cProfile.run('main()', '../Logs/stats.log')
-else:
-    main()
+main()
