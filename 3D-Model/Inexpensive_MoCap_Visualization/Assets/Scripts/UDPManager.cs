@@ -57,6 +57,7 @@ public class UDPManager : MonoBehaviour
             receive_byte_array = listener.Receive(ref groupEP);
             dat = Encoding.ASCII.GetString(receive_byte_array, 0, receive_byte_array.Length);
             dataSplited = dat.Split(charSeparators, StringSplitOptions.None);
+            Debug.Log("test");
             if (dat[0] == 'B')
             {
                 if ((dataSplited[1].Equals("9"))||
@@ -65,6 +66,17 @@ public class UDPManager : MonoBehaviour
                 {
                     Debug.Log((float.Parse(dataSplited[3])).ToString());
                     cubemover.SetAngleXYZ(Int32.Parse(dataSplited[1])-9, float.Parse(dataSplited[3]));
+                    Debug.Log("test");
+                }
+            }
+            if (dat[0] == 'X')
+            {
+                if ((dataSplited[1].Equals("1")) ||
+                    (dataSplited[1].Equals("2")) ||
+                    (dataSplited[1].Equals("3")))
+                {
+                    Debug.Log((float.Parse(dataSplited[3])).ToString());
+                    cubemover.SetAngleXYZ(Int32.Parse(dataSplited[1]) - 9, float.Parse(dataSplited[3]));
                     Debug.Log("test");
                 }
             }

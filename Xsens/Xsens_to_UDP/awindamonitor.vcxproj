@@ -1,0 +1,693 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B12702AD-ABFB-343A-A199-8E24837244A3}</ProjectGuid>
+    <RootNamespace>awindamonitor</RootNamespace>
+    <Keyword>Qt4VS</Keyword>
+    <ProjectName>AwindaMonitor C++ Example</ProjectName>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><PropertyGroup Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')"><QtMsBuild>$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild></PropertyGroup><Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')"><Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." /></Target><ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')"><Import Project="$(QtMsBuild)\qt.props" /></ImportGroup>
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.60610.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\Out\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\Int\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\Out\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\Int\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\Out\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\Int\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\Out\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\Int\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent>
+      <Command />
+    </PreBuildEvent>
+    <ClCompile>
+      <AdditionalOptions>/wd4100 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;C:\Qt\5.11.2\msvc2017_64\include;C:\Qt\5.11.2\msvc2017_64\include\Qt3DCore;C:\Qt\5.11.2\msvc2017_64\include\Qt3DAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DLogic;C:\Qt\5.11.2\msvc2017_64\include\Qt3DRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuick;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickScene2D;C:\Qt\5.11.2\msvc2017_64\include\ActiveQt;C:\Qt\5.11.2\msvc2017_64\include\QtBluetooth;C:\Qt\5.11.2\msvc2017_64\include\QtCharts;C:\Qt\5.11.2\msvc2017_64\include\QtConcurrent;C:\Qt\5.11.2\msvc2017_64\include\QtCore;C:\Qt\5.11.2\msvc2017_64\include\QtDataVisualization;C:\Qt\5.11.2\msvc2017_64\include\QtDBus;C:\Qt\5.11.2\msvc2017_64\include\QtGamepad;C:\Qt\5.11.2\msvc2017_64\include\QtGui;C:\Qt\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\5.11.2\msvc2017_64\include\QtHelp;C:\Qt\5.11.2\msvc2017_64\include\QtLocation;C:\Qt\5.11.2\msvc2017_64\include\QtMultimedia;C:\Qt\5.11.2\msvc2017_64\include\QtMultimediaWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtNetwork;C:\Qt\5.11.2\msvc2017_64\include\QtNetworkAuth;C:\Qt\5.11.2\msvc2017_64\include\QtNfc;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\5.11.2\msvc2017_64\include\QtPositioning;C:\Qt\5.11.2\msvc2017_64\include\QtPrintSupport;C:\Qt\5.11.2\msvc2017_64\include\QtQml;C:\Qt\5.11.2\msvc2017_64\include\QtQuick;C:\Qt\5.11.2\msvc2017_64\include\QtQuickWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtQuickControls2;C:\Qt\5.11.2\msvc2017_64\include\QtQuickTest;C:\Qt\5.11.2\msvc2017_64\include\QtScxml;C:\Qt\5.11.2\msvc2017_64\include\QtSensors;C:\Qt\5.11.2\msvc2017_64\include\QtSerialBus;C:\Qt\5.11.2\msvc2017_64\include\QtSerialPort;C:\Qt\5.11.2\msvc2017_64\include\QtTextToSpeech;C:\Qt\5.11.2\msvc2017_64\include\QtSql;C:\Qt\5.11.2\msvc2017_64\include\QtSvg;C:\Qt\5.11.2\msvc2017_64\include\QtTest;C:\Qt\5.11.2\msvc2017_64\include\QtUiTools;C:\Qt\5.11.2\msvc2017_64\include\QtWebChannel;C:\Qt\5.11.2\msvc2017_64\include\QtWebSockets;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngine;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineCore;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWinExtras;C:\Qt\5.11.2\msvc2017_64\include\QtXml;C:\Qt\5.11.2\msvc2017_64\include\QtXmlPatterns;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
+    <Link>
+      <AdditionalDependencies>C:\Qt\5.11.2\msvc2017_64\lib\qtmain.lib;xsensdeviceapi32.lib;xstypes32.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DCore.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DAnimation.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DInput.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DLogic.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DRender.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuick.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickAnimation.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickInput.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickRender.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickScene2D.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxContainer.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxBase.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Bluetooth.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Charts.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Concurrent.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Core.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5DataVisualization.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5DBus.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Gamepad.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Gui.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Help.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Location.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Multimedia.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5MultimediaWidgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Network.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5NetworkAuth.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Nfc.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5OpenGL.lib;opengl32.lib;glu32.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5OpenGLExtensions.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Positioning.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5PrintSupport.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Qml.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Quick.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickWidgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickControls2.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickTest.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Scxml.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Sensors.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5SerialBus.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5SerialPort.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5TextToSpeech.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Sql.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Svg.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Test.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5UiTools.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebChannel.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebSockets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngine.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineCore.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineWidgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Widgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WinExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Xml.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5XmlPatterns.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\$(Platform)\lib;C:\Qt\5.11.2\msvc2017_64\lib;C:\Qt\5.11.2\msvc2017_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copy Xsens libraries</Message>
+      <Command>copy /Y /B ..\..\$(Platform)\lib\xsensdeviceapi$(PlatformArchitecture).dll "$(OutDir)" &gt;NUL
+copy /Y /B ..\..\$(Platform)\lib\xstypes$(PlatformArchitecture).dll "$(OutDir)" &gt;NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Core.dll "$(OutDir)" &gt; NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Gui.dll "$(OutDir)" &gt; NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Widgets.dll "$(OutDir)" &gt; NUL
+mkdir  "$(OutDir)\platforms\"
+copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt; NUL</Command>
+    </PostBuildEvent>
+  <QtMoc><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile><Define>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB</Define><ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription><DynamicSource>output</DynamicSource><IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;C:\Qt\5.11.2\msvc2017_64\include;C:\Qt\5.11.2\msvc2017_64\include\Qt3DCore;C:\Qt\5.11.2\msvc2017_64\include\Qt3DAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DLogic;C:\Qt\5.11.2\msvc2017_64\include\Qt3DRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuick;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickScene2D;C:\Qt\5.11.2\msvc2017_64\include\ActiveQt;C:\Qt\5.11.2\msvc2017_64\include\QtBluetooth;C:\Qt\5.11.2\msvc2017_64\include\QtCharts;C:\Qt\5.11.2\msvc2017_64\include\QtConcurrent;C:\Qt\5.11.2\msvc2017_64\include\QtCore;C:\Qt\5.11.2\msvc2017_64\include\QtDataVisualization;C:\Qt\5.11.2\msvc2017_64\include\QtDBus;C:\Qt\5.11.2\msvc2017_64\include\QtGamepad;C:\Qt\5.11.2\msvc2017_64\include\QtGui;C:\Qt\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\5.11.2\msvc2017_64\include\QtHelp;C:\Qt\5.11.2\msvc2017_64\include\QtLocation;C:\Qt\5.11.2\msvc2017_64\include\QtMultimedia;C:\Qt\5.11.2\msvc2017_64\include\QtMultimediaWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtNetwork;C:\Qt\5.11.2\msvc2017_64\include\QtNetworkAuth;C:\Qt\5.11.2\msvc2017_64\include\QtNfc;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\5.11.2\msvc2017_64\include\QtPositioning;C:\Qt\5.11.2\msvc2017_64\include\QtPrintSupport;C:\Qt\5.11.2\msvc2017_64\include\QtQml;C:\Qt\5.11.2\msvc2017_64\include\QtQuick;C:\Qt\5.11.2\msvc2017_64\include\QtQuickWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtQuickControls2;C:\Qt\5.11.2\msvc2017_64\include\QtQuickTest;C:\Qt\5.11.2\msvc2017_64\include\QtScxml;C:\Qt\5.11.2\msvc2017_64\include\QtSensors;C:\Qt\5.11.2\msvc2017_64\include\QtSerialBus;C:\Qt\5.11.2\msvc2017_64\include\QtSerialPort;C:\Qt\5.11.2\msvc2017_64\include\QtTextToSpeech;C:\Qt\5.11.2\msvc2017_64\include\QtSql;C:\Qt\5.11.2\msvc2017_64\include\QtSvg;C:\Qt\5.11.2\msvc2017_64\include\QtTest;C:\Qt\5.11.2\msvc2017_64\include\QtUiTools;C:\Qt\5.11.2\msvc2017_64\include\QtWebChannel;C:\Qt\5.11.2\msvc2017_64\include\QtWebSockets;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngine;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineCore;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWinExtras;C:\Qt\5.11.2\msvc2017_64\include\QtXml;C:\Qt\5.11.2\msvc2017_64\include\QtXmlPatterns;.</IncludePath></QtMoc><QtRcc><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile><InitFuncName>%(Filename)</InitFuncName><Compression>default</Compression><NoCompression>true</NoCompression><ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription></QtRcc><QtUic><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile><ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription></QtUic></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PreBuildEvent>
+      <Command />
+    </PreBuildEvent>
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/wd4100 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;C:\Qt\5.11.2\msvc2017_64\include;C:\Qt\5.11.2\msvc2017_64\include\Qt3DCore;C:\Qt\5.11.2\msvc2017_64\include\Qt3DAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DLogic;C:\Qt\5.11.2\msvc2017_64\include\Qt3DRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuick;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickScene2D;C:\Qt\5.11.2\msvc2017_64\include\ActiveQt;C:\Qt\5.11.2\msvc2017_64\include\QtBluetooth;C:\Qt\5.11.2\msvc2017_64\include\QtCharts;C:\Qt\5.11.2\msvc2017_64\include\QtConcurrent;C:\Qt\5.11.2\msvc2017_64\include\QtCore;C:\Qt\5.11.2\msvc2017_64\include\QtDataVisualization;C:\Qt\5.11.2\msvc2017_64\include\QtDBus;C:\Qt\5.11.2\msvc2017_64\include\QtGamepad;C:\Qt\5.11.2\msvc2017_64\include\QtGui;C:\Qt\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\5.11.2\msvc2017_64\include\QtHelp;C:\Qt\5.11.2\msvc2017_64\include\QtLocation;C:\Qt\5.11.2\msvc2017_64\include\QtMultimedia;C:\Qt\5.11.2\msvc2017_64\include\QtMultimediaWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtNetwork;C:\Qt\5.11.2\msvc2017_64\include\QtNetworkAuth;C:\Qt\5.11.2\msvc2017_64\include\QtNfc;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\5.11.2\msvc2017_64\include\QtPositioning;C:\Qt\5.11.2\msvc2017_64\include\QtPrintSupport;C:\Qt\5.11.2\msvc2017_64\include\QtQml;C:\Qt\5.11.2\msvc2017_64\include\QtQuick;C:\Qt\5.11.2\msvc2017_64\include\QtQuickWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtQuickControls2;C:\Qt\5.11.2\msvc2017_64\include\QtQuickTest;C:\Qt\5.11.2\msvc2017_64\include\QtScxml;C:\Qt\5.11.2\msvc2017_64\include\QtSensors;C:\Qt\5.11.2\msvc2017_64\include\QtSerialBus;C:\Qt\5.11.2\msvc2017_64\include\QtSerialPort;C:\Qt\5.11.2\msvc2017_64\include\QtTextToSpeech;C:\Qt\5.11.2\msvc2017_64\include\QtSql;C:\Qt\5.11.2\msvc2017_64\include\QtSvg;C:\Qt\5.11.2\msvc2017_64\include\QtTest;C:\Qt\5.11.2\msvc2017_64\include\QtUiTools;C:\Qt\5.11.2\msvc2017_64\include\QtWebChannel;C:\Qt\5.11.2\msvc2017_64\include\QtWebSockets;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngine;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineCore;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWinExtras;C:\Qt\5.11.2\msvc2017_64\include\QtXml;C:\Qt\5.11.2\msvc2017_64\include\QtXmlPatterns;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ErrorReporting>None</ErrorReporting>
+    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
+    <Link>
+      <AdditionalDependencies>C:\Qt\5.11.2\msvc2017_64\lib\qtmain.lib;xsensdeviceapi64.lib;xstypes64.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DCore.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DAnimation.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DInput.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DLogic.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DRender.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuick.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickAnimation.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickInput.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickRender.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickScene2D.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxContainer.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxBase.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Bluetooth.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Charts.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Concurrent.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Core.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5DataVisualization.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5DBus.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Gamepad.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Gui.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Help.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Location.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Multimedia.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5MultimediaWidgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Network.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5NetworkAuth.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Nfc.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5OpenGL.lib;opengl32.lib;glu32.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5OpenGLExtensions.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Positioning.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5PrintSupport.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Qml.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Quick.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickWidgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickControls2.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickTest.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Scxml.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Sensors.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5SerialBus.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5SerialPort.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5TextToSpeech.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Sql.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Svg.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Test.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5UiTools.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebChannel.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebSockets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngine.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineCore.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineWidgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Widgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WinExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Xml.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5XmlPatterns.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\$(Platform)\lib;C:\Qt\5.11.2\msvc2017_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ShowProgress>NotSet</ShowProgress>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copy Xsens libraries</Message>
+      <Command>copy /Y /B ..\..\$(Platform)\lib\xsensdeviceapi$(PlatformArchitecture).dll "$(OutDir)" &gt;NUL
+copy /Y /B ..\..\$(Platform)\lib\xstypes$(PlatformArchitecture).dll "$(OutDir)" &gt;NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Core.dll "$(OutDir)" &gt; NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Gui.dll "$(OutDir)" &gt; NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Widgets.dll "$(OutDir)" &gt; NUL
+mkdir  "$(OutDir)\platforms\"
+copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt; NUL</Command>
+    </PostBuildEvent>
+  <QtMoc><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile><Define>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB</Define><ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription><DynamicSource>output</DynamicSource><IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;C:\Qt\5.11.2\msvc2017_64\include;C:\Qt\5.11.2\msvc2017_64\include\Qt3DCore;C:\Qt\5.11.2\msvc2017_64\include\Qt3DAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DLogic;C:\Qt\5.11.2\msvc2017_64\include\Qt3DRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuick;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickScene2D;C:\Qt\5.11.2\msvc2017_64\include\ActiveQt;C:\Qt\5.11.2\msvc2017_64\include\QtBluetooth;C:\Qt\5.11.2\msvc2017_64\include\QtCharts;C:\Qt\5.11.2\msvc2017_64\include\QtConcurrent;C:\Qt\5.11.2\msvc2017_64\include\QtCore;C:\Qt\5.11.2\msvc2017_64\include\QtDataVisualization;C:\Qt\5.11.2\msvc2017_64\include\QtDBus;C:\Qt\5.11.2\msvc2017_64\include\QtGamepad;C:\Qt\5.11.2\msvc2017_64\include\QtGui;C:\Qt\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\5.11.2\msvc2017_64\include\QtHelp;C:\Qt\5.11.2\msvc2017_64\include\QtLocation;C:\Qt\5.11.2\msvc2017_64\include\QtMultimedia;C:\Qt\5.11.2\msvc2017_64\include\QtMultimediaWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtNetwork;C:\Qt\5.11.2\msvc2017_64\include\QtNetworkAuth;C:\Qt\5.11.2\msvc2017_64\include\QtNfc;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\5.11.2\msvc2017_64\include\QtPositioning;C:\Qt\5.11.2\msvc2017_64\include\QtPrintSupport;C:\Qt\5.11.2\msvc2017_64\include\QtQml;C:\Qt\5.11.2\msvc2017_64\include\QtQuick;C:\Qt\5.11.2\msvc2017_64\include\QtQuickWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtQuickControls2;C:\Qt\5.11.2\msvc2017_64\include\QtQuickTest;C:\Qt\5.11.2\msvc2017_64\include\QtScxml;C:\Qt\5.11.2\msvc2017_64\include\QtSensors;C:\Qt\5.11.2\msvc2017_64\include\QtSerialBus;C:\Qt\5.11.2\msvc2017_64\include\QtSerialPort;C:\Qt\5.11.2\msvc2017_64\include\QtTextToSpeech;C:\Qt\5.11.2\msvc2017_64\include\QtSql;C:\Qt\5.11.2\msvc2017_64\include\QtSvg;C:\Qt\5.11.2\msvc2017_64\include\QtTest;C:\Qt\5.11.2\msvc2017_64\include\QtUiTools;C:\Qt\5.11.2\msvc2017_64\include\QtWebChannel;C:\Qt\5.11.2\msvc2017_64\include\QtWebSockets;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngine;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineCore;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWinExtras;C:\Qt\5.11.2\msvc2017_64\include\QtXml;C:\Qt\5.11.2\msvc2017_64\include\QtXmlPatterns;.</IncludePath></QtMoc><QtRcc><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile><InitFuncName>%(Filename)</InitFuncName><Compression>default</Compression><NoCompression>true</NoCompression><ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription></QtRcc><QtUic><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile><ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription></QtUic></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent>
+      <Command />
+    </PreBuildEvent>
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;C:\Qt\5.11.2\msvc2017_64\include;C:\Qt\5.11.2\msvc2017_64\include\Qt3DCore;C:\Qt\5.11.2\msvc2017_64\include\Qt3DAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DLogic;C:\Qt\5.11.2\msvc2017_64\include\Qt3DRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuick;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickScene2D;C:\Qt\5.11.2\msvc2017_64\include\ActiveQt;C:\Qt\5.11.2\msvc2017_64\include\QtBluetooth;C:\Qt\5.11.2\msvc2017_64\include\QtCharts;C:\Qt\5.11.2\msvc2017_64\include\QtConcurrent;C:\Qt\5.11.2\msvc2017_64\include\QtCore;C:\Qt\5.11.2\msvc2017_64\include\QtDataVisualization;C:\Qt\5.11.2\msvc2017_64\include\QtDBus;C:\Qt\5.11.2\msvc2017_64\include\QtGamepad;C:\Qt\5.11.2\msvc2017_64\include\QtGui;C:\Qt\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\5.11.2\msvc2017_64\include\QtHelp;C:\Qt\5.11.2\msvc2017_64\include\QtLocation;C:\Qt\5.11.2\msvc2017_64\include\QtMultimedia;C:\Qt\5.11.2\msvc2017_64\include\QtMultimediaWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtNetwork;C:\Qt\5.11.2\msvc2017_64\include\QtNetworkAuth;C:\Qt\5.11.2\msvc2017_64\include\QtNfc;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\5.11.2\msvc2017_64\include\QtPositioning;C:\Qt\5.11.2\msvc2017_64\include\QtPrintSupport;C:\Qt\5.11.2\msvc2017_64\include\QtQml;C:\Qt\5.11.2\msvc2017_64\include\QtQuick;C:\Qt\5.11.2\msvc2017_64\include\QtQuickWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtQuickControls2;C:\Qt\5.11.2\msvc2017_64\include\QtQuickTest;C:\Qt\5.11.2\msvc2017_64\include\QtScxml;C:\Qt\5.11.2\msvc2017_64\include\QtSensors;C:\Qt\5.11.2\msvc2017_64\include\QtSerialBus;C:\Qt\5.11.2\msvc2017_64\include\QtSerialPort;C:\Qt\5.11.2\msvc2017_64\include\QtTextToSpeech;C:\Qt\5.11.2\msvc2017_64\include\QtSql;C:\Qt\5.11.2\msvc2017_64\include\QtSvg;C:\Qt\5.11.2\msvc2017_64\include\QtTest;C:\Qt\5.11.2\msvc2017_64\include\QtUiTools;C:\Qt\5.11.2\msvc2017_64\include\QtWebChannel;C:\Qt\5.11.2\msvc2017_64\include\QtWebSockets;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngine;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineCore;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWinExtras;C:\Qt\5.11.2\msvc2017_64\include\QtXml;C:\Qt\5.11.2\msvc2017_64\include\QtXmlPatterns;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
+    <Link>
+      <AdditionalDependencies>C:\Qt\5.11.2\msvc2017_64\lib\qtmaind.lib;xsensdeviceapi32.lib;xstypes32.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxBase.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DCore.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DAnimation.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DInput.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DLogic.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DRender.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuick.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickAnimation.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickInput.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickRender.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickScene2D.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngine.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineCore.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineWidgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DCored.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DAnimationd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DExtrasd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DInputd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DLogicd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DRenderd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickAnimationd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickExtrasd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickInputd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickRenderd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickScene2Dd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxContainerd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxBased.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Bluetoothd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Chartsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Concurrentd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Cored.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5DataVisualizationd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5DBusd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Gamepadd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Guid.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Helpd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Locationd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Multimediad.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5MultimediaWidgetsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Networkd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5NetworkAuthd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Nfcd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5OpenGLd.lib;opengl32.lib;glu32.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5OpenGLExtensionsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Positioningd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5PrintSupportd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Qmld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Quickd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickWidgetsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickControls2d.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickTestd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Scxmld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Sensorsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5SerialBusd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5SerialPortd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5TextToSpeechd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Sqld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Svgd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Testd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5UiToolsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebChanneld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebSocketsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngined.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineCored.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineWidgetsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Widgetsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WinExtrasd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Xmld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5XmlPatternsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\$(Platform)\lib;C:\Qt\5.11.2\msvc2017_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>false</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copy Xsens libraries</Message>
+      <Command>copy /Y /B ..\..\$(Platform)\lib\xsensdeviceapi$(PlatformArchitecture).dll "$(OutDir)" &gt;NUL
+copy /Y /B ..\..\$(Platform)\lib\xstypes$(PlatformArchitecture).dll "$(OutDir)" &gt;NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Core.dll "$(OutDir)" &gt; NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Gui.dll "$(OutDir)" &gt; NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Widgets.dll "$(OutDir)" &gt; NUL
+mkdir  "$(OutDir)\platforms\"
+copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt; NUL</Command>
+    </PostBuildEvent>
+  <QtMoc><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile><Define>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB</Define><ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription><DynamicSource>output</DynamicSource><IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;C:\Qt\5.11.2\msvc2017_64\include;C:\Qt\5.11.2\msvc2017_64\include\Qt3DCore;C:\Qt\5.11.2\msvc2017_64\include\Qt3DAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DLogic;C:\Qt\5.11.2\msvc2017_64\include\Qt3DRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuick;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickScene2D;C:\Qt\5.11.2\msvc2017_64\include\ActiveQt;C:\Qt\5.11.2\msvc2017_64\include\QtBluetooth;C:\Qt\5.11.2\msvc2017_64\include\QtCharts;C:\Qt\5.11.2\msvc2017_64\include\QtConcurrent;C:\Qt\5.11.2\msvc2017_64\include\QtCore;C:\Qt\5.11.2\msvc2017_64\include\QtDataVisualization;C:\Qt\5.11.2\msvc2017_64\include\QtDBus;C:\Qt\5.11.2\msvc2017_64\include\QtGamepad;C:\Qt\5.11.2\msvc2017_64\include\QtGui;C:\Qt\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\5.11.2\msvc2017_64\include\QtHelp;C:\Qt\5.11.2\msvc2017_64\include\QtLocation;C:\Qt\5.11.2\msvc2017_64\include\QtMultimedia;C:\Qt\5.11.2\msvc2017_64\include\QtMultimediaWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtNetwork;C:\Qt\5.11.2\msvc2017_64\include\QtNetworkAuth;C:\Qt\5.11.2\msvc2017_64\include\QtNfc;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\5.11.2\msvc2017_64\include\QtPositioning;C:\Qt\5.11.2\msvc2017_64\include\QtPrintSupport;C:\Qt\5.11.2\msvc2017_64\include\QtQml;C:\Qt\5.11.2\msvc2017_64\include\QtQuick;C:\Qt\5.11.2\msvc2017_64\include\QtQuickWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtQuickControls2;C:\Qt\5.11.2\msvc2017_64\include\QtQuickTest;C:\Qt\5.11.2\msvc2017_64\include\QtScxml;C:\Qt\5.11.2\msvc2017_64\include\QtSensors;C:\Qt\5.11.2\msvc2017_64\include\QtSerialBus;C:\Qt\5.11.2\msvc2017_64\include\QtSerialPort;C:\Qt\5.11.2\msvc2017_64\include\QtTextToSpeech;C:\Qt\5.11.2\msvc2017_64\include\QtSql;C:\Qt\5.11.2\msvc2017_64\include\QtSvg;C:\Qt\5.11.2\msvc2017_64\include\QtTest;C:\Qt\5.11.2\msvc2017_64\include\QtUiTools;C:\Qt\5.11.2\msvc2017_64\include\QtWebChannel;C:\Qt\5.11.2\msvc2017_64\include\QtWebSockets;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngine;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineCore;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWinExtras;C:\Qt\5.11.2\msvc2017_64\include\QtXml;C:\Qt\5.11.2\msvc2017_64\include\QtXmlPatterns;.</IncludePath></QtMoc><QtRcc><InitFuncName>%(Filename)</InitFuncName><OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile><InputFile>%(FullPath)</InputFile><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><Compression>default</Compression><NoCompression>true</NoCompression><ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription></QtRcc><QtUic><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile><ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription></QtUic></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PreBuildEvent>
+      <Command />
+    </PreBuildEvent>
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/wd4100 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;C:\Qt\5.11.2\msvc2017_64\include;C:\Qt\5.11.2\msvc2017_64\include\Qt3DCore;C:\Qt\5.11.2\msvc2017_64\include\Qt3DAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DLogic;C:\Qt\5.11.2\msvc2017_64\include\Qt3DRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuick;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickScene2D;C:\Qt\5.11.2\msvc2017_64\include\ActiveQt;C:\Qt\5.11.2\msvc2017_64\include\QtBluetooth;C:\Qt\5.11.2\msvc2017_64\include\QtCharts;C:\Qt\5.11.2\msvc2017_64\include\QtConcurrent;C:\Qt\5.11.2\msvc2017_64\include\QtCore;C:\Qt\5.11.2\msvc2017_64\include\QtDataVisualization;C:\Qt\5.11.2\msvc2017_64\include\QtDBus;C:\Qt\5.11.2\msvc2017_64\include\QtGamepad;C:\Qt\5.11.2\msvc2017_64\include\QtGui;C:\Qt\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\5.11.2\msvc2017_64\include\QtHelp;C:\Qt\5.11.2\msvc2017_64\include\QtLocation;C:\Qt\5.11.2\msvc2017_64\include\QtMultimedia;C:\Qt\5.11.2\msvc2017_64\include\QtMultimediaWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtNetwork;C:\Qt\5.11.2\msvc2017_64\include\QtNetworkAuth;C:\Qt\5.11.2\msvc2017_64\include\QtNfc;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\5.11.2\msvc2017_64\include\QtPositioning;C:\Qt\5.11.2\msvc2017_64\include\QtPrintSupport;C:\Qt\5.11.2\msvc2017_64\include\QtQml;C:\Qt\5.11.2\msvc2017_64\include\QtQuick;C:\Qt\5.11.2\msvc2017_64\include\QtQuickWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtQuickControls2;C:\Qt\5.11.2\msvc2017_64\include\QtQuickTest;C:\Qt\5.11.2\msvc2017_64\include\QtScxml;C:\Qt\5.11.2\msvc2017_64\include\QtSensors;C:\Qt\5.11.2\msvc2017_64\include\QtSerialBus;C:\Qt\5.11.2\msvc2017_64\include\QtSerialPort;C:\Qt\5.11.2\msvc2017_64\include\QtTextToSpeech;C:\Qt\5.11.2\msvc2017_64\include\QtSql;C:\Qt\5.11.2\msvc2017_64\include\QtSvg;C:\Qt\5.11.2\msvc2017_64\include\QtTest;C:\Qt\5.11.2\msvc2017_64\include\QtUiTools;C:\Qt\5.11.2\msvc2017_64\include\QtWebChannel;C:\Qt\5.11.2\msvc2017_64\include\QtWebSockets;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngine;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineCore;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWinExtras;C:\Qt\5.11.2\msvc2017_64\include\QtXml;C:\Qt\5.11.2\msvc2017_64\include\QtXmlPatterns;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
+    <Link>
+      <AdditionalDependencies>C:\Qt\5.11.2\msvc2017_64\lib\qtmaind.lib;xsensdeviceapi64.lib;xstypes64.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxBase.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DCore.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DAnimation.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DInput.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DLogic.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DRender.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuick.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickAnimation.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickExtras.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickInput.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickRender.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickScene2D.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngine.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineCore.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineWidgets.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DCored.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DAnimationd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DExtrasd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DInputd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DLogicd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DRenderd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickAnimationd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickExtrasd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickInputd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickRenderd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt53DQuickScene2Dd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxContainerd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5AxBased.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Bluetoothd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Chartsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Concurrentd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Cored.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5DataVisualizationd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5DBusd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Gamepadd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Guid.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Helpd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Locationd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Multimediad.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5MultimediaWidgetsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Networkd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5NetworkAuthd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Nfcd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5OpenGLd.lib;opengl32.lib;glu32.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5OpenGLExtensionsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Positioningd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5PrintSupportd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Qmld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Quickd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickWidgetsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickControls2d.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5QuickTestd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Scxmld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Sensorsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5SerialBusd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5SerialPortd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5TextToSpeechd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Sqld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Svgd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Testd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5UiToolsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebChanneld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebSocketsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngined.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineCored.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WebEngineWidgetsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Widgetsd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5WinExtrasd.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5Xmld.lib;C:\Qt\5.11.2\msvc2017_64\lib\Qt5XmlPatternsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\$(Platform)\lib;C:\Qt\5.11.2\msvc2017_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copy Xsens libraries</Message>
+      <Command>copy /Y /B ..\..\$(Platform)\lib\xsensdeviceapi$(PlatformArchitecture).dll "$(OutDir)" &gt;NUL
+copy /Y /B ..\..\$(Platform)\lib\xstypes$(PlatformArchitecture).dll "$(OutDir)" &gt;NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Core.dll "$(OutDir)" &gt; NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Gui.dll "$(OutDir)" &gt; NUL
+copy /Y /B ..\..\$(Platform)\lib\Qt5Widgets.dll "$(OutDir)" &gt; NUL
+mkdir  "$(OutDir)\platforms\"
+copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt; NUL</Command>
+    </PostBuildEvent>
+  <QtMoc><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile><Define>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB</Define><ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription><DynamicSource>output</DynamicSource><IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;C:\Qt\5.11.2\msvc2017_64\include;C:\Qt\5.11.2\msvc2017_64\include\Qt3DCore;C:\Qt\5.11.2\msvc2017_64\include\Qt3DAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DLogic;C:\Qt\5.11.2\msvc2017_64\include\Qt3DRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuick;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickAnimation;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickExtras;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickInput;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickRender;C:\Qt\5.11.2\msvc2017_64\include\Qt3DQuickScene2D;C:\Qt\5.11.2\msvc2017_64\include\ActiveQt;C:\Qt\5.11.2\msvc2017_64\include\QtBluetooth;C:\Qt\5.11.2\msvc2017_64\include\QtCharts;C:\Qt\5.11.2\msvc2017_64\include\QtConcurrent;C:\Qt\5.11.2\msvc2017_64\include\QtCore;C:\Qt\5.11.2\msvc2017_64\include\QtDataVisualization;C:\Qt\5.11.2\msvc2017_64\include\QtDBus;C:\Qt\5.11.2\msvc2017_64\include\QtGamepad;C:\Qt\5.11.2\msvc2017_64\include\QtGui;C:\Qt\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\5.11.2\msvc2017_64\include\QtHelp;C:\Qt\5.11.2\msvc2017_64\include\QtLocation;C:\Qt\5.11.2\msvc2017_64\include\QtMultimedia;C:\Qt\5.11.2\msvc2017_64\include\QtMultimediaWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtNetwork;C:\Qt\5.11.2\msvc2017_64\include\QtNetworkAuth;C:\Qt\5.11.2\msvc2017_64\include\QtNfc;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\5.11.2\msvc2017_64\include\QtPositioning;C:\Qt\5.11.2\msvc2017_64\include\QtPrintSupport;C:\Qt\5.11.2\msvc2017_64\include\QtQml;C:\Qt\5.11.2\msvc2017_64\include\QtQuick;C:\Qt\5.11.2\msvc2017_64\include\QtQuickWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtQuickControls2;C:\Qt\5.11.2\msvc2017_64\include\QtQuickTest;C:\Qt\5.11.2\msvc2017_64\include\QtScxml;C:\Qt\5.11.2\msvc2017_64\include\QtSensors;C:\Qt\5.11.2\msvc2017_64\include\QtSerialBus;C:\Qt\5.11.2\msvc2017_64\include\QtSerialPort;C:\Qt\5.11.2\msvc2017_64\include\QtTextToSpeech;C:\Qt\5.11.2\msvc2017_64\include\QtSql;C:\Qt\5.11.2\msvc2017_64\include\QtSvg;C:\Qt\5.11.2\msvc2017_64\include\QtTest;C:\Qt\5.11.2\msvc2017_64\include\QtUiTools;C:\Qt\5.11.2\msvc2017_64\include\QtWebChannel;C:\Qt\5.11.2\msvc2017_64\include\QtWebSockets;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngine;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineCore;C:\Qt\5.11.2\msvc2017_64\include\QtWebEngineWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWidgets;C:\Qt\5.11.2\msvc2017_64\include\QtWinExtras;C:\Qt\5.11.2\msvc2017_64\include\QtXml;C:\Qt\5.11.2\msvc2017_64\include\QtXmlPatterns;.</IncludePath></QtMoc><QtRcc><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile><InitFuncName>%(Filename)</InitFuncName><Compression>default</Compression><NoCompression>true</NoCompression><ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription></QtRcc><QtUic><QTDIR>C:\Qt\5.11.2\msvc2017_64</QTDIR><InputFile>%(FullPath)</InputFile><OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile><ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription></QtUic></ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="connectedmtwdata.cpp" />
+    
+    
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainwindow.cpp" />
+    <ClCompile Include="myUDP2.cpp" />
+    <ClCompile Include="myxda.cpp" />
+    
+    
+    
+    
+    
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="connectedmtwdata.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <QtMoc Include="mainwindow.h">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+    <QtMoc Include="myxda.h">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+    <CustomBuild Include="GeneratedFiles\ui_mainwindow.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="mainwindow.ui">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtUic>
+    <QtRcc Include="awindamonitor.qrc">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="await_measurement_start.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="connected.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="connecting.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="enabled.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="flushing.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="measuring.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="operational.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="recording.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="xsens_logo.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Tools</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="myUDP2.h">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" /><ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')"><Import Project="$(QtMsBuild)\qt.targets" /></ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties QtVersion_x0020_x64="win64" QtVersion_x0020_Win32="win32" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
