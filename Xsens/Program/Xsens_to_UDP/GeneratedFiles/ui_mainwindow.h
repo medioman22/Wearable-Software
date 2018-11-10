@@ -59,6 +59,7 @@ public:
     QLabel *logFilenameCaptionLabel;
     QProgressBar *flushingProgressBar;
     QLabel *flushingCaptionLabel;
+    QLineEdit *logFilenameEdit_2;
     QGroupBox *loggingGroupBox;
     QTextBrowser *logWindow;
     QPushButton *clearLogPushButton;
@@ -210,6 +211,10 @@ public:
         flushingCaptionLabel->setObjectName(QStringLiteral("flushingCaptionLabel"));
         flushingCaptionLabel->setEnabled(false);
         flushingCaptionLabel->setGeometry(QRect(10, 260, 46, 20));
+        logFilenameEdit_2 = new QLineEdit(stationPropertiesGroupBox);
+        logFilenameEdit_2->setObjectName(QStringLiteral("logFilenameEdit_2"));
+        logFilenameEdit_2->setEnabled(false);
+        logFilenameEdit_2->setGeometry(QRect(60, 290, 81, 21));
         loggingGroupBox = new QGroupBox(centralWidget);
         loggingGroupBox->setObjectName(QStringLiteral("loggingGroupBox"));
         loggingGroupBox->setGeometry(QRect(330, 10, 341, 141));
@@ -287,6 +292,7 @@ public:
         logFilenameEdit->setText(QApplication::translate("MainWindow", "logfile.mtb", nullptr));
         logFilenameCaptionLabel->setText(QApplication::translate("MainWindow", "Filename:", nullptr));
         flushingCaptionLabel->setText(QApplication::translate("MainWindow", "Flushing:", nullptr));
+        logFilenameEdit_2->setText(QApplication::translate("MainWindow", "logfile.mtb", nullptr));
         loggingGroupBox->setTitle(QApplication::translate("MainWindow", "What's going on:", nullptr));
         clearLogPushButton->setText(QString());
         stateMachineImageGroupBox->setTitle(QApplication::translate("MainWindow", "State diagram:", nullptr));

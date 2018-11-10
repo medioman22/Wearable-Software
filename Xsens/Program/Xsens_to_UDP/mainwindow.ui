@@ -547,6 +547,22 @@
       <string>Flushing:</string>
      </property>
     </widget>
+    <widget class="QLineEdit" name="logFilenameEdit_2">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>290</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>logfile.mtb</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="loggingGroupBox">
     <property name="geometry">
