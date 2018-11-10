@@ -2,6 +2,7 @@
 Interface/bin
 Interface/include
 Interface/lib
+
 # Ignore everything in this directory
 Interface/Logs/**
 # Except this file
@@ -9,3 +10,4 @@ Interface/Logs/**
 Plots/*.csv
 **/__pycache__
 **/*.log
+Xsens/Program/Xsens_to_UDP/.vs
