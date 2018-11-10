@@ -1,6 +1,0 @@
-1. Read manual 'ConnectWifi.pdf' to connect to the internet via a WLAN Hotspot
-
-2. Test connection
->> ping 8.8.8.8
-
-(3. Alternatively, you can look into 'ConnectUSB.pdf' to share you computers internet connection.)

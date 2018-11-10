@@ -12,13 +12,12 @@ import time                                                     # Imported for d
 # OR
 # Use a official driver of existing library, import it and map functionality
 # import drivers.<_DRIVER> as <TEMPLATE_DRIVER>
-#################################################################
-import threading                                                # Threading class for the threads
+#################################################################import threading                                                # Threading class for the threads
 
-from MuxModule import Mux                                       # SoftWEAR MUX module.
+from MuxModule import GetMux                                    # SoftWEAR MUX module.
 
-# Create a MUX shadow instance as there is only one Mux
-MuxShadow = Mux()
+# Mux Module to switch channels
+MuxModule = GetMux()
 
 # Unique identifier of the sensor
 #################################################################
@@ -29,12 +28,11 @@ MuxShadow = Mux()
 
 # Addresses
 #################################################################
-# TODO:
-# In case the device needs to be addressed via I2C, etc.
-# ADDRESS = <TEMPLATE_DRIVER>.<DRIVER_ADDRESS>
-# For I2C, bus number 2 should be used
-# BUSNUM = 2
+# TODO: Define the addresses
+# DRIVER_ADDRESS = [0x28, 0x29]
+# DRIVER_BUSNUM  = [1, 2]
 #################################################################
+
 
 
 # Constants
@@ -49,7 +47,7 @@ MuxShadow = Mux()
 # TODO:
 # Fill in the definition fields <...> of the driver
 #################################################################
-class TEMPLATE:
+class <DRIVER>:
     """Driver for <Device name>."""
 
     # Name of the device
@@ -70,24 +68,14 @@ class TEMPLATE:
     # Dimension unit of the driver (0-#)
     _dimUnit = <List of units for each dimension>
 
-    # Channel
-    #############################################################
-    # For I2C, use channel
-    # _channel = None
-    # Else user pin
-    # _pin = None
-    #############################################################
-
     # Muxed channel
-    #############################################################
-    # For I2C, use channel
-    # _muxedChannel = None
-    # Else user pin
-    # _muxedPin = None
-    #############################################################
+    _muxedChannel = None
+
+    # Mux name
+    _muxName = None
 
     # The driver object
-    _driver = None
+    _bno = None
 
     # Flag whether the driver is connected
     _connected = False
@@ -158,24 +146,43 @@ class TEMPLATE:
     # Duration needed for an update cycle
     _cycleDuration = 0
 
+    # Address of the driver
+    _address = None
 
-    def __init__(self, channel, muxedChannel = None, ADRSet = False):
-        """Device supports an address pin, one can represent this with a 'True' value of ADRSet."""
-        self._channel = channel                                 # Set pin
-        self._muxedChannel = muxedChannel                       # Set muxed pin
+    # Bus num of the driver
+    _busnum = None
 
-        self._values = []                                       # Set empty values array
+    # Lock for the driver, used in scan and loop thread
+    LOCK = threading.Lock()
 
-        #########################################################
-        # Depending on which types of settings are enabled uncomment lines
-        # self._mode = self._settings['modes'][<default mode>]  # Set default mode
-        # self._frequency = self._settings['frquency'][<default frequency>] # Set default frequency
-        # self._dutyFrequency = self._settings['modes'][<default dutyFrequency>] # Set default dutyFrequency
-        # self._flags = <List of default flags>                 # Set default flag list
-        #########################################################
-
-        self._driver = <TEMPLATE_DRIVER>.<DRIVER>(address=ADDRESS_1,busnum=BUSNUM) # Create the driver object
+    def __init__(self, pinConfig, muxedChannel = None, muxName = None):
+        """Init the device."""
+        if (muxedChannel != None):
+            MuxModule.activate(muxName, muxedChannel)           # Activate mux channel
         try:
+
+            if "ADDRESS" in pinConfig and pinConfig["ADDRESS"] == None or pinConfig["ADDRESS"] not in DRIVER_ADDRESS:
+                raise ValueError('address is invalid')
+            if "BUSNUM" in pinConfig and pinConfig["BUSNUM"] == None or pinConfig["BUSNUM"] not in DRIVER_BUSNUM:
+                raise ValueError('busnum is invalid')
+
+            self._address = pinConfig["ADDRESS"]                    # Set address
+            self._busnum = pinConfig["BUSNUM"]                      # Set bus
+            self._muxName = muxName                                 # Set mux name
+            self._muxedChannel = muxedChannel                       # Set muxed pin
+
+            self._values = []                                       # Set empty values array
+
+            #########################################################
+            # Depending on which types of settings are enabled uncomment lines
+            # self._mode = self._settings['modes'][<default mode>]  # Set default mode
+            # self._frequency = self._settings['frquency'][<default frequency>] # Set default frequency
+            # self._dutyFrequency = self._settings['modes'][<default dutyFrequency>] # Set default dutyFrequency
+            # self._flags = <List of default flags>                 # Set default flag list
+            #########################################################
+
+            self._bno = <TEMPLATE_DRIVER>.<DRIVER>(address=self._address,busnum=self._busnum) # Create the driver object
+
             #####################################################
             # TODO:
             # Try to connect to the driver
@@ -183,6 +190,10 @@ class TEMPLATE:
             #####################################################
         except:
             self._connected = False
+
+        if (muxedChannel != None):
+            MuxModule.deactivate(muxName)                       # Deactivate mux
+
 
     def cleanup(self):
         """Clean up driver when no longer needed."""
@@ -195,26 +206,40 @@ class TEMPLATE:
 
     def getDeviceConnected(self):
         """Return True if the device is connected, false otherwise."""
+        self.LOCK.acquire()                                     # Lock the driver for scanning
         try:
+            if (self._muxedChannel != None):
+                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
             #####################################################
             # TODO:
             # Try to verify identity of connected device
             # Fail with error if not confirmation
             #####################################################
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
         except:
             self._connected = False                             # Device disconnected
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
+        self.LOCK.release()                                     # Release driver
         return self._connected
 
     def configureDevice(self):
         """Once the device is connected, it must be configured."""
         try:
+            if (self._muxedChannel != None):
+                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
             #####################################################
             # TODO:
             # Configure device for start up
             # Fail with error if not confirmation
             #####################################################
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
         except:                                                 # Device disconnected in the meantime
-            raise Error('Error on device while configuring')
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
+            raise IOError('<What Error?>')
         self._threadActive = True                               # Set thread active flag
         self._thread = threading.Thread(target=self._loop, name=self._name) # Create thread
         self._thread.daemon = True                              # Set thread as daemonic
@@ -224,21 +249,37 @@ class TEMPLATE:
         """Inner loop of the driver."""
         while True:
             beginT = time.time()                                # Save start time of loop cycle
+            deltaT = 0
 
-            #####################################################
-            # TODO:
-            # Implement data read/write function and store the value in self._currentValue
-            # You can use the flag self._update to check if new data is available
-            # Consider using try: .. except: ..
-            #####################################################
+            self.LOCK.acquire()                                 # Lock the driver for loop
+            if (self._muxedChannel != None):
+                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
+            try:
 
-            self._values.append([time.time(), self._currentValue]) # Save timestamp and value
+                #####################################################
+                # TODO:
+                # Implement data read/write function and store the value in self._currentValue
+                # You can use the flag self._update to check if new data is available
+                # Consider using try: .. except: ..
+                #####################################################
 
-            endT = time.time()                                  # Save start time of loop cycle
-            deltaT = endT - beginT                              # Calculate time used for loop cycle
-            self._cycleDuration = deltaT                        # Save time needed for a cycle
+                self._values.append([time.time(), self._currentValue]) # Save timestamp and value
+
+                endT = time.time()                              # Save start time of loop cycle
+                deltaT = endT - beginT                          # Calculate time used for loop cycle
+                self._cycleDuration = deltaT                    # Save time needed for a cycle
+
+            except:
+                self._connected = False                         # Device disconnected
+
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)             # Deactivate mux
+            self.LOCK.release()                                 # Release driver
+
+
             if (deltaT < self._period):
                 time.sleep(self._period - deltaT)               # Sleep until next loop period
+
 
             if not self._threadActive:                          # Stop the thread
                 return
@@ -260,9 +301,9 @@ class TEMPLATE:
     def getName(self):
         """Return device name."""
         if self._muxedChannel == None:
-            return '{}@<Device connection type>[{}]'.format(self._name, self._channel)
+            return '{}@I2C[{},{}]'.format(self._name, self._address, self._busnum)
         else:
-            return '{}@<Device connection type>[{}:{}]'.format(self._name, self._channel, self._muxedChannel)
+            return '{}@I2C[{},{}]#{}[{}]'.format(self._name, self._address, self._busnum, self._muxName, self._muxedChannel)
 
     def getDir(self):
         """Return device direction."""
@@ -278,7 +319,7 @@ class TEMPLATE:
 
     def getChannel(self):
         """Return device channel."""
-        return self._channel
+        return self._busnum
 
     def getMuxedChannel(self):
         """Return device muxed channel."""
@@ -304,7 +345,6 @@ class TEMPLATE:
 
     def getMode(self):
         """Return device mode."""
-        # Can be ignored or deleted if mode is not supported by the driver
         return self._mode
 
     def setMode(self, mode):
@@ -376,3 +416,12 @@ class TEMPLATE:
         # Can be ignored or deleted if dutyFrequency is not supported by the driver
         ############################################################
         raise ValueError('duty frequency {} is not allowed'.format(dutyFrequency))
+
+
+    def comparePinConfig(self, pinConfig, muxedChannel = None):
+        """Check if the same pin config."""
+        return ("ADDRESS" in pinConfig and
+                "BUSNUM" in pinConfig and
+                pinConfig["ADDRESS"] == self._address and
+                pinConfig["BUSNUM"] == self._busnum and
+                muxedChannel == self._muxedChannel)
