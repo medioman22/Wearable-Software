@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """A representation of the physical Beaglebone Green Wireless board connected."""
 
 import json

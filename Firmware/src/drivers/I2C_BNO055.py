@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 Driver file for the BNO055 accelerometer / gyroscope / magnetometer. Communicates
 with the device via I2C and implements the basic functions for integrating into

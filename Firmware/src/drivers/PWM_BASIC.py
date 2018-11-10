@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 Driver file for the BASIC PWM. Set the value of a pwm pin for integrating into the SoftWEAR package.
 """

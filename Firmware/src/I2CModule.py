@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
 SoftWEAR I2C module. Adds MUX features and hardware detection to normal I2C.
 """
@@ -55,7 +57,7 @@ class I2C:
                                                                 # Check if drv already loaded and still connected
                     if not lastDrv.getDeviceConnected():        # Device is disconnected
                         disconnectedDriver.append(lastDrv)
-                    if lastDrv.getChannel() == channel:         # Device still connected
+                    elif lastDrv.getChannel() == channel:       # Device still connected
                         self._connectedDrivers.append(lastDrv)  # Add to connected driver list
                         self.connectedDevices.append({  'channel': channel, # Add to connected device list
                                                         'mux': -1,
