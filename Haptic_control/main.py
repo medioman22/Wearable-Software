@@ -3,13 +3,14 @@
 """
 Created on Tue Oct 16 10:16:00 2018
 
-@author: matteomacchini
+@author: Hugo kohli
 """
 
 import numpy as np
 import haptic_device
 import time
-
+from threading import Thread
+import keyboard
 
 north = np.array([8,5,2])
 south = np.array([2,5,8])
@@ -28,16 +29,20 @@ my_device.connection()
 #    my_device.impulsion_command(southeast, length = 1, signalType = 'flat')
 my_device.impulsion_command(south, length = 1, signalType = 'linear', duty = 0)
 
-def random_direction(dir1 = north, dir2 = east, dir3 = west, dir4 = northwest, signalType = 'flat', length = 0.8, duty = 70., all_motors = False) :
+def random_direction(dir1 = north, dir2 = east, dir3 = west, dir4 = northwest, signalType = 'flat', length = 0.8, duty = 70., all_motors = True) :
     
     my_device.impulsion_command(dir1, length, signalType, duty, all_motors)
     my_device.impulsion_command(dir2, length, signalType, duty, all_motors)
     my_device.impulsion_command(dir3, length, signalType, duty, all_motors)
     my_device.impulsion_command(dir4, length, signalType, duty, all_motors)
-    print('What did you feel ?')
-    
-random_direction()
-my_device.impulsion_command(south, length = 1, signalType = 'flat', duty = 0)
+    print('Thanks for the feedback')
+
+
+
+Thread(target = random_direction).start()
+
+#random_direction()
+#my_device.impulsion_command(south, length = 1, signalType = 'flat', duty = 0)
 
 
     
