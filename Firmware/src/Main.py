@@ -404,17 +404,20 @@ def updateThread():
             if message['type'] == 'Scan':                       # Change scan for a device
                 scanForDevices = message['value']
 
+            if message['type'] == 'Ping':                       # Ping back
+                messagesSend.append(json.dumps({'type': 'Ping','name':''}))
+
         dataMessage = {'type': 'D', 'data': []}                 # Create data message
         for device in inputList:                                # Create input device data message
-            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
         for device in outputList:                               # Create output device data message
-            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
         for device in pwmList:                                  # Create pwm device data message
-            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
         for device in adcList:                                  # Create adc device data message
-            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
         for device in i2cList:                                  # Create i2c device data message
-            dataMessage['data'].append({'name': device['name'], 'values': device['vals']})
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
 
         if len(dataMessage['data']) > 0:
             messagesSend.append(json.dumps(dataMessage))         # Send data message

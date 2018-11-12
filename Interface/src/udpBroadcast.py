@@ -37,7 +37,8 @@ class UDPBroadcast():
 
         self._ip = ip
         self._port = port
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
+        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self._logger.info("Configure UDP socket with {}/{}".format(ip,port))
 
     def __del__(self):
@@ -56,7 +57,7 @@ class UDPBroadcast():
 
     def send(self, string):
         """Send serialized message."""
-        self._socket.sendto(bytes(string, "utf-8"), (self._ip, self._port)) # Send message via socket
+        self._socket.sendto(bytes(string, "utf-8"), ('<broadcast>', self._port)) # Send message via socket
 
 
 

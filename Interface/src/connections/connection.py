@@ -15,7 +15,7 @@ possibleStatusTypes = ['Disconnected', 'Connected', 'Corrupted']
 # Ingoing message types
 possibleIncomingMessageTypes = ['Register', 'Deregister', 'D', 'CycleDuration', 'Ping']
 # Outgoing message types
-possibleOutgoingMessageTypes = ['Data', 'Ping', 'DeviceList', 'Set', 'Settings', 'Scan']
+possibleOutgoingMessageTypes = ['DeviceList', 'Set', 'Settings', 'Scan', 'Ping']
 
 class Message():
     """Message coming form the board."""
