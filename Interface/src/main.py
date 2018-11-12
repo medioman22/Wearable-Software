@@ -571,7 +571,7 @@ class MainWindow(QMainWindow):
                                                                         str(values[1][i])]) + '\n')
 
                                 if (self._broadcast != None):   # Stream data to UDP using same format as for the CSV files
-                                    for i in range(len(values[0])): # Loop through all dimensions
+                                    for i in range(len(values[1])): # Loop through all dimensions
                                         for device in self._board.deviceList(): # Look for correct device
                                                                 # Check if it exists and should be ignored
                                             if (device.name() == name and not device.ignore()):
