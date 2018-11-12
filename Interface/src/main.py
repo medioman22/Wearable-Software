@@ -32,10 +32,8 @@ from interface import InterfaceWidget                           # Custom interfa
 from connectionDialog import ConnectionDialog                   # Dialog widget for connection settings
 from udpBroadcast import UDPBroadcast                           # UDP Broadcast functionality
 from boards.board import Device                                 # Board base class
-from boards.mockedBoard import MockedBoard                      # MockedBoard implementation
 from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard # BBGW implementation
 from connections.connection import Message                      # Message class
-from connections.mockedConnection import MockedConnection       # MockedConnection implementation
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection # BBGWConnection implementation
 
 # Logging settings
@@ -44,10 +42,8 @@ LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print leve
 
 
 # Global variables
-availableBoards = [ BeagleboneGreenWirelessBoard(),             # List of available boards
-                    MockedBoard()]
-availableConnections = [MockedConnection(), BeagleboneGreenWirelessConnection()]
-utils = Utils()                                                 # Utility class
+availableBoards = [BeagleboneGreenWirelessBoard()]              # List of available boards
+availableConnections = [BeagleboneGreenWirelessConnection()]    # Utility class
 
 # Settings
 UDP_IP = "127.0.0.1"                                            # Default host ip
