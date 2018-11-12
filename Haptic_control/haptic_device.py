@@ -26,6 +26,8 @@ import keyboard
 
 c = BeagleboneGreenWirelessConnection()
 
+I2C_interface = "PCA9685@I2C[1]"
+
 t_init = 0
 NS = 1
 WE = 3
@@ -94,11 +96,12 @@ class haptic_device():
     def connection(self):
         c.connect()
         print('Status: {}'.format(c.getState()))
+        c.sendMessages([json.dumps({"type": "Settings", "name": I2C_interface, "dutyFrequency": '1000 Hz'})])
         
     
     def motor_activation(self, num, duty):
         motor = int(num- 1)
-        c.sendMessages([json.dumps({"dim":  motor, "value": duty, "type": "Set", "name": "PCA9685@I2C[1]"})])
+        c.sendMessages([json.dumps({"dim":  motor, "value": duty, "type": "Set", "name": I2C_interface})])
     
     
     
