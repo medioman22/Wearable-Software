@@ -129,7 +129,14 @@ ping epfl.ch
 
 You will now need to clone this repository into your home folder in order to proceed.
 ```
+cd ~
 git clone https://github.com/medioman22/Wearable-Software.git
+```
+
+Switch to a branch if necessary:
+```
+cd Wearable-Software
+git checkout <branch>
 ```
 
 *Alternatively*:
@@ -142,8 +149,9 @@ In order for the firmware to run on the beaglebone you will need to have some pa
 To do so you can use the provided script in the repository that you just download.
 Run following commands:
 ```
-bash Wearable-Software/Firmware/Scripts/Install_PythonPackages.sh
-bash Wearable-Software/Firmware/Scripts/Install_Adafruit_Python_GPIO.sh
+cd ~
+sudo bash ~/Wearable-Software/Firmware/Scripts/Install_PythonPackages.sh
+sudo bash ~/Wearable-Software/Firmware/Scripts/Install_Adafruit_Python_GPIO.sh
 ```
 
 #### Alternatively: Installing all the packages in you BBGW manually
@@ -163,6 +171,7 @@ To install the Adafruit_Python_GPIO, follow the instruction on the README.
 
 To launch the Firmware from the console, type:
 ```
+cd ~
 sudo python Wearable-Software/Firmware/src/Main.py [ldmep]
 ```
 
@@ -186,13 +195,13 @@ In order to stop the Firmware you need to break manually with `Ctrl-C`.
 
 The Firmware can be configured to launch at start up with following command:
 ```
-bash Wearable-Software/Firmware/Scripts/EnableAutoLaunch.sh [ldmep]
+sudo bash Wearable-Software/Firmware/Scripts/EnableAutoLaunch.sh [ldmep]
 ```
 
 And to disable it:
 
 ```
-bash Wearable-Software/Firmware/Scripts/DisableAutoLaunch.sh
+sudo bash Wearable-Software/Firmware/Scripts/DisableAutoLaunch.sh
 ```
 ## Running the tests
 

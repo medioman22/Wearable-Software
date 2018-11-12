@@ -552,8 +552,8 @@ class MainWindow(QMainWindow):
                         for messageData in message.data['data']: # Loop through all data blocks
                             name = messageData['name']          # Name of the device
                             valuesArray = messageData['values'] # New values of the device
-                            for values in valuesArray:          # Loop all new values (timestamp, [values])
-                                self._board.updateData(name, values[1], values[0])
+                            for values in valuesArray:          # Loop all new values (timestamp, [values], cycleDuration)
+                                self._board.updateData(name, values[1], values[0], messageData['cycle'])
                                 if (self._board.fileName() != None): # Stream data to file
                                     with open(self._board.fileName(), "a") as fh: # Open the file
                                         for i in range(len(values[1])): # Loop through all dimensions
@@ -575,29 +575,6 @@ class MainWindow(QMainWindow):
                                                                                 str(i),
                                                                                 str(values[0]),
                                                                                 str(values[1][i])]))
-                    # elif (message.type == 'Data'):              # Message with new data for a device (',' are escaped to '-')
-                    #     data = True                             # Raise data refresh flag
-                    #                                             # Update the data
-                    #     self._board.updateData(message.name, message.data['values'], message.data['timestamp'])
-                    #     if (self._board.fileName() != None):    # Stream data to file
-                    #         with open(self._board.fileName(), "a") as fh: # Open the file
-                    #             for i in range(len(message.data['values'])): # Loop through all dimensions
-                    #                 for device in self._board.deviceList(): # Look for correct device
-                    #                     if (device.name() == message.name and not device.ignore()): # Check if it exists and should be ignored
-                    #                         fh.write(','.join([ message.name.replace(',','-'), # Write data entry
-                    #                                             str(i),
-                    #                                             str(message.data['timestamp']),
-                    #                                             str(message.data['values'][i])]) + '\n')
-                    #
-                    #     if (self._broadcast != None):           # Stream data to UDP using same format as for the CSV files
-                    #         for i in range(len(message.data['values'])): # Loop through all dimensions
-                    #             for device in self._board.deviceList(): # Look for correct device
-                    #                 if (device.name() == message.name and not device.ignore()): # Check if it exists and should be ignored
-                    #                     self._broadcast.send(','.join([ message.name.replace(',','-'), # Send data entry
-                    #                                                     str(i),
-                    #                                                     str(message.data['timestamp']),
-                    #                                                     str(message.data['values'][i])]))
-                    #
                     elif (message.type == 'CycleDuration'):       # Cycle duration message
                         self._logger.debug('Cycle durations: {}', str(message.data['values']))
                         self._interface.setCycleDurationLabel(message.data['values'])

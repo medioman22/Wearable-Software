@@ -118,8 +118,11 @@ class DeviceSettingsWidget(QWidget):
         """Initialize the ui of the device settings widget."""
         # Layout for information of device
         informationLayout = QHBoxLayout()
-        informationLayout.addWidget(QLabel('Direction: <i>{}</i>'.format(self._device.dir())))
-        informationLayout.addWidget(QLabel('Dimension: <i>{}</i>'.format(self._device.dim())))
+        informationLayout.addWidget(QLabel('Dir: <i>{}</i>'.format(self._device.dir())))
+        informationLayout.addWidget(QLabel('Dim: <i>{}</i>'.format(self._device.dim())))
+        cycleDuration = QLabel('Dur: <i>{:.2f} ms</i>'.format(self._device.duration() * 1000))
+        self._cycleDuration = cycleDuration
+        informationLayout.addWidget(cycleDuration)
         infoButton = QPushButton('Info');
         infoButton.clicked.connect(self._onShowInfo)
         informationLayout.addWidget(infoButton)
@@ -323,6 +326,7 @@ class DeviceSettingsWidget(QWidget):
         """Update data of a device."""
         newData = self._device.data()                           # Get data from device
         newTimestamp = self._device.timestamp()                 # Get timestamp from device
+        self._cycleDuration.setText('Dur: <i>{:.2f} ms</i>'.format(self._device.duration() * 1000)) # Get cycle duration
         if len(newData) == self._device.dim():                  # Check if data has same length as dim
             for dim in range(self._device.dim()):               # Loop all dim
                 if (self._device.activeDim()[dim]):             # Only print active dim
