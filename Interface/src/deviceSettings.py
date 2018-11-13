@@ -367,7 +367,7 @@ class DeviceSettingsWidget(QWidget):
         """Dialog to select location to save file."""
         options = QFileDialog.Options()
         #options |= QFileDialog.DontUseNativeDialog             # Can be uncommented if there is a problem with the default menu on OSX
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Device Plot For {}".format(self._device.name()),"{}/../../Plots/{} Plot.csv".format(sys.path[0], self._device.name()),"Text Files (*.csv)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Device Plot For {}".format(self._device.name()),"{}/../Plots/{} Plot.csv".format(sys.path[0], self._device.name()),"Text Files (*.csv)", options=options)
         if not fileName:
             self._logger.info('No file selected')
             return

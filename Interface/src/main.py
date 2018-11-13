@@ -630,7 +630,7 @@ class MainWindow(QMainWindow):
         """Dialog to select location to save file."""
         options = QFileDialog.Options()
         #options |= QFileDialog.DontUseNativeDialog             # Can be uncommented if there is a problem with the default menu on OSX
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Board Multi Plot For {}".format(self._board.name()),"{}/../../Plots/{} Multi Plot.csv".format(sys.path[0], self._board.name()),"Text Files (*.csv)", options=options) # Select file to store data stream
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Board Multi Plot For {}".format(self._board.name()),"{}/../Plots/{} Multi Plot.csv".format(sys.path[0], self._board.name()),"Text Files (*.csv)", options=options) # Select file to store data stream
         if not fileName:
             self._logger.info('No file selected')
             return

@@ -1,4 +1,4 @@
-# SoftWEAR Firmware
+# Firmware
 
 The Firmware is written to run on a BeagleBone Green wireless. Its purpose is to help you to connect and interface sensors connected to the board.
 

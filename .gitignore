@@ -3,6 +3,6 @@ Interface/bin
 Interface/include
 Interface/lib
 Interface/Logs/**
-Plots/*.csv
+Interface/Plots/*.csv
 **/__pycache__
 **/*.log

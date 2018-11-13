@@ -41,7 +41,7 @@ c = None                                                        # Connection obj
 
 inputList = []                                                  # List of connected Input devices on the GPIO pins
 outputList = []                                                 # List of connected Output devices on the GPIO pins
-pwmList = []                                                     # List of connected PWM devices on the GPIO pins
+pwmList = []                                                    # List of connected PWM devices on the GPIO pins
 adcList = []                                                    # List of connected ADC devices on the Analog pins
 i2cList = []                                                    # List of connected IMU devices on the I2C ports
 connectionState = ""                                            # Current connection state to be displayed
