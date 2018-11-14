@@ -39,6 +39,8 @@ class Device():
     _pastData = None
     # Past timestamps
     _pastTimestamps = None
+    # Cycle duration
+    _cycleDuration = 0
     # About the device
     _about = None
     # Settings of the device
@@ -159,6 +161,10 @@ class Device():
     def pastTimestamps(self):
         """Return a shallow copy of the past timestamp list."""
         return self._pastTimestamps.copy()
+
+    def duration(self):
+        """Return the dim."""
+        return self._cycleDuration
 
     def about(self):
         """Return a shallow copy of the about information."""
@@ -345,7 +351,7 @@ class Board():
             else:                                               # Tried to deregister a non-registered device
                 self._logger.debug('device {} is not registered'.format(device.name()))
 
-    def updateData(self, name, data, timestamp):
+    def updateData(self, name, data, timestamp, cycleDuration):
         """Update data of a device."""
         for registeredDevice in self._deviceList:
             if (registeredDevice.name() == name):
@@ -357,6 +363,7 @@ class Board():
                         registeredDevice._activeDim[i] = True   # Activate dim
                                                                 # Add current timestamp to past timestamps of 'friend' object
                 registeredDevice._pastTimestamps.append(registeredDevice._timestamp)
+                registeredDevice._cycleDuration = cycleDuration # Add the cycle duration of the device of 'friend' object
                 while (MAX_POINTS < len(registeredDevice._pastTimestamps)): # Create overflow for past timestamps of 'friend' object
                     registeredDevice._pastTimestamps.pop(0)
                 for i, dataI in enumerate(registeredDevice._data): # Access private field of 'friend' object

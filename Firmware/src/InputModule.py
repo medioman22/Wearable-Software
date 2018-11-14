@@ -84,7 +84,8 @@ class Input:
                                                     'dutyFrequency': lastDrv.getDutyFrequency(),
                                                     'flags': lastDrv.getFlags(),
                                                     'val': 0,
-                                                    'vals': []})
+                                                    'vals': [],
+                                                    'cycle': 0})
                         break                                   # Break to next device
                 else:                                           # Try new drivers if no existing was found
                     for DRIVER in DRIVERS:                      # Test all drivers
@@ -106,7 +107,8 @@ class Input:
                                                     'dutyFrequency': drv.getDutyFrequency(),
                                                     'flags': drv.getFlags(),
                                                     'val': 0,
-                                                    'vals': []})
+                                                    'vals': [],
+                                                    'cycle': 0})
                         break                                   # Break to next device
                     else:
                         pass                                    # No suitable driver has been found
@@ -133,7 +135,8 @@ class Input:
                                                             'dutyFrequency': lastDrv.getDutyFrequency(),
                                                             'flags': lastDrv.getFlags(),
                                                             'val': 0,
-                                                            'vals': []})
+                                                            'vals': [],
+                                                            'cycle': 0})
                                 break                           # Break to next device
                         else:                                   # Try new drivers if no existing was found
                             for DRIVER in DRIVERS:              # Test all drivers
@@ -155,7 +158,8 @@ class Input:
                                                             'dutyFrequency': drv.getDutyFrequency(),
                                                             'flags': drv.getFlags(),
                                                             'val': 0,
-                                                            'vals': []})
+                                                            'vals': [],
+                                                            'cycle': 0})
                                 break                           # Break to next device
                             else:
                                 pass                            # No suitable driver has been found
