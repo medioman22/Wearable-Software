@@ -47,7 +47,7 @@ my_device = haptic_device.haptic_device()
 my_device.connection()
 
 
-def random_direction(listOfDirection = directionList, signalType = 'linear', length = maxLength, duty = maxIntensity, all_motors = False, exp = 'direction') :  
+def random_direction(listOfDirection = directionList, signalType = '', length = maxLength, duty = maxIntensity, all_motors = False, exp = 'direction') :  
     correctDirList = []
     givenDirList = []
     timeList = []
@@ -94,7 +94,8 @@ def random_intensity_changing_length(listOfIntensity = intensityList, signalType
         
         
 Thread(target = haptic_device.measure_time).start()        
-Thread(target = random_direction).start()
+Thread(target = random_intensity).start()
+ 
 #my_device.impulsion_command(south, length = 1, signalType = 'flat', duty = 0)
 
 

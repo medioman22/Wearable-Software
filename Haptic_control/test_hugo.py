@@ -25,7 +25,7 @@ def measure_time():
         
 def check_key_pressed():
     direction_dict = {'q' : 'NW',
-           'w' : 'N', 'e': 'NE', 'a': 'W', 'd': 'E', 'y': 'SW', 'x': 'S', 'c': 'SE','space': 'Space'}
+           'w' : 'N', 'e': 'NE', 'a': 'W', 'd': 'E', 'y': 'SW', 'x': 'S', 'c': 'SE','space': 'Space','1':1}
     for key in direction_dict.keys():
         if keyboard.is_pressed(key) :
             return direction_dict[key]

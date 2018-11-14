@@ -114,7 +114,7 @@ class haptic_device():
     def connection(self):
         c.connect()
         print('Status: {}'.format(c.getState()))
-        c.sendMessages([json.dumps({"type": "Settings", "name": I2C_interface, "dutyFrequency": '1000 Hz'})])
+        c.sendMessages([json.dumps({"type": "Settings", "name": I2C_interface, "dutyFrequency": '50 Hz'})])
         
     
     def motor_activation(self, num, duty):
@@ -171,11 +171,9 @@ class haptic_device():
     def motor_control_linear_all_motors(self, length, duty, direction,fraction = 10):
         
         step = duty/fraction
-        
-        for i in range(fraction,fraction+1):
+        for i in range(1,fraction+1):
             self.activate_row_of_3_motors(direction[0],direction,i*step)
-            
-            # = length/4 * 1/(fraction/2)
+            time.sleep(length/(4*fraction))
         for i in range(1,fraction+1):
             self.activate_row_of_3_motors(direction[0],direction,(fraction-i)*step)
             self.activate_row_of_3_motors(direction[1],direction,i*step)
