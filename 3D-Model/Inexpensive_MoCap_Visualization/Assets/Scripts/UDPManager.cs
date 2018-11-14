@@ -21,7 +21,6 @@ using System.Collections.Generic;
 
 public class UDPManager : MonoBehaviour
 {
-    Vector3 currentRotVect = new Vector3(0, 0, 0);
     public int listenPort;
     public string IP = "127.0.0.1";
 
@@ -73,10 +72,11 @@ public class UDPManager : MonoBehaviour
             {
                 if ((dataSplited[1].Equals("1")) ||
                     (dataSplited[1].Equals("2")) ||
-                    (dataSplited[1].Equals("3")))
+                    (dataSplited[1].Equals("3")) ||
+                    (dataSplited[1].Equals("4")))
                 {
                     Debug.Log((float.Parse(dataSplited[3])).ToString());
-                    cubemover.SetAngleXYZ(Int32.Parse(dataSplited[1]), float.Parse(dataSplited[3]));
+                    cubemover.SetAngleXYZW(Int32.Parse(dataSplited[1]), float.Parse(dataSplited[3]));
                 }
             }
         }

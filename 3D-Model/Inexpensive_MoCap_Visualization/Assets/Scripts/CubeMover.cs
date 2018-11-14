@@ -13,7 +13,9 @@ using UnityEngine;
 
 public class CubeMover : MonoBehaviour {
 
+    private Vector3 currentPos = new Vector3(0, 0.5f, 0);
     private Vector3 currentRotVect = new Vector3(0,0,0);
+    private Quaternion currentQuaternion = new Quaternion(0, 0, 0, 0);
 
 	// Use this for initialization
 	void Start () {
@@ -28,14 +30,26 @@ public class CubeMover : MonoBehaviour {
     public void SetAngleXYZ(int euler, float angle)
     {
         if (euler == 0)
-            currentRotVect[1] = angle;
+            currentRotVect.x = angle;
         if (euler == 1)
-            currentRotVect[0] = angle;
+            currentRotVect.y = angle;
         if (euler == 2)
-            currentRotVect[2] = -angle;
+            currentRotVect.z = -angle;
+    }
+    public void SetAngleXYZW(int quat, float angle)
+    {
+        if (quat == 2)
+            currentQuaternion.x = angle;
+        if (quat == 1)
+            currentQuaternion.y = angle;
+        if (quat == 4)
+            currentQuaternion.z = angle;
+        if (quat == 3)
+            currentQuaternion.w = angle;
+
     }
     private void Move()
     {
-        transform.eulerAngles = currentRotVect;
+        transform.SetPositionAndRotation(currentPos, currentQuaternion);
     }
 }
