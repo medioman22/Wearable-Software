@@ -1,7 +1,7 @@
 ﻿/*
 
 Author: Victor Faraut
-Date: 28.10.2018
+Date: 14.11.2018
 
 
 */
@@ -13,7 +13,7 @@ using UnityEngine;
 
 public class CubeMover : MonoBehaviour {
 
-    private Vector3 currentPos = new Vector3(0, 0.5f, 0);
+    public Vector3 currentPos = new Vector3(0, 0.5f, 0);
     private Vector3 currentRotVect = new Vector3(0,0,0);
     private Quaternion currentQuaternion = new Quaternion(0, 0, 0, 0);
 

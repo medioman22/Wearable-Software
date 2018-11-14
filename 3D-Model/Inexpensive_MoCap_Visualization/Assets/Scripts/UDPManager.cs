@@ -1,7 +1,7 @@
 ﻿/*
 
 Author: Victor Faraut
-Date: 28.10.2018
+Date: 14.11.2018
 
 
 */
@@ -23,6 +23,7 @@ public class UDPManager : MonoBehaviour
 {
     public int listenPort;
     public string IP = "127.0.0.1";
+    public char lastID = '0';
 
     private Thread t;
     private UdpClient listener;
@@ -70,13 +71,16 @@ public class UDPManager : MonoBehaviour
             }
             if (dat[0] == 'X')
             {
-                if ((dataSplited[1].Equals("1")) ||
-                    (dataSplited[1].Equals("2")) ||
-                    (dataSplited[1].Equals("3")) ||
-                    (dataSplited[1].Equals("4")))
+                if (dat[13] == lastID)
                 {
-                    Debug.Log((float.Parse(dataSplited[3])).ToString());
-                    cubemover.SetAngleXYZW(Int32.Parse(dataSplited[1]), float.Parse(dataSplited[3]));
+                    if ((dataSplited[1].Equals("1")) ||
+                        (dataSplited[1].Equals("2")) ||
+                        (dataSplited[1].Equals("3")) ||
+                        (dataSplited[1].Equals("4")))
+                    {
+                        Debug.Log((float.Parse(dataSplited[3])).ToString());
+                        cubemover.SetAngleXYZW(Int32.Parse(dataSplited[1]), float.Parse(dataSplited[3]));
+                    }
                 }
             }
         }
