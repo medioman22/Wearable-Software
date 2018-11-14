@@ -36,11 +36,14 @@ northwest = np.array([9,5,1])
 northeast = np.array([7,5,10])
 southeast = np.array([1,5,9])
 southwest = np.array([10,5,7])
+
 dirGiven = ''
 reactionTime = 0
+intensityGiven = 0
+mode = ''
 
 direction_dict = {'q' : 'NW',
-           'w' : 'N', 'e': 'NE', 'a': 'W', 'd': 'E', 'y': 'SW', 'x': 'S', 'c': 'SE'} #corresponding key pressed by the user on the keyboard
+           'w' : 'N', 'e': 'NE', 'a': 'W', 'd': 'E', 'y': 'SW', 'x': 'S', 'c': 'SE', '1': 1,'2':2,'3':3,'4':4,'5':5} #corresponding key pressed by the user on the keyboard
 
 userActivationForDir = False #boolean to activate each direction when the user desire (click on the space button)
 feedbackGiven = False #set to true when the user press a key to give his feeback
@@ -48,7 +51,7 @@ feedbackGiven = False #set to true when the user press a key to give his feeback
 def measure_time():
     was_pressed = False
     wasPressedSpace = False
-    global userActivationForDir, feedbackGiven, dirGiven, reactionTime
+    global userActivationForDir, feedbackGiven, dirGiven, reactionTime, mode, intensityGiven
     
     while True:         #making an infinite loop
         try:            #used try so that if user pressed other than the given key error will not be shown    
@@ -57,22 +60,27 @@ def measure_time():
                 if not wasPressedSpace :
                     userActivationForDir = True
                     wasPressedSpace = True
-                    print('Direction sent')
+                    print('')
                 pass
             
             elif key_pressed : #if direction key is pressed
-                if  was_pressed == False and feedbackGiven == False:
+                if  was_pressed == False and feedbackGiven == False :
                     t_fin = time.time()
                     reactionTime = str(round(t_fin-t_init, 2))
-                    print('Direction : ', key_pressed, ', Reaction time :', reactionTime)
-                    dirGiven = key_pressed
                     feedbackGiven = True
                     was_pressed = True
+                    if mode == 'direction' :
+                        dirGiven = key_pressed
+                        print('Direction : ', key_pressed, ', Reaction time :', reactionTime)
+                    elif mode == 'intensity':
+                        intensityGiven = key_pressed
+                        print('Intensity : ', key_pressed, ', Reaction time :', reactionTime)
                 pass   #finishing the loop
             else:
                 was_pressed = False
                 wasPressedSpace = False
                 pass
+            
         except:
             break
         
@@ -210,10 +218,12 @@ class haptic_device():
         self.motor_activation(direction[2],0)
                 
         
-    def impulsion_command(self, direction,length = 1, signalType = 'linear', duty = 99, all_motors = False, realDir = 'No direction transmitted'):
-        global t_init, userActivationForDir,feedbackGiven, dirGiven, reactionTime
+    def impulsion_command(self, direction,length = 1, signalType = 'linear', 
+                          duty = 99, all_motors = False, realValue = 'No value transmitted', experiment = 'direction', feedbackRequest = True):
+        global t_init, userActivationForDir,feedbackGiven, dirGiven, reactionTime, mode
+        mode = experiment
         userActivationForDir = False
-        while userActivationForDir == False:
+        while userActivationForDir == False :
             time.sleep(0.1)
             pass
         feedbackGiven = False
@@ -230,13 +240,17 @@ class haptic_device():
             t_init = time.time()        
         else: 
             print('Incorrect signal type')
-        while feedbackGiven == False:
+        while feedbackGiven == False and  feedbackRequest:
             time.sleep(0.01)
             pass
-        print('Correct direction was :', realDir)
         
-        return dirGiven, reactionTime
-
+        if mode == 'direction' and  feedbackRequest :
+            print('Correct direction was :', realValue)
+            return dirGiven, reactionTime
+        if mode == 'intensity' and feedbackRequest:
+            print('Correct intensity was :', realValue)
+            return intensityGiven, reactionTime
+        
         
 
     def wait(self, sec):

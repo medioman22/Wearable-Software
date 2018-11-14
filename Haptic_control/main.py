@@ -24,13 +24,13 @@ dictOfCorresp = {north[0] : 'N', south[0] : 'S', east[0] : 'E', west[0] : 'W', n
 
 
 nbOfDirectionSet = 1
-nbOfIntensitySet = 5
-maxIntensity = 80
-maxLength = 0.8
+nbOfIntensitySet = 1
+maxIntensity = 90
+maxLength = 1.5
 
 initialDirectionList = [north, south, east, west, northwest, northeast, southwest, southeast]
 directionList = []
-initialIntensityList = [0.2,0.4,0.6,0.8,1.]
+initialIntensityList = [1,2,3,4,5]
 intensityList = []
 
 for i in range (0, nbOfDirectionSet):
@@ -41,26 +41,25 @@ for i in range(0,nbOfIntensitySet):
 
 random.shuffle(directionList)
 random.shuffle(intensityList)
-intensityList = [i*maxIntensity for i in intensityList]
 
 
 my_device = haptic_device.haptic_device() 
 my_device.connection()
 
 
-def random_direction(listOfDirection = directionList, signalType = 'flat', length = maxLength, duty = maxIntensity, all_motors = False) :  
+def random_direction(listOfDirection = directionList, signalType = 'linear', length = maxLength, duty = maxIntensity, all_motors = False, exp = 'direction') :  
     correctDirList = []
     givenDirList = []
     timeList = []
     for i in range(0, len(listOfDirection)):
         correctDirList.append(dictOfCorresp[listOfDirection[i][0]])
     for i in range(0, len(listOfDirection)):
-        dirGiven, reactTime = my_device.impulsion_command(listOfDirection[i], length, signalType, duty, all_motors, realDir = correctDirList[i])
+        dirGiven, reactTime = my_device.impulsion_command(listOfDirection[i], length, signalType, duty, all_motors, realValue = correctDirList[i], experiment = exp, feedbackRequest = True )
         givenDirList.append(dirGiven)
         timeList.append(reactTime)
     print('Thanks for the feedback')
     print('')
-    print('The real direction where :')
+    print('The real directions where :')
     print(correctDirList)
     print('Youre answers were :')
     print(givenDirList)
@@ -68,18 +67,34 @@ def random_direction(listOfDirection = directionList, signalType = 'flat', lengt
     print(timeList)
     
 
-def random_intensity(listOfIntensity = intensityList, signalType = 'flat', length = maxLength) :
+def random_intensity(listOfIntensity = intensityList, signalType = 'flat', length = maxLength, exp = 'intensity') : 
+    correctIntensList = listOfIntensity
+    listOfIntensity = [i*maxIntensity/5 for i in listOfIntensity]
+    givenIntensList = []
+    timeList = []
+ 
     for i in range(0, len(listOfIntensity)):
-        my_device.impulsion_command(north, length, signalType, listOfIntensity[i])
-    
-    
+        my_device.impulsion_command(north, length, signalType, duty = 60., realValue = correctIntensList[i], experiment = exp,  feedbackRequest = False)
+        intensGiven, reactTime = my_device.impulsion_command(north, length, signalType, duty = listOfIntensity[i], realValue = correctIntensList[i], experiment = exp,  feedbackRequest = True)
+        givenIntensList.append(intensGiven)
+        timeList.append(reactTime)
+    print('Thanks for the feedback')
+    print('')
+    print('The real intensities where :')
+    print(correctIntensList)
+    print('Youre answers were :')
+    print(givenIntensList)
+    print('with the corresponding reaction time :')
+    print(timeList)
         
 def random_intensity_changing_length(listOfIntensity = intensityList, signalType = 'flat', length = maxLength) :
     for i in range(0, len(listOfIntensity)):
-        my_device.impulsion_command(north, i/len(listOfIntensity)*length, signalType, listOfIntensity[i])
+        my_device.impulsion_command(north, i/len(listOfIntensity)*length, signalType, listOfIntensity[i],  feedbackRequest = True)
+        
+        
         
 Thread(target = haptic_device.measure_time).start()        
-Thread(target = random_intensity).start()
+Thread(target = random_direction).start()
 #my_device.impulsion_command(south, length = 1, signalType = 'flat', duty = 0)
 
 
