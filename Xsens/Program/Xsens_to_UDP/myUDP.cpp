@@ -17,11 +17,11 @@ void myUDP::sendDataFormated(QString deviceID, QString strDataType,QString dateT
 	QByteArray Data;
 	Data.append("Xsens[");
 	Data.append(deviceID);
-	Data.append("], ");
+	Data.append("],");
 	Data.append(strDataType);
-	Data.append(", ");
+	Data.append(",");
 	Data.append(dateTime);
-	Data.append(", ");
+	Data.append(",");
 	Data.append(strData);
 
 	socket->writeDatagram(Data, udp_ip, udp_port);

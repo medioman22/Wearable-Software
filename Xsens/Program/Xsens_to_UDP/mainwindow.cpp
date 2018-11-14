@@ -502,6 +502,7 @@ void MainWindow::handleDataAvailable(XsDeviceId deviceId, XsDataPacket packet)
 	{
 		//Getting Euler angles.
 		XsEuler oriEuler = packet.orientationEuler();
+		XsQuaternion oriQuat = packet.orientationQuaternion();
 
 		// Just for fun: pitch to select.
 		// (you only want to select this in the GUI after the XKF-3w filters stabilized though)
@@ -511,6 +512,17 @@ void MainWindow::handleDataAvailable(XsDeviceId deviceId, XsDataPacket packet)
 		}
 
 		mtwData.setOrientation(oriEuler);
+
+		// Have the current epoch to put in the UDP message. 
+		// Same timestamp for all of the same data
+		QString dateTime = QString::number(m_epoch.currentMSecsSinceEpoch());
+
+		// Sends the data for x, y, z, w quaternion values through UDP comm
+		m_myUDP.sendDataFormated(mtwIdStr, "1", dateTime, QString("%1").arg(oriQuat.x(), 5, 'f', 2));
+		m_myUDP.sendDataFormated(mtwIdStr, "2", dateTime, QString("%1").arg(oriQuat.y(), 5, 'f', 2));
+		m_myUDP.sendDataFormated(mtwIdStr, "3", dateTime, QString("%1").arg(oriQuat.z(), 5, 'f', 2));
+		m_myUDP.sendDataFormated(mtwIdStr, "4", dateTime, QString("%1").arg(oriQuat.w(), 5, 'f', 2));
+		
 	}
 
 	// -- Determine effective update rate percentage --
@@ -798,15 +810,6 @@ void MainWindow::displayMtwData(ConnectedMTwData *mtwData)
 		m_ui->pitchLabel->setText(QString("%1 [deg]").arg(mtwData->orientation().y(),5,'f',2));
 		m_ui->yawLabel->setText(QString("%1 [deg]").arg(mtwData->orientation().z(),5,'f',2));
 		
-
-		// Have the current epoch to put in the UDP message. 
-		// Same timestamp for all of the same data
-		QString dateTime = QString::number(m_epoch.currentMSecsSinceEpoch());
-
-		// Sends the data for x, y, z euler angles through UDP comm
-		m_myUDP.sendDataFormated("1", "1", dateTime, QString("%1").arg(mtwData->orientation().x(), 5, 'f', 2));
-		m_myUDP.sendDataFormated("1", "2", dateTime, QString("%1").arg(mtwData->orientation().y(), 5, 'f', 2));
-		m_myUDP.sendDataFormated("1", "3", dateTime, QString("%1").arg(mtwData->orientation().z(), 5, 'f', 2));
 	}
 
 	// Display effective update rate.

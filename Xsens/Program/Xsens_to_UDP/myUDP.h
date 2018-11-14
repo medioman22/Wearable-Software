@@ -18,5 +18,5 @@ public:
 private:
 	QUdpSocket *socket;
 	QHostAddress udp_ip = QHostAddress::LocalHost;
-	int udp_port = 12345;
+	int udp_port = 12347;
 };

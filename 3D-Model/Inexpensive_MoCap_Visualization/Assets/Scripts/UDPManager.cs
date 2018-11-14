@@ -38,6 +38,7 @@ public class UDPManager : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("Start thread");
         t = new Thread(new ThreadStart(ListenThread));
         //cubemover = cube.GetComponent<CubeMover>();
         t.IsBackground = true;
@@ -57,7 +58,6 @@ public class UDPManager : MonoBehaviour
             receive_byte_array = listener.Receive(ref groupEP);
             dat = Encoding.ASCII.GetString(receive_byte_array, 0, receive_byte_array.Length);
             dataSplited = dat.Split(charSeparators, StringSplitOptions.None);
-            Debug.Log("test");
             if (dat[0] == 'B')
             {
                 if ((dataSplited[1].Equals("9"))||
@@ -76,8 +76,7 @@ public class UDPManager : MonoBehaviour
                     (dataSplited[1].Equals("3")))
                 {
                     Debug.Log((float.Parse(dataSplited[3])).ToString());
-                    cubemover.SetAngleXYZ(Int32.Parse(dataSplited[1]) - 9, float.Parse(dataSplited[3]));
-                    Debug.Log("test");
+                    cubemover.SetAngleXYZ(Int32.Parse(dataSplited[1]), float.Parse(dataSplited[3]));
                 }
             }
         }
