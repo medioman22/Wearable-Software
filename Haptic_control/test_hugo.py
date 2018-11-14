@@ -4,6 +4,7 @@ import threading
 from threading import Thread
 t_init = time.time()
 
+
 def measure_time():
     t_init = time.time()
     was_pressed = False
@@ -24,7 +25,7 @@ def measure_time():
         
 def check_key_pressed():
     direction_dict = {'q' : 'NW',
-           'w' : 'N', 'e': 'NE', 'a': 'W', 'd': 'E', 'y': 'SW', 'x': 'S', 'c': 'SE'}
+           'w' : 'N', 'e': 'NE', 'a': 'W', 'd': 'E', 'y': 'SW', 'x': 'S', 'c': 'SE','space': 'Space'}
     for key in direction_dict.keys():
         if keyboard.is_pressed(key) :
             return direction_dict[key]
@@ -44,7 +45,8 @@ def func2(a=32):
     print(' ', a)
     print (time.time()-t_init)
 
-#measure_time()
+measure_time()
 Thread(target = func1).start()
 
 Thread(target = measure_time).start()
+    

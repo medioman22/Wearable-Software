@@ -12,10 +12,6 @@ import numpy as np
 #from pyqtgraph.Qt import QtGui
 #import pyqtgraph as pg
 import json
-
-#import imp
-#foo = imp.load_source('beagleboneGreenWirelessConnection', 'C:\Users\Hugo\Documents\GitHub\Wearable-Software\Interface\src\connections\beagleboneGreenWirelessConnection.py')
-
 import sys
 sys.path.append('C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Interface\\src\\')
 
@@ -28,36 +24,57 @@ c = BeagleboneGreenWirelessConnection()
 
 I2C_interface = "PCA9685@I2C[1]"
 
-t_init = 0
-NS = 1
+
+t_init = 0 #iniate the timer to 0
+
+NS = 1 #constants to activate several motors at the same time
 WE = 3
-north = np.array([8,5,2])
+
+north = np.array([8,5,2]) #each direction corresponds to a pattern of 3 successive motors
 south = np.array([2,5,8])
 east = np.array([4,5,6])
 west = np.array([6,5,4])
 northwest = np.array([9,5,1])
 northeast = np.array([7,5,10])
 southeast = np.array([1,5,9])
-southweast = np.array([10,5,7])
+southwest = np.array([10,5,7])
+
 direction_dict = {'q' : 'NW',
-           'w' : 'N', 'e': 'NE', 'a': 'W', 'd': 'E', 'y': 'SW', 'x': 'S', 'c': 'SE'}
+           'w' : 'N', 'e': 'NE', 'a': 'W', 'd': 'E', 'y': 'SW', 'x': 'S', 'c': 'SE'} #corresponding key pressed by the user on the keyboard
+
+userActivationForDir = False #boolean to activate each direction when the user desire (click on the space button)
+feedbackGiven = False #set to true when the user press a key to give his feeback
+
 
 def measure_time():
     was_pressed = False
-    while True:         #making a loop
-        try:            #used try so that if user pressed other than the given key error will not be shown
+    wasPressedSpace = False
+    global userActivationForDir, feedbackGiven
+    
+    while True:         #making an infinite loop
+        try:            #used try so that if user pressed other than the given key error will not be shown    
             key_pressed = check_key_pressed(direction_dict)
-            if key_pressed : #if direction key is pressed
-                if not was_pressed :
+            if keyboard.is_pressed('space'):
+                if not wasPressedSpace :
+                    userActivationForDir = True
+                    wasPressedSpace = True
+                    print('Direction sent')
+                pass
+            
+            elif key_pressed : #if direction key is pressed
+                if  was_pressed and feedbackGiven :
                     t_fin = time.time()
                     print('Direction : ', key_pressed, ', Reaction time :', t_fin-t_init)
+                    feedbackGiven = True
                     was_pressed = True
                 pass   #finishing the loop
             else:
                 was_pressed = False
+                wasPressedSpace = False
                 pass
         except:
             break
+        
 
 def check_key_pressed(direction_dict):
     for key in direction_dict.keys():
@@ -67,16 +84,14 @@ def check_key_pressed(direction_dict):
         else : pass
     return None
 
+
 Thread(target = measure_time).start()
+
+
 
 class haptic_device():
     
-    """
-    REMEMBER : ALL class functions have 'self' as a first argument
-    """
-    
     ### CLASS FUNCTIONS ###
-
         
     def __init__(self):
         self.motor_number = 9
@@ -85,10 +100,6 @@ class haptic_device():
         self.motor_state = [0, 0, 0,
                             0, 0, 0,
                             0, 0, 0]
-        
-    ### PRIVATE FUNCTIONS ###
-    
-    # they start with a _
     
         
     ### PUBLIC FUNCTIONS ###
@@ -208,22 +219,30 @@ class haptic_device():
         
         
     def impulsion_command(self, direction,length = 1, signalType = 'linear', duty = 99, all_motors = False):
-        global t_init
+        global t_init, userActivationForDir,feedbackGiven
+        feedbackGiven = False
+        userActivationForDir = False
+        while userActivationForDir == False:
+            time.sleep(0.1)
+            pass
         if signalType == 'flat':
+            t_init = time.time()
             if all_motors == True: self.motor_control_flat_all_motors(length, duty, direction)
             else : self.motor_control_flat(length,duty,direction)
-            t_init = time.time()
+            
         elif signalType == 'linear':
             if all_motors == True: self.motor_control_linear_all_motors(length, duty, direction)
             else : self.motor_control_linear(length,duty,direction)
             t_init = time.time()        
         else: 
             print('Incorrect signal type')
+        while feedbackGiven == False:
+            time.sleep(0.1)
+            pass
+
         
 
     def wait(self, sec):
-#        print('waiting ', str(sec), ' seconds')
         global time_pointer
-#        time_pointer += sec
         time.sleep(sec)
         
