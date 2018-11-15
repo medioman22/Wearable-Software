@@ -169,55 +169,76 @@ class haptic_device():
 
         
     def motor_control_linear_all_motors(self, length, duty, direction,fraction = 10):
-        
+        start_point = 1
         step = duty/fraction
-        for i in range(1,fraction+1):
-            self.activate_row_of_3_motors(direction[0],direction,i*step)
+        for i in range(0,fraction):
+            self.activate_row_of_3_motors(direction[0],direction,(i+1)*step)
             time.sleep(length/(4*fraction))
-        for i in range(1,fraction+1):
-            self.activate_row_of_3_motors(direction[0],direction,(fraction-i)*step)
-            self.activate_row_of_3_motors(direction[1],direction,i*step)
+        for i in range(0,fraction):
+            self.activate_row_of_3_motors(direction[0],direction,(fraction-(i+1)+start_point)*step)
+            self.activate_row_of_3_motors(direction[1],direction,(i+1)*step)
             time.sleep(length/(4*fraction))
-        for i in range(1,fraction+1):
-            self.activate_row_of_3_motors(direction[1],direction,(fraction-i)*step)
-            self.activate_row_of_3_motors(direction[2],direction,i*step)
+        for i in range(0,fraction):
+            self.activate_row_of_3_motors(direction[1],direction,(fraction-(i+1)+start_point)*step)
+            self.activate_row_of_3_motors(direction[2],direction,(i+1)*step)
             time.sleep(length/(4*fraction))
-        for i in range(1,fraction+1):
-            self.activate_row_of_3_motors(direction[2],direction,(fraction-i)*step)
+        for i in range(0,fraction):
+            self.activate_row_of_3_motors(direction[2],direction,(fraction-(i+1)+start_point)*step)
             self.wait(length/(4*fraction))
+            
+            
+             
         
     def motor_control_linear(self, length, duty, direction, fraction = 10):
         step = duty/fraction
-        for i in range(1,fraction+1):
-            self.motor_activation(direction[0],i*step)
-            time.sleep(length/(4*fraction)) #4 is coming from the 4 different phases
-        for i in range(1,fraction+1):
-            self.motor_activation(direction[0],(fraction-i)*step)
-            self.motor_activation(direction[1],i*duty/fraction)
-            time.sleep(length/(4*fraction))
-        for i in range(1,fraction+1):
-            self.motor_activation(direction[1],(fraction-i)*step)
-            self.motor_activation(direction[2],i*step)
-            time.sleep(length/(4*fraction))
-        for i in range(1,fraction+1):
-            self.motor_activation(direction[2],(fraction-i)*step)
-            time.sleep(length/(4*fraction))
-        
+        start_point = 1
+        waitTime = length/(4*(fraction-start_point))
+        for i in range(start_point,fraction):
+            t1 = time.time()
+            self.motor_activation(direction[0],(i+1)*step)
+            t2 = time.time()
+            time.sleep(waitTime - (t2-t1)) #4 is coming from the 4 different phases
+        for i in range(start_point,fraction):
+            t1 = time.time()
+            self.motor_activation(direction[0],(fraction-(i+1)+start_point)*step)
+            self.motor_activation(direction[1],(i+1)*duty/fraction)
+            t2 = time.time()
+            time.sleep(waitTime - (t2-t1))
+        self.motor_activation(direction[0],0)
+        for i in range(start_point,fraction):
+            t1 = time.time()
+            self.motor_activation(direction[1],(fraction-(i+1)+start_point)*step)
+            self.motor_activation(direction[2],(i+1)*step)
+            t2 = time.time()
+            time.sleep(waitTime - (t2-t1))
+        self.motor_activation(direction[1],0)
+        for i in range(start_point,fraction):
+            t1 = time.time()
+            self.motor_activation(direction[2],(fraction-(i+1)+start_point)*step)
+            t2 = time.time()
+            time.sleep(waitTime - (t2-t1))
+        self.motor_activation(direction[2],0)
         
     def motor_control_flat(self, length, duty, direction):
-        self.motor_activation(direction[0],duty)        
-        time.sleep(length/3)
+        t1 = time.time()
+        self.motor_activation(direction[0],duty)  
+        t2 = time.time()
+        time.sleep(length/3 - (t2-t1))
+        t1 = time.time()
         self.motor_activation(direction[0],0)
         self.motor_activation(direction[1],duty)
-        time.sleep(length/3)
+        t2 = time.time()
+        time.sleep(length/3 - (t2-t1))
+        t1 = time.time()
         self.motor_activation(direction[1],0)
         self.motor_activation(direction[2],duty)
-        time.sleep(length/3)
+        t2 = time.time()
+        time.sleep(length/3 - (t2-t1))
         self.motor_activation(direction[2],0)
                 
         
     def impulsion_command(self, direction,length = 1, signalType = 'linear', 
-                          duty = 99, all_motors = False, realValue = 'No value transmitted', experiment = 'direction', feedbackRequest = True):
+                          duty = 99, all_motors = False, realValue = 'No value transmitted', experiment = 'direction', feedbackAsked = True, feedbackReturned = False):
         global t_init, userActivationForDir,feedbackGiven, dirGiven, reactionTime, mode
         mode = experiment
         userActivationForDir = False
@@ -235,23 +256,18 @@ class haptic_device():
             t_init = time.time()
             if all_motors == True: self.motor_control_linear_all_motors(length, duty, direction)
             else : self.motor_control_linear(length,duty,direction)
-            t_init = time.time()        
         else: 
             print('Incorrect signal type')
-        while feedbackGiven == False and  feedbackRequest:
+        while feedbackGiven == False and feedbackAsked :
             time.sleep(0.01)
             pass
         
-        if mode == 'direction' and  feedbackRequest :
-            print('Correct direction was :', realValue)
+        if mode == 'direction' :
+            if feedbackReturned : print('Correct direction was :', realValue)
             return dirGiven, reactionTime
-        if mode == 'intensity' and feedbackRequest:
-            print('Correct intensity was :', realValue)
+        if mode == 'intensity' :
+            if feedbackReturned : print('Correct intensity was :', realValue)
             return intensityGiven, reactionTime
-        
-        
-
-    def wait(self, sec):
-        global time_pointer
-        time.sleep(sec)
-        
+        for i in range(0,10):
+            c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
+    
