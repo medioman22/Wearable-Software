@@ -13,6 +13,7 @@ from threading import Thread
 import random
 import csv
 
+savingPath = 'C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Haptic_control\\logs\\'
 north = np.array([8,5,2])
 south  = np.array([2,5,8])
 east = np.array([4,5,6])
@@ -21,26 +22,20 @@ northwest = np.array([9,5,1])
 northeast = np.array([7,5,10])
 southeast = np.array([1,5,9])
 southwest = np.array([10,5,7])
+
 dictOfCorresp = {north[0] : 'N', south[0] : 'S', east[0] : 'E', west[0] : 'W', northeast[0] : 'NE', northwest[0] : 'NW', southeast[0] : 'SE', southwest[0] : 'SW'}
 
 
-nbOfDirectionSet = 3
-nbOfIntensitySet = 1
+nbOfSetForExp = 1
 maxIntensity = 90
 maxLength = 1
 
-#initialDirectionList = [north, south]   
 initialDirectionList = [north, south, east, west, northwest, northeast, southwest, southeast]
 initialIntensityList = [1,2,3,4,5]
-intensityList = []
+
 
 subject = 'Hugo'
-    
-for i in range(0,nbOfIntensitySet):
-    intensityList.extend(initialIntensityList)
 
-
-random.shuffle(intensityList)
 
 
 my_device = haptic_device.haptic_device() 
@@ -48,81 +43,89 @@ my_device.connection()
 
 
 
-def random_direction(nbOfSet = 1,signalType = 'linear', all_motors = False, exp = 'direction', feedbackRequest = True, save = True ) :  
-    global initialDirectionList, maxLength, maxIntensity, dictOfCorresp, subject
-    directionList = []
-    correctDirList = []
-    givenDirList = []
-    timeList = []
-    
-    for i in range (0, nbOfSet):
-        directionList.extend(initialDirectionList)
-        
-    random.shuffle(directionList)
-    
-    for i in range(0, len(directionList)):
-        correctDirList.append(dictOfCorresp[directionList[i][0]])
-        
-    for i in range(0, len(directionList)):
-        dirGiven, reactTime = my_device.impulsion_command(direction = directionList[i], 
-                        length = maxLength, signalType = signalType, duty = maxIntensity, all_motors = False, realValue = correctDirList[i], 
-                        experiment = exp, feedback = feedbackRequest)
-        givenDirList.append(dirGiven)
-        timeList.append(reactTime)
-    print('Thanks for the feedback')
+def experiment(experimentType = 'intensity_and_length'):
+    global nbOfSet
+    print('First, you will experiment each ', experimentType, ' and a feedback will be given to you. Press space to activate each ', experimentType)
+    random_set(nbOfSet = 1, exp = experimentType, feedbackRequest = True, save = False)
     print('')
-    print('The real directions where :')
-    print(correctDirList)
-    print('Youre answers were :')
-    print(givenDirList)
-    print('with the corresponding reaction time :')
-    print(timeList)
-    if save :  
-        with open(subject + '_intens_feedback.csv', 'w') as csvfile:
-            filewriter = csv.writer(csvfile, delimiter=',', quotechar= '|', quoting=csv.QUOTE_MINIMAL)
-            filewriter.writerow(['Given Direction', 'Real Direction', 'Reaction time'])
-            for i in range(0,len(correctDirList)):
-                filewriter.writerow([givenDirList[i], correctDirList[i], timeList[i]])
-    
-def direction_experiment():
-    global nbOfDirectionSet
-    print('First, you will experiment each direction, and a feedback will be given to you. Press space to activate each direction')
-    random_direction(nbOfSet = 1, signalType = 'linear', all_motors = False, exp = 'direction', feedbackRequest = True, save = False)
-    print('')
-    print('Now the experiment begin, press space to activate each direction')
-    random_direction(nbOfSet = nbOfDirectionSet, signalType = 'linear', all_motors = False, exp = 'direction', feedbackRequest = False, save = True) 
+    print('Now the experiment begin, press space to activate each ', experimentType)
+    random_set(nbOfSet = nbOfSetForExp, exp = experimentType, feedbackRequest = False, save = True)
 
-def random_intensity(listOfIntensity = intensityList, signalType = 'flat', length = maxLength, exp = 'intensity', feedbackRequest = True ) : 
-    correctIntensList = listOfIntensity
-    listOfIntensity = [i*maxIntensity/5 for i in listOfIntensity]
-    givenIntensList = []
+
+def random_set(nbOfSet = 1, exp = 'direction', feedbackRequest = True, save = True):
+    global initialDirectionList, initialIntensityList, maxLength, maxIntensity, dictOfCorresp, subject, savingPath
+    valueList = []
+    correctList = []
+    givenList = []
     timeList = []
- 
-    for i in range(0, len(listOfIntensity)):
-        my_device.impulsion_command(north, length, signalType, duty = 60., realValue = correctIntensList[i], experiment = exp,  feedbackRequest = False)
-        intensGiven, reactTime = my_device.impulsion_command(north, length, signalType, duty = listOfIntensity[i], realValue = correctIntensList[i], experiment = exp,  feedback = feedbackRequest )
-        givenIntensList.append(intensGiven)
+    signalTypeExp1 = 'linear'
+    signalTypeExp2 = 'flat'
+    
+    for i in range(0, nbOfSet):
+        if exp == 'direction' : valueList.extend(initialDirectionList)
+        elif exp == 'intensity_and_length' or 'intensity': valueList.extend(initialIntensityList)
+        else :
+            print('wrong experiment type')
+            break
+    
+    random.shuffle(valueList)
+    
+    for i in range(0, len(valueList)):
+        if exp == 'direction' : correctList.append(dictOfCorresp[valueList[i][0]])
+        elif exp == 'intensity_and_length' or exp == 'intensity' : correctList = valueList
+        else : print('wrong experiment type')
+   
+    
+    if exp == 'intensity_and_length' or exp == 'intensity' : valueList = [i*maxIntensity/5 for i in valueList]
+    
+    for i in range(0, len(valueList)):
+        if exp == 'direction' :
+            valueGiven, reactTime = my_device.impulsion_command(direction = valueList[i], length = maxLength, 
+                                        signalType = signalTypeExp1, duty = maxIntensity, all_motors = False, realValue = correctList[i], 
+                                        experiment = exp, feedbackAsked = True, feedbackReturned = feedbackRequest)
+        elif exp == 'intensity' :
+           my_device.impulsion_command(direction = north, length = maxLength, 
+                                        signalType = signalTypeExp2, duty = 60., all_motors = False, realValue = correctList[i], 
+                                        experiment = exp, feedbackAsked = False, feedbackReturned = False, )
+           valueGiven, reactTime = my_device.impulsion_command(direction = north, length = maxLength, 
+                                        signalType = signalTypeExp2, duty = valueList[i], all_motors = False, realValue = correctList[i], 
+                                        experiment = exp, feedbackAsked = True, feedbackReturned = feedbackRequest)
+        elif exp == 'intensity_and_length' :
+           my_device.impulsion_command(direction = north, length = maxLength, 
+                                        signalType = signalTypeExp2, duty = 60., all_motors = False, realValue = correctList[i], 
+                                        experiment = exp, feedbackAsked = False, feedbackReturned = False, )
+           signalLength = maxLength - (correctList[i]-3)/2*maxLength*0.4
+           valueGiven, reactTime = my_device.impulsion_command(direction = north, length = signalLength, 
+                                        signalType = signalTypeExp2, duty = valueList[i], all_motors = False, realValue = correctList[i], 
+                                        experiment = exp, feedbackAsked = True, feedbackReturned = feedbackRequest)
+        else : print('wrong experiment type')
+        givenList.append(valueGiven)
         timeList.append(reactTime)
     print('Thanks for the feedback')
     print('')
-    print('The real intensities where :')
-    print(correctIntensList)
+    print('The real ', exp,' where :')
+    print(correctList)
     print('Youre answers were :')
-    print(givenIntensList)
+    print(givenList)
     print('with the corresponding reaction time :')
     print(timeList)
+    if save : 
+        with open(savingPath + subject + '_' + exp + '_feedback.csv', 'w') as csvfile:
+            filewriter = csv.writer(csvfile, delimiter=',', quotechar= '|', quoting=csv.QUOTE_MINIMAL)
+            filewriter.writerow(['Given ' + exp, 'Real '+ exp, 'Reaction time'])
+            for i in range(0,len(correctList)):
+                filewriter.writerow([givenList[i], correctList[i], timeList[i]])
+
     
-    
-def random_intensity_changing_length(listOfIntensity = intensityList, signalType = 'flat', length = maxLength) :
-    for i in range(0, len(listOfIntensity)):
-        my_device.impulsion_command(north, i/len(listOfIntensity)*length, signalType, listOfIntensity[i],  feedbackRequest = True)
+#def random_intensity_changing_length(listOfIntensity = intensityList, signalType = 'flat', length = maxLength) :
+#    for i in range(0, len(listOfIntensity)):
+#        my_device.impulsion_command(north, i/len(listOfIntensity)*length, signalType, listOfIntensity[i],  feedbackRequest = True)
         
         
         
 Thread(target = haptic_device.measure_time).start()        
-Thread(target = direction_experiment).start()
+Thread(target = experiment).start()
  
-#my_device.impulsion_command(south, length = 1, signalType = 'flat', duty = 0)
 
 
     

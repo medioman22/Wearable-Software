@@ -72,7 +72,7 @@ def measure_time():
                     if mode == 'direction' :
                         dirGiven = key_pressed
                         print('Direction : ', key_pressed, ', Reaction time :', reactionTime)
-                    elif mode == 'intensity':
+                    elif mode == 'intensity' or mode == 'intensity_and_length':
                         intensityGiven = key_pressed
                         print('Intensity : ', key_pressed, ', Reaction time :', reactionTime)
                 pass   #finishing the loop
@@ -166,7 +166,8 @@ class haptic_device():
         self.activate_row_of_3_motors(direction[2],direction,duty) 
         time.sleep(length/3)
         self.activate_row_of_3_motors(direction[2],direction,0) 
-
+        for i in range(0,10):
+            c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
         
     def motor_control_linear_all_motors(self, length, duty, direction,fraction = 10):
         start_point = 1
@@ -185,7 +186,8 @@ class haptic_device():
         for i in range(0,fraction):
             self.activate_row_of_3_motors(direction[2],direction,(fraction-(i+1)+start_point)*step)
             self.wait(length/(4*fraction))
-            
+        for i in range(0,10):
+            c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
             
              
         
@@ -218,6 +220,8 @@ class haptic_device():
             t2 = time.time()
             time.sleep(waitTime - (t2-t1))
         self.motor_activation(direction[2],0)
+        for i in range(0,10):
+            c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
         
     def motor_control_flat(self, length, duty, direction):
         t1 = time.time()
@@ -235,6 +239,8 @@ class haptic_device():
         t2 = time.time()
         time.sleep(length/3 - (t2-t1))
         self.motor_activation(direction[2],0)
+        for i in range(0,10):
+            c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
                 
         
     def impulsion_command(self, direction,length = 1, signalType = 'linear', 
@@ -258,6 +264,7 @@ class haptic_device():
             else : self.motor_control_linear(length,duty,direction)
         else: 
             print('Incorrect signal type')
+        
         while feedbackGiven == False and feedbackAsked :
             time.sleep(0.01)
             pass
@@ -265,9 +272,8 @@ class haptic_device():
         if mode == 'direction' :
             if feedbackReturned : print('Correct direction was :', realValue)
             return dirGiven, reactionTime
-        if mode == 'intensity' :
+        if mode == 'intensity_and_length' or 'intensity' :
             if feedbackReturned : print('Correct intensity was :', realValue)
             return intensityGiven, reactionTime
-        for i in range(0,10):
-            c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
+
     

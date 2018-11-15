@@ -13,10 +13,10 @@ second_list = ['S', 1, 'NS','S','N']
 
 
 
-sub = 'shrek'
+sub = 'shat'
   
  
-with open(sub + '_intens_feedback.csv', 'w') as csvfile:
+with open('C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Haptic_control\\logs\\' + sub + '_intens_feedback.csv', 'w') as csvfile:
     filewriter = csv.writer(csvfile, delimiter=',',
                             quotechar= '|', quoting=csv.QUOTE_MINIMAL)
     filewriter.writerow(['Given Direction', 'Real Direction'])
