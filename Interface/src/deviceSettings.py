@@ -26,6 +26,7 @@ from PyQt5.QtGui import (QMovie)                                # Media elements
 import pyqtgraph as pg                                          # Custom graphics package
 import numpy as np                                              # Number utility package
 from connections.connection import Message                      # Import message
+from utils import standardColorSet                              # Import color set
 
 # from deviceSettingsFunctionSelector import DeviceSettingsFunctionSelectorWidget # Custom device settings function selector widget
 
@@ -35,28 +36,6 @@ pg.setConfigOptions(antialias=True)                             # Enable antiali
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
 LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print level for .log logging
 
-# Standard color set for plots
-standardColorSet = [
-    (0,     200,    0),
-    (200,   0,      0),
-    (0,     0,      200),
-    (200,   200,    100),
-    (200,   0,      100),
-    (200,   100,    0),
-    (0,     200,    100),
-    (100,   0,      100),
-    (200,   100,    200),
-    (100,   100,    0),
-    (100,   100,    200),
-    (50,    50,     200),
-    (50,    0,       200),
-    (50,    150,    0),
-    (100,   150,    50),
-    (100,   50,     0),
-    (50,    150,    50),
-    (150,   0,      150),
-    (200,   200,    200)
-]
 
 class DeviceSettingsWidget(QWidget):
     """
@@ -69,6 +48,8 @@ class DeviceSettingsWidget(QWidget):
     sendMessage = pyqtSignal(Message)
     # Signal for ignore
     ignore = pyqtSignal()
+    # Signal for hide
+    hide = pyqtSignal()
 
     # Associated device
     _device = None
@@ -237,6 +218,16 @@ class DeviceSettingsWidget(QWidget):
         self._ignoreCheckBox = ignoreCheckBox
         self._logger.debug("Device settings UI buttons created")
 
+        # Hide flag
+        hideCheckBox = QCheckBox('Hide')
+        if self._device.hide():
+            hideCheckBox.setChecked(True)
+        else:
+            hideCheckBox.setChecked(False)
+        hideCheckBox.stateChanged.connect(self._onHide)
+        self._hideCheckBox = hideCheckBox
+        self._logger.debug("Device settings UI buttons created")
+
         # Show plot in popup
         plotPopup = QPushButton('Show Plot In Popup')
         plotPopup.clicked.connect(self._onShowPlotInPopup)
@@ -249,6 +240,7 @@ class DeviceSettingsWidget(QWidget):
         controlLayout.addWidget(saveStopButton)
         controlLayout.addWidget(plotPopup)
         controlLayout.addWidget(ignoreCheckBox)
+        controlLayout.addWidget(hideCheckBox)
         controlLayout.addStretch(1)
         bodyGridLayout.addLayout(controlLayout,             0, 1, 1, 1, Qt.AlignLeft | Qt.AlignTop)
         self._logger.debug("Device settings UI layout created")
@@ -367,7 +359,7 @@ class DeviceSettingsWidget(QWidget):
         """Dialog to select location to save file."""
         options = QFileDialog.Options()
         #options |= QFileDialog.DontUseNativeDialog             # Can be uncommented if there is a problem with the default menu on OSX
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Device Plot For {}".format(self._device.name()),"{}/../../Plots/{} Plot.csv".format(sys.path[0], self._device.name()),"Text Files (*.csv)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Device Plot For {}".format(self._device.name()),"{}/../Plots/{} Plot.csv".format(sys.path[0], self._device.name()),"Text Files (*.csv)", options=options)
         if not fileName:
             self._logger.info('No file selected')
             return
@@ -457,6 +449,18 @@ class DeviceSettingsWidget(QWidget):
             self._device.setIgnore(False)
             self.ignore.emit()
             self._logger.info("Do not ignore device '{}'".format(self._device.name()))
+
+    @pyqtSlot(int)
+    def _onHide(self, flag):
+        """Set hide flag."""
+        if (flag == Qt.CheckState.Checked):                     # Set hide flag for the device
+            self._device.setHide(True)
+            self.hide.emit()
+            self._logger.info("Hide device '{}'".format(self._device.name()))
+        else:
+            self._device.setHide(False)
+            self.hide.emit()
+            self._logger.info("Do not hide device '{}'".format(self._device.name()))
 
     @pyqtSlot(str)
     def _onModeSelection(self, mode):

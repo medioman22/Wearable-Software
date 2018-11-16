@@ -1,4 +1,4 @@
-# SoftWEAR Firmware API
+# Firmware API
 
 ## Disclaimer
 

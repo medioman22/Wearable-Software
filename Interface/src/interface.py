@@ -252,6 +252,7 @@ class InterfaceWidget(QWidget):
             deviceListItem = QListWidgetItem(device.name())
             deviceWidget = DeviceSettingsWidget(device)
             deviceWidget.sendMessage.connect(self.onSendMessage)
+            deviceWidget.hide.connect(self.onHideDevice)
             deviceWidget.ignore.connect(self.onIgnoreDevice)
             self._deviceList.addItem(deviceListItem)
             self._deviceStack.addWidget(deviceWidget)
@@ -310,4 +311,9 @@ class InterfaceWidget(QWidget):
     @pyqtSlot()
     def onIgnoreDevice(self):
         """Listen to ignore flag of a device to pass it to the main."""
+        self.update.emit()
+
+    @pyqtSlot()
+    def onHideDevice(self):
+        """Listen to hide flag of a device to pass it to the main."""
         self.update.emit()
