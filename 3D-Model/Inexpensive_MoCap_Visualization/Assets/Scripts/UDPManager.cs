@@ -1,7 +1,7 @@
 ﻿/*
 
 Author: Victor Faraut
-Date: 28.10.2018
+Date: 14.11.2018
 
 
 */
@@ -21,9 +21,9 @@ using System.Collections.Generic;
 
 public class UDPManager : MonoBehaviour
 {
-    Vector3 currentRotVect = new Vector3(0, 0, 0);
     public int listenPort;
     public string IP = "127.0.0.1";
+    public char lastID = '0';
 
     private Thread t;
     private UdpClient listener;
@@ -38,6 +38,7 @@ public class UDPManager : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("Start thread");
         t = new Thread(new ThreadStart(ListenThread));
         //cubemover = cube.GetComponent<CubeMover>();
         t.IsBackground = true;
@@ -57,7 +58,6 @@ public class UDPManager : MonoBehaviour
             receive_byte_array = listener.Receive(ref groupEP);
             dat = Encoding.ASCII.GetString(receive_byte_array, 0, receive_byte_array.Length);
             dataSplited = dat.Split(charSeparators, StringSplitOptions.None);
-            Debug.Log("test");
             if (dat[0] == 'B')
             {
                 if ((dataSplited[1].Equals("9"))||
@@ -71,13 +71,16 @@ public class UDPManager : MonoBehaviour
             }
             if (dat[0] == 'X')
             {
-                if ((dataSplited[1].Equals("1")) ||
-                    (dataSplited[1].Equals("2")) ||
-                    (dataSplited[1].Equals("3")))
+                if (dat[13] == lastID)
                 {
-                    Debug.Log((float.Parse(dataSplited[3])).ToString());
-                    cubemover.SetAngleXYZ(Int32.Parse(dataSplited[1]) - 9, float.Parse(dataSplited[3]));
-                    Debug.Log("test");
+                    if ((dataSplited[1].Equals("1")) ||
+                        (dataSplited[1].Equals("2")) ||
+                        (dataSplited[1].Equals("3")) ||
+                        (dataSplited[1].Equals("4")))
+                    {
+                        Debug.Log((float.Parse(dataSplited[3])).ToString());
+                        cubemover.SetAngleXYZW(Int32.Parse(dataSplited[1]), float.Parse(dataSplited[3]));
+                    }
                 }
             }
         }
