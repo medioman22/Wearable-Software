@@ -110,7 +110,6 @@ class I2C:
                                     pass
                                                                 # Check if drv already loaded and still connected
                                 elif not lastDrv.getDeviceConnected(): # Device is disconnected
-                                    print('remove', lastDrv.getName())
                                     disconnectedDriver.append(lastDrv)
                                 else:                           # Device still connected
                                     connectedDrivers.append(lastDrv) # Add to connected driver list
@@ -136,7 +135,6 @@ class I2C:
                                     drv = DRIVER(pinConfig, muxedChannel, muxName) # Test the different drivers
                                     if not drv.getDeviceConnected(): # Validate driver connected
                                         continue                # Try next driver until none is left
-                                    print('add', drv.getName())
                                     drv.configureDevice()       # Configure device
                                     connectedDrivers.append(drv) # Add to connected driver list
                                     connectedDevices.append({   'address': pinConfig["ADDRESS"], # Add to connected device list

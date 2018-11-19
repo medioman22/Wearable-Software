@@ -166,6 +166,7 @@ class PCA9685:
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                   # Deactivate mux
         except:
+            print('Exception in PCA9685 driver init')
             self._connected = False
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                   # Deactivate mux
@@ -386,5 +387,4 @@ def setDuty(pca, channel, duty):
     res = 4096                                                      # 12 bits of resolution
     on = 0                                                          # Duty on
     off = int(duty / 100. * res)                                    # Duty off
-    print('set', channel, on, off)
     pca.set_pwm(channel, on, off)                                   # Send the values to the pca

@@ -5,6 +5,7 @@
 Driver file for the I2C TCA9548A MUX. Switch for 8 mux channels.
 """
 import Adafruit_GPIO.I2C as I2C
+import Adafruit_BBIO.GPIO as GPIO
 import threading                                                # Threading class for the threads
 import time                                                     # Time class for the waits
 
@@ -41,44 +42,41 @@ class I2CTCA9548AMux8:
     # Device
     _device = None
 
+    # Detect pin
+    _DETECT = None
+
     def __init__(self, pinConfig):
         """Initialize mux with address and busnum."""
-        try:
-            if "ADDRESS" in pinConfig and pinConfig["ADDRESS"] == None or pinConfig["ADDRESS"] not in TCA9548A_ADDRESS:
-                raise ValueError('address is invalid')
-            if "BUSNUM" in pinConfig and pinConfig["BUSNUM"] == None or pinConfig["BUSNUM"] not in TCA9548A_BUSNUM:
-                raise ValueError('busnum is invalid')
+        if "ADDRESS" in pinConfig and pinConfig["ADDRESS"] == None or pinConfig["ADDRESS"] not in TCA9548A_ADDRESS:
+            raise ValueError('address is invalid')
+        if "BUSNUM" in pinConfig and pinConfig["BUSNUM"] == None or pinConfig["BUSNUM"] not in TCA9548A_BUSNUM:
+            raise ValueError('busnum is invalid')
 
-            self._address = pinConfig["ADDRESS"]                    # Get address
-            self._busnum = pinConfig["BUSNUM"]                      # Get busnum
+        self._address = pinConfig["ADDRESS"]                    # Get address
+        self._busnum = pinConfig["BUSNUM"]                      # Get busnum
+        self._DETECT = pinConfig["DETECT"]                      # Get detect pin
 
-            self._device = I2C.get_i2c_device(self._address, self._busnum) # Init the I2C connection
-            self._device.writeRaw8(0x0)                             # Test to write something
-            time.sleep(0.005)                                       # Wait a bit
-        except:
-            return
+        self._device = I2C.get_i2c_device(self._address, self._busnum) # Init the I2C connection
+        self._device.writeRaw8(0x0)                             # Test to write something
+        GPIO.setup(self._DETECT, GPIO.IN, GPIO.PUD_DOWN)        # Init the detect pin and set it as input with pull down
+        time.sleep(0.005)                                       # Wait a bit
 
     def cleanup(self):
         """Clean up driver when no longer needed."""
         try:
-            self._device.writeRaw8(0x00)                            # Disable
+            self._device.writeRaw8(0x00)                        # Disable
         except:
+            print('Exception in i2c mux cleanup')
             return
 
 
     def getMuxConnected(self):
         """Return True if the device is reachable."""
-        connectionState = False
-        self.LOCK.acquire()
         try:
-            if self._selectedChannel == None:
-                connectionState = self._device.readRaw8() == 0      # Test for value 0 as set before
-            else:
-                connectionState = self._device.readRaw8() == 0x01 << self._selectedChannel # Test for value x as set before
+            return GPIO.input(self._DETECT)
         except:
-            connectionState = False
-        self.LOCK.release()
-        return connectionState
+            print('Exception in i2c mux conntected')
+            return False
 
     def configureDevice(self):
         """Once the device is connected, it must be configured."""
@@ -92,7 +90,11 @@ class I2CTCA9548AMux8:
         if muxedPin < 0 or muxedPin > self._range - 1:          # Test parameter validity
             raise ValueError("Parameter error: the MUX has only 8 channels (0-7)")
         self._selectedChannel = muxedPin                        # Set channel
-        self._device.writeRaw8(0x01 << self._selectedChannel)   # Set register
+        try:
+            self._device.writeRaw8(0x01 << self._selectedChannel) # Set register
+        except:
+            print('Exception in i2c mux activate')
+            pass
 
     def deactivate(self):
         """Deactivate the previously activated MUX pin."""
@@ -100,6 +102,7 @@ class I2CTCA9548AMux8:
         try:
             self._device.writeRaw8(0x00)
         except:
+            print('Exception in i2c mux deactivate')
             pass                                                # Try to deactivate if possible
         self._selectedChannel = None
         self.LOCK.release()

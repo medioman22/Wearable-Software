@@ -113,4 +113,4 @@ The (MUX|ADC|I2C|Input|Output|PWM) modules provide following functionality:
 
 Drivers are modules dedicated to a unique type of devices. They are able to interface devices of their type and scanning, updating and configuring at runtime. The drivers are registered in the appropriate (XXX)Modules where they are managed. Each driver has a dedicated thread internally allowing the threads to run different velocities depending on the type of device. For device types like ADC, Input, Output and PWM a single driver is usually enough but for I2C devices, which need to be interfaced individually, there is a template `I2C_DRIVER_TEMPLATE.py` for a driver provided which can be used to implement drivers for new device types according to the instructions in `__IMPLEMENT_NEW_DRIVER.md`.
 
-MUX drivers are bit special as for the basic Input and ADC, there is only one driver allowed at the time. But you are free to add as many I2C MUX drivers as you like.
+MUX drivers are bit special as there is only one driver allowed at the time. But you are free to add as many I2C MUX drivers on *different* addresses as you like.
