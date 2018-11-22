@@ -10,6 +10,10 @@ This documentation provides a *schematic* overview of the Firmware. For a more i
 * `Logs` contains a set of files generated at runtime
 * `src` contains the source code of the Firmware
 
+## Hardware Layout
+
+![](./Assets/PinLayout.png)
+
 ## Setup & Installation
 
 Look at `README.md` for instructions to setup and installation.
