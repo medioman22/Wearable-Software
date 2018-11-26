@@ -18,6 +18,7 @@ sys.path.append('C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Interfac
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection
 import keyboard 
 
+
 c = BeagleboneGreenWirelessConnection()
 
 I2C_interface = "PCA9685@I2C[1]"
@@ -48,56 +49,13 @@ direction_dict = {'q' : 'NW',
 userActivationForDir = False #boolean to activate each direction when the user desire (click on the space button)
 feedbackGiven = False #set to true when the user press a key to give his feeback
 
-def measure_time():
-    was_pressed = False
-    wasPressedSpace = False
-    global userActivationForDir, feedbackGiven, dirGiven, reactionTime, mode, intensityGiven
-    
-    while True:         #making an infinite loop
-        try:            #used try so that if user pressed other than the given key error will not be shown    
-            key_pressed = check_key_pressed(direction_dict)
-            if keyboard.is_pressed('space'):
-                if not wasPressedSpace :
-                    userActivationForDir = True
-                    wasPressedSpace = True
-                    print('')
-                pass
-            
-            elif key_pressed : #if direction key is pressed
-                if  was_pressed == False and feedbackGiven == False :
-                    t_fin = time.time()
-                    reactionTime = str(round(t_fin-t_init, 2))
-                    feedbackGiven = True
-                    was_pressed = True
-                    if mode == 'direction' :
-                        dirGiven = key_pressed
-                        print('Direction : ', key_pressed, ', Reaction time :', reactionTime)
-                    elif mode == 'intensity' or mode == 'intensity_and_length':
-                        intensityGiven = key_pressed
-                        print('Intensity : ', key_pressed, ', Reaction time :', reactionTime)
-                pass   #finishing the loop
-            else:
-                was_pressed = False
-                wasPressedSpace = False
-                pass
-            
-        except:
-            break
-        
 
-def check_key_pressed(direction_dict):
-    for key in direction_dict.keys():
-        if keyboard.is_pressed(key) :
-            return direction_dict[key]
-            break
-        else : pass
-    return None
+
 
 
 
 
 class haptic_device():
-    
     ### CLASS FUNCTIONS ###
         
     def __init__(self):
@@ -114,6 +72,7 @@ class haptic_device():
     def connection(self):
         c.connect()
         print('Status: {}'.format(c.getState()))
+        c.sendMessages([json.dumps({"type": "Settings", "name": I2C_interface, "dutyFrequency": '50 Hz'})])
         c.sendMessages([json.dumps({"type": "Settings", "name": I2C_interface, "dutyFrequency": '50 Hz'})])
         
     
@@ -193,7 +152,7 @@ class haptic_device():
         
     def motor_control_linear(self, length, duty, direction, fraction = 10):
         step = duty/fraction
-        start_point = 1
+        start_point = 2
         waitTime = length/(4*(fraction-start_point))
         for i in range(start_point,fraction):
             t1 = time.time()
@@ -242,15 +201,65 @@ class haptic_device():
         for i in range(0,10):
             c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
                 
+    
+    def measure_time(self):
+        was_pressed = False
+        wasPressedSpace = False
+        global userActivationForDir, feedbackGiven, dirGiven, reactionTime, mode, intensityGiven
         
+        while True:         #making an infinite loop
+            try:            #used try so that if user pressed other than the given key error will not be shown    
+                key_pressed = self.check_key_pressed(direction_dict)
+                
+                if keyboard.is_pressed('space'):
+                    if not wasPressedSpace :
+                        userActivationForDir = True
+                        wasPressedSpace = True
+                        print('')
+                    pass
+                
+                elif key_pressed : #if direction key is pressed
+                    if  was_pressed == False and feedbackGiven == False :
+                        t_fin = time.time()
+                        reactionTime = str(round(t_fin-t_init, 2))
+                        feedbackGiven = True
+                        was_pressed = True
+                        if mode == 'direction' :
+                            dirGiven = key_pressed
+                            print('Direction : ', key_pressed, ', Reaction time :', reactionTime)
+                        elif mode == 'intensity' or mode == 'intensity_and_length':
+                            intensityGiven = key_pressed
+                            print('Intensity : ', key_pressed, ', Reaction time :', reactionTime)
+                    pass   #finishing the loop
+                else:
+                    was_pressed = False
+                    wasPressedSpace = False
+                    pass
+                
+            except:
+                break
+        
+
+    def check_key_pressed(self,direction_dict):
+        for key in direction_dict.keys():
+            if keyboard.is_pressed(key) :
+                return direction_dict[key]
+                break
+            else : pass
+        return None
+    
     def impulsion_command(self, direction,length = 1, signalType = 'linear', 
                           duty = 99, all_motors = False, realValue = 'No value transmitted', experiment = 'direction', feedbackAsked = True, feedbackReturned = False):
         global t_init, userActivationForDir,feedbackGiven, dirGiven, reactionTime, mode
         mode = experiment
         userActivationForDir = False
+        if (mode == 'intensity' or mode == 'intensity_and_length') and feedbackAsked:
+            userActivationForDir = True
+            
         while userActivationForDir == False :
             time.sleep(0.1)
             pass
+        
         feedbackGiven = False
         
         if signalType == 'flat':
@@ -273,7 +282,8 @@ class haptic_device():
             if feedbackReturned : print('Correct direction was :', realValue)
             return dirGiven, reactionTime
         if mode == 'intensity_and_length' or 'intensity' :
-            if feedbackReturned : print('Correct intensity was :', realValue)
+            if feedbackReturned : 
+                print('Correct intensity was :', realValue)
             return intensityGiven, reactionTime
 
     
