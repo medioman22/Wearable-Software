@@ -26,8 +26,8 @@ from PyQt5.QtWidgets import (   QMainWindow,                    # Widget objects
                                 QApplication)
 from PyQt5.QtGui import (   QFont,                              # Media elements from Qt
                             QIcon)
-
-from utils import Utils                                         # Utility package
+import pyqtgraph as pg                                          # Custom graphics package
+import numpy as np                                              # Number utility package
 from interface import InterfaceWidget                           # Custom interface widget
 from connectionDialog import ConnectionDialog                   # Dialog widget for connection settings
 from udpBroadcast import UDPBroadcast                           # UDP Broadcast functionality
@@ -35,6 +35,7 @@ from boards.board import Device                                 # Board base cla
 from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard # BBGW implementation
 from connections.connection import Message                      # Message class
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection # BBGWConnection implementation
+from utils import standardColorSet                              # Import color set
 
 # Logging settings
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
@@ -78,8 +79,14 @@ class MainWindow(QMainWindow):
     _connectionIteratorTimer = None
     # The UPD broadcast
     _broadcast = None
-    # Flag whether ignored devices should be shown or hidden
-    _showIgnoredDevices = False
+    # Flag whether hidden devices should be shown or hidden
+    _showHiddenDevices = False
+    # Popup with multi plot
+    _popupPlotWidget = None
+    # Devices that should be plotted
+    _popupPlotsDevices = None
+    # Plots used to display multi plot data for popup
+    _popupPlots = None
     # Logger module
     _logger = None
 
@@ -150,19 +157,19 @@ class MainWindow(QMainWindow):
         selectMenu.triggered.connect(self._selectBoardListener)
         boardMenu.addMenu(selectMenu)
 
-        # Ignore menu
-        showIgnoreAct = QAction('&Show Ignored Devices', self)
-        showIgnoreAct.setStatusTip('Show Ignored Devices')
-        showIgnoreAct.triggered.connect(self._onShowIgnored)
-        showIgnoreAct.setVisible(True)
-        self._showIgnoreAct = showIgnoreAct
-        boardMenu.addAction(showIgnoreAct)
-        hideIgnoreAct = QAction('&Hide Ignored Devices', self)
-        hideIgnoreAct.setStatusTip('Hide Ignored Devices')
-        hideIgnoreAct.triggered.connect(self._onHideIgnored)
-        hideIgnoreAct.setVisible(False)
-        self._hideIgnoreAct = hideIgnoreAct
-        boardMenu.addAction(hideIgnoreAct)
+        # Hide menu
+        showHideAct = QAction('&Show Hidden Devices', self)
+        showHideAct.setStatusTip('Show Hidden Devices')
+        showHideAct.triggered.connect(self._onShowHidden)
+        showHideAct.setVisible(True)
+        self._showHideAct = showHideAct
+        boardMenu.addAction(showHideAct)
+        hideHideAct = QAction('&Hide Hidden Devices', self)
+        hideHideAct.setStatusTip('Hide Hidden Devices')
+        hideHideAct.triggered.connect(self._onHideHidden)
+        hideHideAct.setVisible(False)
+        self._hideHideAct = hideHideAct
+        boardMenu.addAction(hideHideAct)
 
         # Plot points selection menu
         plotPointsSelectionMenu = QMenu('Plot Points', self)
@@ -206,6 +213,12 @@ class MainWindow(QMainWindow):
         streamStopAct.setVisible(False)
         self._streamStopAct = streamStopAct
         boardMenu.addAction(streamStopAct)
+
+        # Multi plot
+        showMultiPlotAct = QAction('&Multi Plot', self)
+        showMultiPlotAct.setStatusTip('Plot multiple devices')
+        showMultiPlotAct.triggered.connect(self._onShowMultiPlotInPopup)
+        boardMenu.addAction(showMultiPlotAct)
         boardMenu.addSeparator()
 
         # Scan menu
@@ -320,7 +333,7 @@ class MainWindow(QMainWindow):
         """Update all ui elements."""
         self.updateStatusValues()
         self.updateDeviceList()
-        self.updateData()
+        #self.updateData()
         self._logger.debug("Main UI updated")
 
     def updateStatusValues(self):
@@ -330,16 +343,18 @@ class MainWindow(QMainWindow):
         self._interface.setStatus(self._connection.status())    # Set current connection status
         self._interface.setScanLabel(self._connection.status() == 'Connected') # Set scan label
 
-    def updateDeviceList(self):                                 # Filter device list by ignored devices
+    def updateDeviceList(self):                                 # Filter device list by hidden devices
         """Update device lists."""
-        self._interface.updateDeviceList(list(filter(lambda x: not x.ignore() or self._showIgnoredDevices, self._board.deviceList())))
+        self._interface.updateDeviceList(list(filter(lambda x: not x.hide() or self._showHiddenDevices, self._board.deviceList())))
 
     def center(self):
         """Center the main window."""
-        qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
+        # qr = self.frameGeometry()
+        # cp = QDesktopWidget().availableGeometry().center()
+        # qr.moveCenter(cp)
+        # self.move(qr.topLeft())
+        self.showMaximized()
+
 
     def updateData(self):
         """Update all data elements."""
@@ -493,24 +508,24 @@ class MainWindow(QMainWindow):
         self._scanStopAct.setVisible(True)
 
     @pyqtSlot()
-    def _onShowIgnored(self):
-        """Show ignored devices."""
-        self._showIgnoredDevices = True
+    def _onShowHidden(self):
+        """Show hidden devices."""
+        self._showHiddenDevices = True
         self.updateDeviceList()
-        self._logger.info("Show ignored devices")
+        self._logger.info("Show hidden devices")
 
-        self._showIgnoreAct.setVisible(False)
-        self._hideIgnoreAct.setVisible(True)
+        self._showHideAct.setVisible(False)
+        self._hideHideAct.setVisible(True)
 
     @pyqtSlot()
-    def _onHideIgnored(self):
-        """Hide ignored devices."""
-        self._showIgnoredDevices = False
+    def _onHideHidden(self):
+        """Hide hidden devices."""
+        self._showHiddendDevices = False
         self.updateDeviceList()
-        self._logger.info("Hide ignored devices")
+        self._logger.info("Hide hidden devices")
 
-        self._showIgnoreAct.setVisible(True)
-        self._hideIgnoreAct.setVisible(False)
+        self._showHideAct.setVisible(True)
+        self._hideHideAct.setVisible(False)
 
     @pyqtSlot(QAction)
     def _setPlotPointsListener(self, action):
@@ -533,6 +548,7 @@ class MainWindow(QMainWindow):
 
             data = False                                        # Data refresh flag
             ui = False                                          # UI refresh flag
+            multiPlot = False                                   # Multiplot flag
 
             if (messages != None and len(messages) > 0):
                 for message in messages:
@@ -559,8 +575,8 @@ class MainWindow(QMainWindow):
                                         for i in range(len(values[1])): # Loop through all dimensions
                                                                 # Look for correct device
                                             for device in self._board.deviceList():
-                                                                # Check if it exists and should be ignored
-                                                if (device.name() == name and not device.ignore()):
+                                                                # Check if it exists and should be ignored or is hidden
+                                                if (device.name() == name and not device.ignore() and not device.hide()):
                                                     fh.write(','.join([ name.replace(',','-'), # Write data entry
                                                                         str(i),
                                                                         str(values[0]),
@@ -569,13 +585,23 @@ class MainWindow(QMainWindow):
                                 if (self._broadcast != None):   # Stream data to UDP using same format as for the CSV files
                                     for i in range(len(values[1])): # Loop through all dimensions
                                         for device in self._board.deviceList(): # Look for correct device
-                                                                # Check if it exists and should be ignored
-                                            if (device.name() == name and not device.ignore()):
+                                                                # Check if it exists and should be ignored or is hidden
+                                            if (device.name() == name and not device.ignore() and not device.hide()):
                                                 self._broadcast.send(','.join([ name.replace(',','-'), # Send data entry
                                                                                 str(i),
                                                                                 str(values[0]),
                                                                                 str(values[1][i])]))
-                    elif (message.type == 'CycleDuration'):       # Cycle duration message
+                                if (self._popupPlotWidget != None and self._popupPlotWidget.isVisible()): # Multiplot data in window
+                                    multiPlot = True
+                                    p = 0
+                                    for d, device in enumerate(self._popupPlotsDevices):
+                                        pastData = device.pastData()
+                                        for i in range(device.dim()):
+                                            if device.activeDim()[i] == True: # Check if dimension is active
+                                                self._popupPlots[p].setData(y=np.asarray(pastData[i]), x=np.arange(len(pastData[i]))) # Plot values
+                                                p += 1
+
+                    elif (message.type == 'CycleDuration'):     # Cycle duration message
                         self._logger.debug('Cycle durations: {}', str(message.data['values']))
                         self._interface.setCycleDurationLabel(message.data['values'])
                     elif (message.type == 'Ping'):              # Ping message
@@ -585,7 +611,7 @@ class MainWindow(QMainWindow):
                         self._logger.warn('Unknown message type: {}'.format(message.type))
                         pass
 
-                if (data):                                      # Update data if data flag has been raised
+                if (data and not multiPlot):                    # Update data if data flag has been raised (except multi plot is active)
                     self.updateData()
                 if (ui):                                        # Update UI if UI flag has been raised
                     self.updateUI()
@@ -595,17 +621,17 @@ class MainWindow(QMainWindow):
 
             messagesSend = []                                   # Messages for outgoing devices
 
-            for device in self._board.deviceList():             # Calculate new values for all outgoing devices
-                if (device.dir() == 'out' and device.functionRunning()): # Check for running function
-                    values = [[] for i in range(device.dim())]  # Prepare data list with dimension
-                    for i in range(device.dim()):               # Calculate new data for device
-                        f, p, s = device.function(i)            # Get function parameter
-                        values[i] = utils.functionForLabel(f)(p, s) # Use utility class function
-
-                    device.setData(values)                      # Update device
-
-                    if (None not in values):                    # Check if there are none-'None' values
-                        messagesSend.append(Message('out', device.name(), {'values': values})) # Create the message
+            # for device in self._board.deviceList():             # Calculate new values for all outgoing devices
+            #     if (device.dir() == 'out' and device.functionRunning()): # Check for running function
+            #         values = [[] for i in range(device.dim())]  # Prepare data list with dimension
+            #         for i in range(device.dim()):               # Calculate new data for device
+            #             f, p, s = device.function(i)            # Get function parameter
+            #             values[i] = utils.functionForLabel(f)(p, s) # Use utility class function
+            #
+            #         device.setData(values)                      # Update device
+            #
+            #         if (None not in values):                    # Check if there are none-'None' values
+            #             messagesSend.append(Message('out', device.name(), {'values': values})) # Create the message
 
 
             if (len(messagesSend) > 0):                         # Send and serialize messages
@@ -626,11 +652,33 @@ class MainWindow(QMainWindow):
         self.updateDeviceList()
 
 
+    def _onShowMultiPlotInPopup(self):
+        """Show multi plot in popup."""
+        if (self._popupPlotWidget != None):                       # Clear popup
+            self._popupPlotWidget.close()
+
+        # Widget for plot data
+        self._popupPlots = []
+        self._popupPlotWidget = pg.PlotWidget(title='Live Data Multi Plot')
+        self._popupPlotWidget.setWindowTitle(self._board.name())
+        self._popupPlotWidget.showAxis('bottom', False)
+        self._popupPlotsDevices = list(filter(lambda x: not x.ignore() and not x.hide(), self._board.deviceList()))
+        for d, device in enumerate(self._popupPlotsDevices):
+            for i in range(device.dim()):
+                if device.activeDim()[i] == True:               # Check if dimension is active
+                    plot = self._popupPlotWidget.plot(pen=(standardColorSet[d]), name="Plot {}({})".format(device.name(), i))
+                    self._popupPlots.append(plot)
+        self._logger.debug("Popup Multi Plot For {}".format(self._board.name()))
+        self._popupPlotWidget.show()
+        self._popupPlotWidget.activateWindow()
+        self._popupPlotWidget.raise_()
+
+
     def saveFileDialog(self):
         """Dialog to select location to save file."""
         options = QFileDialog.Options()
         #options |= QFileDialog.DontUseNativeDialog             # Can be uncommented if there is a problem with the default menu on OSX
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Board Multi Plot For {}".format(self._board.name()),"{}/../../Plots/{} Multi Plot.csv".format(sys.path[0], self._board.name()),"Text Files (*.csv)", options=options) # Select file to store data stream
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Board Multi Plot For {}".format(self._board.name()),"{}/../Plots/{} Multi Plot.csv".format(sys.path[0], self._board.name()),"Text Files (*.csv)", options=options) # Select file to store data stream
         if not fileName:
             self._logger.info('No file selected')
             return

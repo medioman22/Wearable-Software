@@ -194,6 +194,7 @@ class BNO055:
             # self._connected = self._bno.begin(MODE_MAP[self._mode]) # USE THIS LINE FOR NDOF
             #####################################################
         except:
+            print('Exception in BNO055 driver init')
             self._connected = False
 
         if (muxedChannel != None):

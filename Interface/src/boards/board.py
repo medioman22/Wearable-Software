@@ -57,6 +57,8 @@ class Device():
     _fileName = None
     # Ignore device
     _ignore = False
+    # Hide device
+    _hide = False
     # The logger
     _logger = None
 
@@ -200,6 +202,10 @@ class Device():
         """Return the ignore flag."""
         return self._ignore
 
+    def hide(self):
+        """Return the hide flag."""
+        return self._hide
+
     def setData(self, data):
         """Set data for device."""
         if (self._dir != 'out'):                                # Set data is only available for out devices
@@ -219,6 +225,10 @@ class Device():
     def setIgnore(self, ignore):
         """Set the ignore flag."""
         self._ignore = ignore
+
+    def setHide(self, hide):
+        """Set the hide flag."""
+        self._hide = hide
 
 
 

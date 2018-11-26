@@ -23,6 +23,8 @@ import json                                                     # Serializing cl
 from termcolor import colored                                   # Color printing in the console
 import cProfile                                                 # Used to profile the script
 
+import Adafruit_BBIO.GPIO as GPIO                               # Main peripheral class. Implements GPIO communication
+
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
 SOFTWARE = "SoftWEAR/Firmware-BeagleboneGreenWireless(v0.1)"    # Identifier of the Software
 
@@ -36,12 +38,13 @@ UPDATE_PERIODE = 0.1                                            # Update periode
 SCAN_PERIODE = 2                                                # Scan periode to refresh values
 
 scanForDevices = True                                           # Scanning enabled as default
+scanPin = Config.PIN_MAP['SCAN']                                # Scan pin
 exit = False                                                    # Exit flag to terminate all threads
 c = None                                                        # Connection object
 
 inputList = []                                                  # List of connected Input devices on the GPIO pins
 outputList = []                                                 # List of connected Output devices on the GPIO pins
-pwmList = []                                                     # List of connected PWM devices on the GPIO pins
+pwmList = []                                                    # List of connected PWM devices on the GPIO pins
 adcList = []                                                    # List of connected ADC devices on the Analog pins
 i2cList = []                                                    # List of connected IMU devices on the I2C ports
 connectionState = ""                                            # Current connection state to be displayed
@@ -54,6 +57,8 @@ output = OutputModule.Output()                                  # Initialize the
 pwm = PWMModule.PWM()                                           # Initialize the SoftWEAR PWM Module
 adc = ADCModule.ADC()                                           # Initialize the SoftWEAR ADC Module
 i2c = I2CModule.I2C()                                           # Initialize the SoftWEAR I2C Module
+
+GPIO.setup(scanPin, GPIO.IN, GPIO.PUD_UP)                       # Setup scan pin
 
 def muxScan():
     """Scan for new mux devices."""
@@ -196,7 +201,7 @@ def scanThread():
     """Thread dedicated to scan for new devices."""
     global c, scanForDevices, scanDuration
     while True:                                                 # Enter the infinite loop
-        if not scanForDevices:                                  # Check for scanning
+        if not scanForDevices or not GPIO.input(scanPin):       # Check for scanning
             scanDuration = 0                                    # No scanning
             time.sleep(SCAN_PERIODE)
             continue

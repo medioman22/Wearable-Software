@@ -1,4 +1,4 @@
-# SoftWEAR Firmware
+# Firmware
 
 The Firmware is written to run on a BeagleBone Green wireless. Its purpose is to help you to connect and interface sensors connected to the board.
 
@@ -203,6 +203,15 @@ And to disable it:
 ```
 sudo bash Wearable-Software/Firmware/Scripts/DisableAutoLaunch.sh
 ```
+
+## API
+
+More information about the api connection protocol can be found in the `API.md`.
+
+## Documentation
+
+More information about the Firmware code and the functionality can be found in the `DOCS.md`.
+
 ## Running the tests
 
 Explain how to run the automated tests for this system
@@ -225,8 +234,8 @@ Give an example
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+[This system is not yet deployable and only used to prototype!]
 
-## Known issue
+## Known Issues
 
 * The BNO055 sensor is not able to run on the `NDOF` mode from the interface. To do so you need to change the initial mode of initialization of the sensor in the `Firmware/src/drivers/I2C_BNO055.py` from `0` to `11` in the init function.

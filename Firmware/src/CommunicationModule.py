@@ -51,7 +51,7 @@ class CommunicationConnection:
     # The Application Port
     _port = 12345
 
-    def __init__(self, platform='pc'):
+    def __init__(self):
         """
         Class constructor.
 
@@ -62,9 +62,9 @@ class CommunicationConnection:
         self._recvQueue = deque()                               # Initialize the recieve queue
 
         # Configure the logger
-        self._logger = logging.getLogger('RoboComConnection')
+        self._logger = logging.getLogger('CommunicationModule')
         self._logger.setLevel(LOG_LEVEL_PRINT)                  # Only {LOG_LEVEL_PRINT} level or above will be saved
-        fh = logging.FileHandler('roboComConnection.log', 'w')
+        fh = logging.FileHandler('CommunicationModule.log', 'w')
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         fh.setFormatter(formatter)
         fh.setLevel(LOG_LEVEL_SAVE)                             # Only {LOG_LEVEL_SAVE} level or above will be saved

@@ -43,29 +43,26 @@ class BasicMux8:
 
     def __init__(self, pinConfig):
         """Initialize mux with pins (A,B,C,DETECT)."""
-        try:
-            if "A" not in pinConfig or pinConfig["A"] == None:
-                raise ValueError('Pin A is invalid')
-            if "B" not in pinConfig or pinConfig["B"] == None:
-                raise ValueError('Pin B is invalid')
-            if "C" not in pinConfig or pinConfig["C"] == None:
-                raise ValueError('Pin C is invalid')
-            if "DETECT" not in pinConfig or pinConfig["DETECT"] == None:
-                raise ValueError('Pin DETECT is invalid')
+        if "A" not in pinConfig or pinConfig["A"] == None:
+            raise ValueError('Pin A is invalid')
+        if "B" not in pinConfig or pinConfig["B"] == None:
+            raise ValueError('Pin B is invalid')
+        if "C" not in pinConfig or pinConfig["C"] == None:
+            raise ValueError('Pin C is invalid')
+        if "DETECT" not in pinConfig or pinConfig["DETECT"] == None:
+            raise ValueError('Pin DETECT is invalid')
 
-            self._A = pinConfig["A"]                                    # Get pin A
-            self._B = pinConfig["B"]                                    # Get pin B
-            self._C = pinConfig["C"]                                    # Get pin C
-            self._DETECT = pinConfig["DETECT"]                          # Get pin DETECT
-            GPIO.setup(self._A, GPIO.OUT)                               # Init first select pin as output
-            GPIO.output(self._A, GPIO.LOW)                              # Init first select pin to low
-            GPIO.setup(self._B, GPIO.OUT)                               # Init second select pin as output
-            GPIO.output(self._B, GPIO.LOW)                              # Init second select pin to low
-            GPIO.setup(self._C, GPIO.OUT)                               # Init third select pin as output
-            GPIO.output(self._C, GPIO.LOW)                              # Init third select pin to low
-            GPIO.setup(self._DETECT, GPIO.IN, GPIO.PUD_DOWN)            # Init the detect pin and set it as input with pull down
-        except:
-            return
+        self._A = pinConfig["A"]                                    # Get pin A
+        self._B = pinConfig["B"]                                    # Get pin B
+        self._C = pinConfig["C"]                                    # Get pin C
+        self._DETECT = pinConfig["DETECT"]                          # Get pin DETECT
+        GPIO.setup(self._A, GPIO.OUT)                               # Init first select pin as output
+        GPIO.output(self._A, GPIO.LOW)                              # Init first select pin to low
+        GPIO.setup(self._B, GPIO.OUT)                               # Init second select pin as output
+        GPIO.output(self._B, GPIO.LOW)                              # Init second select pin to low
+        GPIO.setup(self._C, GPIO.OUT)                               # Init third select pin as output
+        GPIO.output(self._C, GPIO.LOW)                              # Init third select pin to low
+        GPIO.setup(self._DETECT, GPIO.IN, GPIO.PUD_DOWN)            # Init the detect pin and set it as input with pull down
 
     def cleanup(self):
         """Clean up driver when no longer needed."""
@@ -77,6 +74,7 @@ class BasicMux8:
         try:
             return GPIO.input(self._DETECT)
         except:
+            print('Exception in mux connected')
             return False
 
     def configureDevice(self):

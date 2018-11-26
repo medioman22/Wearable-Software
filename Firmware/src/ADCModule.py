@@ -62,7 +62,6 @@ class ADC:
         for pinConfig in PIN_MAP["ADC"]:                        # Loop all available pin configs
             pin = pinConfig["DATA"]                             # DATA pin
             muxSwitch = pinConfig["MUX"]                        # MUX switch pin
-
             if not self.detectMux(muxSwitch) or len(muxList) == 0: # Not a muxed pin or mux is not enabled
                 for lastDrv in lastConnectedDrivers:            # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
@@ -166,6 +165,7 @@ class ADC:
             drv.cleanup()
         self._connectedDrivers = connectedDrivers
         self.connectedDevices = connectedDevices
+        print(self._connectedDrivers)
 
     def getValues(self):
         """Get values of a device."""

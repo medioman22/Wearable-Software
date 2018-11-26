@@ -189,6 +189,7 @@ class <DRIVER>:
             # Fail with error if not possible
             #####################################################
         except:
+            print('Exception in <device> driver init')
             self._connected = False
 
         if (muxedChannel != None):
