@@ -34,13 +34,16 @@ DATA_LOG = False                                                # Flag whether d
 EVENT_LOG = False                                               # Flag whether events should be logged to a file
 
 PRINT_PERIODE = 0.2                                             # Print periode to display values of devices in terminal
-UPDATE_PERIODE = 0.1                                            # Update periode to refresh values
+UPDATE_PERIODE = 0.01                                           # Update periode to refresh values
 SCAN_PERIODE = 2                                                # Scan periode to refresh values
 
 scanForDevices = True                                           # Scanning enabled as default
 scanPin = Config.PIN_MAP['SCAN']                                # Scan pin
 exit = False                                                    # Exit flag to terminate all threads
 c = None                                                        # Connection object
+
+loop = None                                                     # Embedded loop file
+embeddedC = None                                                # Embedded loop connection object
 
 inputList = []                                                  # List of connected Input devices on the GPIO pins
 outputList = []                                                 # List of connected Output devices on the GPIO pins
@@ -308,7 +311,9 @@ def scanThread():
                                             'dutyFrequency': device['dutyFrequency']}))
 
         if c.getState() == 'Connected':
-            c.sendMessages(messagesSend)                        # Send the messages
+            c.sendMessages(messagesSend[:])                     # Send the messages
+        if embeddedC != None and embeddedC.getState() == 'Connected':
+            embeddedC._inMessages = embeddedC._inMessages + messagesSend[:] # Send the messages
         if EVENT_LOG:                                           # Check for event log
             eventLog(messagesSend)                              # Call event log function
 
@@ -328,7 +333,13 @@ def updateThread():
     while True:                                                 # Enter the infinite loop
         startTime = time.time()                                 # Save start time of update cycle
         messagesSend = []                                       # List of messages to send
-        messagesRecv = c.getMessages()                          # Get new messages
+        messagesRecv = []                                       # Get new messages
+        if c.getState() == 'Connected':
+            messagesRecv = messagesRecv + c.getMessages()       # Send the messages
+        if embeddedC != None and embeddedC.getState() == 'Connected':
+            messagesRecv = messagesRecv + embeddedC._outMessages # Send the messages
+            embeddedC._outMessages = []                         # Clear out messages
+
 
         inputUpdate()                                           # Update input devices
         outputUpdate()                                          # Update output devices
@@ -425,10 +436,12 @@ def updateThread():
             dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
 
         if len(dataMessage['data']) > 0:
-            messagesSend.append(json.dumps(dataMessage))         # Send data message
+            messagesSend.append(json.dumps(dataMessage))        # Send data message
 
         if c.getState() == 'Connected':
-            c.sendMessages(messagesSend)                        # Send the messages
+            c.sendMessages(messagesSend[:])                     # Send the messages
+        if embeddedC != None and embeddedC.getState() == 'Connected':
+            embeddedC._inMessages = embeddedC._inMessages + messagesSend[:] # Send the messages
         if DATA_LOG:                                            # Check for data log
             dataLog(messagesSend)                               # Call data log function
         endTime = time.time()                                   # Save end time of update cycle
@@ -542,7 +555,7 @@ def eventLog(messages):
 
 def main():
     """Infinite loop function, reads all devices and manages the connection."""
-    global connectionState, c, exit, LIVE_PRINT, DIAG_LOG, DATA_LOG, EVENT_LOG
+    global connectionState, c, exit, loop, embeddedC, LIVE_PRINT, DIAG_LOG, DATA_LOG, EVENT_LOG
 
     if ('l' in sys.argv):                                       # Check live plot parameter
         LIVE_PRINT = True
@@ -558,6 +571,15 @@ def main():
         EVENT_LOG = True
         with open("../Logs/event.log", "w"):                    # Clear log file
             pass                                                # Write message
+    if ('f' in sys.argv):                                       # Check event log parameter
+        from embedded.loop import Loop                          # Import the embedded loop file
+        from embedded.api import APIConnection                  # Import the embedded api connection
+        embeddedC = APIConnection()                             # Create the embedded api connection
+        embeddedC.connect()                                     # Connect the embedded api connection
+        loop = Loop(embeddedC)                                  # Initialize the Loop
+        loopThread = threading.Thread(target=loop.start, name="LoopThread") # Create loop thread
+        loopThread.daemon = True                                # Set loop thread as daemonic
+        loopThread.start()                                      # Start loop thread
 
                                                                 # Create the communication class. Using 'with' to ensure correct termination.
     c = CommunicationModule.CommunicationConnection()           # Create the communication
@@ -575,8 +597,11 @@ def main():
         if c.getState() is 'Connected':
         #     sendMessages = [json.dumps({'type': 'Ping','name':''})]
         #     c.sendMessages(sendMessages)
-            sendMessages = [json.dumps({'type': 'CycleDuration','name':'', 'values': {'update': updateDuration, 'scan': scanDuration}})]
-            c.sendMessages(sendMessages)
+            messagesSend = [json.dumps({'type': 'CycleDuration','name':'', 'values': {'update': updateDuration, 'scan': scanDuration}})]
+            c.sendMessages(messagesSend)                        # Send the messages
+        if embeddedC != None and embeddedC.getState() == 'Connected':
+            messagesSend = [json.dumps({'type': 'CycleDuration','name':'', 'values': {'update': updateDuration, 'scan': scanDuration}})]
+            embeddedC._inMessages = embeddedC._inMessages + messagesSend[:] # Send the messages
 
         if LIVE_PRINT:                                          # Check for live plotting
             livePrint()                                         # Call print function

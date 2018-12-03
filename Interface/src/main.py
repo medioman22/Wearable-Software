@@ -171,6 +171,16 @@ class MainWindow(QMainWindow):
         self._hideHideAct = hideHideAct
         boardMenu.addAction(hideHideAct)
 
+        # Ignore devices
+        ignoreAllAct = QAction('&Ignore All Devices', self)
+        ignoreAllAct.setStatusTip('Ignore All Devices')
+        ignoreAllAct.triggered.connect(self._onIgnoreAll)
+        ignoreNoneAct = QAction('&Ignore Noe Devices', self)
+        ignoreNoneAct.setStatusTip('Ignore Noe Devices')
+        ignoreNoneAct.triggered.connect(self._onIgnoreNone)
+        boardMenu.addAction(ignoreAllAct)
+        boardMenu.addAction(ignoreNoneAct)
+
         # Plot points selection menu
         plotPointsSelectionMenu = QMenu('Plot Points', self)
         for plotPoints, plotPointsLabel in enumerate(PLOT_POINTS_SET):
@@ -423,8 +433,10 @@ class MainWindow(QMainWindow):
             self._connection.disconnect()
             self._board.reset()
             self._onStreamStop()
+            self._connection = None
         try:
             self._logger.debug("Start connection attempt …")
+            self.loadConnection(self._board.connectionType())   # Create connection
             self._connection.connect()                          # Start connection attempts
             self._logger.debug("Connection successfully established") # Reaching next line means connection is established
             self._logger.info('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
@@ -520,12 +532,28 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def _onHideHidden(self):
         """Hide hidden devices."""
-        self._showHiddendDevices = False
+        self._showHiddenDevices = False
         self.updateDeviceList()
         self._logger.info("Hide hidden devices")
 
         self._showHideAct.setVisible(True)
         self._hideHideAct.setVisible(False)
+
+    @pyqtSlot()
+    def _onIgnoreAll(self):
+        """Ignore all devices."""
+        for device in self._board.deviceList():
+            device.setIgnore(True)
+        self.updateDeviceList()
+        self._logger.info("Ignore All devices")
+
+    @pyqtSlot()
+    def _onIgnoreNone(self):
+        """Ignore no devices."""
+        for device in self._board.deviceList():
+            device.setIgnore(False)
+        self.updateDeviceList()
+        self._logger.info("Ignore No devices")
 
     @pyqtSlot(QAction)
     def _setPlotPointsListener(self, action):
