@@ -172,7 +172,7 @@ To install the Adafruit_Python_GPIO, follow the instruction on the README.
 To launch the Firmware from the console, type:
 ```
 cd ~
-sudo python Wearable-Software/Firmware/src/Main.py [ldmep]
+sudo python Wearable-Software/Firmware/src/Main.py [ldmepf]
 ```
 
 *Options:*
@@ -184,6 +184,7 @@ sudo python Wearable-Software/Firmware/src/Main.py [ldmep]
 | m    | Log the data exchange of the Firmware on the TCP/IP socket |
 | e    | Log the event exchange of the Firmware on the TCP/IP socket |
 | p    | Log the system profiling for the Firmware (can be printed with `Wearable-Software/Firmware/src/_PrintStats.py`) |
+| f    | Use the local embedded loop file |
 
 *Those flags can be combined, but may have a negative impact on the performance*
 
@@ -195,7 +196,7 @@ In order to stop the Firmware you need to break manually with `Ctrl-C`.
 
 The Firmware can be configured to launch at start up with following command:
 ```
-sudo bash Wearable-Software/Firmware/Scripts/EnableAutoLaunch.sh [ldmep]
+sudo bash Wearable-Software/Firmware/Scripts/EnableAutoLaunch.sh [ldmepf]
 ```
 
 And to disable it:

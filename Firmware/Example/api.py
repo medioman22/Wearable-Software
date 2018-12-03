@@ -4,6 +4,8 @@
 """
 Wearable Software API module. The API provided by this class is asynchronous;
 i.e. there is a background thread doing all the work and calls are non-blocking.
+
+Import this module to your project to connect to the Firmware API via the TCP/IP channel.
 """
 
 import socket as sock                                           # Standard socket API. Communication is over TCP/IP
@@ -177,10 +179,6 @@ class APIConnection():
     def status(self):
         """Get the status."""
         return self.getState()
-
-    def type(self):
-        """Get the type."""
-        return self._type
 
     def ip(self):
         """Get the ip."""

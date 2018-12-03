@@ -6,6 +6,7 @@
 
 import socket                                                   # Socket package for UDP
 import logging                                                  # Logging package
+import time                                                     # Timing
 
 # Logging settings
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
@@ -75,5 +76,8 @@ if __name__ == '__main__':
     print("UDP target port:", UDP_PORT)
     print("Message:", TEST_MESSAGE)
 
-    broadcast = UDPBroadcast(UDP_IP, UDP_PORT)
-    broadcast.send(TEST_MESSAGE)
+    while True:
+        broadcast = UDPBroadcast(UDP_IP, UDP_PORT)
+        broadcast.send(TEST_MESSAGE)
+
+        time.sleep(0.2)

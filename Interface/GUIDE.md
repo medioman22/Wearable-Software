@@ -33,6 +33,8 @@ Menu
 |:--------------------|
 | Select Board        |
 | Show Hidden Devices |
+| Ignore All Devices  |
+| Ignore No Devices   |
 | Plot Points         |
 | Connect             |
 | Edit Connection …   |

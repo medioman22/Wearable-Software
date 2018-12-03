@@ -109,16 +109,24 @@ PIN_MAP = {
     ],
     "PWM": [
         {
-            "DATA": "P9_14"
+            "DATA": "P9_14",
+            "CHANGE_DUTY_FREQUENCY": False
         },
         {
-            "DATA": "P9_16"
+            "DATA": "P9_16",
+            "CHANGE_DUTY_FREQUENCY": False
         },
         {
-            "DATA": "P8_13"
+            "DATA": "P8_13",
+            "CHANGE_DUTY_FREQUENCY": False
         },
         {
-            "DATA": "P8_19"
+            "DATA": "P8_19",
+            "CHANGE_DUTY_FREQUENCY": False
+        },
+        {
+            "DATA": "P9_42",
+            "CHANGE_DUTY_FREQUENCY": True
         },
     ],
     "ADC": [
