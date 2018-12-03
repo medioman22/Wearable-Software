@@ -49,6 +49,7 @@ class PWM:
 
         for pinConfig in PIN_MAP["PWM"]:                        # Loop all available pin configs
             pin = pinConfig["DATA"]                             # DATA pin
+            changeDutyFrequency = pinConfig["CHANGE_DUTY_FREQUENCY"] # Change frequency avail
 
             for lastDrv in lastConnectedDrivers:                # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
@@ -73,7 +74,7 @@ class PWM:
                     break                                       # Break to next device
             else:                                               # Try new drivers if no existing was found
                 for DRIVER in DRIVERS:                          # Test all drivers
-                    drv = DRIVER(pin)                           # Test the different drivers
+                    drv = DRIVER(pin, changeDutyFrequency)      # Test the different drivers
                     if not drv.getDeviceConnected():            # Validate driver connected
                         continue                                # Try next driver until none is left
                     drv.configureDevice()                       # Configure device

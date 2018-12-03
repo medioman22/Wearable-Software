@@ -110,13 +110,19 @@ class PWMBasic:
     # Duration needed for an update cycle
     _cycleDuration = 0
 
+    # Duration needed for an update cycle
+    _changeDutyFrequency = None
 
-    def __init__(self, pin):
+
+    def __init__(self, pin, changeDutyFrequency):
         """Device supports a pin."""
         self._pin = pin                                         # Set pin
         self._values = []                                       # Set empty values array
         self._dutyFrequency = self._settings['dutyFrequencies'][-1] # Set default duty frequency
         self._flags = []                                        # Set default flag list
+        self._changeDutyFrequency = changeDutyFrequency         # Test if change duty frequency is available
+
+
 
     def cleanup(self):
         """Clean up driver when no longer needed."""
@@ -209,7 +215,12 @@ class PWMBasic:
         }
     def getSettings(self):
         """Return device settings."""
-        return self._settings
+        settings = self._settings
+        if not self._changeDutyFrequency:                       # Test if change duty frequency is available
+            settings = dict(settings)
+            settings.pop('dutyFrequencies', None)
+
+        return settings
 
     def getCycleDuration(self):
         """Return device cycle duration."""
