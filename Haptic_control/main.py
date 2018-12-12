@@ -38,15 +38,14 @@ initialDirectionList = [north, south, east, west, northwest, northeast, southwes
 initialIntensityList = [1,2,3,4,5]
 
 linear = 'linear'
-step = 'step'
+flat = 'flat'
 direction = 'direction'
 intensity = 'intensity'
 intensity_and_length = 'intensity_and_length'
 
 
-subject = 'Test'
+subject = 'Rokalito'
 signalTypeExp = linear
-
 
 my_device = haptic_device.haptic_device() 
 my_device.connection()
@@ -56,7 +55,7 @@ my_device.connection()
 
 
 
-def experiment(experimentType = intensity_and_length, signalType = signalTypeExp):
+def experiment(experimentType = direction, signalType = signalTypeExp):
     global nbOfSet
     print('First, you will train each ', experimentType, ' and a feedback will be given to you. Press space to activate each ', experimentType)
     random_set(nbOfSet = nbOfSetForTrain, exp = experimentType, feedbackRequest = True, save = True, signalType = signalTypeExp)
@@ -123,7 +122,7 @@ def random_set(nbOfSet = 1, exp = 'direction', feedbackRequest = True, save = Tr
     print('with the corresponding reaction time :')
     print(timeList)
     if save : 
-        with open(savingPath + subject + '_' + exp + '_feedback' + str(counter) +'.csv', 'w') as csvfile:
+        with open(savingPath + subject + '_' + exp + signalTypeExp+ '_feedback' + str(counter) +'.csv', 'w') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',', quotechar= '|', quoting=csv.QUOTE_MINIMAL)
             filewriter.writerow(['Given ' + exp, 'Real '+ exp, 'Reaction time'])
             for i in range(0,len(correctList)):

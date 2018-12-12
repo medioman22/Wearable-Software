@@ -183,21 +183,22 @@ class haptic_device():
             c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
         
     def motor_control_flat(self, length, duty, direction):
-        t1 = time.time()
+#        t1 = time.time()
         self.motor_activation(direction[0],duty)  
-        t2 = time.time()
-        time.sleep(length/3 - (t2-t1))
-        t1 = time.time()
+#        t2 = time.time()
+        time.sleep(length/3)# - (t2-t1))
+#        t1 = time.time()
         self.motor_activation(direction[0],0)
         self.motor_activation(direction[1],duty)
-        t2 = time.time()
-        time.sleep(length/3 - (t2-t1))
-        t1 = time.time()
+#        t2 = time.time()
+        time.sleep(length/3)# - (t2-t1))
+#        t1 = time.time()
         self.motor_activation(direction[1],0)
         self.motor_activation(direction[2],duty)
-        t2 = time.time()
-        time.sleep(length/3 - (t2-t1))
+#        t2 = time.time()
+        time.sleep(length/3)# - (t2-t1))
         self.motor_activation(direction[2],0)
+        
         for i in range(0,10):
             c.sendMessages([json.dumps({"dim": i, "value": 0.0, "type": "Set", "name": "PCA9685@I2C[1]"})])
                 
