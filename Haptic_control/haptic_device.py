@@ -12,11 +12,12 @@ import numpy as np
 #from pyqtgraph.Qt import QtGui
 #import pyqtgraph as pg
 import json
+import keyboard 
 import sys
-sys.path.append('C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Interface\\src\\')
+sys.path.append('C:\\Users\\hkohli\\Desktop\\Github\\Wearable-Software\\Interface\\src\\')
 
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection
-import keyboard 
+
 
 
 c = BeagleboneGreenWirelessConnection()

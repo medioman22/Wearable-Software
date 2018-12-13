@@ -13,7 +13,12 @@ from threading import Thread
 import random
 import csv
 import time
+import socket
+import struct
+#import math
 
+rollDistance = 0
+pitchDistance = 0
 savingPath = 'C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Haptic_control\\logs\\'
 north = np.array([8,5,2])
 south  = np.array([2,5,8])
@@ -42,20 +47,22 @@ flat = 'flat'
 direction = 'direction'
 intensity = 'intensity'
 intensity_and_length = 'intensity_and_length'
-
+guidance = 'guidance'
 
 subject = 'Rokalito'
 signalTypeExp = linear
+experimentTypeChosen = guidance
 
-my_device = haptic_device.haptic_device() 
-my_device.connection()
-
-
-
+#my_device = haptic_device.haptic_device() 
+#my_device.connection()
 
 
 
-def experiment(experimentType = direction, signalType = signalTypeExp):
+
+def guidanceExperiment():
+    distance_acquisition()
+
+def experiment(experimentType = experimentTypeChosen, signalType = signalTypeExp):
     global nbOfSet
     print('First, you will train each ', experimentType, ' and a feedback will be given to you. Press space to activate each ', experimentType)
     random_set(nbOfSet = nbOfSetForTrain, exp = experimentType, feedbackRequest = True, save = True, signalType = signalTypeExp)
@@ -133,10 +140,45 @@ def random_set(nbOfSet = 1, exp = 'direction', feedbackRequest = True, save = Tr
 #    for i in range(0, len(listOfIntensity)):
 #        my_device.impulsion_command(north, i/len(listOfIntensity)*length, signalType, listOfIntensity[i],  feedbackRequest = True)
         
-        
-        
-Thread(target = my_device.measure_time).start()        
-Thread(target = experiment).start()
+
+def distance_acquisition():
+    UDP_IP = "127.0.0.1"
+    UDP_PORT = 36000
+    
+    many_data = 1000000     # this is abuot 55 minutes of acquisition with 3 markers
+                            # (increase for longer acquisition time)
+    correction = [None] * many_data
+    
+    sock = socket.socket(socket.AF_INET, # Internet
+                         socket.SOCK_DGRAM) # UDP
+    sock.bind((UDP_IP, UDP_PORT))
+    
+    count = 0
+    
+    #while True:
+    data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
+    print("acquired marker data, counter = ", count)
+    
+    strs = 'ffffffffffffff'
+    
+    data_ump = struct.unpack(strs, data)
+    
+    corr = data_ump[-2:]
+    
+    rollDistance = corr[0]
+    pitchDistance = corr[1]
+#    angle = math.atan(pitchDistance/rollDistance)
+    correction[count] = np.array(corr)
+    
+    print(corr)
+    
+    count = count + 1       
+    
+#Thread(target = my_device.measure_time).start()        
+if(experimentTypeChosen == guidance):
+    guidanceExperiment()
+    #    Thread(target = guidanceExperiment).start()
+else :  Thread(target = experiment).start()
  
 
 

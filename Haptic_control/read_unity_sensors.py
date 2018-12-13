@@ -11,7 +11,7 @@ import socket
 import struct
 
 UDP_IP = "127.0.0.1"
-UDP_PORT = 35000
+UDP_PORT = 36000
 
 many_data = 1000000     # this is abuot 55 minutes of acquisition with 3 markers
                         # (increase for longer acquisition time)
