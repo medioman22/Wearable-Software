@@ -58,7 +58,7 @@ class UDPBroadcast():
 
     def send(self, string):
         """Send serialized message."""
-        self._socket.sendto(bytes(string, "utf-8"), ('<broadcast>', self._port)) # Send message via socket
+        self._socket.sendto(bytes(string, "utf-8"), (self._ip, self._port)) # Send message via socket
 
 
 
