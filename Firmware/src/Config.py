@@ -29,6 +29,8 @@ ADDRESSES = []
 ADDRESSES += [0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77]
 # I2C MUX PCA9685
 ADDRESSES += [0x40]
+# I2C MUX ADS1015
+ADDRESSES += [0x48, 0x49]
 # I2C MUX BNO055
 ADDRESSES += [0x28, 0x29]
 ################################################################################
@@ -160,28 +162,20 @@ PIN_MAP = {
         }
     ],
     "I2C": [
-        # {
-        #     "ADDRESS": 0x40,
-        #     "BUSNUM": 1
-        # },
         {
             "ADDRESS": 0x40,
             "BUSNUM": 2
         },
-        # {
-        #     "ADDRESS": 0x28,
-        #     "BUSNUM": 1
-        # },
         {
             "ADDRESS": 0x28,
             "BUSNUM": 2
         },
-        # {
-        #     "ADDRESS": 0x29,
-        #     "BUSNUM": 1
-        # },
         {
             "ADDRESS": 0x29,
+            "BUSNUM": 2
+        },
+        {
+            "ADDRESS": 0x48,
             "BUSNUM": 2
         },
     ]

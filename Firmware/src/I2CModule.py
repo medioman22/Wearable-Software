@@ -10,6 +10,7 @@ from MuxModule import GetMux                                    # SoftWEAR MUX m
 
 from drivers.I2C_BNO055 import BNO055                           # Driver module for the BNO055 device
 from drivers.I2C_PCA9685 import PCA9685                         # Driver module for the PCA9685 device
+from drivers.I2C_ADS1015 import ADS1015                         # Driver module for the ADS1015 device
 #import I2C_MPU6050                                             # Driver for the MPU6050 device
 
 
@@ -22,7 +23,7 @@ https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/ove
 MuxModule = GetMux()
 
 # List of all possible drivers
-DRIVERS = [BNO055, PCA9685]
+DRIVERS = [BNO055, PCA9685, ADS1015]
 
 class I2C:
     """Implements I2C functionality."""
