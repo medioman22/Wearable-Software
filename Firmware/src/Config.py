@@ -27,11 +27,11 @@ LAYOUT = "DevLayout"
 ADDRESSES = []
 # I2C MUX TCA9548A
 ADDRESSES += [0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77]
-# I2C MUX PCA9685
+# I2C PCA9685
 ADDRESSES += [0x40]
-# I2C MUX ADS1015
+# I2C ADS1015
 ADDRESSES += [0x48, 0x49]
-# I2C MUX BNO055
+# I2C BNO055
 ADDRESSES += [0x28, 0x29]
 ################################################################################
 

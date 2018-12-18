@@ -1,7 +1,7 @@
 clc; clear all; close all;
 
 % Plot file
-file = "Mocked Board Multi Plot.csv";
+file = "Beaglebone Green Wireless Multi Plot.csv";
 data = table2cell(readtable(file, 'Format','%s%s%f%f'));
 fprintf("Read File: '%s'\n", file);
 
