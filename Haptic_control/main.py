@@ -15,7 +15,7 @@ import csv
 import time
 import socket
 import struct
-#import math
+import math
 
 rollDistance = 0
 pitchDistance = 0
@@ -32,12 +32,12 @@ southwest = np.array([10,5,7])
 dictOfCorresp = {north[0] : 'N', south[0] : 'S', east[0] : 'E', west[0] : 'W', northeast[0] : 'NE', northwest[0] : 'NW', southeast[0] : 'SE', southwest[0] : 'SW'}
 
 counter = 0
-nbOfSetForTrain = 2
-nbOfSetForTest = 4
+nbOfSetForTrain = 2 
+nbOfSetForTest = 4 
 maxIntensity = 99
-lowestIntensity = 20
+lowestIntensity = 40
 
-maxLength = 1.2
+moyLength = 1. 
 
 initialDirectionList = [north, south, east, west, northwest, northeast, southwest, southeast]
 initialIntensityList = [1,2,3,4,5]
@@ -49,18 +49,38 @@ intensity = 'intensity'
 intensity_and_length = 'intensity_and_length'
 guidance = 'guidance'
 
-subject = 'Rokalito'
+subject = 'test'
 signalTypeExp = linear
+
 experimentTypeChosen = guidance
 
-#my_device = haptic_device.haptic_device() 
-#my_device.connection()
+#experimentTypeChosen = direction
+
+my_device = haptic_device.haptic_device() 
+my_device.connection()
 
 
-
+#my_device.impulsion_command_guidance(direction = east,length = 2, duty = 0)
 
 def guidanceExperiment():
-    distance_acquisition()
+    global moyLength
+    while True :
+        rawAngle, rawRadius = distances_acquisition()
+        if rawAngle != None : 
+            rawAngle = math.pi/2
+            rawRadius = 101
+            angle = quarter_attribution(rawAngle)
+            print(angle)
+            radius = intensity_attribution(rawRadius)
+            motorIntens = (radius)*(maxIntensity-lowestIntensity)/5 + lowestIntensity
+            print(motorIntens)
+            signalLength = moyLength - (radius-3)/2*moyLength*0.4
+            print(signalLength)
+    #        my_device.impulsion_command_guidance(direction = east,length = 2, duty = 99)
+            my_device.impulsion_command_guidance(direction = angle,length = signalLength, duty = motorIntens)
+            time.sleep(0.5)
+        else : print('Waiting for datas')
+
 
 def experiment(experimentType = experimentTypeChosen, signalType = signalTypeExp):
     global nbOfSet
@@ -72,7 +92,7 @@ def experiment(experimentType = experimentTypeChosen, signalType = signalTypeExp
 
 
 def random_set(nbOfSet = 1, exp = 'direction', feedbackRequest = True, save = True, signalType = 'linear'):
-    global initialDirectionList, initialIntensityList, maxLength, maxIntensity, dictOfCorresp, subject, savingPath, lowestIntensity, counter
+    global initialDirectionList, initialIntensityList, moyLength, maxIntensity, dictOfCorresp, subject, savingPath, lowestIntensity, counter
     valueList = []
     correctList = []
     givenList = []
@@ -97,24 +117,24 @@ def random_set(nbOfSet = 1, exp = 'direction', feedbackRequest = True, save = Tr
     
     for i in range(0, len(valueList)):
         if exp == 'direction' :
-            valueGiven, reactTime = my_device.impulsion_command(direction = valueList[i], length = maxLength, 
+            valueGiven, reactTime = my_device.impulsion_command(direction = valueList[i], length = moyLength, 
                                         signalType = signalTypeExp, duty = maxIntensity, all_motors = False, realValue = correctList[i], 
                                         experiment = exp, feedbackAsked = True, feedbackReturned = feedbackRequest)
         elif exp == 'intensity' :
-           my_device.impulsion_command(direction = north, length = maxLength, 
+           my_device.impulsion_command(direction = east, length = moyLength, 
                                         signalType = signalTypeExp, duty = 60., all_motors = False, realValue = correctList[i], 
                                         experiment = exp, feedbackAsked = False, feedbackReturned = False)
            time.sleep(1)
-           valueGiven, reactTime = my_device.impulsion_command(direction = north, length = maxLength, 
+           valueGiven, reactTime = my_device.impulsion_command(direction = east, length = moyLength, 
                                         signalType = signalTypeExp, duty = valueList[i], all_motors = False, realValue = correctList[i], 
                                         experiment = exp, feedbackAsked = True, feedbackReturned = feedbackRequest)
         elif exp == 'intensity_and_length' :
-           my_device.impulsion_command(direction = north, length = maxLength, 
+           my_device.impulsion_command(direction = east, length = moyLength, 
                                         signalType = signalTypeExp, duty = 60., all_motors = False, realValue = correctList[i], 
                                         experiment = exp, feedbackAsked = False, feedbackReturned = False)
-           signalLength = maxLength - (correctList[i]-3)/2*maxLength*0.3
+           signalLength = moyLength - (correctList[i]-3)/2*moyLength*0.4
            time.sleep(1)
-           valueGiven, reactTime = my_device.impulsion_command(direction = north, length = signalLength, 
+           valueGiven, reactTime = my_device.impulsion_command(direction = east, length = signalLength, 
                                         signalType = signalTypeExp, duty = valueList[i], all_motors = False, realValue = correctList[i], 
                                         experiment = exp, feedbackAsked = True, feedbackReturned = feedbackRequest)
         else : print('wrong experiment type')
@@ -129,56 +149,72 @@ def random_set(nbOfSet = 1, exp = 'direction', feedbackRequest = True, save = Tr
     print('with the corresponding reaction time :')
     print(timeList)
     if save : 
-        with open(savingPath + subject + '_' + exp + signalTypeExp+ '_feedback' + str(counter) +'.csv', 'w') as csvfile:
+        with open(savingPath + subject + '_' + exp + signalTypeExp + '_feedback' + str(counter) +'.csv', 'w') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',', quotechar= '|', quoting=csv.QUOTE_MINIMAL)
             filewriter.writerow(['Given ' + exp, 'Real '+ exp, 'Reaction time'])
             for i in range(0,len(correctList)):
                 filewriter.writerow([givenList[i], correctList[i], timeList[i]])
-        counter = counter+1
+        counter = counter + 1
     
-#def random_intensity_changing_length(listOfIntensity = intensityList, signalType = 'flat', length = maxLength) :
-#    for i in range(0, len(listOfIntensity)):
-#        my_device.impulsion_command(north, i/len(listOfIntensity)*length, signalType, listOfIntensity[i],  feedbackRequest = True)
-        
+def quarter_attribution(angle):
+    PI_8 = math.pi/8
+    if angle < 3*PI_8 and angle > PI_8:
+        direction = northeast
+    if angle < 5*PI_8 and angle > 3*PI_8:
+        direction = north
+    if angle < 7*PI_8 and angle > 5*PI_8:
+        direction = northwest
+    if angle < 9*PI_8 and angle > 7*PI_8:
+        direction = west
+    if angle < 11*PI_8 and angle > 9*PI_8:
+        direction = southwest
+    if angle < 13*PI_8 and angle > 11*PI_8:
+        direction = south
+    if angle < 15*PI_8 and angle > 13*PI_8:
+        direction = southeast
+    if angle < PI_8 and angle > 15*PI_8:
+        direction = east       
+    return direction
 
-def distance_acquisition():
+def intensity_attribution(radius):
+    IntensityThreshold = 100
+    if radius > IntensityThreshold:
+        motorIntens = 5
+    elif radius >3*IntensityThreshold/4 :
+        motorIntens = 4
+    elif radius >2*IntensityThreshold/4 :
+        motorIntens = 3
+    elif radius >1*IntensityThreshold/4 :
+        motorIntens = 2
+    else :
+        motorIntens = 1
+    return motorIntens
+
+def distances_acquisition():
     UDP_IP = "127.0.0.1"
-    UDP_PORT = 36000
-    
-    many_data = 1000000     # this is abuot 55 minutes of acquisition with 3 markers
-                            # (increase for longer acquisition time)
-    correction = [None] * many_data
-    
+    UDP_PORT = 36000    
     sock = socket.socket(socket.AF_INET, # Internet
                          socket.SOCK_DGRAM) # UDP
     sock.bind((UDP_IP, UDP_PORT))
-    
-    count = 0
-    
-    #while True:
     data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-    print("acquired marker data, counter = ", count)
-    
-    strs = 'ffffffffffffff'
-    
+    strs = 'ffffffffffffff'    
     data_ump = struct.unpack(strs, data)
     
     corr = data_ump[-2:]
     
     rollDistance = corr[0]
     pitchDistance = corr[1]
-#    angle = math.atan(pitchDistance/rollDistance)
-    correction[count] = np.array(corr)
     
-    print(corr)
-    
-    count = count + 1       
-    
-#Thread(target = my_device.measure_time).start()        
+    angle = math.atan(pitchDistance/rollDistance)
+    radius = math.sqrt(math.pow(rollDistance,2) + math.pow(pitchDistance,2))
+
+    return angle, radius       
+            
 if(experimentTypeChosen == guidance):
     guidanceExperiment()
-    #    Thread(target = guidanceExperiment).start()
-else :  Thread(target = experiment).start()
+else :  
+    Thread(target = experiment).start()
+    Thread(target = my_device.measure_time).start()
  
 
 

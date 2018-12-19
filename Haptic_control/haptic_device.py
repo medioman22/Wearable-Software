@@ -14,8 +14,8 @@ import numpy as np
 import json
 import keyboard 
 import sys
-sys.path.append('C:\\Users\\hkohli\\Desktop\\Github\\Wearable-Software\\Interface\\src\\')
-
+#sys.path.append('C:\\Users\\hkohli\\Desktop\\Github\\Wearable-Software\\Interface\\src\\')
+sys.path.append('C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Interface\\src\\')
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection
 
 
@@ -74,7 +74,9 @@ class haptic_device():
         c.connect()
         print('Status: {}'.format(c.getState()))
         c.sendMessages([json.dumps({"type": "Settings", "name": I2C_interface, "dutyFrequency": '50 Hz'})])
-        c.sendMessages([json.dumps({"type": "Settings", "name": I2C_interface, "dutyFrequency": '50 Hz'})])
+        time.sleep(3)
+        c.sendMessages([json.dumps({"type": "Settings", "name": I2C_interface, "scan": False})])
+        
         
     
     def motor_activation(self, num, duty):
@@ -288,4 +290,9 @@ class haptic_device():
                 print('Correct intensity was :', realValue)
             return intensityGiven, reactionTime
 
+
+    def impulsion_command_guidance(self, direction,length = 1, duty = 99):
+        self.motor_control_linear(length,duty,direction)
+        
+    
     
