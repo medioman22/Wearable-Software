@@ -66,9 +66,9 @@ def guidanceExperiment():
     global moyLength
     while True :
         rawAngle, rawRadius = distances_acquisition()
-        if rawAngle != None : 
-            rawAngle = math.pi/2
-            rawRadius = 101
+        if rawAngle != 0 and rawRadius != 0 : 
+            print('angle in radius', rawAngle)
+            print('radius :', rawRadius)
             angle = quarter_attribution(rawAngle)
             print(angle)
             radius = intensity_attribution(rawRadius)
@@ -79,7 +79,7 @@ def guidanceExperiment():
     #        my_device.impulsion_command_guidance(direction = east,length = 2, duty = 99)
             my_device.impulsion_command_guidance(direction = angle,length = signalLength, duty = motorIntens)
             time.sleep(0.5)
-        else : print('Waiting for datas')
+#        else : print('Waiting for datas')
 
 
 def experiment(experimentType = experimentTypeChosen, signalType = signalTypeExp):
@@ -160,24 +160,24 @@ def quarter_attribution(angle):
     PI_8 = math.pi/8
     if angle < 3*PI_8 and angle > PI_8:
         direction = northeast
-    if angle < 5*PI_8 and angle > 3*PI_8:
+    elif angle < 5*PI_8 and angle > 3*PI_8:
         direction = north
-    if angle < 7*PI_8 and angle > 5*PI_8:
+    elif angle < 7*PI_8 and angle > 5*PI_8:
         direction = northwest
-    if angle < 9*PI_8 and angle > 7*PI_8:
-        direction = west
-    if angle < 11*PI_8 and angle > 9*PI_8:
+    elif angle < 9*PI_8 and angle > 7*PI_8:
+        direction = southeast        
+    elif angle < -5*PI_8 and angle > -7*PI_8:
         direction = southwest
-    if angle < 13*PI_8 and angle > 11*PI_8:
+    elif angle < -3*PI_8 and angle > -5*PI_8:
         direction = south
-    if angle < 15*PI_8 and angle > 13*PI_8:
-        direction = southeast
-    if angle < PI_8 and angle > 15*PI_8:
-        direction = east       
+    elif angle < PI_8 and angle > -PI_8:
+        direction = east
+    else:
+        direction = west       
     return direction
 
 def intensity_attribution(radius):
-    IntensityThreshold = 100
+    IntensityThreshold = 20
     if radius > IntensityThreshold:
         motorIntens = 5
     elif radius >3*IntensityThreshold/4 :
@@ -204,10 +204,12 @@ def distances_acquisition():
     
     rollDistance = corr[0]
     pitchDistance = corr[1]
-    
-    angle = math.atan(pitchDistance/rollDistance)
-    radius = math.sqrt(math.pow(rollDistance,2) + math.pow(pitchDistance,2))
-
+    if rollDistance != 0 :
+        angle = math.atan(pitchDistance/rollDistance)
+        radius = math.sqrt(math.pow(rollDistance,2) + math.pow(pitchDistance,2))
+    else :
+        angle = 0
+        radius = 0
     return angle, radius       
             
 if(experimentTypeChosen == guidance):
