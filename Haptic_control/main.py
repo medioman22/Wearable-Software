@@ -34,7 +34,7 @@ nbOfSetForTest = 4
 maxIntensity = 99
 lowestIntensity = 40
 
-moyLength = 1. 
+moyLength = .8
 
 initialDirectionList = [north, south, east, west, northwest, northeast, southwest, southeast]
 initialIntensityList = [1,2,3,4,5]
@@ -61,13 +61,13 @@ my_device.connection()
 def guidanceExperiment():
     global moyLength
     while True :
-#        rawAngle, rawRadius, pitchDistance, rollDistance = distances_acquisition()
-        rawAngle = -0.7
-        rawRadius = 32
-        rollDistance = 12
-        pitchDistance = -14
-        if rollDistance == 0:
-            rollDistance = 0.0001
+        rawAngle, rawRadius, pitchDistance, rollDistance = distances_acquisition()
+#        rawAngle = -0.7
+#        rawRadius = 32
+#        rollDistance = 12
+#        pitchDistance = -14
+#        if rollDistance == 0:
+#            rollDistance = 0.0001
         
         if rawRadius != 0 : 
             print('angle in radius', rawAngle)
@@ -160,37 +160,37 @@ def quarter_attribution(angle, pitchDistance, rollDistance):
     PI_8 = math.pi/8
     if angle > PI_8 and angle < 3*PI_8:
         if pitchDistance > 0 :
-            direction = southwest
+            direction = northeast
             print('bottom left')
         else:
-            direction = northeast
+            direction = southwest
             print('up right')
     elif angle < -PI_8 and angle > -3*PI_8:
         if pitchDistance > 0 :
-            direction = southeast
+            direction = northwest
             print('bottom right')
         else :
-            direction = northwest
+            direction = southeast
             print('up left')
     elif angle < PI_8 and angle > -PI_8:
         if rollDistance > 0 :
-            direction = west
+            direction = east
             print('left')
         else:
-            direction = east
+            direction = west
             print('right')
     else:
         if pitchDistance>0:
-            direction = south
+            direction = north
             print('down')
         else:
-            direction = north
+            direction = south
             print('up')
             
     return direction
 
 def intensity_attribution(radius):
-    IntensityThreshold = 20
+    IntensityThreshold = 10
     if radius > IntensityThreshold:
         motorIntens = 5
     elif radius >3*IntensityThreshold/4 :
@@ -227,7 +227,8 @@ def distances_acquisition():
         angle = 0
         radius = 0
     return angle, radius, pitchDistance, rollDistance       
-            
+           
+ 
 if(experimentTypeChosen == guidance):
     guidanceExperiment()
 else :  
