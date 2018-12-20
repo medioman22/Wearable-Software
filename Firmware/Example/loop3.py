@@ -11,6 +11,9 @@ import json                                                     # Serializing cl
 
 from api import APIConnection                                   # Import API
 
+LOWER_THRESHOLD = 0.1
+UPPER_THRESHOLD = 0.4
+
 class Loop():
     """API connection."""
 
@@ -41,25 +44,19 @@ class Loop():
                 if message['type'] == 'D':
                     for el in message['data']:                      # Loop data
                         ###################################
-                        # Basic Feedback: INPUT ~> OUTPUT #
-                        if el['name'] == 'INPUT_BASIC@Input[P8_27]': # Check for device
-                            if len(el['values']) > 0:               # Check if data is avail
-                                messagesOut.append(json.dumps({'type': 'Set', 'name': 'OUTPUT_BASIC@Output[P9_23]', 'dim': 0, 'value': el['values'][-1][1][0]}))
+                        if el['name'] == 'BNO055@I2C[40,2]':
+                            if len(el['values']) > 0:
+                                v = round(min(10, abs(el['values'][-1][1][2])) / 10 * 8 + 18); # Map to servo values
+                                print(v)
+                                messagesOut.append(json.dumps({'type': 'Settings', 'name': 'PCA9685@I2C[64,2]', 'dutyFrequency': '100 Hz'}))
+                                messagesOut.append(json.dumps({'type': 'Set', 'name': 'PCA9685@I2C[64,2]', 'dim': 0, 'value': v}))
                         ###################################
-
-                        ###################################
-                        # Basic Feedback: ADC ~> PWM      #
-                        if el['name'] == 'ADC_BASIC@ADC[P9_39]':    # Check for device
-                            if len(el['values']) > 0:               # Check if data is avail
-                                v = el['values'][-1][1][0] * 100    # [0,1] -> [0,100]
-                                messagesOut.append(json.dumps({'type': 'Set', 'name': 'PWM_BASIC@PWM[P9_16]', 'dim': 0, 'value': v}))
-                        ###################################
-
+                break;
             # Send the messages
             self._api.sendMessages(messagesOut)
 
-            # Wait for 0.01s
-            time.sleep(0.01)
+            # Wait for 0.1s
+            time.sleep(0.1)
 
 
 

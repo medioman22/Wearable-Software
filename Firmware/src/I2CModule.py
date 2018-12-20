@@ -107,7 +107,7 @@ class I2C:
                         muxRange = MuxModule.about(muxName)['range'] # Get mux range
                         for muxedChannel in range(muxRange):    # Loop all muxed channels
                             for lastDrv in lastConnectedDrivers: # Test last connected drivers
-                                if not lastDrv.comparePinConfig(pinConfig, muxedChannel): # Wrong driver
+                                if not lastDrv.comparePinConfig(pinConfig, muxName, muxedChannel): # Wrong driver
                                     pass
                                                                 # Check if drv already loaded and still connected
                                 elif not lastDrv.getDeviceConnected(): # Device is disconnected
