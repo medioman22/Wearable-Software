@@ -1,8 +1,5 @@
-        #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Tue Oct 16 10:08:06 2018
-
 @author: matteomacchini
 """
 
@@ -14,8 +11,8 @@ import numpy as np
 import json
 import keyboard 
 import sys
-sys.path.append('C:\\Users\\hkohli\\Desktop\\Github\\Wearable-Software\\Interface\\src\\')
-#sys.path.append('C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Interface\\src\\')
+#sys.path.append('C:\\Users\\hkohli\\Desktop\\Github\\Wearable-Software\\Interface\\src\\')
+sys.path.append('C:\\Users\\Hugo\\Documents\\GitHub\\Wearable-Software\\Interface\\src\\')
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection
 
 
@@ -293,6 +290,3 @@ class haptic_device():
 
     def impulsion_command_guidance(self, direction,length = 1, duty = 99):
         self.motor_control_linear(length,duty,direction)
-        
-    
-    
