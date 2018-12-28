@@ -96,8 +96,14 @@ Look at the example provided in `/Firmware/Example` which uses the **API** to di
 
 ### Embedded Loop
 
-In folder `/src/embedded` is a file `loop.py`, which implements onboard functionality that can be replaced or enhanced. It uses the same api but with a lot less delay due to no need of message transmission between the Firmware and the PC.
+In folder `/src/embedded` is a file `loop.py`, which implements onboard functionality that can be replaced or enhanced. It uses the same api but with a lot less delay due to no need of message transmission between the Firmware and the PC. One can use the script `LoadEmbeddedScript.sh` to copy a `loop.py` file from the PC to the BBGW.
 
-There is also an example in `/Examples` folder using the `api.py` file. This example file can be used as a base for custom implementations and directly copied into the `embedded` folder.
+```
+bash ./LoadEmbeddedScript.sh "path/to/file" 192.168.7.2
+```
+
+The IP is same as used for the login via ssh.
+
+There is also an example in `/Examples` folder using the `api.py` file. This example file can be used as a base for custom implementations and directly copied into the `embedded` folder with the load script.
 
 The file *must* expose a class with a `start` method that takes the api connector object as parameter.

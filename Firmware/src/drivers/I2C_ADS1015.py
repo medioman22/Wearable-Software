@@ -2,36 +2,22 @@
 # Author: Cyrill Lippuner
 # Date: October 2018
 """
-Driver file <Insert name/code if device>
-<Insert description of device>
+Driver file for the ADS_1015 Analog reader. Communicates
+with the device via I2C and implements the basic functions for integrating into
+the SoftWEAR package.
 """
 import time                                                     # Imported for delay reasons
-#################################################################
-# TODO:
-# Insert functionality directly into this template file
-# OR
-# Use a official driver of existing library, import it and map functionality
-# import drivers.<_DRIVER> as <TEMPLATE_DRIVER>
-#################################################################import threading                                                # Threading class for the threads
-
+import drivers._ADS1X15 as ADS1015_DRIVER                       # Import official driver
+import threading                                                # Threading class for the threads
 from MuxModule import GetMux                                    # SoftWEAR MUX module.
 
 # Mux Module to switch channels
 MuxModule = GetMux()
 
-# Unique identifier of the sensor
-#################################################################
-# TODO:
-# In case the device supports an identification possibility
-# IDENTIFIER = <TEMPLATE_DRIVER>.<DRIVER_ID>
-#################################################################
 
 # Addresses
-#################################################################
-# TODO: Define the addresses
-# DRIVER_ADDRESS = [0x28, 0x29]
-# DRIVER_BUSNUM  = [1, 2]
-#################################################################
+DRIVER_ADDRESS = [0x48, 0x49]
+DRIVER_BUSNUM  = [1, 2]
 
 
 
@@ -47,26 +33,26 @@ MuxModule = GetMux()
 # TODO:
 # Fill in the definition fields <...> of the driver
 #################################################################
-class <DRIVER>:
-    """Driver for <Device name>."""
+class ADS1015:
+    """Driver for ADS1015."""
 
     # Name of the device
-    _name = '<Device name>'
+    _name = 'ADS1015'
 
     # Info of the device
-    _info = '<Device description>'
+    _info = 'The ADS1013, ADS1014, and ADS1015 are precision analog-to-digital converters (ADCs) with 12 bits of resolution offered in an ultra-small, leadless QFN-10 package or an MSOP-10 package. The ADS1013/4/5 are designed with precision, power, and ease of implementation in mind. The ADS1013/4/5 feature an onboard reference and oscillator. Data are transferred via an I2C-compatible serial interface; four I2C slave addresses can be selected. The ADS1013/4/5 operate from a single power supply ranging from 2.0V to 5.5V.'
 
     # Direction of the driver (in/out)
-    _dir = '<Direction of data flow (in|out)>'
+    _dir = 'in'
 
     # Dimension of the driver (0-#)
-    _dim = <Dimension of the data vector (+int)>
+    _dim = 4
 
     # Dimension map of the driver (0-#)
-    _dimMap = <List of labels for each dimension>
+    _dimMap = ['A1', 'A2', 'A3', 'A4']
 
     # Dimension unit of the driver (0-#)
-    _dimUnit = <List of units for each dimension>
+    _dimUnit = ['', '', '', '']
 
     # Muxed channel
     _muxedChannel = None
@@ -82,39 +68,28 @@ class <DRIVER>:
 
     # Settings of the driver
     _settings = {
-        #########################################################
-        # Data refresh frequency
-        # 'frequencies': [
-        #     '1 Hz',
-        #     '2 Hz',
-        #     '3 Hz',
-        #     '4 Hz',
-        #     '5 Hz',
-        #     '6 Hz',
-        #     '10 Hz',
-        #     '20 Hz',
-        #     '30 Hz',
-        #     '40 Hz',
-        #     '50 Hz',
-        #     '60 Hz',
-        #     '100 Hz'
-        # ],
-        # Operation mode for driver
-        # 'modes': [
-        #     '<Mode 1>',
-        #     '<Mode 2>',
-        #     '<Mode 3>'
-        # ],
-        # Flags for driver
-        # 'flags': ['<Driver flag>']
-        #########################################################
+        'frequencies': [
+            '1 Hz',
+            '2 Hz',
+            '3 Hz',
+            '4 Hz',
+            '5 Hz',
+            '6 Hz',
+            '10 Hz',
+            '20 Hz',
+            '30 Hz',
+            '40 Hz',
+            '50 Hz',
+            '60 Hz',
+            '100 Hz'
+        ]
     }
 
     # Data type of values
-    _dataType = '<Type of values (Range|On/Off)>'
+    _dataType = 'Range'
 
     # Data range for values
-    _dataRange = <List of lower and upper bounds for the values ([]|[min,max])>
+    _dataRange = []
 
     # Value to set
     _currentValue = 0
@@ -132,10 +107,10 @@ class <DRIVER>:
     _flags = None
 
     # Frequency for the thread
-    _frequency = '<default frequency>'
+    _frequency = '10 Hz'
 
     # Period for the thread
-    _period = <default period "1/<default frquency>">
+    _period = 0.1
 
     # Thread active flag
     _threadActive = False
@@ -157,9 +132,9 @@ class <DRIVER>:
 
     def __init__(self, pinConfig, muxedChannel = None, muxName = None):
         """Init the device."""
+        if (muxedChannel != None):
+            MuxModule.activate(muxName, muxedChannel)           # Activate mux channel
         try:
-            if (muxedChannel != None):
-                MuxModule.activate(muxName, muxedChannel)           # Activate mux channel
 
             if "ADDRESS" in pinConfig and pinConfig["ADDRESS"] == None or pinConfig["ADDRESS"] not in DRIVER_ADDRESS:
                 raise ValueError('address is invalid')
@@ -173,25 +148,14 @@ class <DRIVER>:
 
             self._values = []                                       # Set empty values array
 
-            #########################################################
-            # Depending on which types of settings are enabled uncomment lines
-            # self._mode = self._settings['modes'][<default mode>]  # Set default mode
-            # self._frequency = self._settings['frquency'][<default frequency>] # Set default frequency
-            # self._dutyFrequency = self._settings['modes'][<default dutyFrequency>] # Set default dutyFrequency
-            # self._flags = <List of default flags>                 # Set default flag list
-            #########################################################
+            self._frequency = self._settings['frequencies'][6]      # Set default frequency
 
-            self._drv = <TEMPLATE_DRIVER>.<DRIVER>(address=self._address,busnum=self._busnum) # Create the driver object
+            self._drv = ADS1015_DRIVER.ADS1015(address=self._address,busnum=self._busnum) # Create the driver object
 
-            #####################################################
-            # TODO:
-            # Try to connect to the driver
-            # Fail with error if not possible
-            #####################################################
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                       # Deactivate mux
         except:
-            print('Exception in <device> driver init')
+            print('Exception in ADS1015 driver init')
             self._connected = False
 
             if (muxedChannel != None):
@@ -213,11 +177,7 @@ class <DRIVER>:
         try:
             if (self._muxedChannel != None):
                 MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
-            #####################################################
-            # TODO:
-            # Try to verify identity of connected device
-            # Fail with error if not confirmation
-            #####################################################
+            self._connected = self._drv.read_adc(0) != None     # Device is connected and has no error
             if (self._muxedChannel != None):
                 MuxModule.deactivate(self._muxName)             # Deactivate mux
         except:
@@ -232,11 +192,7 @@ class <DRIVER>:
         try:
             if (self._muxedChannel != None):
                 MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
-            #####################################################
-            # TODO:
-            # Configure device for start up
-            # Fail with error if not confirmation
-            #####################################################
+            # No special config
             if (self._muxedChannel != None):
                 MuxModule.deactivate(self._muxName)             # Deactivate mux
         except:                                                 # Device disconnected in the meantime
@@ -259,12 +215,8 @@ class <DRIVER>:
                 if (self._muxedChannel != None):
                     MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
 
-                #####################################################
-                # TODO:
-                # Implement data read/write function and store the value in self._currentValue
-                # You can use the flag self._update to check if new data is available
-                # Consider using try: .. except: ..
-                #####################################################
+                                                                # Read all values
+                self._currentValue = [self._drv.read_adc(0), self._drv.read_adc(1), self._drv.read_adc(2), self._drv.read_adc(3)]
 
                 self._values.append([time.time(), self._currentValue]) # Save timestamp and value
 
@@ -280,6 +232,7 @@ class <DRIVER>:
                 if (self._muxedChannel != None):
                     MuxModule.deactivate(self._muxName)         # Deactivate mux
                 self.LOCK.release()                             # Release driver
+
 
 
             if (deltaT < self._period):
@@ -354,54 +307,26 @@ class <DRIVER>:
 
     def setMode(self, mode):
         """Set device mode."""
-        ############################################################
-        # Can be ignored or deleted if mode is not supported by the driver
-        ############################################################
-        # if (mode in self._settings['modes']):
-        #     # Do something based on the mode or throw an error
-        # else:
-        #     raise ValueError('mode {} is not allowed'.format(mode))
-        ############################################################
+        raise ValueError('set mode is not implemented')
 
     def getFlags(self):
         """Return device mode."""
-        ############################################################
-        # Can be ignored or deleted if flags is not supported by the driver
-        ############################################################
-        return self._flags[:]
+        return []
 
     def getFlag(self, flag):
         """Return device mode."""
-        ############################################################
-        # Can be ignored or deleted if flags is not supported by the driver
-        ############################################################
-        return self._flags[flag]
+        return None
 
     def setFlag(self, flag, value):
         """Set device flag."""
-        ############################################################
-        # Can be ignored or deleted if flags is not supported by the driver
-        ############################################################
-        if (flag in self._settings['flags']):
-            if value:
-                self._flags.append(flag)                            # Add the flag
-            else:
-                self._flags.remove(flag)                            # Remove the flag
-        else:
-            raise ValueError('flag {} is not allowed'.format(flag))
+        raise ValueError('flag is not implemented')
 
     def getFrequency(self):
         """Return device frequency."""
-        ############################################################
-        # Can be ignored or deleted if frequency is not supported by the driver
-        ############################################################
         return self._frequency
 
     def setFrequency(self, frequency):
         """Set device frequency."""
-        ############################################################
-        # Can be ignored or deleted if frequency is not supported by the driver
-        ############################################################
         if (frequency in self._settings['frequencies']):
             self._frequency = frequency
             self._period = 1./int(self._frequency[:-3])
@@ -410,23 +335,18 @@ class <DRIVER>:
 
     def getDutyFrequency(self):
         """Return device duty frequency."""
-        ############################################################
-        # Can be ignored or deleted if dutyFrequency is not supported by the driver
-        ############################################################
         return self._dutyFrequency
 
     def setDutyFrequency(self, dutyFrequency):
         """Set device duty frequency."""
-        ############################################################
-        # Can be ignored or deleted if dutyFrequency is not supported by the driver
-        ############################################################
-        raise ValueError('duty frequency {} is not allowed'.format(dutyFrequency))
+        raise ValueError('duty frequency is not implemented')
 
 
-    def comparePinConfig(self, pinConfig, muxedChannel = None):
+    def comparePinConfig(self, pinConfig, muxName = None, muxedChannel = None):
         """Check if the same pin config."""
         return ("ADDRESS" in pinConfig and
                 "BUSNUM" in pinConfig and
                 pinConfig["ADDRESS"] == self._address and
                 pinConfig["BUSNUM"] == self._busnum and
+                muxName == self._muxName and
                 muxedChannel == self._muxedChannel)
