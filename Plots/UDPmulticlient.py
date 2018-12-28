@@ -38,7 +38,6 @@ class UDPClient(Thread):
             print ("Socket created on port " + str(self.UDP_Port))
         except socket.error as msg:
             print ("Failed to creat the socket "+str(self.UDP_Port)+" . Error Code: " + str(msg[0])+" Message "+msg[1])
-
         try:
             self.sock.bind((self.UDP_IP, self.UDP_Port))
         except socket.error as msg:
@@ -47,7 +46,7 @@ class UDPClient(Thread):
     def run(self):
         """Read and decode data from the UDP socket and stors them in a LOG file"""
 
-        self.logger = setup_logger("logfile_"+str(self.UDP_Port),("Recordings/logfile_"+str(self.UDP_Port)+".log"))
+        self.logger = setup_logger("logfile_"+str(self.UDP_Port),("Recordings/"+str(time.time())+"_logfile_"+str(self.UDP_Port)+".log"))
         #self.logger = logging.basicConfig(level=logging.DEBUG, filename=("logfile_"+str(self.UDP_Port)), filemode="a+",
          #                   format="%(asctime)-15s %(levelname)-8s %(message)s")
         while True:
@@ -68,9 +67,11 @@ def exit_handler():
 
 def main():
     UDP_IP = "127.0.0.1"
-    UDP_PORT1 = 12347
-    UDP_PORT2 = 12343
-    UDP_PORT3 = 12342
+    UDP_PORT1 = 12345
+    UDP_PORT2 = 12346
+    UDP_PORT3 = 12347
+
+    print (str(time.time()))
 
 
 

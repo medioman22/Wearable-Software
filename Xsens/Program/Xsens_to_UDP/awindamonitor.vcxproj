@@ -78,6 +78,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\Out\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\Int\</IntDir>
+    <ReferencePath>$(VC_ReferencesPath_x64);\Qt\5.11.2\msvc2017_64\bin;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\Out\</OutDir>
@@ -86,6 +87,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\Out\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\Int\</IntDir>
+    <ReferencePath>\Qt\5.11.2\msvc2017_64\bin;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
@@ -93,14 +95,14 @@
     </PreBuildEvent>
     <ClCompile>
       <AdditionalOptions>/wd4100 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCharts;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtDataVisualization;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtHelp;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQuickTest;$(QTDIR)\include\QtScxml;$(QTDIR)\include\QtSerialBus;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtTextToSpeech;$(QTDIR)\include\QtUiTools;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_CHARTS_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_MULTIMEDIA_LIB;QT_NETWORK_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_CORE_LIB;QT_NETWORK_LIB;QT_QUICKWIDGETS_LIB;QT_SERIALPORT_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>qtmain.lib;xsensdeviceapi32.lib;xstypes32.lib;Qt5Charts.lib;Qt5Core.lib;Qt5DataVisualization.lib;Qt5Gui.lib;Qt5Help.lib;Qt5Multimedia.lib;Qt5Network.lib;Qt5OpenGL.lib;opengl32.lib;glu32.lib;Qt5OpenGLExtensions.lib;Qt5Positioning.lib;Qt5PrintSupport.lib;Qt5Qml.lib;Qt5Quick.lib;Qt5QuickWidgets.lib;Qt5QuickControls2.lib;Qt5QuickTest.lib;Qt5Scxml.lib;Qt5SerialBus.lib;Qt5SerialPort.lib;Qt5TextToSpeech.lib;Qt5UiTools.lib;Qt5WebChannel.lib;Qt5WebSockets.lib;Qt5WebEngineWidgets.lib;Qt5Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;xsensdeviceapi32.lib;xstypes32.lib;Qt5Core.lib;Qt5Network.lib;Qt5QuickWidgets.lib;Qt5SerialPort.lib;Qt5WebSockets.lib;Qt5WebEngineWidgets.lib;Qt5Widgets.lib;Qt5Gui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\$(Platform)\lib;$(QTDIR)\lib;$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -118,10 +120,10 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
       <QTDIR>$(QTDIR)</QTDIR>
       <InputFile>%(FullPath)</InputFile>
       <OutputFile>.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <Define>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB</Define>
+      <Define>_CRT_SECURE_NO_WARNINGS;QT_CORE_LIB;QT_NETWORK_LIB;QT_QUICKWIDGETS_LIB;QT_SERIALPORT_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</Define>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCharts;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtDataVisualization;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtHelp;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQuickTest;$(QTDIR)\include\QtScxml;$(QTDIR)\include\QtSerialBus;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtTextToSpeech;$(QTDIR)\include\QtUiTools;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
     <QtRcc>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -148,8 +150,8 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
     </Midl>
     <ClCompile>
       <AdditionalOptions>/wd4100 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;.\Xsens_files\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCharts;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtDataVisualization;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtHelp;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQuickTest;$(QTDIR)\include\QtScxml;$(QTDIR)\include\QtSerialBus;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtTextToSpeech;$(QTDIR)\include\QtUiTools;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_CHARTS_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_MULTIMEDIA_LIB;QT_NETWORK_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_CORE_LIB;QT_NETWORK_LIB;QT_QUICKWIDGETS_LIB;QT_SERIALPORT_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -157,7 +159,7 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>qtmain.lib;xsensdeviceapi64.lib;xstypes64.lib;Qt5Charts.lib;Qt5Core.lib;Qt5DataVisualization.lib;Qt5Gui.lib;Qt5Help.lib;Qt5Multimedia.lib;Qt5Network.lib;Qt5OpenGL.lib;opengl32.lib;glu32.lib;Qt5OpenGLExtensions.lib;Qt5Positioning.lib;Qt5PrintSupport.lib;Qt5Qml.lib;Qt5Quick.lib;Qt5QuickWidgets.lib;Qt5QuickControls2.lib;Qt5QuickTest.lib;Qt5Scxml.lib;Qt5SerialBus.lib;Qt5SerialPort.lib;Qt5TextToSpeech.lib;Qt5UiTools.lib;Qt5WebChannel.lib;Qt5WebSockets.lib;Qt5WebEngineWidgets.lib;Qt5Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;xsensdeviceapi64.lib;xstypes64.lib;Qt5Core.lib;Qt5Network.lib;Qt5QuickWidgets.lib;Qt5SerialPort.lib;Qt5WebSockets.lib;Qt5WebEngineWidgets.lib;Qt5Widgets.lib;Qt5Gui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\$(Platform)\lib;$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
@@ -177,10 +179,10 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
       <QTDIR>$(QTDIR)</QTDIR>
       <InputFile>%(FullPath)</InputFile>
       <OutputFile>.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <Define>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB</Define>
+      <Define>_CRT_SECURE_NO_WARNINGS;QT_CORE_LIB;QT_NETWORK_LIB;QT_QUICKWIDGETS_LIB;QT_SERIALPORT_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</Define>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;.\Xsens_files\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCharts;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtDataVisualization;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtHelp;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQuickTest;$(QTDIR)\include\QtScxml;$(QTDIR)\include\QtSerialBus;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtTextToSpeech;$(QTDIR)\include\QtUiTools;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
     <QtRcc>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -203,8 +205,8 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
       <Command />
     </PreBuildEvent>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCharts;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtDataVisualization;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtHelp;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQuickTest;$(QTDIR)\include\QtScxml;$(QTDIR)\include\QtSerialBus;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtTextToSpeech;$(QTDIR)\include\QtUiTools;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_CHARTS_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_MULTIMEDIA_LIB;QT_NETWORK_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_CORE_LIB;QT_NETWORK_LIB;QT_QUICKWIDGETS_LIB;QT_SERIALPORT_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -212,7 +214,7 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>qtmaind.lib;xsensdeviceapi32.lib;xstypes32.lib;Qt5AxBase.lib;Qt53DCore.lib;Qt53DAnimation.lib;Qt53DExtras.lib;Qt53DInput.lib;Qt53DLogic.lib;Qt53DRender.lib;Qt53DQuick.lib;Qt53DQuickAnimation.lib;Qt53DQuickExtras.lib;Qt53DQuickInput.lib;Qt53DQuickRender.lib;Qt53DQuickScene2D.lib;Qt5WebEngine.lib;Qt5WebEngineCore.lib;Qt5WebEngineWidgets.lib;Qt5Chartsd.lib;Qt5Cored.lib;Qt5DataVisualizationd.lib;Qt5Guid.lib;Qt5Helpd.lib;Qt5Multimediad.lib;Qt5Networkd.lib;Qt5OpenGLd.lib;opengl32.lib;glu32.lib;Qt5OpenGLExtensionsd.lib;Qt5Positioningd.lib;Qt5PrintSupportd.lib;Qt5Qmld.lib;Qt5Quickd.lib;Qt5QuickWidgetsd.lib;Qt5QuickControls2d.lib;Qt5QuickTestd.lib;Qt5Scxmld.lib;Qt5SerialBusd.lib;Qt5SerialPortd.lib;Qt5TextToSpeechd.lib;Qt5UiToolsd.lib;Qt5WebChanneld.lib;Qt5WebSocketsd.lib;Qt5WebEngineWidgetsd.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;xsensdeviceapi32.lib;xstypes32.lib;Qt5AxBase.lib;Qt53DCore.lib;Qt53DAnimation.lib;Qt53DExtras.lib;Qt53DInput.lib;Qt53DLogic.lib;Qt53DRender.lib;Qt53DQuick.lib;Qt53DQuickAnimation.lib;Qt53DQuickExtras.lib;Qt53DQuickInput.lib;Qt53DQuickRender.lib;Qt53DQuickScene2D.lib;Qt5WebEngine.lib;Qt5WebEngineCore.lib;Qt5WebEngineWidgets.lib;Qt5Cored.lib;Qt5Networkd.lib;Qt5QuickWidgetsd.lib;Qt5SerialPortd.lib;Qt5WebSocketsd.lib;Qt5WebEngineWidgetsd.lib;Qt5Widgetsd.lib;Qt5Guid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\$(Platform)\lib;$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
@@ -232,10 +234,10 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
       <QTDIR>$(QTDIR)</QTDIR>
       <InputFile>%(FullPath)</InputFile>
       <OutputFile>.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <Define>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB</Define>
+      <Define>_CRT_SECURE_NO_WARNINGS;QT_CORE_LIB;QT_NETWORK_LIB;QT_QUICKWIDGETS_LIB;QT_SERIALPORT_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</Define>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCharts;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtDataVisualization;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtHelp;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQuickTest;$(QTDIR)\include\QtScxml;$(QTDIR)\include\QtSerialBus;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtTextToSpeech;$(QTDIR)\include\QtUiTools;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
     <QtRcc>
       <InitFuncName>%(Filename)</InitFuncName>
@@ -262,8 +264,8 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
     </Midl>
     <ClCompile>
       <AdditionalOptions>/wd4100 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCharts;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtDataVisualization;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtHelp;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQuickTest;$(QTDIR)\include\QtScxml;$(QTDIR)\include\QtSerialBus;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtTextToSpeech;$(QTDIR)\include\QtUiTools;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_CHARTS_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_MULTIMEDIA_LIB;QT_NETWORK_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_CORE_LIB;QT_NETWORK_LIB;QT_QUICKWIDGETS_LIB;QT_SERIALPORT_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -274,7 +276,7 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
       </LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>qtmaind.lib;xsensdeviceapi64.lib;xstypes64.lib;Qt5AxBase.lib;Qt53DCore.lib;Qt53DAnimation.lib;Qt53DExtras.lib;Qt53DInput.lib;Qt53DLogic.lib;Qt53DRender.lib;Qt53DQuick.lib;Qt53DQuickAnimation.lib;Qt53DQuickExtras.lib;Qt53DQuickInput.lib;Qt53DQuickRender.lib;Qt53DQuickScene2D.lib;Qt5WebEngine.lib;Qt5WebEngineCore.lib;Qt5WebEngineWidgets.lib;Qt5Chartsd.lib;Qt5Cored.lib;Qt5DataVisualizationd.lib;Qt5Guid.lib;Qt5Helpd.lib;Qt5Multimediad.lib;Qt5Networkd.lib;Qt5OpenGLd.lib;opengl32.lib;glu32.lib;Qt5OpenGLExtensionsd.lib;Qt5Positioningd.lib;Qt5PrintSupportd.lib;Qt5Qmld.lib;Qt5Quickd.lib;Qt5QuickWidgetsd.lib;Qt5QuickControls2d.lib;Qt5QuickTestd.lib;Qt5Scxmld.lib;Qt5SerialBusd.lib;Qt5SerialPortd.lib;Qt5TextToSpeechd.lib;Qt5UiToolsd.lib;Qt5WebChanneld.lib;Qt5WebSocketsd.lib;Qt5WebEngineWidgetsd.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;xsensdeviceapi64.lib;xstypes64.lib;Qt5AxBase.lib;Qt53DCore.lib;Qt53DAnimation.lib;Qt53DExtras.lib;Qt53DInput.lib;Qt53DLogic.lib;Qt53DRender.lib;Qt53DQuick.lib;Qt53DQuickAnimation.lib;Qt53DQuickExtras.lib;Qt53DQuickInput.lib;Qt53DQuickRender.lib;Qt53DQuickScene2D.lib;Qt5WebEngine.lib;Qt5WebEngineCore.lib;Qt5WebEngineWidgets.lib;Qt5Cored.lib;Qt5Networkd.lib;Qt5QuickWidgetsd.lib;Qt5SerialPortd.lib;Qt5WebSocketsd.lib;Qt5WebEngineWidgetsd.lib;Qt5Widgetsd.lib;Qt5Guid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\$(Platform)\lib;$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -294,10 +296,10 @@ copy /Y /B ..\..\$(Platform)\lib\platforms\qwindows.* "$(OutDir)\platforms\" &gt
       <QTDIR>$(QTDIR)</QTDIR>
       <InputFile>%(FullPath)</InputFile>
       <OutputFile>.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <Define>_CRT_SECURE_NO_WARNINGS;QT_3DCORE_LIB;QT_3DANIMATION_LIB;QT_3DEXTRAS_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DRENDER_LIB;QT_3DQUICK_LIB;QT_3DQUICKANIMATION_LIB;QT_3DQUICKEXTRAS_LIB;QT_3DQUICKINPUT_LIB;QT_3DQUICKRENDER_LIB;QT_3DQUICKSCENE2D_LIB;QT_BLUETOOTH_LIB;QT_CHARTS_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;QT_DATAVISUALIZATION_LIB;QT_DBUS_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_HELP_LIB;QT_LOCATION_LIB;QT_MULTIMEDIA_LIB;QT_MULTIMEDIAWIDGETS_LIB;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_NFC_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_POSITIONING_LIB;QT_PRINTSUPPORT_LIB;QT_QML_LIB;QT_QUICK_LIB;QT_QUICKWIDGETS_LIB;QT_QUICKCONTROLS2_LIB;QT_QMLTEST_LIB;QT_SCXML_LIB;QT_SENSORS_LIB;QT_SERIALBUS_LIB;QT_SERIALPORT_LIB;QT_TEXTTOSPEECH_LIB;QT_SQL_LIB;QT_SVG_LIB;QT_TESTLIB_LIB;QT_UITOOLS_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_WINEXTRAS_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB</Define>
+      <Define>_CRT_SECURE_NO_WARNINGS;QT_CORE_LIB;QT_NETWORK_LIB;QT_QUICKWIDGETS_LIB;QT_SERIALPORT_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</Define>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCharts;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtDataVisualization;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtHelp;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQuickTest;$(QTDIR)\include\QtScxml;$(QTDIR)\include\QtSerialBus;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtTextToSpeech;$(QTDIR)\include\QtUiTools;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(Configuration);.\GeneratedFiles;$(ProjectDir)..\..\$(Platform)\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWidgets;.\;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
     <QtRcc>
       <QTDIR>$(QTDIR)</QTDIR>
