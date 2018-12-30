@@ -1,3 +1,7 @@
+% Author: Victor Faraut
+% Date: 28.12.2018
+
+
 function [Xsens_out, Xsens_id] = Xsens_analyser2(Xsens_file)
 Xsens_data   =   importdata(Xsens_file);
 
@@ -36,20 +40,25 @@ for id = 1:length(Xsens_id)
             first_idx = find((Xsens_cleaned(id).data(:,1)==1));
             first_idx = first_idx(1);
 
-            if (Xsens_cleaned(id).data(first_idx+1,1)==2 && ...
-                Xsens_cleaned(id).data(first_idx+2,1)==3 && ...
-                Xsens_cleaned(id).data(first_idx+3,1)==4)
+            try(Xsens_cleaned(id).data(first_idx+3,1))
+                if (Xsens_cleaned(id).data(first_idx+1,1)==2 && ...
+                    Xsens_cleaned(id).data(first_idx+2,1)==3 && ...
+                    Xsens_cleaned(id).data(first_idx+3,1)==4)
 
-                Xsens_out(id).data(i,:) = [Xsens_cleaned(id).data(first_idx,3),...
-                                        Xsens_cleaned(id).data(first_idx+1,3),...
-                                        Xsens_cleaned(id).data(first_idx+2,3),...
-                                        Xsens_cleaned(id).data(first_idx+3,3)];
-                Xsens_out(id).timestamp(i,1) = Xsens_cleaned(id).timestamp(first_idx);
-                Xsens_cleaned(id).data(first_idx,1) = 0;
-                i = i+1;
-            else
+                    Xsens_out(id).data(i,:) = [Xsens_cleaned(id).data(first_idx,3),...
+                                            Xsens_cleaned(id).data(first_idx+1,3),...
+                                            Xsens_cleaned(id).data(first_idx+2,3),...
+                                            Xsens_cleaned(id).data(first_idx+3,3)];
+                    Xsens_out(id).timestamp(i,1) = Xsens_cleaned(id).timestamp(first_idx);
+                    Xsens_cleaned(id).data(first_idx,1) = 0;
+                    i = i+1;
+                else
+                    Xsens_cleaned(id).data(first_idx,1) = 0;
+                end
+            catch
                 Xsens_cleaned(id).data(first_idx,1) = 0;
             end
+                
         else
             break;
         end

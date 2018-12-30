@@ -6,6 +6,7 @@ import sys
 from threading import Thread
 import time
 import atexit
+import struct
 from pathlib import Path
 
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -46,13 +47,24 @@ class UDPClient(Thread):
     def run(self):
         """Read and decode data from the UDP socket and stors them in a LOG file"""
 
-        self.logger = setup_logger("logfile_"+str(self.UDP_Port),("Recordings/"+str(time.time())+"_logfile_"+str(self.UDP_Port)+".log"))
+        self.logger = setup_logger("logfile_"+str(self.UDP_Port),("Recordings/"+str(int(time.time()))+"_logfile_"+str(self.UDP_Port)+".log"))
         #self.logger = logging.basicConfig(level=logging.DEBUG, filename=("logfile_"+str(self.UDP_Port)), filemode="a+",
          #                   format="%(asctime)-15s %(levelname)-8s %(message)s")
         while True:
             data, addr = self.sock.recvfrom(1024) # buffer size is 1024 bytes
-            self.logger.info(data.decode())
-            print("For port: "+ str(self.UDP_Port) +"  Data: "+ data.decode())
+            if self.UDP_Port == 9000:
+                #self.logger.info(data)
+                strs = ""
+                for i in range(0,len(data)//4):
+                    if(i%8 ==0):
+                        strs +="i"
+                    else:
+                        strs +="f"
+                        
+                self.logger.info(struct.unpack(strs, data))
+            else:
+                self.logger.info(data.decode())
+            #print("For port: "+ str(self.UDP_Port) +"  Data: "+ data.decode())
 
     def stop(self):
         self.sock.close()
@@ -67,7 +79,7 @@ def exit_handler():
 
 def main():
     UDP_IP = "127.0.0.1"
-    UDP_PORT1 = 12345
+    UDP_PORT1 = 9000
     UDP_PORT2 = 12346
     UDP_PORT3 = 12347
 
@@ -86,7 +98,7 @@ def main():
     thread_3.start()
 
     # Wait forever that the thread one finishes
-    thread_1.join()
+    thread_2.join()
 
     atexit.register(exit_handler)
 

@@ -1,7 +1,7 @@
 ﻿/*
 
 Author: Victor Faraut
-Date: 14.11.2018
+Date: 30.12.2018
 
 
 */
@@ -31,8 +31,12 @@ public class UDPManager : MonoBehaviour
     private string msgName;
     private object msgPayload;
 
-    public GameObject cube;
-    public CubeMover cubemover;
+    public GameObject cube0;
+    public GameObject cube1;
+    public GameObject cube2;
+    private CubeMover cubemover0;
+    private CubeMover cubemover1;
+    private CubeMover cubemover2;
 
     private char[] charSeparators = new char[] { ',' };
 
@@ -40,7 +44,9 @@ public class UDPManager : MonoBehaviour
     {
         Debug.Log("Start thread");
         t = new Thread(new ThreadStart(ListenThread));
-        //cubemover = cube.GetComponent<CubeMover>();
+        cubemover0 = cube0.GetComponent<CubeMover>();
+        cubemover1 = cube1.GetComponent<CubeMover>();
+        cubemover2 = cube2.GetComponent<CubeMover>();
         t.IsBackground = true;
         t.Start();
     }
@@ -58,30 +64,20 @@ public class UDPManager : MonoBehaviour
             receive_byte_array = listener.Receive(ref groupEP);
             dat = Encoding.ASCII.GetString(receive_byte_array, 0, receive_byte_array.Length);
             dataSplited = dat.Split(charSeparators, StringSplitOptions.None);
-            if (dat[0] == 'B')
+            if (Equals(dataSplited[0],"Opti"))
             {
-                if ((dataSplited[1].Equals("9"))||
-                    (dataSplited[1].Equals("10"))||
-                    (dataSplited[1].Equals("11")))
-                {
-                    Debug.Log((float.Parse(dataSplited[3])).ToString());
-                    cubemover.SetAngleXYZ(Int32.Parse(dataSplited[1])-9, float.Parse(dataSplited[3]));
-                    Debug.Log("test");
-                }
+                Debug.Log("Opti");
+                cubemover0.SetQuat(float.Parse(dataSplited[1]), float.Parse(dataSplited[2]), float.Parse(dataSplited[3]), float.Parse(dataSplited[4]));
             }
-            if (dat[0] == 'X')
+            if (Equals(dataSplited[0], "Wear"))
             {
-                if (dat[13] == lastID)
-                {
-                    if ((dataSplited[1].Equals("1")) ||
-                        (dataSplited[1].Equals("2")) ||
-                        (dataSplited[1].Equals("3")) ||
-                        (dataSplited[1].Equals("4")))
-                    {
-                        Debug.Log((float.Parse(dataSplited[3])).ToString());
-                        cubemover.SetAngleXYZW(Int32.Parse(dataSplited[1]), float.Parse(dataSplited[3]));
-                    }
-                }
+                Debug.Log("Wear");
+                cubemover1.SetQuat(float.Parse(dataSplited[1]), float.Parse(dataSplited[2]), float.Parse(dataSplited[3]), float.Parse(dataSplited[4]));
+            }
+            if (Equals(dataSplited[0], "Xsens"))
+            {
+                Debug.Log("Xsens");
+                cubemover2.SetQuat(float.Parse(dataSplited[1]), float.Parse(dataSplited[2]), float.Parse(dataSplited[3]), float.Parse(dataSplited[4]));
             }
         }
     }

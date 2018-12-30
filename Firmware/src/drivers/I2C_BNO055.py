@@ -139,7 +139,7 @@ class BNO055:
     _flags = None
 
     # Frequency for the thread
-    _frequency = '10 Hz'
+    _frequency = '40 Hz'
 
     # Period for the thread
     _period = 0.1
@@ -180,7 +180,7 @@ class BNO055:
 
             self._values = []                                       # Set empty values array
 
-            self._mode = self._settings['modes'][0]                 # Set default mode
+            self._mode = self._settings['modes'][12]                 # Set default mode
             #########################################################
             # self._mode = self._settings['modes'][<NDOF_INDEX>]    # USE THIS LINE FOR NDOF
             #########################################################

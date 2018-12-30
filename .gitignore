@@ -9,4 +9,4 @@ Interface/Plots/*.csv
 **/__pycache__
 **/*.log
 Xsens/Program/Xsens_to_UDP/.vs
-Plots/Recordings/*
+

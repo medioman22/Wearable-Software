@@ -1,0 +1,6 @@
+111: torso not moving to much
+123: torso moving
+1234: hand not moving but may have value of imu null
+1234: redo of the previous one
+12345: moving hand slowly
+123456: moving hand quickly

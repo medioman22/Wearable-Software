@@ -1,3 +1,6 @@
+% Author: Victor Faraut
+% Date: 26.12.2018
+
 function [Xsens_cleaned] = Xsens_analyser(Xsens_file)
 
 Xsens_data      =   importdata(Xsens_file);

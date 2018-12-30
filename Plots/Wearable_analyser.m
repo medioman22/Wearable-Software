@@ -1,3 +1,6 @@
+% Author: Victor Faraut
+% Date: 26.12.2018
+
 function [Wearable_cleaned] = Wearable_analyser(Wearable_file)
 Wearable_data   =   importdata(Wearable_file);
 C_wearable = {};

@@ -1,3 +1,6 @@
+% Author: Victor Faraut
+% Date: 28.12.2018
+
 function [Wear_out, Wear_id] = Wearable_analyser2(Wear_file)
 Wear_data   =   importdata(Wear_file);
 
@@ -7,6 +10,7 @@ for i = 1:length(Wear_data.textdata(:,1))
     Wear_data.textdata{i,3} = strsplit(strcat(cell2mat(Wear_data.textdata(i,1)),",",cell2mat(Wear_data.textdata(i,2))));
     output = strsplit(Wear_data.textdata{i,3}{4},'@');
     if(strfind(output{1},'BNO055'))
+%     if(strfind(output{1},'BNO055') && (sum(Wear_data.data(i,1) == [12,13,14,15])==1))
         index = [index i];
     end 
 end
@@ -21,7 +25,7 @@ for i = 1:length(Wear_data.data(:,1))
     m = str2num(time{2});
     s = str2num(strrep((time{3}),',','.'));
     timestamp(i) = ((h*60 + m)*60)+s;
-    sensor_id{i} = (output{3}(end-1));   
+    sensor_id{i} = (strcat(output{1,3}(end-6),output{1,3}(end-1)));   
 end
 
 Wear_id = unique(sensor_id);
@@ -42,18 +46,22 @@ for id = 1:length(Wear_id)
             first_idx = find((Wear_cleaned(id).data(:,1)==12));
             first_idx = first_idx(1);
 
-            if (Wear_cleaned(id).data(first_idx+1,1)==13 && ...
-                Wear_cleaned(id).data(first_idx+2,1)==14 && ...
-                Wear_cleaned(id).data(first_idx+3,1)==15)
+            try (Wear_cleaned(id).data(first_idx+3,1))
+                if (Wear_cleaned(id).data(first_idx+1,1)==13 && ...
+                    Wear_cleaned(id).data(first_idx+2,1)==14 && ...
+                    Wear_cleaned(id).data(first_idx+3,1)==15)
 
-                Wear_out(id).data(i,:) = [Wear_cleaned(id).data(first_idx,3),...
-                                        Wear_cleaned(id).data(first_idx+1,3),...
-                                        Wear_cleaned(id).data(first_idx+2,3),...
-                                        Wear_cleaned(id).data(first_idx+3,3)];
-                Wear_out(id).timestamp(i,1) = Wear_cleaned(id).timestamp(first_idx);
-                Wear_cleaned(id).data(first_idx,1) = 0;
-                i = i+1;
-            else
+                    Wear_out(id).data(i,:) = [Wear_cleaned(id).data(first_idx,3),...
+                                            Wear_cleaned(id).data(first_idx+1,3),...
+                                            Wear_cleaned(id).data(first_idx+2,3),...
+                                            Wear_cleaned(id).data(first_idx+3,3)];
+                    Wear_out(id).timestamp(i,1) = Wear_cleaned(id).timestamp(first_idx);
+                    Wear_cleaned(id).data(first_idx,1) = 0;
+                    i = i+1;
+                else
+                    Wear_cleaned(id).data(first_idx,1) = 0;
+                end
+            catch
                 Wear_cleaned(id).data(first_idx,1) = 0;
             end
         else
