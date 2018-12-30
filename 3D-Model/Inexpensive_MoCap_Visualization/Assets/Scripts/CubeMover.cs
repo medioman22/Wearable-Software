@@ -1,7 +1,7 @@
 ﻿/*
 
 Author: Victor Faraut
-Date: 14.11.2018
+Date: 30.12.2018
 
 
 */
@@ -46,6 +46,15 @@ public class CubeMover : MonoBehaviour {
             currentQuaternion.z = angle;
         if (quat == 3)
             currentQuaternion.w = angle;
+
+    }
+
+    public void SetQuat(float quatx, float quaty, float quatz, float quatw)
+    {
+            currentQuaternion.x = quatx;
+            currentQuaternion.y = quaty;
+            currentQuaternion.z = quatz;
+            currentQuaternion.w = quatw;
 
     }
     private void Move()

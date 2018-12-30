@@ -65,14 +65,7 @@ PIN_MAP = {
     ],
 
     "INPUT": [
-        {
-            "DATA": "P8_27",
-            "MUX": "P8_29"
-        },
-        {
-            "DATA": "P8_31",
-            "MUX": "P8_33"
-        }
+        
     ],
     "OUTPUT": [
         # {
@@ -87,79 +80,13 @@ PIN_MAP = {
         # {
         #     "DATA": "USR3"
         # },
-        {
-            "DATA": "P9_23"
-        },
-        {
-            "DATA": "P9_25"
-        },
-        {
-            "DATA": "P9_27"
-        },
-        {
-            "DATA": "P8_35"
-        },
-        {
-            "DATA": "P8_37"
-        },
-        {
-            "DATA": "P8_39"
-        },
-        {
-            "DATA": "P8_41"
-        },
+        
     ],
     "PWM": [
-        {
-            "DATA": "P9_14",
-            "CHANGE_DUTY_FREQUENCY": False
-        },
-        {
-            "DATA": "P9_16",
-            "CHANGE_DUTY_FREQUENCY": False
-        },
-        {
-            "DATA": "P8_13",
-            "CHANGE_DUTY_FREQUENCY": False
-        },
-        {
-            "DATA": "P8_19",
-            "CHANGE_DUTY_FREQUENCY": False
-        },
-        {
-            "DATA": "P9_42",
-            "CHANGE_DUTY_FREQUENCY": True
-        },
+        
     ],
     "ADC": [
-        {
-            "DATA": "P9_39",
-            "MUX": "P8_28"
-        },
-        {
-            "DATA": "P9_40",
-            "MUX": "P8_30"
-        },
-        {
-            "DATA": "P9_33",
-            "MUX": "P8_32"
-        },
-        {
-            "DATA": "P9_35",
-            "MUX": "P8_34"
-        },
-        {
-            "DATA": "P9_36",
-            "MUX": "P8_36"
-        },
-        {
-            "DATA": "P9_37",
-            "MUX": "P8_38"
-        },
-        {
-            "DATA": "P9_38",
-            "MUX": "P8_40"
-        }
+        
     ],
     "I2C": [
         {
