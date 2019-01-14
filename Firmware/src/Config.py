@@ -20,7 +20,7 @@ Configuration file for the Firmware of the Wearable SoftWEAR. PLEASE DO NOT CHAN
 ################################################################################
 
 # Layout configuration
-LAYOUT = "DevLayout"
+LAYOUT = "DefaultLayout"
 
 ################################################################################
 # Used I2C addresses

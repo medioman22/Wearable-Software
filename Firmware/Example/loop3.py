@@ -29,6 +29,11 @@ class Loop():
         ###################################
         # Do some initialization          #
         ###################################
+        self._api.sendMessages(
+        [
+            json.dumps({'type': 'Setting', 'name': 'PCA9685@I2C[64,2]', 'dutyFrequency': '60 Hz'}),
+            json.dumps({'type': 'Scan', 'value': 0})
+        ]);
 
         while (1):
             # Get the messages
@@ -46,8 +51,8 @@ class Loop():
                         ###################################
                         if el['name'] == 'BNO055@I2C[40,2]':
                             if len(el['values']) > 0:
-                                v = round(min(10, abs(el['values'][-1][1][2])) / 10 * 8 + 18); # Map to servo values
-                                print(v)
+                                v = round(min(8, abs(el['values'][-1][1][2]))) + 6; # Map to servo values
+                                print(v);
                                 messagesOut.append(json.dumps({'type': 'Settings', 'name': 'PCA9685@I2C[64,2]', 'dutyFrequency': '100 Hz'}))
                                 messagesOut.append(json.dumps({'type': 'Set', 'name': 'PCA9685@I2C[64,2]', 'dim': 0, 'value': v}))
                         ###################################

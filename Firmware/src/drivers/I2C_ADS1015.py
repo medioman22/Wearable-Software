@@ -155,7 +155,7 @@ class ADS1015:
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                       # Deactivate mux
         except:
-            print('Exception in ADS1015 driver init')
+            # print('Exception in ADS1015 driver init')
             self._connected = False
 
             if (muxedChannel != None):

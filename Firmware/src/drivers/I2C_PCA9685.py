@@ -166,7 +166,7 @@ class PCA9685:
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                   # Deactivate mux
         except:
-            print('Exception in PCA9685 driver init')
+            # print('Exception in PCA9685 driver init')
             self._connected = False
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                   # Deactivate mux

@@ -165,7 +165,6 @@ class ADC:
             drv.cleanup()
         self._connectedDrivers = connectedDrivers
         self.connectedDevices = connectedDevices
-        print(self._connectedDrivers)
 
     def getValues(self):
         """Get values of a device."""

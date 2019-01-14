@@ -26,7 +26,7 @@ import cProfile                                                 # Used to profil
 import Adafruit_BBIO.GPIO as GPIO                               # Main peripheral class. Implements GPIO communication
 
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
-SOFTWARE = "SoftWEAR/Firmware-BeagleboneGreenWireless(v0.1)"    # Identifier of the Software
+SOFTWARE = "Firmware-BeagleboneGreenWireless(v0.1)"             # Identifier of the Software
 
 LIVE_PRINT = False                                              # Flag whether live printing should be enabled in the console
 DIAG_LOG = False                                                # Flag whether diagnostics should be logged to a file
@@ -460,8 +460,8 @@ def livePrint():
     stringToPrint = ""                                          # String to print
     stringToPrint += colored("****************************************************************\n", 'green')
     stringToPrint += colored("* Hardware:    {}                  *\n".format(BOARD), 'green') # Display hardware information
-    stringToPrint += colored("* Software:    {} *\n".format(SOFTWARE), 'green') # Display software information
-    stringToPrint += colored("* Layout:      {}                                       *\n".format(Config.LAYOUT), 'green') # Display layout information
+    stringToPrint += colored("* Software:    {}          *\n".format(SOFTWARE), 'green') # Display software information
+    stringToPrint += colored("* Layout:      {}                                   *\n".format(Config.LAYOUT), 'green') # Display layout information
     stringToPrint += colored("****************************************************************\n", 'green')
     stringToPrint += "\n"
     stringToPrint += "Connection:  {}".format(colored(connectionState, attrs=['bold', 'dark'])) # Print connection status
