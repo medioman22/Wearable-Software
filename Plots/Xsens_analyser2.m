@@ -12,6 +12,9 @@ for i = 1:length(Xsens_data.textdata(:,1))
 end
 Xsens_data.textdata = Xsens_data.textdata(:,3);
 
+% Read the timestamp that was written by the python script (the first
+% timestamp) and stores it inside a timestamp variable, read and stores the
+% sensor ID also
 for i = 1:length(Xsens_data.data(:,1))
     output = strsplit(Xsens_data.textdata{i}{4},'@');
     time = strsplit(Xsens_data.textdata{i}{2},{':'});
@@ -22,6 +25,10 @@ for i = 1:length(Xsens_data.data(:,1))
     sensor_id{i} = (output{1}(7:end-1));   
 end
 
+% attributes to the all unique sensor id to a variable that will be outputed
+% as well as setting the array of structures to have a structur composed of
+% data and timestamp for each sensor ID instead of have all things mixed
+% up.
 Xsens_id = unique(sensor_id);
 Xsens_cleaned = [];
 for id = 1:length(Xsens_id)
@@ -31,14 +38,22 @@ for id = 1:length(Xsens_id)
     Xsens_cleaned(id).timestamp = timestamp(index)';
 end
 
+
+% way of checking if we have complete quaternion and if the quaternion is
+% not complete it gets ignored. Loops on itself until it finds no more
+% first quaternion indexs.
 Xsens_out = [];
 
 for id = 1:length(Xsens_id)
     i = 1;
     while true
+        % finds the index of the first part of a quaternion
         if find((Xsens_cleaned(id).data(:,1)==1))
             first_idx = find((Xsens_cleaned(id).data(:,1)==1));
             first_idx = first_idx(1);
+            % checks if the 3 value after the first index are comming from
+            % the same quaternion and if yes, stores it, if not, the first
+            % index is set to 0 to be ignore on the following loop
 
             try(Xsens_cleaned(id).data(first_idx+3,1))
                 if (Xsens_cleaned(id).data(first_idx+1,1)==2 && ...

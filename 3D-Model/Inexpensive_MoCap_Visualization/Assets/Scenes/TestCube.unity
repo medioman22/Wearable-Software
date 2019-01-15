@@ -125,7 +125,6 @@ GameObject:
   - component: {fileID: 125434984}
   - component: {fileID: 125434983}
   - component: {fileID: 125434987}
-  - component: {fileID: 125434988}
   - component: {fileID: 125434989}
   m_Layer: 0
   m_Name: Cube
@@ -213,22 +212,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentPos: {x: 0, y: 0.5, z: 0}
---- !u!114 &125434988
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 125434982}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e24f0bf780b9e9942b86e2fa9025b2f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  listenPort: 12347
-  IP: 127.0.0.1
-  lastID: 49
-  cube: {fileID: 125434982}
-  cubemover: {fileID: 125434987}
 --- !u!54 &125434989
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -256,7 +239,6 @@ GameObject:
   - component: {fileID: 158946545}
   - component: {fileID: 158946544}
   - component: {fileID: 158946543}
-  - component: {fileID: 158946542}
   - component: {fileID: 158946541}
   m_Layer: 0
   m_Name: Cube (1)
@@ -280,22 +262,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &158946542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 158946540}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e24f0bf780b9e9942b86e2fa9025b2f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  listenPort: 12347
-  IP: 127.0.0.1
-  lastID: 53
-  cube: {fileID: 158946540}
-  cubemover: {fileID: 158946543}
 --- !u!114 &158946543
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,6 +349,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 326024493}
+  - component: {fileID: 326024494}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -403,6 +370,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &326024494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 326024492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e24f0bf780b9e9942b86e2fa9025b2f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  listenPort: 5555
+  IP: 127.0.0.1
+  lastID: 48
+  cube0: {fileID: 1107860822}
+  cube1: {fileID: 125434982}
+  cube2: {fileID: 158946540}
 --- !u!1 &395806827
 GameObject:
   m_ObjectHideFlags: 0
@@ -558,7 +542,6 @@ GameObject:
   - component: {fileID: 1107860827}
   - component: {fileID: 1107860826}
   - component: {fileID: 1107860825}
-  - component: {fileID: 1107860824}
   - component: {fileID: 1107860823}
   m_Layer: 0
   m_Name: Cube (2)
@@ -582,22 +565,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1107860824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1107860822}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e24f0bf780b9e9942b86e2fa9025b2f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  listenPort: 12347
-  IP: 127.0.0.1
-  lastID: 68
-  cube: {fileID: 1107860822}
-  cubemover: {fileID: 1107860825}
 --- !u!114 &1107860825
 MonoBehaviour:
   m_ObjectHideFlags: 0
