@@ -1,0 +1,17 @@
+Given direction,Real direction,Reaction time
+S,N,6.32
+NW,E,4.59
+SE,SE,3.33
+S,S,4.26
+W,W,2.46
+SW,SW,2.32
+W,SW,2.8
+W,W,2.47
+NE,NE,2.43
+SW,S,2.7
+N,N,2.46
+SE,SE,2.02
+NE,NE,2.6
+W,NW,2.51
+NW,NW,3.55
+SE,E,3.11
