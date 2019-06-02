@@ -12,10 +12,6 @@ close all; clear all; clc;
 u = udp('', 'LocalHost', '', 'LocalPort', 12346);
 fopen(u);
 u.ReadAsyncMode = 'continuous';
-
-% Data stored
-data = [];
-dataLabels = {};
         
 while 1
     % Receive UDP packets
@@ -26,10 +22,12 @@ while 1
     if (length(messageParts) ~= 4)
         continue;
     end
+    
+    disp(message);
 
     % Store values
-    dataLabels(end+1,:) = [ cellstr(messageParts{1}), cellstr(messageParts{2}) ];
-    data(end+1,:) = [ uint64(str2double(messageParts{3}) * 1000) str2num(messageParts{4}) ];
+    %dataLabels(end+1,:) = [ cellstr(messageParts{1}), cellstr(messageParts{2}) ];
+    %data(end+1,:) = [ uint64(str2double(messageParts{3}) * 1000) str2num(messageParts{4}) ];
     
     % Wait a bit
     pause(0.01)

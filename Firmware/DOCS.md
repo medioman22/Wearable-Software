@@ -10,6 +10,10 @@ This documentation provides a *schematic* overview of the Firmware. For a more i
 * `Logs` contains a set of files generated at runtime
 * `src` contains the source code of the Firmware
 
+## Hardware Layout
+
+![](./Assets/PinLayout.png)
+
 ## Setup & Installation
 
 Look at `README.md` for instructions to setup and installation.
@@ -34,11 +38,11 @@ python api.py
 The main file is the heart of the Firmware and used to start it with:
 
 ```
-sudo python Main.py [ldmep]
+sudo python Main.py [ldmepf]
 ```
 
 * *`sudo` is needed due to the 'PWM Module', which needs root access*
-* *Have a look at `README.md` for more information about `[ldmep]` flags*
+* *Have a look at `README.md` for more information about `[ldmepf]` flags*
 
 #### Initialization
 
@@ -113,4 +117,9 @@ The (MUX|ADC|I2C|Input|Output|PWM) modules provide following functionality:
 
 Drivers are modules dedicated to a unique type of devices. They are able to interface devices of their type and scanning, updating and configuring at runtime. The drivers are registered in the appropriate (XXX)Modules where they are managed. Each driver has a dedicated thread internally allowing the threads to run different velocities depending on the type of device. For device types like ADC, Input, Output and PWM a single driver is usually enough but for I2C devices, which need to be interfaced individually, there is a template `I2C_DRIVER_TEMPLATE.py` for a driver provided which can be used to implement drivers for new device types according to the instructions in `__IMPLEMENT_NEW_DRIVER.md`.
 
-MUX drivers are bit special as for the basic Input and ADC, there is only one driver allowed at the time. But you are free to add as many I2C MUX drivers as you like.
+MUX drivers are bit special as there is only one driver allowed at the time. But you are free to add as many I2C MUX drivers on *different* addresses as you like.
+
+
+### Embedded loop
+
+Embedded loops are custom made controllers that use the same api as on a connected computer application. It is run with the `f` command.

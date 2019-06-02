@@ -9,6 +9,7 @@ from PyQt5.QtCore import (  Qt,                                 # Core functiona
                             pyqtSlot)
 from PyQt5.QtWidgets import (   QWidget,                        # Widget objects for GUI from Qt
                                 QPushButton,
+                                QComboBox,
                                 QLabel,
                                 QListWidget,
                                 QListWidgetItem,
@@ -52,6 +53,8 @@ class InterfaceWidget(QWidget):
     _deviceStack = None
     # Board Device list
     _deviceList = None
+    # Board Device list filter
+    _deviceListFilter = None
     # Selected device
     _selectedDeviceName = None
     # Logger module
@@ -71,6 +74,8 @@ class InterfaceWidget(QWidget):
         # self._logger.addHandler(fh)
 
         self._logger.info("Interface initializing …")
+
+        self._deviceListFilter = 'All'
 
         # Initialize interface UI
         self.initUI()
@@ -148,6 +153,20 @@ class InterfaceWidget(QWidget):
         self._deviceList = deviceList
         self._logger.debug("Interface UI device list created")
 
+        # List of connected device filter
+        deviceListFilter = QComboBox()
+        deviceListFilter.addItem('All')
+        deviceListFilter.addItem('I2C')
+        deviceListFilter.addItem('SPI')
+        deviceListFilter.addItem('UART')
+        deviceListFilter.addItem('ADC')
+        deviceListFilter.addItem('Input')
+        deviceListFilter.addItem('Output')
+        deviceListFilter.addItem('PWM')
+        deviceListFilter.setCurrentIndex(0);
+        deviceListFilter.currentTextChanged.connect(self._onDeviceListFilter)
+
+
         # Stack of connected device settings
         deviceStack = QStackedWidget()
         self._deviceStack = deviceStack
@@ -175,14 +194,17 @@ class InterfaceWidget(QWidget):
         bodyGridLayout = QGridLayout()
         bodyGridLayout.addWidget(boardPixmapLabel,      0, 0, Qt.AlignCenter)
         bodyGridLayout.addWidget(groupLayout,           0, 1, Qt.AlignLeft)
-        bodyGridLayout.addWidget(deviceList,            1, 0, Qt.AlignLeft)
-        bodyGridLayout.addWidget(deviceStack,           1, 1, Qt.AlignLeft)
+        bodyGridLayout.addWidget(deviceListFilter,      1, 0, Qt.AlignLeft)
+        bodyGridLayout.addWidget(deviceList,            2, 0, Qt.AlignLeft)
+        bodyGridLayout.addWidget(deviceStack,           2, 1, Qt.AlignLeft)
 
         # Define stretching behaviour
         bodyGridLayout.setRowStretch(0, 1)
-        bodyGridLayout.setRowStretch(1, 10)
+        bodyGridLayout.setRowStretch(1, 1)
+        bodyGridLayout.setRowStretch(2, 10)
         bodyGridLayout.setColumnStretch(0, 1)
-        bodyGridLayout.setColumnStretch(1, 10)
+        bodyGridLayout.setColumnStretch(1, 1)
+        bodyGridLayout.setColumnStretch(2, 10)
 
         self.setLayout(bodyGridLayout)
         self._logger.debug("Interface UI layout created")
@@ -249,17 +271,26 @@ class InterfaceWidget(QWidget):
         deviceListItemToSelect = None
         deviceWidgetToSelect = None
         for device in devices:                                  # Add devices to list/stack
-            deviceListItem = QListWidgetItem(device.name())
-            deviceWidget = DeviceSettingsWidget(device)
-            deviceWidget.sendMessage.connect(self.onSendMessage)
-            deviceWidget.hide.connect(self.onHideDevice)
-            deviceWidget.ignore.connect(self.onIgnoreDevice)
-            self._deviceList.addItem(deviceListItem)
-            self._deviceStack.addWidget(deviceWidget)
-            if (device.name() == self._selectedDeviceName):     # Check for previous selection
-                deviceToSelect = device
-                deviceListItemToSelect = deviceListItem
-                deviceWidgetToSelect = deviceWidget
+            if  (self._deviceListFilter == 'All' or             # Filter devices
+                (self._deviceListFilter == 'I2C' and '@I2C' in device.name()) or
+                (self._deviceListFilter == 'SPI' and '@SPI' in device.name()) or
+                (self._deviceListFilter == 'UART' and '@UART' in device.name()) or
+                (self._deviceListFilter == 'ADC' and '@ADC' in device.name()) or
+                (self._deviceListFilter == 'Input' and '@Input' in device.name()) or
+                (self._deviceListFilter == 'Output' and '@Output' in device.name()) or
+                (self._deviceListFilter == 'PWM' and '@PWM' in device.name())
+                ):
+                deviceListItem = QListWidgetItem(device.name())
+                deviceWidget = DeviceSettingsWidget(device)
+                deviceWidget.sendMessage.connect(self.onSendMessage)
+                deviceWidget.hide.connect(self.onHideDevice)
+                deviceWidget.ignore.connect(self.onIgnoreDevice)
+                self._deviceList.addItem(deviceListItem)
+                self._deviceStack.addWidget(deviceWidget)
+                if (device.name() == self._selectedDeviceName): # Check for previous selection
+                    deviceToSelect = device
+                    deviceListItemToSelect = deviceListItem
+                    deviceWidgetToSelect = deviceWidget
         if (deviceToSelect != None):                            # Reselect device
             self._deviceList.setCurrentItem(deviceListItemToSelect)
             self._deviceStack.setCurrentWidget(deviceWidgetToSelect)
@@ -301,6 +332,12 @@ class InterfaceWidget(QWidget):
                     break
             else:                                               # Ignore when widget does no longer exist
                 pass
+
+    @pyqtSlot(str)
+    def _onDeviceListFilter(self, filter):
+        """Select device list filter listener."""
+        self._deviceListFilter = filter
+        self.update.emit()
 
 
     @pyqtSlot(Message)

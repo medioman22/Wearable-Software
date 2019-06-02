@@ -166,6 +166,7 @@ class PCA9685:
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                   # Deactivate mux
         except:
+            # print('Exception in PCA9685 driver init')
             self._connected = False
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                   # Deactivate mux
@@ -372,12 +373,13 @@ class PCA9685:
             raise ValueError('duty frequency {} is not allowed'.format(dutyFrequency))
 
 
-    def comparePinConfig(self, pinConfig, muxedChannel = None):
+    def comparePinConfig(self, pinConfig, muxName = None, muxedChannel = None):
         """Check if the same pin config."""
         return ("ADDRESS" in pinConfig and
                 "BUSNUM" in pinConfig and
                 pinConfig["ADDRESS"] == self._address and
                 pinConfig["BUSNUM"] == self._busnum and
+                muxName == self._muxName and
                 muxedChannel == self._muxedChannel)
 
 
@@ -386,5 +388,4 @@ def setDuty(pca, channel, duty):
     res = 4096                                                      # 12 bits of resolution
     on = 0                                                          # Duty on
     off = int(duty / 100. * res)                                    # Duty off
-    print('set', channel, on, off)
     pca.set_pwm(channel, on, off)                                   # Send the values to the pca

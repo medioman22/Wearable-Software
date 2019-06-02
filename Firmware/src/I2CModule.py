@@ -10,6 +10,7 @@ from MuxModule import GetMux                                    # SoftWEAR MUX m
 
 from drivers.I2C_BNO055 import BNO055                           # Driver module for the BNO055 device
 from drivers.I2C_PCA9685 import PCA9685                         # Driver module for the PCA9685 device
+from drivers.I2C_ADS1015 import ADS1015                         # Driver module for the ADS1015 device
 #import I2C_MPU6050                                             # Driver for the MPU6050 device
 
 
@@ -22,7 +23,7 @@ https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/ove
 MuxModule = GetMux()
 
 # List of all possible drivers
-DRIVERS = [BNO055, PCA9685]
+DRIVERS = [BNO055, PCA9685, ADS1015]
 
 class I2C:
     """Implements I2C functionality."""
@@ -106,11 +107,10 @@ class I2C:
                         muxRange = MuxModule.about(muxName)['range'] # Get mux range
                         for muxedChannel in range(muxRange):    # Loop all muxed channels
                             for lastDrv in lastConnectedDrivers: # Test last connected drivers
-                                if not lastDrv.comparePinConfig(pinConfig, muxedChannel): # Wrong driver
+                                if not lastDrv.comparePinConfig(pinConfig, muxName, muxedChannel): # Wrong driver
                                     pass
                                                                 # Check if drv already loaded and still connected
                                 elif not lastDrv.getDeviceConnected(): # Device is disconnected
-                                    print('remove', lastDrv.getName())
                                     disconnectedDriver.append(lastDrv)
                                 else:                           # Device still connected
                                     connectedDrivers.append(lastDrv) # Add to connected driver list
@@ -136,7 +136,6 @@ class I2C:
                                     drv = DRIVER(pinConfig, muxedChannel, muxName) # Test the different drivers
                                     if not drv.getDeviceConnected(): # Validate driver connected
                                         continue                # Try next driver until none is left
-                                    print('add', drv.getName())
                                     drv.configureDevice()       # Configure device
                                     connectedDrivers.append(drv) # Add to connected driver list
                                     connectedDevices.append({   'address': pinConfig["ADDRESS"], # Add to connected device list

@@ -20,16 +20,18 @@ Configuration file for the Firmware of the Wearable SoftWEAR. PLEASE DO NOT CHAN
 ################################################################################
 
 # Layout configuration
-LAYOUT = "DevLayout"
+LAYOUT = "DefaultLayout"
 
 ################################################################################
 # Used I2C addresses
 ADDRESSES = []
 # I2C MUX TCA9548A
 ADDRESSES += [0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77]
-# I2C MUX PCA9685
+# I2C PCA9685
 ADDRESSES += [0x40]
-# I2C MUX BNO055
+# I2C ADS1015
+ADDRESSES += [0x48, 0x49]
+# I2C BNO055
 ADDRESSES += [0x28, 0x29]
 ################################################################################
 
@@ -39,25 +41,37 @@ ADDRESSES += [0x28, 0x29]
 ################################################################################
 # Pin mapping
 PIN_MAP = {
+    "SCAN": "P9_41",
     "MUX": [
         {
             # Basic
-            "A": "P8_41",
-            "B": "P8_42",
-            "C": "P8_43",
-            "DETECT": "P8_44"
+            "A": "P8_43",
+            "B": "P8_44",
+            "C": "P8_45",
+            "DETECT": "P8_46"
         },
         {
             # I2C
             "ADDRESS": 0x70,
-            "BUSNUM": 2
+            "BUSNUM": 2,
+            "DETECT": "P9_15"
+        },
+        {
+            # I2C
+            "ADDRESS": 0x71,
+            "BUSNUM": 2,
+            "DETECT": "P9_15"
         }
     ],
 
     "INPUT": [
         {
-            "DATA": "P8_40",
-            "MUX": "P8_39"
+            "DATA": "P8_27",
+            "MUX": "P8_29"
+        },
+        {
+            "DATA": "P8_31",
+            "MUX": "P8_33"
         }
     ],
     "OUTPUT": [
@@ -74,73 +88,94 @@ PIN_MAP = {
         #     "DATA": "USR3"
         # },
         {
-            "DATA": "P9_16"
+            "DATA": "P9_23"
         },
-        # {
-        #     "DATA": "P9_115"
-        # },
-        # {
-        #     "DATA": "P9_117"
-        # },
+        {
+            "DATA": "P9_25"
+        },
+        {
+            "DATA": "P9_27"
+        },
+        {
+            "DATA": "P8_35"
+        },
+        {
+            "DATA": "P8_37"
+        },
+        {
+            "DATA": "P8_39"
+        },
+        {
+            "DATA": "P8_41"
+        },
     ],
     "PWM": [
         {
-            "DATA": "P9_14"
+            "DATA": "P9_14",
+            "CHANGE_DUTY_FREQUENCY": False
+        },
+        {
+            "DATA": "P9_16",
+            "CHANGE_DUTY_FREQUENCY": False
+        },
+        {
+            "DATA": "P8_13",
+            "CHANGE_DUTY_FREQUENCY": False
+        },
+        {
+            "DATA": "P8_19",
+            "CHANGE_DUTY_FREQUENCY": False
+        },
+        {
+            "DATA": "P9_42",
+            "CHANGE_DUTY_FREQUENCY": True
         },
     ],
     "ADC": [
         {
             "DATA": "P9_39",
-            "MUX": "P9_41"
+            "MUX": "P8_28"
         },
         {
             "DATA": "P9_40",
-            "MUX": None
+            "MUX": "P8_30"
         },
-        # {
-        #     "DATA": "P9_33",
-        #     "MUX": None
-        # },
-        # {
-        #     "DATA": "P9_35",
-        #     "MUX": None
-        # },
-        # {
-        #     "DATA": "P9_36",
-        #     "MUX": None
-        # },
-        # {
-        #     "DATA": "P9_37",
-        #     "MUX": None
-        # },
-        # {
-        #     "DATA": "P9_38",
-        #     "MUX": None
-        # }
+        {
+            "DATA": "P9_33",
+            "MUX": "P8_32"
+        },
+        {
+            "DATA": "P9_35",
+            "MUX": "P8_34"
+        },
+        {
+            "DATA": "P9_36",
+            "MUX": "P8_36"
+        },
+        {
+            "DATA": "P9_37",
+            "MUX": "P8_38"
+        },
+        {
+            "DATA": "P9_38",
+            "MUX": "P8_40"
+        }
     ],
     "I2C": [
-        # {
-        #     "ADDRESS": 0x40,
-        #     "BUSNUM": 1
-        # },
         {
             "ADDRESS": 0x40,
             "BUSNUM": 2
         },
-        # {
-        #     "ADDRESS": 0x28,
-        #     "BUSNUM": 1
-        # },
         {
             "ADDRESS": 0x28,
             "BUSNUM": 2
         },
-        # {
-        #     "ADDRESS": 0x29,
-        #     "BUSNUM": 1
-        # },
         {
             "ADDRESS": 0x29,
+            "BUSNUM": 2
+        },
+        {
+            "ADDRESS": 0x48,
             "BUSNUM": 2
         },
     ]

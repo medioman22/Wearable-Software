@@ -75,7 +75,7 @@ class <DRIVER>:
     _muxName = None
 
     # The driver object
-    _bno = None
+    _drv = None
 
     # Flag whether the driver is connected
     _connected = False
@@ -157,9 +157,9 @@ class <DRIVER>:
 
     def __init__(self, pinConfig, muxedChannel = None, muxName = None):
         """Init the device."""
-        if (muxedChannel != None):
-            MuxModule.activate(muxName, muxedChannel)           # Activate mux channel
         try:
+            if (muxedChannel != None):
+                MuxModule.activate(muxName, muxedChannel)           # Activate mux channel
 
             if "ADDRESS" in pinConfig and pinConfig["ADDRESS"] == None or pinConfig["ADDRESS"] not in DRIVER_ADDRESS:
                 raise ValueError('address is invalid')
@@ -181,18 +181,21 @@ class <DRIVER>:
             # self._flags = <List of default flags>                 # Set default flag list
             #########################################################
 
-            self._bno = <TEMPLATE_DRIVER>.<DRIVER>(address=self._address,busnum=self._busnum) # Create the driver object
+            self._drv = <TEMPLATE_DRIVER>.<DRIVER>(address=self._address,busnum=self._busnum) # Create the driver object
 
             #####################################################
             # TODO:
             # Try to connect to the driver
             # Fail with error if not possible
             #####################################################
+            if (muxedChannel != None):
+                MuxModule.deactivate(muxName)                       # Deactivate mux
         except:
+            print('Exception in <device> driver init')
             self._connected = False
 
-        if (muxedChannel != None):
-            MuxModule.deactivate(muxName)                       # Deactivate mux
+            if (muxedChannel != None):
+                MuxModule.deactivate(muxName)                       # Deactivate mux
 
 
     def cleanup(self):
@@ -251,10 +254,10 @@ class <DRIVER>:
             beginT = time.time()                                # Save start time of loop cycle
             deltaT = 0
 
-            self.LOCK.acquire()                                 # Lock the driver for loop
-            if (self._muxedChannel != None):
-                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
             try:
+                self.LOCK.acquire()                             # Lock the driver for loop
+                if (self._muxedChannel != None):
+                    MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
 
                 #####################################################
                 # TODO:
@@ -269,12 +272,14 @@ class <DRIVER>:
                 deltaT = endT - beginT                          # Calculate time used for loop cycle
                 self._cycleDuration = deltaT                    # Save time needed for a cycle
 
+                if (self._muxedChannel != None):
+                    MuxModule.deactivate(self._muxName)         # Deactivate mux
+                self.LOCK.release()                             # Release driver
             except:
                 self._connected = False                         # Device disconnected
-
-            if (self._muxedChannel != None):
-                MuxModule.deactivate(self._muxName)             # Deactivate mux
-            self.LOCK.release()                                 # Release driver
+                if (self._muxedChannel != None):
+                    MuxModule.deactivate(self._muxName)         # Deactivate mux
+                self.LOCK.release()                             # Release driver
 
 
             if (deltaT < self._period):

@@ -76,7 +76,10 @@ class Mux:
                     break                                       # Break to next device
             else:                                               # Try new drivers if no existing was found
                 for DRIVER in DRIVERS:                          # Test all drivers
-                    drv = DRIVER(pinConfig)                     # Test the different drivers
+                    try:
+                        drv = DRIVER(pinConfig)                 # Test the different drivers
+                    except:
+                        continue
                     if not drv.getMuxConnected():               # Validate driver connected
                         continue                                # Try next driver until none is left
                     drv.configureDevice()                       # Configure device

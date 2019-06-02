@@ -45,6 +45,7 @@ LOG_LEVEL_SAVE = logging.DEBUG                                  # Set print leve
 # Global variables
 availableBoards = [BeagleboneGreenWirelessBoard()]              # List of available boards
 availableConnections = [BeagleboneGreenWirelessConnection()]    # Utility class
+MAX_POINTS = 180                                                # Max point for diag plot
 
 # Settings
 UDP_IP = "127.0.0.1"                                            # Default host ip
@@ -87,6 +88,12 @@ class MainWindow(QMainWindow):
     _popupPlotsDevices = None
     # Plots used to display multi plot data for popup
     _popupPlots = None
+    # Popup with diag plot
+    _popupDiagPlotWidget = None
+    # Plot used to display multi plot data for popup
+    _popupDiagPlot = None
+    # Update loop durations
+    _updateLoopDurations = None
     # Logger module
     _logger = None
 
@@ -171,6 +178,16 @@ class MainWindow(QMainWindow):
         self._hideHideAct = hideHideAct
         boardMenu.addAction(hideHideAct)
 
+        # Ignore devices
+        ignoreAllAct = QAction('&Ignore All Devices', self)
+        ignoreAllAct.setStatusTip('Ignore All Devices')
+        ignoreAllAct.triggered.connect(self._onIgnoreAll)
+        ignoreNoneAct = QAction('&Ignore No Devices', self)
+        ignoreNoneAct.setStatusTip('Ignore No Devices')
+        ignoreNoneAct.triggered.connect(self._onIgnoreNone)
+        boardMenu.addAction(ignoreAllAct)
+        boardMenu.addAction(ignoreNoneAct)
+
         # Plot points selection menu
         plotPointsSelectionMenu = QMenu('Plot Points', self)
         for plotPoints, plotPointsLabel in enumerate(PLOT_POINTS_SET):
@@ -219,6 +236,12 @@ class MainWindow(QMainWindow):
         showMultiPlotAct.setStatusTip('Plot multiple devices')
         showMultiPlotAct.triggered.connect(self._onShowMultiPlotInPopup)
         boardMenu.addAction(showMultiPlotAct)
+
+        # Diag plot
+        showDiagPlotAct = QAction('&Diagnosis Plot', self)
+        showDiagPlotAct.setStatusTip('Plot update loop duration')
+        showDiagPlotAct.triggered.connect(self._onShowDiagPlotInPopup)
+        boardMenu.addAction(showDiagPlotAct)
         boardMenu.addSeparator()
 
         # Scan menu
@@ -322,6 +345,9 @@ class MainWindow(QMainWindow):
         self._connection.setIp(self._ip)
         self._connection.setPort(self._port)
 
+        # Clear diag
+        self._updateLoopDurations = []
+
         self._logger.info("Connection '{}' loaded".format(type))
 
 
@@ -423,8 +449,10 @@ class MainWindow(QMainWindow):
             self._connection.disconnect()
             self._board.reset()
             self._onStreamStop()
+            self._connection = None
         try:
             self._logger.debug("Start connection attempt …")
+            self.loadConnection(self._board.connectionType())   # Create connection
             self._connection.connect()                          # Start connection attempts
             self._logger.debug("Connection successfully established") # Reaching next line means connection is established
             self._logger.info('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
@@ -520,12 +548,28 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def _onHideHidden(self):
         """Hide hidden devices."""
-        self._showHiddendDevices = False
+        self._showHiddenDevices = False
         self.updateDeviceList()
         self._logger.info("Hide hidden devices")
 
         self._showHideAct.setVisible(True)
         self._hideHideAct.setVisible(False)
+
+    @pyqtSlot()
+    def _onIgnoreAll(self):
+        """Ignore all devices."""
+        for device in self._board.deviceList():
+            device.setIgnore(True)
+        self.updateDeviceList()
+        self._logger.info("Ignore All devices")
+
+    @pyqtSlot()
+    def _onIgnoreNone(self):
+        """Ignore no devices."""
+        for device in self._board.deviceList():
+            device.setIgnore(False)
+        self.updateDeviceList()
+        self._logger.info("Ignore No devices")
 
     @pyqtSlot(QAction)
     def _setPlotPointsListener(self, action):
@@ -604,6 +648,11 @@ class MainWindow(QMainWindow):
                     elif (message.type == 'CycleDuration'):     # Cycle duration message
                         self._logger.debug('Cycle durations: {}', str(message.data['values']))
                         self._interface.setCycleDurationLabel(message.data['values'])
+                        self._updateLoopDurations.append(message.data['values']['update'] * 1000) # in ms
+                        while (MAX_POINTS < len(self._updateLoopDurations)): # Create overflow for past values
+                            self._updateLoopDurations.pop(0)
+                        if self._popupDiagPlot != None:
+                            self._popupDiagPlot.setData(y=np.asarray(self._updateLoopDurations), x=np.arange(len(self._updateLoopDurations))) # Plot values
                     elif (message.type == 'Ping'):              # Ping message
                         self._logger.debug('PING')
 
@@ -659,7 +708,7 @@ class MainWindow(QMainWindow):
 
         # Widget for plot data
         self._popupPlots = []
-        self._popupPlotWidget = pg.PlotWidget(title='Live Data Multi Plot')
+        self._popupPlotWidget = pg.PlotWidget(title='Diagnosis Plot – Update Loop Duration')
         self._popupPlotWidget.setWindowTitle(self._board.name())
         self._popupPlotWidget.showAxis('bottom', False)
         self._popupPlotsDevices = list(filter(lambda x: not x.ignore() and not x.hide(), self._board.deviceList()))
@@ -672,6 +721,22 @@ class MainWindow(QMainWindow):
         self._popupPlotWidget.show()
         self._popupPlotWidget.activateWindow()
         self._popupPlotWidget.raise_()
+
+    def _onShowDiagPlotInPopup(self):
+        """Show diag plot in popup."""
+        if (self._popupDiagPlotWidget != None):                 # Clear popup
+            self._popupDiagPlotWidget.close()
+
+        # Widget for plot data
+        self._popupDiagPlotWidget = pg.PlotWidget(title='Live Data Multi Plot')
+        self._popupDiagPlotWidget.setWindowTitle(self._board.name())
+        self._popupDiagPlotWidget.showAxis('bottom', False)
+        self._updateLoopDurations = []                          # Reset diag
+        self._popupDiagPlot = self._popupDiagPlotWidget.plot(pen=(standardColorSet[0]), name="Update Loop")
+        self._logger.debug("Popup Diag Plot For {}".format(self._board.name()))
+        self._popupDiagPlotWidget.show()
+        self._popupDiagPlotWidget.activateWindow()
+        self._popupDiagPlotWidget.raise_()
 
 
     def saveFileDialog(self):

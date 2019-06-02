@@ -194,6 +194,7 @@ class BNO055:
             # self._connected = self._bno.begin(MODE_MAP[self._mode]) # USE THIS LINE FOR NDOF
             #####################################################
         except:
+            # print('Exception in BNO055 driver init')
             self._connected = False
 
         if (muxedChannel != None):
@@ -409,10 +410,11 @@ class BNO055:
         raise ValueError('duty frequency {} is not allowed'.format(dutyFrequency))
 
 
-    def comparePinConfig(self, pinConfig, muxedChannel = None):
+    def comparePinConfig(self, pinConfig, muxName = None, muxedChannel = None):
         """Check if the same pin config."""
         return ("ADDRESS" in pinConfig and
                 "BUSNUM" in pinConfig and
                 pinConfig["ADDRESS"] == self._address and
                 pinConfig["BUSNUM"] == self._busnum and
+                muxName == self._muxName and
                 muxedChannel == self._muxedChannel)
