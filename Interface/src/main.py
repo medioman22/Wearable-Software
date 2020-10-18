@@ -36,6 +36,7 @@ from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard # B
 from connections.connection import Message                      # Message class
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection # BBGWConnection implementation
 from utils import standardColorSet                              # Import color set
+from SSH.SSHClient import SSHClient                             # Import the SSH Client class for running the python code.
 
 # Logging settings
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
@@ -67,7 +68,8 @@ PLOT_POINTS = '256 Points'                                      # Default plot p
 
 class MainWindow(QMainWindow):
     """The main window of the application."""
-
+    # SSH client
+    _Client = None
     # The selected board
     _board = None
     # The selected boards connection
@@ -98,6 +100,7 @@ class MainWindow(QMainWindow):
     _logger = None
 
     def __init__(self):
+
         """Initialize the main window."""
         super().__init__()
 
