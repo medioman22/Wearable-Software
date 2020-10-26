@@ -51,7 +51,7 @@ MAX_POINTS = 180                                                # Max point for 
 # Settings
 UDP_IP = "127.0.0.1"                                            # Default host ip
 UDP_PORT = 12346                                                # Default host port
-UPDATE_LOOP = 50                                                # Update rate of the stream in [ms]
+UPDATE_LOOP = 100                                                # Update rate of the stream in [ms]
 
 PLOT_POINTS_SET = {                                             # Available plot points
     '32 Points': 32,
@@ -463,10 +463,16 @@ class MainWindow(QMainWindow):
             time.sleep(0.1)                                     # Wait a bit
                                                                 # Send a message to get a list of all devices
             self._connection.sendMessages([self._board.serializeMessage(Message('DeviceList',''))])
+            #time.sleep(0.1)
             self.updateBoardMenu()                              # Refresh UI
         except ConnectionError as e:                            # Error thrown during the connection attempt
+            # self._board.reset()
+            # self._onStreamStop()                                # for smoothing process of connection
+            # self._connection = None
+            # self.loadConnection(self._board.connectionType())
             self._logger.error("Connection error, could not create connection: {}".format(e))
             self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
+  
 
         self.updateUI()
 

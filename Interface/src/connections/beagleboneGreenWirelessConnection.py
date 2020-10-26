@@ -80,9 +80,9 @@ class BeagleboneGreenWirelessConnection(Connection):
         self._state = 'Initialized'
 
         # Start never ending thread
-        communicationThread = threading.Thread(target=self._innerThread, name="CommunicationThread")
-        communicationThread.daemon = True                       # Set thread as daemonic
-        communicationThread.start()
+        self.communicationThread = threading.Thread(target=self._innerThread, name="CommunicationThread")
+        self.communicationThread.daemon = True                       # Set thread as daemonic
+        self.communicationThread.start()
 
     def __del__(self):
         """Class destructor. This is needed in order to stop the background thread."""
@@ -106,7 +106,7 @@ class BeagleboneGreenWirelessConnection(Connection):
                 continue;                                       # Retry on next loop
             try:                                                # Socket timeout will throw an exception
                 data = self._s.recv(1024)
-                if not data: break                              # This means remote location closed socket
+                if not data: continue #break                              # This means remote location closed socket
                 self._logger.debug("Recieved RAW data: " + str(data))
                 m_list = (remainder + data.decode("utf-8")).split("}")  # Add the recieved data to the previous remainder
                 remainder = ""
@@ -133,7 +133,7 @@ class BeagleboneGreenWirelessConnection(Connection):
                 self._logger.error('Socket Error occurred: ' + str(exc))
                 print("Error Occured: " + str(exc))
                 self._state = 'Disconnected'
-                break
+                continue #break
             except Exception as exc:                            # Log generic errors
                 self._logger.error('General Error occurred: ' + str(exc) + ' rem: ' + str(remainder))
             while len(self._sendQueue) > 0:                     # Pop all elements from the sending queue and send them all
