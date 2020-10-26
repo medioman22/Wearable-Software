@@ -353,10 +353,15 @@ class MainWindow(QMainWindow):
 
         self._logger.info("Connection '{}' loaded".format(type))
 
-
-
-
-
+    def RunPythonScript(self):
+        if (self._Client == None):
+            self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
+            self._Client.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
+            time.sleep(2)
+        elif(not self._Client.state):
+            self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
+            self._Client.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
+            time.sleep(2)
 
     def updateUI(self):
         """Update all ui elements."""
@@ -411,6 +416,7 @@ class MainWindow(QMainWindow):
             if reply == QMessageBox.Yes:
                 # Terminate connection and stop data streams
                 self._connection.disconnect()
+                self._Client.close() #closing the python code for Firmware
                 self._board.reset()
                 self._onStreamStop()
 
@@ -446,6 +452,8 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def _connectListener(self):
+        #execute the Firmware code
+        self.RunPythonScript()
         """Try to connect listener."""
         if (self._connection.status() == 'Connected'):          # Do a reconnect if already connected
             self._logger.info("Terminate existing connection before reconnecting")

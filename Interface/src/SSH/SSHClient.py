@@ -12,6 +12,7 @@ class SSHClient:
     password = ""
     host = ""
     port = ""
+    state = False
 
     def __init__(self, host, port, username, password, key=None, passphrase=None):
         self.username = username
@@ -30,7 +31,7 @@ class SSHClient:
                 self.client.connect(self.host, self.port, username=self.username, password=self.password, pkey=None, timeout=self.TIMEOUT)
                 time.sleep(0.1)
                 self.KillProcess()
-                
+
             self.stdin = None
             self.stdout = None
             self.stderr = None
@@ -46,6 +47,7 @@ class SSHClient:
         if feed_password:
             stdin.write(self.password + "\n")
             stdin.flush()
+        self.state = False
 
     def execute(self, command, sudo=False):
         feed_password = False
@@ -57,23 +59,24 @@ class SSHClient:
         if feed_password:
             self.stdin.write(self.password + "\n")
             self.stdin.flush()
+        self.state = True
 
         
 
 
 
-if __name__ == "__main__":
-    SSH = SSHClient(host='192.168.7.2', port=22, username='debian', password='temppwd') 
-    try:
-        #ret = threading.Thread(target= client.execute,args=('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', True))
-        #ret.start()
-        SSH.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
-        #time.sleep(1)
-        SSH.close()
+# if __name__ == "__main__":
+#     SSH = SSHClient(host='192.168.7.2', port=22, username='debian', password='temppwd') 
+#     try:
+#         #ret = threading.Thread(target= client.execute,args=('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', True))
+#         #ret.start()
+#         SSH.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
+#         #time.sleep(1)
+#         SSH.close()
         
-        #print("  ".join(ret["out"]), "  E ".join(ret["err"]), ret["retval"])
-    except KeyboardInterrupt:
-        #ret._stop()
-        SSH.close() 
+#         #print("  ".join(ret["out"]), "  E ".join(ret["err"]), ret["retval"])
+#     except KeyboardInterrupt:
+#         #ret._stop()
+#         SSH.close() 
 
 
