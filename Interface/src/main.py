@@ -357,11 +357,11 @@ class MainWindow(QMainWindow):
         if (self._Client == None):
             self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
             self._Client.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
-            time.sleep(2)
+            time.sleep(2.2)
         elif(not self._Client.state):
             self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
             self._Client.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
-            time.sleep(2)
+            time.sleep(2.2)
 
     def updateUI(self):
         """Update all ui elements."""
@@ -452,8 +452,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def _connectListener(self):
-        #execute the Firmware code
-        self.RunPythonScript()
+        self.RunPythonScript()                                  #execute the Firmware code
         """Try to connect listener."""
         if (self._connection.status() == 'Connected'):          # Do a reconnect if already connected
             self._logger.info("Terminate existing connection before reconnecting")
@@ -471,13 +470,8 @@ class MainWindow(QMainWindow):
             time.sleep(0.1)                                     # Wait a bit
                                                                 # Send a message to get a list of all devices
             self._connection.sendMessages([self._board.serializeMessage(Message('DeviceList',''))])
-            #time.sleep(0.1)
             self.updateBoardMenu()                              # Refresh UI
         except ConnectionError as e:                            # Error thrown during the connection attempt
-            # self._board.reset()
-            # self._onStreamStop()                                # for smoothing process of connection
-            # self._connection = None
-            # self.loadConnection(self._board.connectionType())
             self._logger.error("Connection error, could not create connection: {}".format(e))
             self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
   
