@@ -36,6 +36,7 @@ from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard # B
 from connections.connection import Message                      # Message class
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection # BBGWConnection implementation
 from utils import standardColorSet                              # Import color set
+from SSH.SSHClient import SSHClient                             # Import the SSH Client class for running the python code.
 
 # Logging settings
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
@@ -67,6 +68,8 @@ PLOT_POINTS = '256 Points'                                      # Default plot p
 
 class MainWindow(QMainWindow):
     """The main window of the application."""
+    # SSH client
+    _Client = None
     # The selected board
     _board = None
     # The selected boards connection
@@ -350,6 +353,16 @@ class MainWindow(QMainWindow):
 
         self._logger.info("Connection '{}' loaded".format(type))
 
+    def RunPythonScript(self):
+        if (self._Client == None):
+            self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
+            self._Client.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
+            time.sleep(2.2)
+        elif(not self._Client.state):
+            self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
+            self._Client.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
+            time.sleep(2.2)
+
     def updateUI(self):
         """Update all ui elements."""
         self.updateStatusValues()
@@ -403,6 +416,7 @@ class MainWindow(QMainWindow):
             if reply == QMessageBox.Yes:
                 # Terminate connection and stop data streams
                 self._connection.disconnect()
+                self._Client.close() #closing the python code for Firmware
                 self._board.reset()
                 self._onStreamStop()
 
@@ -438,6 +452,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def _connectListener(self):
+        self.RunPythonScript()                                  #execute the Firmware code
         """Try to connect listener."""
         if (self._connection.status() == 'Connected'):          # Do a reconnect if already connected
             self._logger.info("Terminate existing connection before reconnecting")
