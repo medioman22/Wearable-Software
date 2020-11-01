@@ -353,15 +353,37 @@ class MainWindow(QMainWindow):
 
         self._logger.info("Connection '{}' loaded".format(type))
 
+    #This function command the board to start the code
     def RunPythonScript(self):
-        if (self._Client == None):
+        if (self._Client == None or not self._Client.state):
             self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
-            self._Client.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
-            time.sleep(2.2)
-        elif(not self._Client.state):
-            self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
-            self._Client.execute('python Salar/Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
-            time.sleep(2.2)
+            self._Client.execute('python Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
+    #This function tried to connect to the board
+    def EstablishConnection(self):
+        """Try to connect listener."""
+        if (self._connection.status() == 'Connected'):          # Do a reconnect if already connected
+            self._logger.info("Terminate existing connection before reconnecting")
+            self._connection.disconnect()
+            self._board.reset()
+            self._onStreamStop()
+            self._connection = None
+        try:
+            self._logger.debug("Start connection attempt …")
+            self.loadConnection(self._board.connectionType())   # Create connection
+            self._connection.connect()                          # Start connection attempts
+            self._logger.debug("Connection successfully established") # Reaching next line means connection is established
+            self._logger.info('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
+            self._statusBar.showMessage('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
+            time.sleep(0.1)                                     # Wait a bit
+                                                                # Send a message to get a list of all devices
+            self._connection.sendMessages([self._board.serializeMessage(Message('DeviceList',''))])
+            self.updateBoardMenu()                              # Refresh UI
+        except ConnectionError as e:                            # Error thrown during the connection attempt
+            if (self._Client.state):
+                self._connection._state = "Connecting ..."
+            self._logger.error("Connection error, could not create connection: {}".format(e))
+            self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
+
 
     def updateUI(self):
         """Update all ui elements."""
@@ -428,11 +450,6 @@ class MainWindow(QMainWindow):
 
 
 
-
-
-
-
-
     @pyqtSlot()
     def _showConnectionDialogListener(self):
         """Show connection dialog listener."""
@@ -453,28 +470,8 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def _connectListener(self):
         self.RunPythonScript()                                  #execute the Firmware code
-        """Try to connect listener."""
-        if (self._connection.status() == 'Connected'):          # Do a reconnect if already connected
-            self._logger.info("Terminate existing connection before reconnecting")
-            self._connection.disconnect()
-            self._board.reset()
-            self._onStreamStop()
-            self._connection = None
-        try:
-            self._logger.debug("Start connection attempt …")
-            self.loadConnection(self._board.connectionType())   # Create connection
-            self._connection.connect()                          # Start connection attempts
-            self._logger.debug("Connection successfully established") # Reaching next line means connection is established
-            self._logger.info('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
-            self._statusBar.showMessage('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
-            time.sleep(0.1)                                     # Wait a bit
-                                                                # Send a message to get a list of all devices
-            self._connection.sendMessages([self._board.serializeMessage(Message('DeviceList',''))])
-            self.updateBoardMenu()                              # Refresh UI
-        except ConnectionError as e:                            # Error thrown during the connection attempt
-            self._logger.error("Connection error, could not create connection: {}".format(e))
-            self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
-  
+        
+        self.EstablishConnection()                              #Connect to the board
 
         self.updateUI()
 
@@ -591,11 +588,11 @@ class MainWindow(QMainWindow):
         self._logger.info("Set plot {}".format(action.text()))
 
 
-
-
-
     @pyqtSlot()
     def connectionIteration(self):
+        if (self._Client.state and self._connection._state != "Connected"):
+            self.EstablishConnection()
+            self.updateUI()
         """Next connection iteration listener."""
         if (self._connection.status() == 'Connected'):          # Only do something when there is a connection
                                                                 # Get the new messages from the connection and unserialize them
@@ -696,6 +693,7 @@ class MainWindow(QMainWindow):
 
             if (len(messagesSend) > 0):                         # Send and serialize messages
                 self._connection.sendMessages(list(map(lambda x: self._board.serializeMessage(x), messagesSend)))
+        
 
             self.update()                                       # Update all GUI
             """Ping"""
