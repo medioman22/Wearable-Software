@@ -28,6 +28,7 @@ from PyQt5.QtGui import (   QFont,                              # Media elements
                             QIcon)
 import pyqtgraph as pg                                          # Custom graphics package
 import numpy as np                                              # Number utility package
+import pandas as pd
 from interface import InterfaceWidget                           # Custom interface widget
 from connectionDialog import ConnectionDialog                   # Dialog widget for connection settings
 from udpBroadcast import UDPBroadcast                           # UDP Broadcast functionality
@@ -485,7 +486,7 @@ class MainWindow(QMainWindow):
         if (fileName != None):                                  # Prepare file if one is selected
             with open(fileName, "w") as fh:
                 self._logger.info("Stream data to file '{}'".format(fileName))
-                fh.write(','.join(['Device','Dimension','Date','Value']) + '\n')
+                fh.write(','.join(['Device','Dimension','Time [ms]','Value']) + '\n')
                 self._board.setFileName(fileName)
                 self._streamMenu.menuAction().setVisible(False)
                 self._streamStopAct.setVisible(True)
@@ -508,6 +509,11 @@ class MainWindow(QMainWindow):
             del self._broadcast
             self._broadcast = None
         elif (self._board.fileName() != None):                  # Stop all streaming to file
+            df = pd.read_csv(self._board.fileName())            
+            df = df.drop_duplicates(ignore_index=True)          # Removes duplicates in file
+            df['Time [ms]'] = 1000*(df['Time [ms]'] - df['Time [ms]'].min())    # Removes timestamp offset 
+            df = df.pivot_table(values='Value',index = 'Time [ms]',columns = ['Device','Dimension'])  # Reorganize data
+            df.to_csv(self._board.fileName())
             self._board.setFileName(None)
         self._logger.info("Data streaming has been stopped")
 

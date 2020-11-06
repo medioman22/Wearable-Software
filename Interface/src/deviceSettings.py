@@ -5,6 +5,7 @@
 import sys                                                      # System package
 import logging                                                  # Logging package
 import functools                                                # Functools for extended usage
+import pandas as pd
 from PyQt5.QtCore import (  Qt,                                 # Core functionality from Qt
                             QSize,
                             pyqtSignal,
@@ -124,7 +125,7 @@ class DeviceSettingsWidget(QWidget):
             dataLayout = QVBoxLayout()
             dataLayout.addWidget(QLabel('Input Data'))
             for dim in range(self._device.dim()):
-                dataLabel = QLabel('–')
+                dataLabel = QLabel('-')
                 dataLabel.setMinimumWidth(180)
                 self._dataWidgets.append(dataLabel)
                 dataLayout.addWidget(dataLabel)
@@ -405,7 +406,9 @@ class DeviceSettingsWidget(QWidget):
         fileName = self.saveFileDialog()                        # Get file location
         if (fileName != None):                                  # Prepare file if one is selected
             with open(fileName, "w") as fh:
-                fh.write(','.join((['Date'] + list('{:d}'.format(el) for el in range(self._device.dim())))) + '\n')
+                #fh.write(','.join((['Date'] + list('{:d}'.format(el) for el in range(self._device.dim())))) + '\n')
+                cols = [dimMap + ' ' + '[' + dimUnit + ']' for dimMap,dimUnit in zip(self._device.about()['dimMap'], self._device.about()['dimUnit'])]
+                fh.write(','.join((['Time [ms]'] + cols)) + '\n')
                 self._device.setFileName(fileName)
                 self._saveButton.setVisible(False)
                 self._saveStopButton.setVisible(True)
@@ -414,6 +417,9 @@ class DeviceSettingsWidget(QWidget):
     @pyqtSlot()
     def _onSaveStopPlot(self):
         """Stop saving the plot."""
+        df = pd.read_csv(self._device.fileName())               # Reads final file and removes timestamp offset
+        df['Time [ms]'] = 1000*(df['Time [ms]'] - df['Time [ms]'][0])                  
+        df.to_csv(self._device.fileName())
         self._device.setFileName(None)
         self._saveStopButton.setVisible(False)
         self._streamGifLabel.setVisible(False)
