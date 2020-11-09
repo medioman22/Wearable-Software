@@ -126,10 +126,10 @@ PIN_MAP = {
             "DATA": "P8_19",
             "CHANGE_DUTY_FREQUENCY": False
         },
-        {
-            "DATA": "P9_42",
-            "CHANGE_DUTY_FREQUENCY": True
-        },
+        # {
+        #     "DATA": "P9_42",
+        #     "CHANGE_DUTY_FREQUENCY": True
+        # },
     ],
     "ADC": [
         {
