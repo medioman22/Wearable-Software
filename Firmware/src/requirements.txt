@@ -1,4 +1,3 @@
-Adafruit-BBIO
 Adafruit-GPIO
 serial
 termcolor
