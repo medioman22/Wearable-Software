@@ -406,7 +406,6 @@ class DeviceSettingsWidget(QWidget):
         fileName = self.saveFileDialog()                        # Get file location
         if (fileName != None):                                  # Prepare file if one is selected
             with open(fileName, "w") as fh:
-                #fh.write(','.join((['Date'] + list('{:d}'.format(el) for el in range(self._device.dim())))) + '\n')
                 cols = [dimMap + ' ' + '[' + dimUnit + ']' for dimMap,dimUnit in zip(self._device.about()['dimMap'], self._device.about()['dimUnit'])]
                 fh.write(','.join((['Time [ms]'] + cols)) + '\n')
                 self._device.setFileName(fileName)
