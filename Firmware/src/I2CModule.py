@@ -4,6 +4,8 @@
 """
 SoftWEAR I2C module. Adds MUX features and hardware detection to normal I2C.
 """
+import board
+import busio
 
 from Config import PIN_MAP                                      # SoftWEAR Config module.
 from MuxModule import GetMux                                    # SoftWEAR MUX module.
@@ -11,9 +13,10 @@ from MuxModule import GetMux                                    # SoftWEAR MUX m
 from drivers.I2C_BNO055 import BNO055                           # Driver module for the BNO055 device
 from drivers.I2C_PCA9685 import PCA9685                         # Driver module for the PCA9685 device
 from drivers.I2C_ADS1015 import ADS1015                         # Driver module for the ADS1015 device
+
 #import I2C_MPU6050                                             # Driver for the MPU6050 device
 
-
+i2c = busio.I2C(board.SCL, board.SDA)
 """
 DEDICATED I2C MULTIPLEXER
 https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/overview
@@ -78,7 +81,7 @@ class I2C:
                         break                                   # Break to next device
                 else:                                           # Try new drivers if no existing was found
                     for DRIVER in DRIVERS:                      # Test all drivers
-                        drv = DRIVER(pinConfig)                 # Test the different drivers
+                        drv = DRIVER(i2c,pinConfig)                 # Test the different drivers
                         if not drv.getDeviceConnected():        # Validate driver connected
                             continue                            # Try next driver until none is left
                         drv.configureDevice()                   # Configure device
@@ -133,7 +136,7 @@ class I2C:
                                     break                       # Break to next device
                             else:                               # Try new drivers if no existing was found
                                 for DRIVER in DRIVERS:          # Test all drivers
-                                    drv = DRIVER(pinConfig, muxedChannel, muxName) # Test the different drivers
+                                    drv = DRIVER(i2c, pinConfig, muxedChannel, muxName) # Test the different drivers
                                     if not drv.getDeviceConnected(): # Validate driver connected
                                         continue                # Try next driver until none is left
                                     drv.configureDevice()       # Configure device

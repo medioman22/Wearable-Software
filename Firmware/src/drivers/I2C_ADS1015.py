@@ -7,9 +7,11 @@ with the device via I2C and implements the basic functions for integrating into
 the SoftWEAR package.
 """
 import time                                                     # Imported for delay reasons
-import drivers._ADS1X15 as ADS1015_DRIVER                       # Import official driver
+#import drivers._ADS1X15 as ADS1015_DRIVER                       # Import official driver
+import adafruit_ads1x15.ads1015 as ADS1015_DRIVER
 import threading                                                # Threading class for the threads
 from MuxModule import GetMux                                    # SoftWEAR MUX module.
+
 
 # Mux Module to switch channels
 MuxModule = GetMux()
@@ -130,7 +132,7 @@ class ADS1015:
     # Lock for the driver, used in scan and loop thread
     LOCK = threading.Lock()
 
-    def __init__(self, pinConfig, muxedChannel = None, muxName = None):
+    def __init__(self, i2c, pinConfig, muxedChannel = None, muxName = None):
         """Init the device."""
         if (muxedChannel != None):
             MuxModule.activate(muxName, muxedChannel)           # Activate mux channel
@@ -150,7 +152,7 @@ class ADS1015:
 
             self._frequency = self._settings['frequencies'][6]      # Set default frequency
 
-            self._drv = ADS1015_DRIVER.ADS1015(address=self._address,busnum=self._busnum) # Create the driver object
+            self._drv = ADS1015_DRIVER.ADS1015(i2c=i2c, address=self._address) # Create the driver object
 
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                       # Deactivate mux
@@ -177,7 +179,7 @@ class ADS1015:
         try:
             if (self._muxedChannel != None):
                 MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
-            self._connected = self._drv.read_adc(0) != None     # Device is connected and has no error
+            self._connected = self._drv.read(0) != None     # Device is connected and has no error
             if (self._muxedChannel != None):
                 MuxModule.deactivate(self._muxName)             # Deactivate mux
         except:
@@ -216,7 +218,7 @@ class ADS1015:
                     MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
 
                                                                 # Read all values
-                self._currentValue = [self._drv.read_adc(0), self._drv.read_adc(1), self._drv.read_adc(2), self._drv.read_adc(3)]
+                self._currentValue = [self._drv.read(0), self._drv.read(1), self._drv.read(2), self._drv.read(3)]
 
                 self._values.append([time.time(), self._currentValue]) # Save timestamp and value
 

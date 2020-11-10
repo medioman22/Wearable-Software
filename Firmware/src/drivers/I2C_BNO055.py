@@ -7,7 +7,7 @@ with the device via I2C and implements the basic functions for integrating into
 the SoftWEAR package.
 """
 import time                                                     # Imported for delay reasons
-import drivers._BNO055 as BNO055_DRIVER                         # Import official driver
+import adafruit_bno055                                          # Import official driver
 import threading                                                # Threading class for the threads
 
 from MuxModule import GetMux                                    # SoftWEAR MUX module.
@@ -16,7 +16,7 @@ from MuxModule import GetMux                                    # SoftWEAR MUX m
 MuxModule = GetMux()
 
 # Unique identifier of the sensor
-IDENTIFIER = BNO055_DRIVER.BNO055_ID
+IDENTIFIER = adafruit_bno055._CHIP_ID
 
 
 # Constants
@@ -26,20 +26,20 @@ BNO055_BUSNUM     = [1, 2]
 
 # Mode Map
 MODE_MAP = {
-    'ACCONLY':      BNO055_DRIVER.OPERATION_MODE_ACCONLY,
-    'MAGONLY':      BNO055_DRIVER.OPERATION_MODE_MAGONLY,
-    'GYRONLY':      BNO055_DRIVER.OPERATION_MODE_GYRONLY,
-    'ACCMAG':       BNO055_DRIVER.OPERATION_MODE_ACCMAG,
-    'ACCGYRO':      BNO055_DRIVER.OPERATION_MODE_ACCGYRO,
-    'MAGGYRO':      BNO055_DRIVER.OPERATION_MODE_MAGGYRO,
-    'AMG':          BNO055_DRIVER.OPERATION_MODE_AMG,
-    'IMU':          BNO055_DRIVER.OPERATION_MODE_IMUPLUS,
-    'COMPASS':      BNO055_DRIVER.OPERATION_MODE_COMPASS,
-    'M4G':          BNO055_DRIVER.OPERATION_MODE_M4G,
-    'NDOF_FMC_OFF': BNO055_DRIVER.OPERATION_MODE_NDOF_FMC_OFF,
-    #'NDOF':         BNO055_DRIVER.OPERATION_MODE_NDOF
-    '*EULONLY':     BNO055_DRIVER.OPERATION_MODE_NDOF_FMC_OFF,
-    '*QUATONLY':    BNO055_DRIVER.OPERATION_MODE_NDOF_FMC_OFF,
+    'ACCONLY':      adafruit_bno055.ACCONLY_MODE,
+    'MAGONLY':      adafruit_bno055.MAGONLY_MODE,
+    'GYRONLY':      adafruit_bno055.GYRONLY_MODE,
+    'ACCMAG':       adafruit_bno055.ACCMAG_MODE,
+    'ACCGYRO':      adafruit_bno055.ACCGYRO_MODE,
+    'MAGGYRO':      adafruit_bno055.MAGGYRO_MODE,
+    'AMG':          adafruit_bno055.AMG_MODE,
+    'IMU':          adafruit_bno055.IMUPLUS_MODE,
+    'COMPASS':      adafruit_bno055.COMPASS_MODE,
+    'M4G':          adafruit_bno055.M4G_MODE,
+    'NDOF_FMC_OFF': adafruit_bno055.NDOF_FMC_OFF_MODE,
+    #'NDOF':        adafruit_bno055.NDOF_MODE
+    '*EULONLY':     adafruit_bno055.NDOF_FMC_OFF_MODE,
+    '*QUATONLY':    adafruit_bno055.NDOF_FMC_OFF_MODE,
 }
 ################################################################
 # WARNING: NDOF                                                #
@@ -162,7 +162,7 @@ class BNO055:
     # Lock for the driver, used in scan and loop thread
     LOCK = threading.Lock()
 
-    def __init__(self, pinConfig, muxedChannel = None, muxName = None):
+    def __init__(self, i2c, pinConfig, muxedChannel = None, muxName = None):
         """Device supports an address pin, one can represent this with a 'True' value of ADRSet."""
         if (muxedChannel != None):
             MuxModule.activate(muxName, muxedChannel)           # Activate mux channel
@@ -187,9 +187,9 @@ class BNO055:
             self._flags = []                                        # Set default flag list
             # self._bno = BNO055_DRIVER.BNO055(rst='P9_12')         # Use that line for hardware reset pin
                                                                     # otherwise software reset is used
-            self._bno = BNO055_DRIVER.BNO055(address=self._address,busnum=self._busnum) # Create the driver object
+            self._bno = adafruit_bno055.BNO055_I2C(i2c, self._address) # Create the driver object
 
-            self._connected = self._bno.begin()                     # Connect to the device
+            #self._connected = self._bno.begin()                     # Connect to the device
             #####################################################
             # self._connected = self._bno.begin(MODE_MAP[self._mode]) # USE THIS LINE FOR NDOF
             #####################################################
@@ -212,10 +212,12 @@ class BNO055:
         try:
             if (self._muxedChannel != None):
                 MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
-            status, self_test, error = self._bno.get_system_status(False) # Get status
-            self._connected = (error == 0)                      # Device is connected and has no error
+            #status, self_test, error = self._bno.get_system_status(False) # Get status
+            #self._connected = (error == 0)                      # Device is connected and has no error
             if (self._muxedChannel != None):
                 MuxModule.deactivate(self._muxName)             # Deactivate mux
+            if self._bno != None:
+                self._connected = True
         except:
             self._connected = False                             # Device disconnected
             if (self._muxedChannel != None):
@@ -228,7 +230,7 @@ class BNO055:
         try:
             if (self._muxedChannel != None):
                 MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
-            self._bno.set_mode(MODE_MAP[self._mode])            # Set device as to default mode
+            self._bno.mode = MODE_MAP[self._mode]                     # Set device as to default mode
             if (self._muxedChannel != None):
                 MuxModule.deactivate(self._muxName)             # Deactivate mux
         except:                                                 # Device disconnected in the meantime
@@ -257,17 +259,17 @@ class BNO055:
                 qua = [None,None,None,None]
                 tem = [None]
                 if self._mode in ['ACCONLY', 'ACCMAG', 'ACCGYRO', 'AMG', 'IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
-                    acc = list(self._bno.read_accelerometer())  # Get acc data
+                    acc = list(self._bno.acceleration)  # Get acc data
                 if self._mode in ['MAGONLY', 'ACCMAG', 'MAGGYRO', 'AMG', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF']:
-                    mag = list(self._bno.read_magnetometer())   # Get mag data
+                    mag = list(self._bno.magnetic)   # Get mag data
                 if self._mode in ['GYRONLY', 'ACCGYRO', 'MAGGYRO', 'AMG', 'IMU', 'NDOF_FMC_OFF', 'NDOF']:
-                    gyr = list(self._bno.read_gyroscope())      # Get gyr data
+                    gyr = list(self._bno.gyro)       # Get gyr data
                 if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF', '*EULONLY']:
-                    eul = list(self._bno.read_euler())          # Get eul data
+                    eul = list(self._bno.read_euler)          # Get eul data
                 if self._mode in ['IMU', 'COMPASS', 'M4G', 'NDOF_FMC_OFF', 'NDOF', '*QUATONLY']:
-                    qua = list(self._bno.read_quaternion())     # Get qua data
+                    qua = list(self._bno.quaternion)     # Get qua data
                 if 'TEMPERATURE' in self._flags:
-                    tem = [self._bno.read_temp()]               # Get tem data
+                    tem = [self._bno.temperature]               # Get tem data
                 self._currentValue = acc + mag + gyr + eul + qua + tem
 
                 self._values.append([time.time(), self._currentValue]) # Save timestamp and value
@@ -361,7 +363,7 @@ class BNO055:
             try:
                 if (self._muxedChannel != None):
                     MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
-                self._bno.set_mode(MODE_MAP[self._mode])            # Set device to mode
+                self._bno.mode = MODE_MAP[self._mode]            # Set device to mode
                 if (self._muxedChannel != None):
                     MuxModule.deactivate(self._muxName)             # Deactivate mux
             except:                                                 # Device disconnected in the meantime
