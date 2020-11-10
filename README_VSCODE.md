@@ -36,6 +36,7 @@ This guide allows to debug or run Wearable-Software project on the 10.3 version 
 - Open a CLI on your computer and type `ssh debian@192.168.8.1`.
 
 *You might get the following warning: "Remote host identification has changed". In this case, find the known_host file on your computer (usually in ~/.ssh folder) and remove “192.168.7.2 ecdsa-sha2-nistp256” or equivalent so that only keys are left.*
+
 - Type `yes` when asked “Are you sure you want to continue connecting?”.
 - Type the built-in password of the board `temppwd`.
 
@@ -46,7 +47,7 @@ At this point, you should get to the CLI of the board.
 ### Connect Board to WiFi/Hotspot
 - Type the following commands in the board's CLI: `sudo connmanctl`, enter `temppwd` if necessary, `enable wifi`, `services`. 
 - Copy the WiFi key of the WiFi that you want to connect to (example of key: wifi_xxxxxxxxxx_managed_psk).
-- Type `agent on` and `connect wifi_xxxxxxxxxx_managed_psk` where you replace the WiFi key with your own key.
+- Type `agent on` and `connect wifi_xxxxxxxxxx_managed_psk` where you replace the WiFi key with your own key. Enter the WiFi password.
 - Type `exit` to quit the WiFi manager and close the ssh connection (Ctrl C).
 
 *More information [here](https://www.digikey.com/en/maker/blogs/2017/how-to-setup-wifi-on-the-beaglebone-black-wireless)*
@@ -94,7 +95,10 @@ At this point you should not need to enter a password each time you connect with
 ### Run with VSCode
 - Open `Wearable-Software/Interface/src` folder on your computer with VSCode. 
 - Connect to the board with the ssh tab (this will automatically open a new window) and open `Wearable-Software/Firmware/src` folder.
-- In the firmware window (the board), run `Main.py`
+- In the firmware window (the board), run `Main.py`.
+
+*If it is not done automatically, you might need to install microsoft python extension on the board with VSCode to be able to select an interpreter (select Python3)*
+
 - In the interface window (your computer), run `main.py`. The user interface should show up.
 - Press connect on the user interface.
 
