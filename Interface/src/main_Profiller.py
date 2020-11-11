@@ -537,7 +537,7 @@ class MainWindow(QMainWindow):
         #cmd = 'cmd /c snakeviz '+"Profiller\\"+self._interface._ProfillerFile 
         #os.system('cmd /c snakeviz '+"Profiller\\"+self._interface._ProfillerFile)
         #This option is for gprof2dot
-        if 'win' in sys.platform:
+        if 'win' in sys.platform and not "-- Select" in self._interface._ProfillerFile:
             if not os.path.isfile('Profiller\\'+self._interface._ProfillerFile.replace('.pstats','.png')):
                 cmd = 'cmd /c gprof2dot -f pstats Profiller\\'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller\\'+self._interface._ProfillerFile.replace('.pstats','.png')
                 os.system(cmd)
