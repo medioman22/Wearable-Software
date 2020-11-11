@@ -36,11 +36,18 @@ class InterfaceWidget(QWidget):
     configureConnectionClicked = pyqtSignal()
     # Signal for connect
     connect = pyqtSignal()
+    # Signal for starting the profiller
+    StartProfiller = pyqtSignal()
+    # Signal for Stopping the profiller
+    StopProfiller = pyqtSignal()
+    # Signal for visualizing the selected file
+    visualizeProfiler = pyqtSignal()
+    # Signal for updating profiller list
+    updateProfillerFile = pyqtSignal()
     # Signal for mode change
     sendMessage = pyqtSignal(Message)
     # Signal for update
     update = pyqtSignal()
-
     # Board label
     _boardLabel = None
     # Board status label
@@ -55,6 +62,9 @@ class InterfaceWidget(QWidget):
     _deviceList = None
     # Board Device list filter
     _deviceListFilter = None
+    # Profiller File Selected
+    _ProfillerFile = None
+    _ProfillerFiles = None #Combobox
     # Selected device
     _selectedDeviceName = None
     # Logger module
@@ -190,10 +200,47 @@ class InterfaceWidget(QWidget):
         groupLayout.setLayout(informationGridLayout)
         self._groupLayout = groupLayout
 
+        # Profiler Grid Layout
+        #Combox for displaying the available profiller in the folder
+        self._ProfillerFiles = QComboBox()
+        self._ProfillerFiles.addItem("-- Select The File To Visualize --")
+        self._ProfillerFiles.setCurrentIndex(0);
+        #self.ProfillerFiles.item
+        self._ProfillerFiles.currentTextChanged.connect(self._onProfillerSelected)
+
+        # Buttons are added
+        UpdateProfillerFiles = QPushButton("Update")
+        UpdateProfillerFiles.clicked.connect(self._onUpdateProfillerFile)
+        VisualizeBotton  = QPushButton("Visualize")
+        VisualizeBotton.clicked.connect(self._onVisualizeProfiller)
+        StartButton = QPushButton("Start")
+        StartButton.clicked.connect(self.onStartProfiller)
+        StopButton = QPushButton("Stop")
+        StopButton.clicked.connect(self.onStopProfiller)
+        self._logger.debug("Profiller UI buttons created")
+
+        ProfillerStatusLabel = QLabel('Status: <b>Offline</b>')
+        ProfillerStatusLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self._ProfillerStatusLabel = ProfillerStatusLabel
+        
+        ProfilerGridLayout = QGridLayout()
+        ProfilerGridLayout.addWidget(ProfillerStatusLabel,           0, 0, Qt.AlignLeft)
+        ProfilerGridLayout.addWidget(UpdateProfillerFiles,           0, 1, Qt.AlignLeft)
+        ProfilerGridLayout.addWidget(self._ProfillerFiles,           0, 2, Qt.AlignCenter)
+        ProfilerGridLayout.addWidget(StartButton,                    1, 0, Qt.AlignLeft)
+        ProfilerGridLayout.addWidget(StopButton,                     1, 1, Qt.AlignLeft)
+        ProfilerGridLayout.addWidget(VisualizeBotton,                1, 2, Qt.AlignCenter)
+
+        profillergrouplayout = QGroupBox('Profilling')
+        profillergrouplayout.setLayout(ProfilerGridLayout)
+        self._profillergrouplayout = profillergrouplayout
+
         # Grid for the interface layout
         bodyGridLayout = QGridLayout()
         bodyGridLayout.addWidget(boardPixmapLabel,      0, 0, Qt.AlignCenter)
         bodyGridLayout.addWidget(groupLayout,           0, 1, Qt.AlignLeft)
+        #Profiller
+        bodyGridLayout.addWidget(profillergrouplayout,  1, 1, Qt.AlignLeft)
         bodyGridLayout.addWidget(deviceListFilter,      1, 0, Qt.AlignLeft)
         bodyGridLayout.addWidget(deviceList,            2, 0, Qt.AlignLeft)
         bodyGridLayout.addWidget(deviceStack,           2, 1, Qt.AlignLeft)
@@ -226,6 +273,11 @@ class InterfaceWidget(QWidget):
     def setStatus(self, status):
         """Set states label."""
         self._boardStatusLabel.setText('Status <b>{}</b>'.format(status))
+        self._logger.debug("Interface UI status updated")
+    
+    def setProfillerStatus(self,status):
+        """Set states label."""
+        self._ProfillerStatusLabel.setText('Status <b>{}</b>'.format(status))
         self._logger.debug("Interface UI status updated")
 
     def setIpAndPort(self, ip, port):
@@ -316,6 +368,23 @@ class InterfaceWidget(QWidget):
     def onConnect(self):
         """Listen to configure connection click event."""
         self.connect.emit()
+    @pyqtSlot()
+    def onStartProfiller(self):
+        """Listen to Start Profiller click event."""
+        self.StartProfiller.emit()
+    @pyqtSlot()
+    def _onVisualizeProfiller(self):
+        """Listen to visualize Profiller click event."""
+        self.visualizeProfiler.emit()
+    @pyqtSlot()
+    def _onUpdateProfillerFile(self):
+        """Listen to update Profiller click event."""
+        self.updateProfillerFile.emit()
+
+    @pyqtSlot()
+    def onStopProfiller(self):
+        """Listen to Stop Profiller click event."""
+        self.StopProfiller.emit()
     @pyqtSlot(QListWidgetItem)
     def onSelectDevice(self, listItem):
         """Listen to device selection event."""
@@ -337,6 +406,13 @@ class InterfaceWidget(QWidget):
     def _onDeviceListFilter(self, filter):
         """Select device list filter listener."""
         self._deviceListFilter = filter
+        self.update.emit()
+
+    #for the profiller
+    @pyqtSlot(str)
+    def _onProfillerSelected(self, SelectedFile):
+        """Select device list filter listener."""
+        self._ProfillerFile = SelectedFile
         self.update.emit()
 
 
