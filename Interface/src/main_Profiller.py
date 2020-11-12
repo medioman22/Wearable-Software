@@ -551,6 +551,13 @@ class MainWindow(QMainWindow):
             img = mpimg.imread('Profiller\\'+self._interface._ProfillerFile.replace('.pstats','.png'))
             plt.imshow(img)
             plt.show()
+        elif 'linux' in sys.platform and not "-- Select" in self._interface._ProfillerFile:
+            if not os.path.isfile('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')):
+                cmd = 'gprof2dot -f pstats Profiller/'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')
+                os.system(cmd)
+            img = mpimg.imread('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png'))
+            plt.imshow(img)
+            plt.show()
 
 
     @pyqtSlot()
@@ -754,7 +761,10 @@ class MainWindow(QMainWindow):
                             self._popupDiagPlot.setData(y=np.asarray(self._updateLoopDurations), x=np.arange(len(self._updateLoopDurations))) # Plot values
                     elif (message.type == 'PNG'):
                         Image = base64.b64decode(message.data['values'])
-                        Filename =self._DirectoryProf +"\\"+ message.name
+                        if 'win' in sys.platform:
+                            Filename =self._DirectoryProf +"\\"+ message.name
+                        elif 'linux' in sys.platform:
+                            Filename =self._DirectoryProf +"/"+ message.name
                         f = open(Filename,'wb')
                         f.write(Image)
                         f.close()
