@@ -305,6 +305,7 @@ class MainWindow(QMainWindow):
         interface = InterfaceWidget()
         interface.configureConnectionClicked.connect(self._showConnectionDialogListener)
         interface.connect.connect(self._connectListener)
+        interface.disconnect.connect(self._disconnectListener)
         interface.sendMessage.connect(self._sendMessageListener)
         interface.update.connect(self._updateInterfaceListener)
         # Add Profiller
@@ -512,6 +513,30 @@ class MainWindow(QMainWindow):
         self.EstablishConnection()                              #Connect to the board
 
         self.updateUI()
+    @pyqtSlot()
+    def _disconnectListener(self):
+        """Confirm closing application."""
+        # Close for no connection
+        if (self._connection.status() != 'Connected'):
+            self._connection.disconnect()
+            self._board.reset()
+            self._onStreamStop()
+        # Ask for confirmation
+        else:
+            reply = QMessageBox.question(self, 'Message',
+                "Are you sure to disconnect?", QMessageBox.Yes |
+                QMessageBox.No, QMessageBox.No)
+
+            if reply == QMessageBox.Yes:
+                # Terminate connection and stop data streams
+                self._connection.disconnect()
+                if self._Client != None:
+                    self._Client.close() #closing the python code for Firmware
+                    self._Client = None
+                self._board.reset()
+                self._onStreamStop()
+        self.updateUI()
+       
 
     @pyqtSlot()
     def _StartProfillerListener(self):

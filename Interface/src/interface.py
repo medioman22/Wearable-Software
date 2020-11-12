@@ -36,6 +36,8 @@ class InterfaceWidget(QWidget):
     configureConnectionClicked = pyqtSignal()
     # Signal for connect
     connect = pyqtSignal()
+    # Signal for disconnect
+    disconnect = pyqtSignal()
     # Signal for starting the profiller
     StartProfiller = pyqtSignal()
     # Signal for Stopping the profiller
@@ -99,6 +101,8 @@ class InterfaceWidget(QWidget):
         configureButton.clicked.connect(self.onConfigureConnection)
         connectButton = QPushButton("Connect")
         connectButton.clicked.connect(self.onConnect)
+        disconnectButton = QPushButton("Disconnect")
+        disconnectButton.clicked.connect(self.onDisconnect)
         self._logger.debug("Interface UI buttons created")
 
         # Image of current board
@@ -194,6 +198,7 @@ class InterfaceWidget(QWidget):
         informationGridLayout.addWidget(streamGifLabel,             2, 4, Qt.AlignLeft)
         informationGridLayout.addWidget(connectButton,              3, 0, Qt.AlignLeft)
         informationGridLayout.addWidget(configureButton,            3, 1, Qt.AlignLeft)
+        informationGridLayout.addWidget(disconnectButton,           3, 2, Qt.AlignLeft)
 
         # Group informations
         groupLayout = QGroupBox('Information')
@@ -368,6 +373,10 @@ class InterfaceWidget(QWidget):
     def onConnect(self):
         """Listen to configure connection click event."""
         self.connect.emit()
+    @pyqtSlot()
+    def onDisconnect(self):
+        """Listen to configure disconnection click event."""
+        self.disconnect.emit()
     @pyqtSlot()
     def onStartProfiller(self):
         """Listen to Start Profiller click event."""
