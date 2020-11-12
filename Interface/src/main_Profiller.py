@@ -9,11 +9,12 @@ This application provides an interface to the firmware loaded on the BBB
 Author: Salar Rahimi
 Last edited: November 2020
 """
+import base64                                                   # for decoding json messages
 from datetime import datetime
 import cProfile, pstats                                         # For profiling the code
 import matplotlib.pyplot as plt                                 # Showing the picture for profiller result
 import matplotlib.image as mpimg                                # Same reason as above                    
-import os, glob , io                                            # Operating system package
+import os, glob , io , getpass                                  # Operating system package
 import sys                                                      # System package
 import time                                                     # Time package
 import logging                                                  # Logging package
@@ -153,7 +154,7 @@ class MainWindow(QMainWindow):
 
         #Check the files in the Profiling folder and show it in the combobox of the profiller
         for file in os.listdir(self._DirectoryProf):
-            if file.endswith(self._porfillerFileFormat):
+            if file.endswith(self._porfillerFileFormat) or file.endswith('Firmware.png'):
                 self._interface._ProfillerFiles.addItem(file)
 
 
@@ -516,6 +517,8 @@ class MainWindow(QMainWindow):
     def _StartProfillerListener(self):
         self._Profiler.enable()
         self._ProfilerState = "Profilling ..."
+        #Command board to profile
+        self._connection.sendMessages([self._board.serializeMessage(Message('profile','', {'value': True}))])
         self.updateUI()
 
     @pyqtSlot()
@@ -526,6 +529,10 @@ class MainWindow(QMainWindow):
         ps = pstats.Stats(self._Profiler,stream=s).strip_dirs().sort_stats('cumulative')
         ps.dump_stats(self._DirectoryProf + "\\" + TimeObject.strftime("%d-%b-%Y_%H-%M-%S.%f")+"_Interface" + self._porfillerFileFormat)
         #self._Profiler.dump_stats(self._DirectoryProf + "\\" + TimeObject.strftime("%d-%b-%Y_%H-%M-%S.%f")+"_Interface" + self._porfillerFileFormat)
+        
+        #For stopping process of profilling in the board
+        self._connection.sendMessages([self._board.serializeMessage(Message('profile','', {'value': False})),self._board.serializeMessage(Message('profile_FileName','', 
+            {'value': TimeObject.strftime("%d-%b-%Y_%H-%M-%S.%f")+"_Firmware"}))]) 
         self._ProfilerState = "Stopped"
         self._Profiler = cProfile.Profile()
         self.updateUI()
@@ -553,7 +560,7 @@ class MainWindow(QMainWindow):
         self._interface._ProfillerFiles.clear()
         self._interface._ProfillerFiles.addItem("-- Select The File To Visualize --")
         for file in os.listdir(self._DirectoryProf):
-            if file.endswith(self._porfillerFileFormat):
+            if file.endswith(self._porfillerFileFormat) or file.endswith('Firmware.png'):
                 self._interface._ProfillerFiles.addItem(file)
         self._interface._ProfillerFiles.setCurrentIndex(indexSelected)
 
@@ -745,6 +752,13 @@ class MainWindow(QMainWindow):
                             self._updateLoopDurations.pop(0)
                         if self._popupDiagPlot != None:
                             self._popupDiagPlot.setData(y=np.asarray(self._updateLoopDurations), x=np.arange(len(self._updateLoopDurations))) # Plot values
+                    elif (message.type == 'PNG'):
+                        Image = base64.b64decode(message.data['values'])
+                        Filename =self._DirectoryProf +"\\"+ message.name
+                        f = open(Filename,'wb')
+                        f.write(Image)
+                        f.close()
+
                     elif (message.type == 'Ping'):              # Ping message
                         self._logger.debug('PING')
 

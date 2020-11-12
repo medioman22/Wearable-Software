@@ -6,7 +6,7 @@ SoftWEAR demo program displaying the main features. This scripts executes on the
 beagle bone. Starts a server and ADC, PWM and I2C SoftWEAR modules are polled;
 and their status is reported to the remote location.
 """
-
+import cProfile,pstats, io ,datetime                            # Profilling materials
 import os                                                       # Required for clearing the system display
 import sys                                                      # Required for get input args
 import time                                                     # Required for controllng the sampling period
@@ -21,12 +21,17 @@ import ADCModule                                                # SoftWEAR ADC m
 import I2CModule                                                # SoftWEAR I2C module
 import json                                                     # Serializing class. All objects sent are serialized
 from termcolor import colored                                   # Color printing in the console
-import cProfile                                                 # Used to profile the script
+import base64                                                   # TO Encode the png file
 
 import Adafruit_BBIO.GPIO as GPIO                               # Main peripheral class. Implements GPIO communication
 
 BOARD = "Beaglebone Green Wireless v1.0"                        # Name of the Board
 SOFTWARE = "Firmware-BeagleboneGreenWireless(v0.1)"             # Identifier of the Software
+
+PROFILLER = None                                                # Profiller object
+DirectoryProf = None                                            # storing the file for profiller
+ImageAddress = None
+PNG = False
 
 LIVE_PRINT = False                                              # Flag whether live printing should be enabled in the console
 DIAG_LOG = False                                                # Flag whether diagnostics should be logged to a file
@@ -202,7 +207,7 @@ def i2cUpdate():
 
 def scanThread():
     """Thread dedicated to scan for new devices."""
-    global c, scanForDevices, scanDuration
+    global c, scanForDevices, scanDuration, PNG, ImageAddress
     while True:                                                 # Enter the infinite loop
         if not scanForDevices or not GPIO.input(scanPin):       # Check for scanning
             scanDuration = 0                                    # No scanning
@@ -309,6 +314,19 @@ def scanThread():
                                             'flags': device['flags'],
                                             'frequency': device['frequency'],
                                             'dutyFrequency': device['dutyFrequency']}))
+        #PNG is added in here
+        if PNG:
+            with open(ImageAddress, mode='rb') as file:
+                img = file.read()
+            #img = mpimg.imread(ImageAddress)
+            messagesSend.append(json.dumps({'type': 'PNG',
+                                            'name': ImageAddress.replace(DirectoryProf+'/',""),
+                                            'values': base64.b64encode(img)}))
+            PNG = False
+            os.remove(ImageAddress)
+            ImageAddress = None
+            
+
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend[:])                     # Send the messages
@@ -329,7 +347,7 @@ def scanThread():
 
 def updateThread():
     """Thread dedicated to get updated values of the devices."""
-    global c, scanForDevices, updateDuration, UPDATE_PERIODE
+    global c, scanForDevices, updateDuration, UPDATE_PERIODE, PROFILLER, DirectoryProf, ImageAddress, PNG
     while True:                                                 # Enter the infinite loop
         startTime = time.time()                                 # Save start time of update cycle
         messagesSend = []                                       # List of messages to send
@@ -419,6 +437,24 @@ def updateThread():
 
             if message['type'] == 'Scan':                       # Change scan for a device
                 scanForDevices = message['value']
+            
+            if message['type'] == 'profile':                    # Start profilling the Firmware
+                if message['value']:
+                    PROFILLER = cProfile.Profile()
+                    PROFILLER.enable()
+                else:                                           # Stop profiling and save it 
+                    PROFILLER.disable()
+                    s = io.StringIO() 
+                    ps = pstats.Stats(PROFILLER,stream=s).strip_dirs().sort_stats('cumulative')
+                    ps.dump_stats(DirectoryProf + "/" + "Profilled.pstats")
+                    PROFILLER = None
+                    
+            if message['type'] == 'profile_FileName' :         # Converting the profile data to dot graph
+                cmd = 'gprof2dot -f pstats '+ DirectoryProf + "/" + "Profilled.pstats | dot -Tpng -o "+message['value']+".png"
+                os.system(cmd)
+                os.remove(DirectoryProf + "/" + "Profilled.pstats")
+                ImageAddress = DirectoryProf + "/"+message['value']+".png"
+                PNG = True        
 
             if message['type'] == 'Ping':                       # Ping back
                 messagesSend.append(json.dumps({'type': 'Ping','name':''}))
@@ -555,7 +591,10 @@ def eventLog(messages):
 
 def main():
     """Infinite loop function, reads all devices and manages the connection."""
-    global connectionState, c, exit, loop, embeddedC, LIVE_PRINT, DIAG_LOG, DATA_LOG, EVENT_LOG
+    global connectionState, c, exit, loop, embeddedC, LIVE_PRINT, DIAG_LOG, DATA_LOG, EVENT_LOG, DirectoryProf
+
+    #Create a folder for Profilling if not there
+    DirectoryProf = os.getcwd()
 
     if ('l' in sys.argv):                                       # Check live plot parameter
         LIVE_PRINT = True

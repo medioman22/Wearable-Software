@@ -106,7 +106,7 @@ class BeagleboneGreenWirelessConnection(Connection):
                 continue;                                       # Retry on next loop
             try:                                                # Socket timeout will throw an exception
                 data = self._s.recv(1024)
-                if not data: continue #break                              # This means remote location closed socket
+                if not data: continue #break                    # This means remote location closed socket
                 self._logger.debug("Recieved RAW data: " + str(data))
                 m_list = (remainder + data.decode("utf-8")).split("}")  # Add the recieved data to the previous remainder
                 remainder = ""
