@@ -564,7 +564,7 @@ class MainWindow(QMainWindow):
     
     @pyqtSlot()
     def _VisualizeProfillerListener(self):
-        self._interface._ProfillerFile
+        
         #This option is for SnakeViz
         #cmd = 'cmd /c snakeviz '+"Profiller\\"+self._interface._ProfillerFile 
         #os.system('cmd /c snakeviz '+"Profiller\\"+self._interface._ProfillerFile)
@@ -574,15 +574,17 @@ class MainWindow(QMainWindow):
                 cmd = 'cmd /c gprof2dot -f pstats Profiller\\'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller\\'+self._interface._ProfillerFile.replace('.pstats','.png')
                 os.system(cmd)
             img = mpimg.imread('Profiller\\'+self._interface._ProfillerFile.replace('.pstats','.png'))
-            plt.imshow(img)
-            plt.show()
+            
         elif 'linux' in sys.platform and not "-- Select" in self._interface._ProfillerFile:
             if not os.path.isfile('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')):
                 cmd = 'gprof2dot -f pstats Profiller/'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')
                 os.system(cmd)
             img = mpimg.imread('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png'))
-            plt.imshow(img)
-            plt.show()
+
+        plt.imshow(img)
+        plt.axis('off')
+        plt.suptitle(self._interface._ProfillerFile.replace('.pstats','').replace('.png',''))
+        plt.show()
 
 
     @pyqtSlot()
