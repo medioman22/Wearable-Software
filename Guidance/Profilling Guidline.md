@@ -40,7 +40,7 @@ Just do the following:
 2. Test on bash : dot -V
 
 
-3. pip install gprof2dot
+3. sudo pip install gprof2dot
 
 4. For the Beaglebone is also needed to be done
 

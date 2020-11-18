@@ -1,0 +1,14 @@
+1) Connect BBG via USB cable - wait for reboot
+2) go to http://beagleboard.org/static/beaglebone/latest/README.htm You should see a list of the most recent drivers.
+   Install the one for your operating system. Note that on Windows it may fail due to lack of signature. Search the web how to disable signature requirement for Windows.
+3) Use PuttY or something to SSH into the BBG by connecting to 192.168.7.2 (port 22)
+3) Connect the BBG to the Internet via the USB:
+	- BBG: type sudo /sbin/route add default gw 192.168.7.1 
+	- On Windows, go to adapter settings -> and enable sharing of your network connection with "Linux USB Ethernet/RNDIS"
+	- On Windows, in adapter settings -> edit the "Linux USB Ethernet/RNDIS" connection: set IP 192.168.7.1 / 255.255.255.0 and DNS server to 8.8.8.8
+4) once connected to the internet (ping google.com to test), do (BBG): 
+	- sudo apt-get update
+	- sudo apt-get install tightvncserver
+	- tightvncserver - This will ask for a password. I put "roboshirt"
+	- tightvncserver :1 -geometry 1280x800 -depth 32 -dpi 96
+	
