@@ -31,6 +31,7 @@ import numpy as np                                              # Number utility
 import pandas as pd
 from interface import InterfaceWidget                           # Custom interface widget
 from connectionDialog import ConnectionDialog                   # Dialog widget for connection settings
+from cloudDialog import CloudDialog                             # Dialog widget for cloud settings
 from udpBroadcast import UDPBroadcast                           # UDP Broadcast functionality
 from boards.board import Device                                 # Board base class
 from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard # BBGW implementation
@@ -97,6 +98,8 @@ class MainWindow(QMainWindow):
     _updateLoopDurations = None
     # Logger module
     _logger = None
+    # Cloud
+    _url, _org, _bucket, _token = None, None, None, None
 
     def __init__(self):
         """Initialize the main window."""
@@ -115,6 +118,10 @@ class MainWindow(QMainWindow):
 
         # Setup UI
         self.initUI()
+
+        # Create cloud settings dialog
+        self.cloudDialog = CloudDialog()
+        self.cloudDialog.settingsChanged.connect(self._cloudSettingsChangedListener)
 
         # Create connection settings dialog
         self.connectionDialog = ConnectionDialog()
@@ -219,6 +226,10 @@ class MainWindow(QMainWindow):
         streamToFileAct.setStatusTip('Stream Incoming Data To File')
         streamToFileAct.triggered.connect(self._onStreamToFile)
         streamMenu.addAction(streamToFileAct)
+        streamToCloudAct = QAction('&Cloud', self)
+        streamToCloudAct.setStatusTip('Stream Incoming Data To The Cloud')
+        streamToCloudAct.triggered.connect(self._showCloudDialogListener)
+        streamMenu.addAction(streamToCloudAct)
         streamToPortAct = QAction('&UDP Protocol', self)
         streamToPortAct.setStatusTip('Stream Incoming Data To UDP Service (Not Implemented)')
         streamToPortAct.triggered.connect(self._onStreamToUDP)
@@ -277,6 +288,7 @@ class MainWindow(QMainWindow):
 
         # Configure the interface widget
         interface = InterfaceWidget()
+        interface.configureCloudClicked.connect(self._showCloudDialogListener)
         interface.configureConnectionClicked.connect(self._showConnectionDialogListener)
         interface.connect.connect(self._connectListener)
         interface.sendMessage.connect(self._sendMessageListener)
@@ -492,6 +504,23 @@ class MainWindow(QMainWindow):
                 self._streamStopAct.setVisible(True)
                 shortFileName = (fileName[:32] and '...') + fileName[32:]
                 self._interface.setStreamLabel(True, '{}'.format(shortFileName))
+
+    @pyqtSlot()
+    def _showCloudDialogListener(self):
+        """Stream data to cloud."""
+        self.cloudDialog.setValues(self._url, self._org, self._bucket, self._token)
+        self.cloudDialog.show()
+        self._logger.info("Stream data to cloud")
+
+    @pyqtSlot(str, str, str, str)
+    def _cloudSettingsChangedListener(self, url, org, bucket, token):
+        """Update connection settings listener."""
+        self._url = url
+        self._org = org
+        self._bucket = bucket
+        self._token = token
+        #self.updateStatusValues()
+        self._logger.debug("Update cloud settings")
 
     @pyqtSlot()
     def _onStreamToUDP(self):

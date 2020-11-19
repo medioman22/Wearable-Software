@@ -31,7 +31,8 @@ class InterfaceWidget(QWidget):
 
         Interface as the central widget of the main window displaying the board informations and connected peripheral devices
     """
-
+    # Signal for cloud streaming
+    configureCloudClicked = pyqtSignal()
     # Signal for connection button clicked
     configureConnectionClicked = pyqtSignal()
     # Signal for connect
