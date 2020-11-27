@@ -31,8 +31,7 @@ class InterfaceWidget(QWidget):
 
         Interface as the central widget of the main window displaying the board informations and connected peripheral devices
     """
-    # Signal for cloud streaming
-    configureCloudClicked = pyqtSignal()
+
     # Signal for connection button clicked
     configureConnectionClicked = pyqtSignal()
     # Signal for connect
@@ -237,7 +236,7 @@ class InterfaceWidget(QWidget):
     def setStreamLabel(self, stream, toChannel=None):
         """Set stream label and channel."""
         if stream:                                              # Show stream label
-            self._streamLabel.setText('Stream <b>{}</b>'.format(toChannel))
+            self._streamLabel.setText('Stream {}'.format(toChannel))
             self._streamLabel.setVisible(True)
             self._streamGifLabel.setVisible(True)
         else:                                                   # Hide stream label

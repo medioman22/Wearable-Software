@@ -13,6 +13,7 @@ Last edited: September 2018
 import os                                                       # Operating system package
 import sys                                                      # System package
 import time                                                     # Time package
+from datetime import datetime, timezone                         # Date time package for cloud
 import logging                                                  # Logging package
 from PyQt5.QtCore import (  pyqtSlot,                           # Core functionality from Qt
                             QTimer)
@@ -25,6 +26,7 @@ from PyQt5.QtWidgets import (   QMainWindow,                    # Widget objects
                                 QFileDialog,
                                 QApplication)
 from PyQt5.QtGui import (   QFont,                              # Media elements from Qt
+    
                             QIcon)
 import pyqtgraph as pg                                          # Custom graphics package
 import numpy as np                                              # Number utility package
@@ -32,6 +34,7 @@ import pandas as pd
 from interface import InterfaceWidget                           # Custom interface widget
 from connectionDialog import ConnectionDialog                   # Dialog widget for connection settings
 from cloudDialog import CloudDialog                             # Dialog widget for cloud settings
+from influxdb_client import Point
 from udpBroadcast import UDPBroadcast                           # UDP Broadcast functionality
 from boards.board import Device                                 # Board base class
 from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard # BBGW implementation
@@ -98,8 +101,6 @@ class MainWindow(QMainWindow):
     _updateLoopDurations = None
     # Logger module
     _logger = None
-    # Cloud
-    _url, _org, _bucket, _token = None, None, None, None
 
     def __init__(self):
         """Initialize the main window."""
@@ -117,11 +118,11 @@ class MainWindow(QMainWindow):
         self._logger.info("Main initializing …")
 
         # Setup UI
-        self.initUI()
+        self.initUI()     
 
-        # Create cloud settings dialog
+        # Initialize cloud dialog
         self.cloudDialog = CloudDialog()
-        self.cloudDialog.settingsChanged.connect(self._cloudSettingsChangedListener)
+        self.cloudDialog.startStream.connect(self._onStreamToCloud)
 
         # Create connection settings dialog
         self.connectionDialog = ConnectionDialog()
@@ -228,7 +229,7 @@ class MainWindow(QMainWindow):
         streamMenu.addAction(streamToFileAct)
         streamToCloudAct = QAction('&Cloud', self)
         streamToCloudAct.setStatusTip('Stream Incoming Data To The Cloud')
-        streamToCloudAct.triggered.connect(self._showCloudDialogListener)
+        streamToCloudAct.triggered.connect(self._showCloudDialog)
         streamMenu.addAction(streamToCloudAct)
         streamToPortAct = QAction('&UDP Protocol', self)
         streamToPortAct.setStatusTip('Stream Incoming Data To UDP Service (Not Implemented)')
@@ -288,7 +289,6 @@ class MainWindow(QMainWindow):
 
         # Configure the interface widget
         interface = InterfaceWidget()
-        interface.configureCloudClicked.connect(self._showCloudDialogListener)
         interface.configureConnectionClicked.connect(self._showConnectionDialogListener)
         interface.connect.connect(self._connectListener)
         interface.sendMessage.connect(self._sendMessageListener)
@@ -503,24 +503,21 @@ class MainWindow(QMainWindow):
                 self._streamMenu.menuAction().setVisible(False)
                 self._streamStopAct.setVisible(True)
                 shortFileName = (fileName[:32] and '...') + fileName[32:]
-                self._interface.setStreamLabel(True, '{}'.format(shortFileName))
+                self._interface.setStreamLabel(True, '<b>{}</b>'.format(shortFileName))
 
     @pyqtSlot()
-    def _showCloudDialogListener(self):
-        """Stream data to cloud."""
-        self.cloudDialog.setValues(self._url, self._org, self._bucket, self._token)
-        self.cloudDialog.show()
+    def _showCloudDialog(self):
+        self._logger.info("Show cloud dialog")
+        self.cloudDialog.showCloudDialogListener()
+    
+    @pyqtSlot()
+    def _onStreamToCloud(self):
+        """Stream data to udp service."""
         self._logger.info("Stream data to cloud")
-
-    @pyqtSlot(str, str, str, str)
-    def _cloudSettingsChangedListener(self, url, org, bucket, token):
-        """Update connection settings listener."""
-        self._url = url
-        self._org = org
-        self._bucket = bucket
-        self._token = token
-        #self.updateStatusValues()
-        self._logger.debug("Update cloud settings")
+        self._streamMenu.menuAction().setVisible(False)
+        self._streamStopAct.setVisible(True)
+        self._interface.setStreamLabel(True, '<b>InfluxDB Cloud</b><br><b>URL</b>: {}<br><b>Username</b>: {}<br><b>Bucket</b>: {}'\
+                                             .format(self.cloudDialog._url, self.cloudDialog._org, self.cloudDialog._bucket))
 
     @pyqtSlot()
     def _onStreamToUDP(self):
@@ -529,7 +526,7 @@ class MainWindow(QMainWindow):
         self._broadcast = UDPBroadcast(UDP_IP, UDP_PORT)        # Create UDP data stream
         self._streamMenu.menuAction().setVisible(False)
         self._streamStopAct.setVisible(True)
-        self._interface.setStreamLabel(True, 'UDP {}:{}'.format(UDP_IP, UDP_PORT))
+        self._interface.setStreamLabel(True, '<b>UDP {}:{}</b>'.format(UDP_IP, UDP_PORT))
 
     @pyqtSlot()
     def _onStreamStop(self):
@@ -544,6 +541,9 @@ class MainWindow(QMainWindow):
             df = df.pivot_table(values='Value',index = 'Time [ms]',columns = ['Device','Dimension'])  # Reorganize data
             df.to_csv(self._board.fileName())
             self._board.setFileName(None)
+        elif (self.cloudDialog._client != None):
+            self.cloudDialog.delete_client()
+
         self._logger.info("Data streaming has been stopped")
 
         self._streamStopAct.setVisible(False)
@@ -670,6 +670,20 @@ class MainWindow(QMainWindow):
                                                                                 str(i),
                                                                                 str(values[0]),
                                                                                 str(values[1][i])]))
+
+                                if (self.cloudDialog._client != None):
+                                    for device in self._board.deviceList(): # Look for correct device
+                                                            # Check if it exists and should be ignored or is hidden
+                                        if (device.name() == name and not device.ignore() and not device.hide()):
+                                            for i in range(len(values[1])): # Loop through all dimensions
+                                                p = Point(name).field(str(i), values[1][i]).time(datetime.fromtimestamp(values[0], tz=timezone.utc))
+                                                try:
+                                                    self.cloudDialog._write_api.write(bucket=self.cloudDialog._bucket,
+                                                                                     org=self.cloudDialog._org, record=p)
+                                                except:
+                                                    self.error_dialog.showMessage('Could not connect to cloud')
+                                                    self._onStreamStop()
+
                                 if (self._popupPlotWidget != None and self._popupPlotWidget.isVisible()): # Multiplot data in window
                                     multiPlot = True
                                     p = 0
