@@ -58,6 +58,8 @@ https://bobswift.atlassian.net/wiki/spaces/GVIZ/pages/20971549/How+to+install+Gr
 
 4. pip install gprof2dot 
 
+5. As admin run: dot -c
+
 
 ## Command
 
