@@ -19,6 +19,7 @@ import OutputModule                                             # SoftWEAR Outpu
 import PWMModule                                                # SoftWEAR PWM module
 import ADCModule                                                # SoftWEAR ADC module
 import I2CModule                                                # SoftWEAR I2C module
+import SPIModule                                                # SoftWEAR SPI module
 import json                                                     # Serializing class. All objects sent are serialized
 from termcolor import colored                                   # Color printing in the console
 import base64                                                   # TO Encode the png file
@@ -55,6 +56,7 @@ outputList = []                                                 # List of connec
 pwmList = []                                                    # List of connected PWM devices on the GPIO pins
 adcList = []                                                    # List of connected ADC devices on the Analog pins
 i2cList = []                                                    # List of connected IMU devices on the I2C ports
+spiList = []                                                    # List of connected devices on the SPI ports
 connectionState = ""                                            # Current connection state to be displayed
 updateDuration = 0                                              # Cycle duration needed to update values
 scanDuration = 0                                                # Cycle duration needed to scan for new devices
@@ -65,6 +67,7 @@ output = OutputModule.Output()                                  # Initialize the
 pwm = PWMModule.PWM()                                           # Initialize the SoftWEAR PWM Module
 adc = ADCModule.ADC()                                           # Initialize the SoftWEAR ADC Module
 i2c = I2CModule.I2C()                                           # Initialize the SoftWEAR I2C Module
+spi = SPIModule.SPI()                                           # Initialize the softWEAR SPI Module
 
 GPIO.setup(scanPin, GPIO.IN, GPIO.PUD_UP)                       # Setup scan pin
 
@@ -204,6 +207,32 @@ def i2cScan():
 def i2cUpdate():
     """Update the I2C devices."""
     i2c.getValues()
+
+def spiScan():
+    """Update the status of all SPI devices and saves any connect or disconnect events."""
+    global spiList,spi
+    spi.scan()                                                  # Scan devices on the SPI channels
+    spiListPrevious = spiList                                   # Keep copy of last spi devices
+    spiList = []                                                # Reset list of connected SPI list
+    spiListRegister = []                                        # List of new devices that need to be registered
+    spiListDeregister = []                                      # List of new devices that need to be deregistered
+
+    for el1 in spi.connectedDevices:                            # Check for connected and new devices
+        if (len(filter(lambda el2: el2['name'] == el1['name'], spiListPrevious)) > 0):
+            spiList.append(el1)                                 # Add to connected list
+        else:                                                   # Device is not yet registered
+            spiListRegister.append(el1)                         # Add to register list
+            spiList.append(el1)                                 # Add connected list
+
+    for el1 in spiListPrevious:                                 # Check for disconnected devices
+        if (len(filter(lambda el2: el2['name'] == el1['name'], spiList)) == 0):
+            spiListDeregister.append(el1)                       # Add to deregister list
+
+    return spiListRegister, spiListDeregister
+
+def spiUpdate():
+    """update the SPI devices."""
+    spi.getValues()
 
 def scanThread():
     """Thread dedicated to scan for new devices."""

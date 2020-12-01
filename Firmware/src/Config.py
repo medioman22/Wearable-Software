@@ -178,6 +178,11 @@ PIN_MAP = {
             "ADDRESS": 0x48,
             "BUSNUM": 2
         },
+    ],
+    "SPI": [
+        {
+            
+        }
     ]
 
 }
