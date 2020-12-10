@@ -4,14 +4,11 @@
 """
 Driver file for the I2C TCA9548A MUX. Switch for 8 mux channels.
 """
-import board
-import busio
+import Adafruit_GPIO.I2C as I2C
 import Adafruit_BBIO.GPIO as GPIO
 import threading                                                # Threading class for the threads
 import time                                                     # Time class for the waits
-from adafruit_bus_device.i2c_device import I2CDevice
 
-I2C = busio.I2C(board.SCL, board.SDA)
 
 # Constants
 TCA9548A_ADDRESS    = [0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77]
@@ -59,12 +56,8 @@ class I2CTCA9548AMux8:
         self._busnum = pinConfig["BUSNUM"]                      # Get busnum
         self._DETECT = pinConfig["DETECT"]                      # Get detect pin
 
-        #result = bytearray(4)
-        #I2C.readfrom_into(self._address, result)
-
-        self._device = I2CDevice(I2C, self._address)
-        #self._device = I2C.get_i2c_device(self._address, self._busnum) # Init the I2C connection
-        self._device.write(0x0)                             # Test to write something
+        self._device = I2C.get_i2c_device(self._address, self._busnum) # Init the I2C connection
+        self._device.writeRaw8(0x0)                             # Test to write something
         GPIO.setup(self._DETECT, GPIO.IN, GPIO.PUD_DOWN)        # Init the detect pin and set it as input with pull down
         time.sleep(0.005)                                       # Wait a bit
 

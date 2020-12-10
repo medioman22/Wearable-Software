@@ -7,8 +7,7 @@ with the device via I2C and implements the basic functions for integrating into
 the SoftWEAR package.
 """
 import time                                                     # Imported for delay reasons
-#import drivers._PCA9685 as PCA9685_DRIVER                       # Import official driver
-import adafruit_pca9685
+import drivers._PCA9685 as PCA9685_DRIVER                       # Import official driver
 import threading                                                # Threading class for the threads
 
 from MuxModule import GetMux                                    # SoftWEAR MUX module.
@@ -141,7 +140,7 @@ class PCA9685:
     # Lock for the driver, used in scan and loop thread
     LOCK = threading.Lock()
 
-    def __init__(self, i2p, pinConfig, muxedChannel = None, muxName = None):
+    def __init__(self, pinConfig, muxedChannel = None, muxName = None):
         """Init the device."""
         try:
             if (muxedChannel != None):
@@ -163,7 +162,7 @@ class PCA9685:
             #self._mode = self._settings['modes'][0]             # Set default mode
             self._flags = []                                    # Set default flag list
 
-            self._pca = adafruit_pca9685.PCA9685(i2p, address=self._address) # Create the driver object
+            self._pca = PCA9685_DRIVER.PCA9685(address=self._address,busnum=self._busnum) # Create the driver object
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                   # Deactivate mux
         except:
@@ -177,7 +176,7 @@ class PCA9685:
         self._connected = False                                 # Device disconnected
         self._threadActive = False                              # Unset thread active
         try:
-            self._pca.deinit()                                 # Set PWM to sleep
+            self._pca.cleanup()                                 # Set PWM to sleep
         except:
             pass
 
@@ -187,8 +186,7 @@ class PCA9685:
             self.LOCK.acquire()                                 # Lock the driver for scanning
             if (self._muxedChannel != None):
                 MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
-            if self._pca != None:
-                self._connected = True                          # Device is connected and has no error   
+            self._connected = self._pca.status()                # Device is connected and has no error
             if (self._muxedChannel != None):
                 MuxModule.deactivate(self._muxName)             # Deactivate mux
             self.LOCK.release()                                 # Release driver
@@ -241,9 +239,7 @@ class PCA9685:
                 if (self._muxedChannel != None):
                     MuxModule.deactivate(self._muxName)         # Deactivate mux
                 self.LOCK.release()                             # Release driver
-            try: deltaT
-            except: deltaT = time.time() - beginT               # If deltaT is not init because of try
-            
+
             if (deltaT < self._period):
                 time.sleep(self._period - deltaT)               # Sleep until next loop period
 
@@ -365,7 +361,7 @@ class PCA9685:
                 if (self._muxedChannel != None):
                     MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
                 self._dutyFrequency = dutyFrequency
-                self._pca.frequency(int(self._dutyFrequency[:-3]))
+                self._pca.set_pwm_freq(int(self._dutyFrequency[:-3]))
                 self._update = True                             # Raise update flag
                 if (self._muxedChannel != None):
                     MuxModule.deactivate(self._muxName)         # Deactivate mux
@@ -392,4 +388,4 @@ def setDuty(pca, channel, duty):
     res = 4096                                                      # 12 bits of resolution
     on = 0                                                          # Duty on
     off = int(duty / 100. * res)                                    # Duty off
-    pca.channels[channel].duty_cycle = off                                   # Send the values to the pca
+    pca.set_pwm(channel, on, off)                                   # Send the values to the pca

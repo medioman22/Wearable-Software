@@ -19,7 +19,7 @@ import OutputModule                                             # SoftWEAR Outpu
 import PWMModule                                                # SoftWEAR PWM module
 import ADCModule                                                # SoftWEAR ADC module
 import I2CModule                                                # SoftWEAR I2C module
-import SPIModule                                                # SoftWEAR SPI module
+#import SPIModule                                                # SoftWEAR SPI module
 import json                                                     # Serializing class. All objects sent are serialized
 from termcolor import colored                                   # Color printing in the console
 import base64                                                   # TO Encode the png file
@@ -67,7 +67,7 @@ output = OutputModule.Output()                                  # Initialize the
 pwm = PWMModule.PWM()                                           # Initialize the SoftWEAR PWM Module
 adc = ADCModule.ADC()                                           # Initialize the SoftWEAR ADC Module
 i2c = I2CModule.I2C()                                           # Initialize the SoftWEAR I2C Module
-spi = SPIModule.SPI()                                           # Initialize the softWEAR SPI Module
+#spi = SPIModule.SPI()                                           # Initialize the softWEAR SPI Module
 
 GPIO.setup(scanPin, GPIO.IN, GPIO.PUD_UP)                       # Setup scan pin
 
@@ -86,14 +86,14 @@ def inputScan():
     inputListDeregister = []                                    # List of new devices that need to be deregistered
 
     for el1 in input.connectedDevices:                          # Check for connected and new devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], inputListPrevious)) > 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], inputListPrevious))) > 0):
             inputList.append(el1)                               # Add to connected list
         else:                                                   # Device is not yet registered
             inputListRegister.append(el1)                       # Add to register list
             inputList.append(el1)                               # Add connected list
 
     for el1 in inputListPrevious:                               # Check for disconnected devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], inputList)) == 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], inputList))) == 0):
             inputListDeregister.append(el1)                     # Add to deregister list
 
     return inputListRegister, inputListDeregister
@@ -112,14 +112,14 @@ def outputScan():
     outputListDeregister = []                                   # List of new devices that need to be deregistered
 
     for el1 in output.connectedDevices:                         # Check for connected and new devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], outputListPrevious)) > 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], outputListPrevious))) > 0):
             outputList.append(el1)                              # Add to connected list
         else:                                                   # Device is not yet registered
             outputListRegister.append(el1)                      # Add to register list
             outputList.append(el1)                              # Add connected list
 
     for el1 in outputListPrevious:                              # Check for disconnected devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], outputList)) == 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], outputList))) == 0):
             outputListDeregister.append(el1)                    # Add to deregister list
 
     return outputListRegister, outputListDeregister
@@ -138,14 +138,14 @@ def pwmScan():
     pwmListDeregister = []                                      # List of new devices that need to be deregistered
 
     for el1 in pwm.connectedDevices:                            # Check for connected and new devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], pwmListPrevious)) > 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], pwmListPrevious))) > 0):
             pwmList.append(el1)                                 # Add to connected list
         else:                                                   # Device is not yet registered
             pwmListRegister.append(el1)                         # Add to register list
             pwmList.append(el1)                                 # Add connected list
 
     for el1 in pwmListPrevious:                                 # Check for disconnected devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], pwmList)) == 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], pwmList))) == 0):
             pwmListDeregister.append(el1)                       # Add to deregister list
 
     return pwmListRegister, pwmListDeregister
@@ -164,14 +164,14 @@ def adcScan():
     adcListDeregister = []                                      # List of new devices that need to be deregistered
 
     for el1 in adc.connectedDevices:                            # Check for connected and new devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], adcListPrevious)) > 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], adcListPrevious))) > 0):
             adcList.append(el1)                                 # Add to connected list
         else:                                                   # Device is not yet registered
             adcListRegister.append(el1)                         # Add to register list
             adcList.append(el1)                                 # Add connected list
 
     for el1 in adcListPrevious:                                 # Check for disconnected devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], adcList)) == 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], adcList))) == 0):
             adcListDeregister.append(el1)                       # Add to deregister list
 
     return adcListRegister, adcListDeregister
@@ -192,14 +192,14 @@ def i2cScan():
     i2cListDeregister = []                                      # List of new devices that need to be deregistered
 
     for el1 in i2c.connectedDevices:                            # Check for connected and new devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], i2cListPrevious)) > 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], i2cListPrevious))) > 0):
             i2cList.append(el1)                                 # Add to connected list
         else:                                                   # Device is not yet registered
             i2cListRegister.append(el1)                         # Add to register list
             i2cList.append(el1)                                 # Add connected list
 
     for el1 in i2cListPrevious:                                 # Check for disconnected devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], i2cList)) == 0):
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], i2cList))) == 0):
             i2cListDeregister.append(el1)                       # Add to deregister list
 
     return i2cListRegister, i2cListDeregister
@@ -208,31 +208,31 @@ def i2cUpdate():
     """Update the I2C devices."""
     i2c.getValues()
 
-def spiScan():
-    """Update the status of all SPI devices and saves any connect or disconnect events."""
-    global spiList,spi
-    spi.scan()                                                  # Scan devices on the SPI channels
-    spiListPrevious = spiList                                   # Keep copy of last spi devices
-    spiList = []                                                # Reset list of connected SPI list
-    spiListRegister = []                                        # List of new devices that need to be registered
-    spiListDeregister = []                                      # List of new devices that need to be deregistered
+# def spiScan():
+#     """Update the status of all SPI devices and saves any connect or disconnect events."""
+#     global spiList,spi
+#     spi.scan()                                                  # Scan devices on the SPI channels
+#     spiListPrevious = spiList                                   # Keep copy of last spi devices
+#     spiList = []                                                # Reset list of connected SPI list
+#     spiListRegister = []                                        # List of new devices that need to be registered
+#     spiListDeregister = []                                      # List of new devices that need to be deregistered
 
-    for el1 in spi.connectedDevices:                            # Check for connected and new devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], spiListPrevious)) > 0):
-            spiList.append(el1)                                 # Add to connected list
-        else:                                                   # Device is not yet registered
-            spiListRegister.append(el1)                         # Add to register list
-            spiList.append(el1)                                 # Add connected list
+#     for el1 in spi.connectedDevices:                            # Check for connected and new devices
+#         if (len(filter(lambda el2: el2['name'] == el1['name'], spiListPrevious)) > 0):
+#             spiList.append(el1)                                 # Add to connected list
+#         else:                                                   # Device is not yet registered
+#             spiListRegister.append(el1)                         # Add to register list
+#             spiList.append(el1)                                 # Add connected list
 
-    for el1 in spiListPrevious:                                 # Check for disconnected devices
-        if (len(filter(lambda el2: el2['name'] == el1['name'], spiList)) == 0):
-            spiListDeregister.append(el1)                       # Add to deregister list
+#     for el1 in spiListPrevious:                                 # Check for disconnected devices
+#         if (len(filter(lambda el2: el2['name'] == el1['name'], spiList)) == 0):
+#             spiListDeregister.append(el1)                       # Add to deregister list
 
-    return spiListRegister, spiListDeregister
+#     return spiListRegister, spiListDeregister
 
-def spiUpdate():
-    """update the SPI devices."""
-    spi.getValues()
+# def spiUpdate():
+#     """update the SPI devices."""
+#     spi.getValues()
 
 def scanThread():
     """Thread dedicated to scan for new devices."""

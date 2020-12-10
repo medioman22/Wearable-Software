@@ -126,10 +126,10 @@ PIN_MAP = {
             "DATA": "P8_19",
             "CHANGE_DUTY_FREQUENCY": False
         },
-        # {
-        #     "DATA": "P9_42",
-        #     "CHANGE_DUTY_FREQUENCY": True
-        # },
+        {
+            "DATA": "P8_45",
+            "CHANGE_DUTY_FREQUENCY": True
+        },
     ],
     "ADC": [
         {
@@ -178,6 +178,22 @@ PIN_MAP = {
             "ADDRESS": 0x48,
             "BUSNUM": 2
         },
+    ],
+    "SPI": [
+        {
+            "SPI#": 0,
+            "CLOCK": "P9_22",
+            "MISO": "P9_21",
+            "MOSI": "P9_18",
+            "CS": "P9_17"
+        },
+        {
+            "SPI#": 1,
+            "CLOCK": "P9_31",
+            "MISO": "P9_29",
+            "MOSI": "P9_30",
+            "CS": "P9_28"
+        }   
     ]
 
 }

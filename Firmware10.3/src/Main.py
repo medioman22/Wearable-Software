@@ -19,6 +19,7 @@ import OutputModule                                             # SoftWEAR Outpu
 import PWMModule                                                # SoftWEAR PWM module
 import ADCModule                                                # SoftWEAR ADC module
 import I2CModule                                                # SoftWEAR I2C module
+#import SPIModule                                                # SoftWEAR SPI module
 import json                                                     # Serializing class. All objects sent are serialized
 from termcolor import colored                                   # Color printing in the console
 import base64                                                   # TO Encode the png file
@@ -55,6 +56,7 @@ outputList = []                                                 # List of connec
 pwmList = []                                                    # List of connected PWM devices on the GPIO pins
 adcList = []                                                    # List of connected ADC devices on the Analog pins
 i2cList = []                                                    # List of connected IMU devices on the I2C ports
+spiList = []                                                    # List of connected devices on the SPI ports
 connectionState = ""                                            # Current connection state to be displayed
 updateDuration = 0                                              # Cycle duration needed to update values
 scanDuration = 0                                                # Cycle duration needed to scan for new devices
@@ -65,6 +67,7 @@ output = OutputModule.Output()                                  # Initialize the
 pwm = PWMModule.PWM()                                           # Initialize the SoftWEAR PWM Module
 adc = ADCModule.ADC()                                           # Initialize the SoftWEAR ADC Module
 i2c = I2CModule.I2C()                                           # Initialize the SoftWEAR I2C Module
+#spi = SPIModule.SPI()                                           # Initialize the softWEAR SPI Module
 
 GPIO.setup(scanPin, GPIO.IN, GPIO.PUD_UP)                       # Setup scan pin
 
@@ -205,6 +208,32 @@ def i2cUpdate():
     """Update the I2C devices."""
     i2c.getValues()
 
+# def spiScan():
+#     """Update the status of all SPI devices and saves any connect or disconnect events."""
+#     global spiList,spi
+#     spi.scan()                                                  # Scan devices on the SPI channels
+#     spiListPrevious = spiList                                   # Keep copy of last spi devices
+#     spiList = []                                                # Reset list of connected SPI list
+#     spiListRegister = []                                        # List of new devices that need to be registered
+#     spiListDeregister = []                                      # List of new devices that need to be deregistered
+
+#     for el1 in spi.connectedDevices:                            # Check for connected and new devices
+#         if (len(filter(lambda el2: el2['name'] == el1['name'], spiListPrevious)) > 0):
+#             spiList.append(el1)                                 # Add to connected list
+#         else:                                                   # Device is not yet registered
+#             spiListRegister.append(el1)                         # Add to register list
+#             spiList.append(el1)                                 # Add connected list
+
+#     for el1 in spiListPrevious:                                 # Check for disconnected devices
+#         if (len(filter(lambda el2: el2['name'] == el1['name'], spiList)) == 0):
+#             spiListDeregister.append(el1)                       # Add to deregister list
+
+#     return spiListRegister, spiListDeregister
+
+# def spiUpdate():
+#     """update the SPI devices."""
+#     spi.getValues()
+
 def scanThread():
     """Thread dedicated to scan for new devices."""
     global c, scanForDevices, scanDuration, PNG, ImageAddress
@@ -223,6 +252,7 @@ def scanThread():
         pwmListRegister, pwmListDeregister = pwmScan()          # Get the PWM devices and events
         adcListRegister, adcListDeregister = adcScan()          # Get the ADC devices and events
         i2cListRegister, i2cListDeregister = i2cScan()          # Get the I2C devices and events
+        #spiListRegister, spiListDeregister = spiScan()         # Get the SPI devices and events
 
 
         for device in inputListDeregister:                      # Create input device deregister message
@@ -314,6 +344,25 @@ def scanThread():
                                             'flags': device['flags'],
                                             'frequency': device['frequency'],
                                             'dutyFrequency': device['dutyFrequency']}))
+        #spi 
+        # for device in spiListDeregister:                        # Create I2C device deregister message
+        #     messagesSend.append(json.dumps({'type': 'Deregister',
+        #                                     'name': device['name']}))
+
+
+
+        # for device in spiListRegister:                          # Create I2C device register message
+        #     messagesSend.append(json.dumps({'type': 'Register',
+        #                                     'name': device['name'],
+        #                                     'dir': device['dir'],
+        #                                     'dim': device['dim'],
+        #                                     'about': device['about'],
+        #                                     'settings': device['settings'],
+        #                                     'mode': device['mode'],
+        #                                     'flags': device['flags'],
+        #                                     'frequency': device['frequency'],
+        #                                     'dutyFrequency': device['dutyFrequency']}))
+            
         #PNG is added in here
         if PNG:
             with open(ImageAddress, mode='rb') as file:
@@ -325,8 +374,6 @@ def scanThread():
             PNG = False
             os.remove(ImageAddress)
             ImageAddress = None
-            
-
 
         if c.getState() == 'Connected':
             c.sendMessages(messagesSend[:])                     # Send the messages
@@ -364,6 +411,7 @@ def updateThread():
         pwmUpdate()                                             # Update PWM devices
         adcUpdate()                                             # Update ADC devices
         i2cUpdate()                                             # Update I2C devices
+        #spiUpdate()                                            # Update spi devices
 
         for messageString in messagesRecv:
             message = json.loads(messageString)                 # Parse message from string to JSON
@@ -423,6 +471,19 @@ def updateThread():
                                                     'flags': device['flags'],
                                                     'frequency': device['frequency'],
                                                     'dutyFrequency': device['dutyFrequency']}))
+                #spi
+                # for device in spiList:
+                #     messagesSend.append(json.dumps({'type': 'Register',
+                #                                     'name': device['name'],
+                #                                     'dir': device['dir'],
+                #                                     'dim': device['dim'],
+                #                                     'about': device['about'],
+                #                                     'settings': device['settings'],
+                #                                     'mode': device['mode'],
+                #                                     'flags': device['flags'],
+                #                                     'frequency': device['frequency'],
+                #                                     'dutyFrequency': device['dutyFrequency']}))
+
             if message['type'] == 'Set':                        # Get set message for a device and check for devices
                 output.setValue(message['name'], message['dim'], message['value'])
                 pwm.setValue(message['name'], message['dim'], message['value'])
@@ -591,7 +652,7 @@ def eventLog(messages):
 
 def main():
     """Infinite loop function, reads all devices and manages the connection."""
-    global connectionState, c, exit, loop, embeddedC, LIVE_PRINT, DIAG_LOG, DATA_LOG, EVENT_LOG, DirectoryProf
+    global connectionState, c, exit, loop, embeddedC, LIVE_PRINT, DIAG_LOG, DATA_LOG, EVENT_LOG, DirectoryProf, PNG, ImageAddress
 
     #Create a folder for Profilling if not there
     DirectoryProf = os.getcwd()
@@ -641,6 +702,7 @@ def main():
         if embeddedC != None and embeddedC.getState() == 'Connected':
             messagesSend = [json.dumps({'type': 'CycleDuration','name':'', 'values': {'update': updateDuration, 'scan': scanDuration}})]
             embeddedC._inMessages = embeddedC._inMessages + messagesSend[:] # Send the messages
+        
 
         if LIVE_PRINT:                                          # Check for live plotting
             livePrint()                                         # Call print function
