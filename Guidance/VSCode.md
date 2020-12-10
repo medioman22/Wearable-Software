@@ -25,6 +25,9 @@ ssh -i ~/.ssh/name debian@address
 ### Setting SSH Agent
 It might be needed to set the SSH agent as well.
 
+### Running as administator for debuging
+ Please create launch.json for the file you want to debug with sudo,and in the json file add ,"sudo" : true
+
 
 
 
