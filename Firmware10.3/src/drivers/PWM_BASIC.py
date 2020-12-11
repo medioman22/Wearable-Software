@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# Author: Cyrill Lippuner
-# Date: October 2018
+# Author: Salar Rahimi
+# Date: November 2020
 """
 Driver file for the BASIC PWM. Set the value of a pwm pin for integrating into the SoftWEAR package.
+Update for Debian 10.3
 """
 import Adafruit_BBIO.PWM as PWM
 import threading                                                # Threading class for the threads
