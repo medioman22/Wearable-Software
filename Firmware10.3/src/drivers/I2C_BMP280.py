@@ -161,6 +161,7 @@ class BMP280_I2C:
 
             i2c_busio = busio.I2C(board.SCL, board.SDA)                              # Object for I2C
             self._bmp = BMP280_DRIVER.Adafruit_BMP280_I2C(i2c_busio)  # Create the driver object
+            self._bmp.sea_level_pressure = 1013.25
 
             if (muxedChannel != None):
                 MuxModule.deactivate(muxName)                       # Deactivate mux

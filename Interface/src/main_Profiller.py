@@ -389,7 +389,7 @@ class MainWindow(QMainWindow):
     def RunPythonScript(self):
         if (True): #self._Client == None or not self._Client.state
             self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
-            self._Client.execute('python Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
+            self._Client.execute('python3 Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
     #This function tried to connect to the board
     def EstablishConnection(self):
         """Try to connect listener."""

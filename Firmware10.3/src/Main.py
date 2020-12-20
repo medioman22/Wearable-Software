@@ -19,7 +19,7 @@ import OutputModule                                             # SoftWEAR Outpu
 import PWMModule                                                # SoftWEAR PWM module
 import ADCModule                                                # SoftWEAR ADC module
 import I2CModule                                                # SoftWEAR I2C module
-#import SPIModule                                                # SoftWEAR SPI module
+import SPIModule                                                # SoftWEAR SPI module
 import json                                                     # Serializing class. All objects sent are serialized
 from termcolor import colored                                   # Color printing in the console
 import base64                                                   # TO Encode the png file
@@ -67,7 +67,7 @@ output = OutputModule.Output()                                  # Initialize the
 pwm = PWMModule.PWM()                                           # Initialize the SoftWEAR PWM Module
 adc = ADCModule.ADC()                                           # Initialize the SoftWEAR ADC Module
 i2c = I2CModule.I2C()                                           # Initialize the SoftWEAR I2C Module
-#spi = SPIModule.SPI()                                           # Initialize the softWEAR SPI Module
+spi = SPIModule.SPI()                                           # Initialize the softWEAR SPI Module
 
 GPIO.setup(scanPin, GPIO.IN, GPIO.PUD_UP)                       # Setup scan pin
 
@@ -208,31 +208,31 @@ def i2cUpdate():
     """Update the I2C devices."""
     i2c.getValues()
 
-# def spiScan():
-#     """Update the status of all SPI devices and saves any connect or disconnect events."""
-#     global spiList,spi
-#     spi.scan()                                                  # Scan devices on the SPI channels
-#     spiListPrevious = spiList                                   # Keep copy of last spi devices
-#     spiList = []                                                # Reset list of connected SPI list
-#     spiListRegister = []                                        # List of new devices that need to be registered
-#     spiListDeregister = []                                      # List of new devices that need to be deregistered
+def spiScan():
+    """Update the status of all SPI devices and saves any connect or disconnect events."""
+    global spiList,spi
+    spi.scan()                                                  # Scan devices on the SPI channels
+    spiListPrevious = spiList                                   # Keep copy of last spi devices
+    spiList = []                                                # Reset list of connected SPI list
+    spiListRegister = []                                        # List of new devices that need to be registered
+    spiListDeregister = []                                      # List of new devices that need to be deregistered
 
-#     for el1 in spi.connectedDevices:                            # Check for connected and new devices
-#         if (len(filter(lambda el2: el2['name'] == el1['name'], spiListPrevious)) > 0):
-#             spiList.append(el1)                                 # Add to connected list
-#         else:                                                   # Device is not yet registered
-#             spiListRegister.append(el1)                         # Add to register list
-#             spiList.append(el1)                                 # Add connected list
+    for el1 in spi.connectedDevices:                            # Check for connected and new devices
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], spiListPrevious))) > 0):
+            spiList.append(el1)                                 # Add to connected list
+        else:                                                   # Device is not yet registered
+            spiListRegister.append(el1)                         # Add to register list
+            spiList.append(el1)                                 # Add connected list
 
-#     for el1 in spiListPrevious:                                 # Check for disconnected devices
-#         if (len(filter(lambda el2: el2['name'] == el1['name'], spiList)) == 0):
-#             spiListDeregister.append(el1)                       # Add to deregister list
+    for el1 in spiListPrevious:                                 # Check for disconnected devices
+        if (len(list(filter(lambda el2: el2['name'] == el1['name'], spiList))) == 0):
+            spiListDeregister.append(el1)                       # Add to deregister list
 
-#     return spiListRegister, spiListDeregister
+    return spiListRegister, spiListDeregister
 
-# def spiUpdate():
-#     """update the SPI devices."""
-#     spi.getValues()
+def spiUpdate():
+    """update the SPI devices."""
+    spi.getValues()
 
 def scanThread():
     """Thread dedicated to scan for new devices."""
@@ -252,7 +252,7 @@ def scanThread():
         pwmListRegister, pwmListDeregister = pwmScan()          # Get the PWM devices and events
         adcListRegister, adcListDeregister = adcScan()          # Get the ADC devices and events
         i2cListRegister, i2cListDeregister = i2cScan()          # Get the I2C devices and events
-        #spiListRegister, spiListDeregister = spiScan()         # Get the SPI devices and events
+        spiListRegister, spiListDeregister = spiScan()          # Get the SPI devices and events
 
 
         for device in inputListDeregister:                      # Create input device deregister message
@@ -345,23 +345,23 @@ def scanThread():
                                             'frequency': device['frequency'],
                                             'dutyFrequency': device['dutyFrequency']}))
         #spi 
-        # for device in spiListDeregister:                        # Create I2C device deregister message
-        #     messagesSend.append(json.dumps({'type': 'Deregister',
-        #                                     'name': device['name']}))
+        for device in spiListDeregister:                        # Create I2C device deregister message
+            messagesSend.append(json.dumps({'type': 'Deregister',
+                                            'name': device['name']}))
 
 
 
-        # for device in spiListRegister:                          # Create I2C device register message
-        #     messagesSend.append(json.dumps({'type': 'Register',
-        #                                     'name': device['name'],
-        #                                     'dir': device['dir'],
-        #                                     'dim': device['dim'],
-        #                                     'about': device['about'],
-        #                                     'settings': device['settings'],
-        #                                     'mode': device['mode'],
-        #                                     'flags': device['flags'],
-        #                                     'frequency': device['frequency'],
-        #                                     'dutyFrequency': device['dutyFrequency']}))
+        for device in spiListRegister:                          # Create I2C device register message
+            messagesSend.append(json.dumps({'type': 'Register',
+                                            'name': device['name'],
+                                            'dir': device['dir'],
+                                            'dim': device['dim'],
+                                            'about': device['about'],
+                                            'settings': device['settings'],
+                                            'mode': device['mode'],
+                                            'flags': device['flags'],
+                                            'frequency': device['frequency'],
+                                            'dutyFrequency': device['dutyFrequency']}))
             
         #PNG is added in here
         if PNG:
@@ -411,7 +411,7 @@ def updateThread():
         pwmUpdate()                                             # Update PWM devices
         adcUpdate()                                             # Update ADC devices
         i2cUpdate()                                             # Update I2C devices
-        #spiUpdate()                                            # Update spi devices
+        spiUpdate()                                             # Update spi devices
 
         for messageString in messagesRecv:
             message = json.loads(messageString)                 # Parse message from string to JSON
@@ -472,22 +472,23 @@ def updateThread():
                                                     'frequency': device['frequency'],
                                                     'dutyFrequency': device['dutyFrequency']}))
                 #spi
-                # for device in spiList:
-                #     messagesSend.append(json.dumps({'type': 'Register',
-                #                                     'name': device['name'],
-                #                                     'dir': device['dir'],
-                #                                     'dim': device['dim'],
-                #                                     'about': device['about'],
-                #                                     'settings': device['settings'],
-                #                                     'mode': device['mode'],
-                #                                     'flags': device['flags'],
-                #                                     'frequency': device['frequency'],
-                #                                     'dutyFrequency': device['dutyFrequency']}))
+                for device in spiList:
+                    messagesSend.append(json.dumps({'type': 'Register',
+                                                    'name': device['name'],
+                                                    'dir': device['dir'],
+                                                    'dim': device['dim'],
+                                                    'about': device['about'],
+                                                    'settings': device['settings'],
+                                                    'mode': device['mode'],
+                                                    'flags': device['flags'],
+                                                    'frequency': device['frequency'],
+                                                    'dutyFrequency': device['dutyFrequency']}))
 
             if message['type'] == 'Set':                        # Get set message for a device and check for devices
                 output.setValue(message['name'], message['dim'], message['value'])
                 pwm.setValue(message['name'], message['dim'], message['value'])
                 i2c.setValue(message['name'], message['dim'], message['value'])
+                spi.setValue(message['name'], message['dim'], message['value'])
 
             if message['type'] == 'Settings':                   # Change settings for a device
                 input.settings(message)
@@ -495,6 +496,7 @@ def updateThread():
                 pwm.settings(message)
                 adc.settings(message)
                 i2c.settings(message)
+                spi.settings(message)
 
             if message['type'] == 'Scan':                       # Change scan for a device
                 scanForDevices = message['value']
@@ -530,6 +532,8 @@ def updateThread():
         for device in adcList:                                  # Create adc device data message
             dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
         for device in i2cList:                                  # Create i2c device data message
+            dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
+        for device in spiList:                                  # Create spi device data message
             dataMessage['data'].append({'name': device['name'], 'values': device['vals'], 'cycle': device['cycle']})
 
         if len(dataMessage['data']) > 0:

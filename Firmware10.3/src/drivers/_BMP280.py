@@ -419,32 +419,3 @@ class Adafruit_BMP280_I2C(Adafruit_BMP280):  # pylint: disable=invalid-name
             i2c.write(bytes([register & 0xFF, value & 0xFF]))
             # print("$%02X <= 0x%02X" % (register, value))
 
-
-class Adafruit_BMP280_SPI(Adafruit_BMP280):
-    """Driver for SPI connected BMP280. Default clock rate is 100000 but can be changed with
-      'baudrate'"""
-
-    def __init__(self, spi, cs, baudrate=100000):
-        import adafruit_bus_device.spi_device as spi_device  # pylint: disable=import-outside-toplevel
-
-        self._spi = spi_device.SPIDevice(spi, cs, baudrate=baudrate)
-        super().__init__()
-
-    def _read_register(self, register, length):
-        """Low level register reading over SPI, returns a list of values"""
-        register = (register | 0x80) & 0xFF  # Read single, bit 7 high.
-        with self._spi as spi:
-            # pylint: disable=no-member
-            spi.write(bytearray([register]))
-            result = bytearray(length)
-            spi.readinto(result)
-            # print("$%02X => %s" % (register, [hex(i) for i in result]))
-            return result
-
-    def _write_register_byte(self, register, value):
-        """Low level register writing over SPI, writes one 8-bit value"""
-        register &= 0x7F  # Write, bit 7 low.
-        with self._spi as spi:
-            # pylint: disable=no-member
-            spi.write(bytes([register, value & 0xFF]))
-

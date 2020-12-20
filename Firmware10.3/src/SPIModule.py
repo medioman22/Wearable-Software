@@ -6,17 +6,21 @@ SoftWEAR SPI module. Adds MUX features and hardware detection to normal SPI.
 """
 
 from Config import PIN_MAP                                      # SoftWEAR Config module.
+from MuxModule import GetMux                                    # SoftWEAR MUX module.
 
 # Driver for the BMP280
-from drivers.SPI_BASIC import SPIDriver
+from drivers.SPI_BMP280 import BMP280_SPI
+
+# Create a MUX shadow instance as there is only one Mux
+MuxModule = GetMux()
 
 # List of all possible drivers
-DRIVERS = [SPIDriver]
+DRIVERS = [BMP280_SPI]
 
 class SPI:
     """Implements SPI functionality."""
 
-    # List of all connected drivers
+     # List of all connected drivers
     _connectedDrivers = []
 
     # List of connected devices dictionary
@@ -38,55 +42,109 @@ class SPI:
         connectedDevices = []                                   # New connected devices list
         disconnectedDriver = []                                 # Disconnected drivers
 
-        for pinConfig in PIN_MAP["SPI"]:                        # Loop all available pin configs                                   
-            for lastDrv in lastConnectedDrivers:                # Test last connected drivers
+        muxList = MuxModule.listFor('SPI')                      # Get a list of muxes registered for spi
+
+        for pinConfig in PIN_MAP["SPI"]:                        # Loop all available pin configs
+            if len(muxList) == 0:                               # Non muxed spi channels
+                for lastDrv in lastConnectedDrivers:            # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
-                if not lastDrv.getDeviceConnected():            # Device is disconnected
-                    disconnectedDriver.append(lastDrv)
-                elif lastDrv.comparePinConfig(pinConfig):   # Device still connected
-                    connectedDrivers.append(lastDrv)        # Add to connected driver list
-                    connectedDevices.append({   'address': pinConfig["ADDRESS"], # Add to connected device list
-                                                'bus': pinConfig["BUSNUM"],
-                                                'mux': -1,
-                                                'name': lastDrv.getName(),
-                                                'about': lastDrv.getAbout(),
-                                                'settings': lastDrv.getSettings(),
-                                                'dir': lastDrv.getDir(),
-                                                'dim': lastDrv.getDim(),
-                                                'mode': lastDrv.getMode(),
-                                                'frequency': lastDrv.getFrequency(),
-                                                'dutyFrequency': lastDrv.getDutyFrequency(),
-                                                'flags': lastDrv.getFlags(),
-                                                'val': 0,
-                                                'vals': [],
-                                                'cycle': 0})
-                    break                                   # Break to next device
-            else:                                           # Try new drivers if no existing was found
-                for DRIVER in DRIVERS:                      # Test all drivers
-                    drv = DRIVER(pinConfig)                 # Test the different drivers
-                    if not drv.getDeviceConnected():        # Validate driver connected
-                        continue                            # Try next driver until none is left
-                    drv.configureDevice()                   # Configure device
-                    connectedDrivers.append(drv)            # Add to connected driver list
-                    connectedDevices.append({   'address': pinConfig["ADDRESS"], # Add to connected device list
-                                                'bus': pinConfig["BUSNUM"],
-                                                'mux': -1,
-                                                'name': drv.getName(),
-                                                'about': drv.getAbout(),
-                                                'settings': drv.getSettings(),
-                                                'dir': drv.getDir(),
-                                                'dim': drv.getDim(),
-                                                'mode': drv.getMode(),
-                                                'frequency': drv.getFrequency(),
-                                                'dutyFrequency': drv.getDutyFrequency(),
-                                                'flags': drv.getFlags(),
-                                                'val': 0,
-                                                'vals': [],
-                                                'cycle': 0})
-                    break                                   # Break to next device
-                else:
-                    pass                                    # No suitable driver has been found
-            
+                    if not lastDrv.getDeviceConnected():        # Device is disconnected
+                        disconnectedDriver.append(lastDrv)
+                    elif lastDrv.comparePinConfig(pinConfig):   # Device still connected
+                        connectedDrivers.append(lastDrv)        # Add to connected driver list
+                        connectedDevices.append({   'SPI': pinConfig["SPI#"], # Add to connected device list
+                                                    'mux': -1,
+                                                    'name': lastDrv.getName(),
+                                                    'about': lastDrv.getAbout(),
+                                                    'settings': lastDrv.getSettings(),
+                                                    'dir': lastDrv.getDir(),
+                                                    'dim': lastDrv.getDim(),
+                                                    'mode': lastDrv.getMode(),
+                                                    'frequency': lastDrv.getFrequency(),
+                                                    'dutyFrequency': lastDrv.getDutyFrequency(),
+                                                    'flags': lastDrv.getFlags(),
+                                                    'val': 0,
+                                                    'vals': [],
+                                                    'cycle': 0})
+                        break                                   # Break to next device
+                else:                                           # Try new drivers if no existing was found
+                    for DRIVER in DRIVERS:                      # Test all drivers
+                        drv = DRIVER(pinConfig)                 # Test the different drivers
+                        if not drv.getDeviceConnected():        # Validate driver connected
+                            continue                            # Try next driver until none is left
+                        drv.configureDevice()                   # Configure device
+                        connectedDrivers.append(drv)            # Add to connected driver list
+                        connectedDevices.append({   'SPI': pinConfig["SPI#"], # Add to connected device list
+                                                    'mux': -1,
+                                                    'name': drv.getName(),
+                                                    'about': drv.getAbout(),
+                                                    'settings': drv.getSettings(),
+                                                    'dir': drv.getDir(),
+                                                    'dim': drv.getDim(),
+                                                    'mode': drv.getMode(),
+                                                    'frequency': drv.getFrequency(),
+                                                    'dutyFrequency': drv.getDutyFrequency(),
+                                                    'flags': drv.getFlags(),
+                                                    'val': 0,
+                                                    'vals': [],
+                                                    'cycle': 0})
+                        break                                   # Break to next device
+                    else:
+                        pass                                    # No suitable driver has been found
+            else:                                               # Muxes have been detected
+                for muxName in muxList:                         # Loop all mux channels
+                    if MuxModule.detect(muxName):               # Check if mux is detected
+                        muxRange = MuxModule.about(muxName)['range'] # Get mux range
+                        for muxedChannel in range(muxRange):    # Loop all muxed channels
+                            for lastDrv in lastConnectedDrivers: # Test last connected drivers
+                                if not lastDrv.comparePinConfig(pinConfig, muxName, muxedChannel): # Wrong driver
+                                    pass
+                                                                # Check if drv already loaded and still connected
+                                elif not lastDrv.getDeviceConnected(): # Device is disconnected
+                                    disconnectedDriver.append(lastDrv)
+                                else:                           # Device still connected
+                                    connectedDrivers.append(lastDrv) # Add to connected driver list
+                                    connectedDevices.append({   'SPI': pinConfig["SPI#"], # Add to connected device list
+                                                                'mux': muxedChannel,
+                                                                'name': lastDrv.getName(),
+                                                                'muxName': muxName,
+                                                                'about': lastDrv.getAbout(),
+                                                                'settings': lastDrv.getSettings(),
+                                                                'dir': lastDrv.getDir(),
+                                                                'dim': lastDrv.getDim(),
+                                                                'mode': lastDrv.getMode(),
+                                                                'frequency': lastDrv.getFrequency(),
+                                                                'dutyFrequency': lastDrv.getDutyFrequency(),
+                                                                'flags': lastDrv.getFlags(),
+                                                                'val': 0,
+                                                                'vals': [],
+                                                                'cycle': 0})
+                                    break                       # Break to next device
+                            else:                               # Try new drivers if no existing was found
+                                for DRIVER in DRIVERS:          # Test all drivers
+                                    drv = DRIVER(pinConfig, muxedChannel, muxName) # Test the different drivers
+                                    if not drv.getDeviceConnected(): # Validate driver connected
+                                        continue                # Try next driver until none is left
+                                    drv.configureDevice()       # Configure device
+                                    connectedDrivers.append(drv) # Add to connected driver list
+                                    connectedDevices.append({   'SPI': pinConfig["SPI#"], # Add to connected device list
+                                                                'mux': muxedChannel,
+                                                                'name': drv.getName(),
+                                                                'muxName': muxName,
+                                                                'about': drv.getAbout(),
+                                                                'settings': drv.getSettings(),
+                                                                'dir': drv.getDir(),
+                                                                'dim': drv.getDim(),
+                                                                'mode': drv.getMode(),
+                                                                'frequency': drv.getFrequency(),
+                                                                'dutyFrequency': drv.getDutyFrequency(),
+                                                                'flags': drv.getFlags(),
+                                                                'val': 0,
+                                                                'vals': [],
+                                                                'cycle': 0})
+                                    break                       # Break to next device
+                                else:
+                                    pass                        # No suitable driver has been found
         for drv in disconnectedDriver:                          # Clean up disconnected drivers
             drv.cleanup()
         self._connectedDrivers = connectedDrivers
