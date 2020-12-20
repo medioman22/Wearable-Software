@@ -31,7 +31,7 @@ classdef beagleboneGreenWirelessConnection < handle
             fopen(obj.t);
         end
         
-        function messages = getMessages(obj, seconds)
+        function messages = getMessages(obj, seconds, names)
             warning('off', 'instrument:fscanf:unsuccessfulRead')
             remainder = '';
             messages = {};
@@ -62,6 +62,48 @@ classdef beagleboneGreenWirelessConnection < handle
                         end
                     end
                 end
+            end
+            
+            % If a specific list of input/output names is given
+            if nargin == 3
+                % Change names because structure fields cannot contain
+                % characters like @,[,]
+                new_names = strings(1,length(names));
+                for n = 1:length(names)
+                    new_name = names(n);
+                    new_name = strrep(new_name,'@','_');
+                    new_name = strrep(new_name,'[','_');
+                    new_name = strrep(new_name,']','');
+                    new_names(n) = new_name;
+                    m.(new_name).time = [];
+                    m.(new_name).value = [];
+                end
+                % Construct strucutre of all values and time for given name
+                for i = 1:length(messages)
+                    if messages{i}.type == "D" % Only consider data of type D
+                        for j = 1:length(messages{i}.data) % Get all messages
+                            for n = 1:length(names)
+                                if messages{i}.data(j).name == names(n) % if the data name corresponds to the one we want
+                                    % Create new structure with names as
+                                    % fields and which contains arrays of
+                                    % values and time for each name (field)
+                                    for k = 1:size(messages{i}.data(j).values,1)
+                                        new_name = new_names(n);
+                                        m.(new_name).time = [m.(new_name).time, messages{i}.data(j).values(k,1)];
+                                        m.(new_name).value = [m.(new_name).value, messages{i}.data(j).values(k,2)];
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                % Convert absolute time to seconds (remove offset)
+                fn = fieldnames(m);
+                for k = 1:numel(fn)
+                    m.(fn{k}).time = m.(fn{k}).time - m.(fn{k}).time(1);
+                end
+                % Return the new version of messages
+                messages = m;
             end
         end
         
