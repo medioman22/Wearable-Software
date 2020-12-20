@@ -97,10 +97,15 @@ classdef beagleboneGreenWirelessConnection < handle
                         end
                     end
                 end
+
                 % Convert absolute time to seconds (remove offset)
-                fn = fieldnames(m);
-                for k = 1:numel(fn)
-                    m.(fn{k}).time = m.(fn{k}).time - m.(fn{k}).time(1);
+                try
+                    fn = fieldnames(m);
+                    for k = 1:numel(fn)
+                        m.(fn{k}).time = m.(fn{k}).time - m.(fn{k}).time(1);
+                    end
+                catch
+                    warning("Some I/O names were not found")
                 end
                 % Return the new version of messages
                 messages = m;
