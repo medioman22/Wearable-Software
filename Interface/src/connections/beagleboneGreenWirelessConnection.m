@@ -26,7 +26,7 @@ classdef beagleboneGreenWirelessConnection < handle
         
         function obj = open(obj)
             %%% Start the background communication thread 
-            obj.t = tcpip(obj.ip, obj.port);
+            obj.t = tcpip(obj.ip, obj.port, "Timeout", 0.1, "NetworkRole","client");
             obj.t.InputBufferSize = 1024;
             fopen(obj.t);
         end

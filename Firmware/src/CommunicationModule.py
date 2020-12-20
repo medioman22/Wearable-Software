@@ -117,7 +117,7 @@ class CommunicationConnection:
                 except sock.timeout:                            # We expect timeouts, as we have non-blocking calls
                     if not self._commsThreadRun:
                         return                                  # This line terminates the background thread
-
+            self._sendQueue = deque()                           # Empty send queue before entering connection loop            
             while True:                                         # While loop dedicated to recieving and sending data
                 try:                                            # We will be using the connection socket
                     data = conn.recv(1024)
