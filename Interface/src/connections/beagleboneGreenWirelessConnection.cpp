@@ -1,6 +1,7 @@
 // Date: December 2020
 // Requirements: c++11
 // Arguments needed for compilation: ["-std=c++11", "-pthread"] 
+// Other arguments and installation needed for matplotlibcpp wrapper
 
 // -*- SoftWEAR Communications module. C++ API -*- 
 
@@ -14,7 +15,7 @@
 #include <thread>               // Thread module to send and receive messages in parallel 
 #include <sstream>              // Used for socket reading, sending and string spliting
 #include <nlohmann/json.hpp>    // Serializing module 
-#include "matplotlibcpp.h"
+#include "matplotlibcpp.h"      // Matplotlib wrapper
 
 namespace plt = matplotlibcpp;
 using namespace std;
@@ -86,6 +87,7 @@ json beagleboneGreenWirelessConnection::getMessages(vector<string> names = {}) {
     /**
      * Construct an array of json objects based on strings in @recvQueue.
      * Returns an array of json objects.
+     * If a given list of I/O names is given, return time and values for each of them.
      * Uses json module.
      */
     json messages;                                              // Initialize json array
@@ -97,27 +99,32 @@ json beagleboneGreenWirelessConnection::getMessages(vector<string> names = {}) {
         return messages;
   
     json m;
-    for (auto name = names.cbegin(); name != names.cend(); ++name) {
-        m[*name]["time"] = (vector<double>) {};
-        m[*name]["value"] = (vector<double>) {};
-    }
     for (json::iterator message = messages.begin(); message != messages.end(); ++message) {
-        if ((*message)["type"] == "D") {
+        if ((*message)["type"] == "D") {                        // Only consider messages of type "D"
             for (json::iterator data = (*message)["data"].begin(); data != (*message)["data"].end(); ++data) {
-                    for (auto name = names.cbegin(); name != names.cend(); ++name) {
-                        if ((*data)["name"] == *name) {
+                for (auto name = names.cbegin(); name != names.cend(); ++name) {
+                    if ((*data)["name"] == *name) {             // Only consider messages with names in given names
                         for (json::iterator value = (*data)["values"].begin(); value != (*data)["values"].end(); ++value) {
-                            m[*name]["time"].push_back((*value)[0]);
-                            m[*name]["value"].push_back((*value)[1][0]);
-                        }
+                            m[*name]["values"].push_back({(*value)[0], (*value)[1][0]});
                         }
                     }
+                }
             }
         }
     }
+    // Sort values based on time and create two different fields
+    for (auto name = names.cbegin(); name != names.cend(); ++name) {
+        sort(m[*name]["values"].begin(), m[*name]["values"].end());
+        for (json::iterator values = m[*name]["values"].begin(); values != m[*name]["values"].end(); ++values) {
+            m[*name]["time"].push_back((*values)[0]);
+            m[*name]["value"].push_back((*values)[1]);
+        }
+        m[*name].erase("values");
+    }
+    // Remove time offset
     double offset;
     for (auto name = names.cbegin(); name != names.cend(); ++name) {
-    offset = (double)m[*name]["time"][0];
+        offset = (double)m[*name]["time"][0];
         for (int i = 0; i < m[*name]["time"].size(); ++i) {
             m[*name]["time"][i] = (double)m[*name]["time"][i] - offset;
         }
@@ -261,7 +268,7 @@ int main(int argc, char const *argv[]) {
 
     c.sendMessages(m);                                              // Sends the json messages
     
-    this_thread::sleep_for(chrono::seconds(10));                     // Wait to receive some messages
+    this_thread::sleep_for(chrono::seconds(20));                     // Wait to receive some messages
     vector<string> names = {"ADC_BASIC@ADC[P9_38]","ADC_BASIC@ADC[P9_39]","ADC_BASIC@ADC[P9_40]"};
     json messages = c.getMessages(names);                           // Get json object type messages
     

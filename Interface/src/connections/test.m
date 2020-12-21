@@ -24,7 +24,7 @@ messages = c.getMessages(20, names);
 figure
 fn = fieldnames(messages);
 for k = 1:numel(fn)
-    plot(messages.(fn{k}).time,messages.(fn{k}).value)
+    plot(messages.(fn{k}).time,messages.(fn{k}).value, 'Linewidth',1.5)
 hold on
 end
 hold off

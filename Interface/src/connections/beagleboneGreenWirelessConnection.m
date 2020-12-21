@@ -102,6 +102,10 @@ classdef beagleboneGreenWirelessConnection < handle
                 try
                     fn = fieldnames(m);
                     for k = 1:numel(fn)
+                        % Sort time and corresponding values
+                        [m.(fn{k}).time, I] = sort(m.(fn{k}).time);
+                        m.(fn{k}).value = m.(fn{k}).value(I);
+                        % Remove offset
                         m.(fn{k}).time = m.(fn{k}).time - m.(fn{k}).time(1);
                     end
                 catch
