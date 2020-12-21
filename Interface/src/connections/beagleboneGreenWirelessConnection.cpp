@@ -14,7 +14,9 @@
 #include <thread>               // Thread module to send and receive messages in parallel 
 #include <sstream>              // Used for socket reading, sending and string spliting
 #include <nlohmann/json.hpp>    // Serializing module 
+#include "matplotlibcpp.h"
 
+namespace plt = matplotlibcpp;
 using namespace std;
 using json = nlohmann::json;
 
@@ -60,7 +62,7 @@ class beagleboneGreenWirelessConnection {
         void open();
         void shutdown();
         void sendMessages(json messages);
-        json getMessages();
+        json getMessages(vector<string> names);
 
     private:
         vector<string> sendQueue;                               // Sending queue
@@ -80,18 +82,47 @@ void beagleboneGreenWirelessConnection::sendMessages(json messages) {
         sendQueue.push_back((*message).dump());
 }
 
-json beagleboneGreenWirelessConnection::getMessages() {
+json beagleboneGreenWirelessConnection::getMessages(vector<string> names = {}) {
     /**
      * Construct an array of json objects based on strings in @recvQueue.
      * Returns an array of json objects.
      * Uses json module.
      */
-json messages;                                              // Initialize json array
-while (!recvQueue.empty()) {                                // Pop all messages from the receiving queue and add them to the return array
-        messages.push_back(json::parse(recvQueue[0]));      // Add json parsed strings to the json array
-        recvQueue.erase(recvQueue.begin());                 // Pop the receiving queue
+    json messages;                                              // Initialize json array
+    while (!recvQueue.empty()) {                                // Pop all messages from the receiving queue and add them to the return array
+            messages.push_back(json::parse(recvQueue[0]));      // Add json parsed strings to the json array
+            recvQueue.erase(recvQueue.begin());                 // Pop the receiving queue
+        }
+    if (names.empty())
+        return messages;
+  
+    json m;
+    for (auto name = names.cbegin(); name != names.cend(); ++name) {
+        m[*name]["time"] = (vector<double>) {};
+        m[*name]["value"] = (vector<double>) {};
     }
-return messages;
+    for (json::iterator message = messages.begin(); message != messages.end(); ++message) {
+        if ((*message)["type"] == "D") {
+            for (json::iterator data = (*message)["data"].begin(); data != (*message)["data"].end(); ++data) {
+                    for (auto name = names.cbegin(); name != names.cend(); ++name) {
+                        if ((*data)["name"] == *name) {
+                        for (json::iterator value = (*data)["values"].begin(); value != (*data)["values"].end(); ++value) {
+                            m[*name]["time"].push_back((*value)[0]);
+                            m[*name]["value"].push_back((*value)[1][0]);
+                        }
+                        }
+                    }
+            }
+        }
+    }
+    double offset;
+    for (auto name = names.cbegin(); name != names.cend(); ++name) {
+    offset = (double)m[*name]["time"][0];
+        for (int i = 0; i < m[*name]["time"].size(); ++i) {
+            m[*name]["time"][i] = (double)m[*name]["time"][i] - offset;
+        }
+    }
+    return m;
 }
 
 void beagleboneGreenWirelessConnection::open() {
@@ -230,11 +261,27 @@ int main(int argc, char const *argv[]) {
 
     c.sendMessages(m);                                              // Sends the json messages
     
-    this_thread::sleep_for(chrono::seconds(1));                     // Wait to receive some messages
-    json messages = c.getMessages();                                // Get json object type messages
-    cout << messages[0] << "\n";                                    // Example of a json object message
-    cout << messages[0]["data"][0]["name"];                         // Example of how to access values
+    this_thread::sleep_for(chrono::seconds(10));                     // Wait to receive some messages
+    vector<string> names = {"ADC_BASIC@ADC[P9_38]","ADC_BASIC@ADC[P9_39]","ADC_BASIC@ADC[P9_40]"};
+    json messages = c.getMessages(names);                           // Get json object type messages
+    
+    vector<double> x1 = messages["ADC_BASIC@ADC[P9_38]"]["time"];
+    vector<double> y1 = messages["ADC_BASIC@ADC[P9_38]"]["value"];
+    plt::named_plot("ADC_BASIC@ADC[P9_38]", x1, y1);
 
+    vector<double> x2 = messages["ADC_BASIC@ADC[P9_39]"]["time"];
+    vector<double> y2 = messages["ADC_BASIC@ADC[P9_39]"]["value"];
+    plt::named_plot("ADC_BASIC@ADC[P9_39]", x2, y2);
+
+    vector<double> x3 = messages["ADC_BASIC@ADC[P9_40]"]["time"];
+    vector<double> y3 = messages["ADC_BASIC@ADC[P9_40]"]["value"];
+    plt::named_plot("ADC_BASIC@ADC[P9_40]", x3,y3);
+
+    plt::legend();
+    plt::ylabel("Volt [V]");
+    plt::xlabel("Time [s]");
+    plt::title("Results");
+    plt::show();
     c.shutdown();                                                   // Terminate thread and close connection
     
     return 0;
