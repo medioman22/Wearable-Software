@@ -38,7 +38,7 @@ python api.py
 The main file is the heart of the Firmware and used to start it with:
 
 ```
-sudo python Main.py [ldmepf]
+sudo python3 Main.py [ldmepf]
 ```
 
 * *`sudo` is needed due to the 'PWM Module', which needs root access*
@@ -123,3 +123,21 @@ MUX drivers are bit special as there is only one driver allowed at the time. But
 ### Embedded loop
 
 Embedded loops are custom made controllers that use the same api as on a connected computer application. It is run with the `f` command.
+
+### SPI
+
+Date: December 2020
+
+SPI is now added to list of features of this product. The availbale pins for configuring SPI pins are shown bellow:
+
+![](./Assets/SPI.png)
+
+Initially pins are not configured as SPI and it should either be done manually everytime the system is booted up or permanently. The two possible options are explained in the following sections.
+
+#### Manually
+
+#### Permanently
+
+#### Template for Creating new Driver
+
+`_SPI_DRIVER_TEMPLATE.py` is provided to follow the instruction to create new template for new sensors. 

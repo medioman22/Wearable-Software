@@ -1,26 +1,34 @@
 # -*- coding: utf-8 -*-
-# Author: Salar Rahimi
-# Date: November 2020
+# Author: Cyrill Lippuner
+# Date: October 2018
 """
-SoftWEAR SPI module. Adds MUX features and hardware detection to normal SPI.
+SoftWEAR I2C module. Adds MUX features and hardware detection to normal I2C.
 """
 
 from Config import PIN_MAP                                      # SoftWEAR Config module.
 from MuxModule import GetMux                                    # SoftWEAR MUX module.
 
-# Driver for the BMP280
-from drivers.SPI_BMP280 import BMP280_SPI
+from drivers.I2C_BNO055 import BNO055                           # Driver module for the BNO055 device
+from drivers.I2C_PCA9685 import PCA9685                         # Driver module for the PCA9685 device
+from drivers.I2C_ADS1015 import ADS1015                         # Driver module for the ADS1015 device
+#import I2C_MPU6050                                             # Driver for the MPU6050 device
+
+
+"""
+DEDICATED I2C MULTIPLEXER
+https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/overview
+"""
 
 # Create a MUX shadow instance as there is only one Mux
 MuxModule = GetMux()
 
 # List of all possible drivers
-DRIVERS = [BMP280_SPI]
+DRIVERS = [BNO055, PCA9685, ADS1015]
 
-class SPI:
-    """Implements SPI functionality."""
+class I2C:
+    """Implements I2C functionality."""
 
-     # List of all connected drivers
+    # List of all connected drivers
     _connectedDrivers = []
 
     # List of connected devices dictionary
@@ -28,12 +36,12 @@ class SPI:
 
 
     def __init__(self):
-        """Initialize the device drivers and the MUX object associated with SPI."""
+        """Initialize the device drivers and the MUX object associated with I2C."""
         pass
 
     def detectMux(self):
         """Detect if a mux is active."""
-        return False # TODO: Implement mux for SPI
+        return False # TODO: Implement mux for I2C
 
     def scan(self):
         """Update the connected devices dictionary list."""
@@ -42,17 +50,18 @@ class SPI:
         connectedDevices = []                                   # New connected devices list
         disconnectedDriver = []                                 # Disconnected drivers
 
-        muxList = MuxModule.listFor('SPI')                      # Get a list of muxes registered for spi
+        muxList = MuxModule.listFor('I2C')                      # Get a list of muxes registered for I2C
 
-        for pinConfig in PIN_MAP["SPI"]:                        # Loop all available pin configs
-            if len(muxList) == 0:                               # Non muxed spi channels
+        for pinConfig in PIN_MAP["I2C"]:                        # Loop all available pin configs
+            if len(muxList) == 0:                               # Non muxed i2c channels
                 for lastDrv in lastConnectedDrivers:            # Test last connected drivers
                                                                 # Check if drv already loaded and still connected
                     if not lastDrv.getDeviceConnected():        # Device is disconnected
                         disconnectedDriver.append(lastDrv)
                     elif lastDrv.comparePinConfig(pinConfig):   # Device still connected
                         connectedDrivers.append(lastDrv)        # Add to connected driver list
-                        connectedDevices.append({   'SPI': pinConfig["SPI#"], # Add to connected device list
+                        connectedDevices.append({   'address': pinConfig["ADDRESS"], # Add to connected device list
+                                                    'bus': pinConfig["BUSNUM"],
                                                     'mux': -1,
                                                     'name': lastDrv.getName(),
                                                     'about': lastDrv.getAbout(),
@@ -74,7 +83,8 @@ class SPI:
                             continue                            # Try next driver until none is left
                         drv.configureDevice()                   # Configure device
                         connectedDrivers.append(drv)            # Add to connected driver list
-                        connectedDevices.append({   'SPI': pinConfig["SPI#"], # Add to connected device list
+                        connectedDevices.append({   'address': pinConfig["ADDRESS"], # Add to connected device list
+                                                    'bus': pinConfig["BUSNUM"],
                                                     'mux': -1,
                                                     'name': drv.getName(),
                                                     'about': drv.getAbout(),
@@ -104,7 +114,8 @@ class SPI:
                                     disconnectedDriver.append(lastDrv)
                                 else:                           # Device still connected
                                     connectedDrivers.append(lastDrv) # Add to connected driver list
-                                    connectedDevices.append({   'SPI': pinConfig["SPI#"], # Add to connected device list
+                                    connectedDevices.append({   'address': pinConfig["ADDRESS"], # Add to connected device list
+                                                                'bus': pinConfig["BUSNUM"],
                                                                 'mux': muxedChannel,
                                                                 'name': lastDrv.getName(),
                                                                 'muxName': muxName,
@@ -127,7 +138,8 @@ class SPI:
                                         continue                # Try next driver until none is left
                                     drv.configureDevice()       # Configure device
                                     connectedDrivers.append(drv) # Add to connected driver list
-                                    connectedDevices.append({   'SPI': pinConfig["SPI#"], # Add to connected device list
+                                    connectedDevices.append({   'address': pinConfig["ADDRESS"], # Add to connected device list
+                                                                'bus': pinConfig["BUSNUM"],
                                                                 'mux': muxedChannel,
                                                                 'name': drv.getName(),
                                                                 'muxName': muxName,

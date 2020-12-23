@@ -1,10 +1,11 @@
 # Firmware
 
-The Firmware is written to run on a BeagleBone Green wireless. Its purpose is to help you to connect and interface sensors connected to the board.
+The Firmware is written to run on a BeagleBone Green wireless. Its purpose is to help you to connect and interface sensors connected to the board. The following guidlines are written on the work done by Cyrill Lippuner. The firmware version is updated to Debian 10.3 and code is prepared for python3. 
 
 *Network Configuration*
 ```
-IP: 192.168.7.2
+IP: 192.168.7.2 Cable
+IP: 192.168.8.1 Wifi
 Port: 12345
 ```
 
@@ -48,7 +49,7 @@ In folder `/Firmware/Drivers` is a set of drivers used in *summer 2018*.
 
 #### Flashing the Image
 
-Download the "debian 8.10" image from the [Beaglebone image repo](https://beagleboard.org/latest-images) and flash it onto the board.
+Download the "debian 10.3" image from the [Beaglebone image repo](https://beagleboard.org/latest-images) and flash it onto the board.
 
 * Follow instructions `/Firmware/Manuals/LoadImage.pdf` to burn the correct image on the SD card.
 [BBGW Getting Started](http://beagleboard.org/getting-started#step1)
@@ -76,6 +77,22 @@ git pull
 and reboot the system, it'll flash the eMMC on the next bootup. (make sure to remove the microSD after flashing is complete, otherwise it'll just keep on re-flashing the eMMC)
 [BBGW Getting Started](http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Flashing_eMMC)
 
+#### Imaging on SD card
+
+It is also possible to burn the image on the SD card. For every firmware, there is two options, one is refered with SD and the other with Flash as shown bellow:
+
+Flash Version name:
+```
+AM3358 Debian 10.3 2020-04-06 4GB eMMC IoT Flasher
+```
+
+SD Version name:
+```
+AM3358 Debian 10.3 2020-04-06 4GB SD IoT
+```
+
+It is enough to burn the image to SD card and attach it to the board and turn it on.
+
 
 #### Connecting to the BBGW
 
@@ -87,11 +104,11 @@ ssh debian@192.168.7.2
 
 Once connected, you should be asked to enter a password:
 ```
-> Debian GNU/Linux 8
+> Debian GNU/Linux 10
 
-> BeagleBoard.org Debian Image 2018-02-01
+> BeagleBoard.org Debian Buster IoT Image 2020-04-06
 
-> Support/FAQ: http://elinux.org/Beagleboard:BeagleBoneBlack_Debian
+> Support: http://elinux.org/Beagleboard:BeagleBoneBlack_Debian
 
 > default username:password is [debian:temppwd]
 
@@ -151,7 +168,6 @@ Run following commands:
 ```
 cd ~
 sudo bash ~/Wearable-Software/Firmware/Scripts/Install_PythonPackages.sh
-sudo bash ~/Wearable-Software/Firmware/Scripts/Install_Adafruit_Python_GPIO.sh
 ```
 
 #### Alternatively: Installing all the packages in you BBGW manually
@@ -161,7 +177,7 @@ Or you can manually install the packages:
 List of packages used
 * Python Packages (listed in the Wearable-Software/Firmware/src/requirements.txt)
 ```
-sudo pip install -r requirements.txt
+sudo pip3 install -r requirements.txt
 ```
 * [Adafruit_Python_GPIO](https://github.com/adafruit/Adafruit_Python_GPIO)
 To install the Adafruit_Python_GPIO, follow the instruction on the README.
@@ -172,7 +188,7 @@ To install the Adafruit_Python_GPIO, follow the instruction on the README.
 To launch the Firmware from the console, type:
 ```
 cd ~
-sudo python Wearable-Software/Firmware/src/Main.py [ldmepf]
+sudo python3 Wearable-Software/Firmware/src/Main.py [ldmepf]
 ```
 
 *Options:*

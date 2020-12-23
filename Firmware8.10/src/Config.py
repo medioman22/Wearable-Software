@@ -33,8 +33,6 @@ ADDRESSES += [0x40]
 ADDRESSES += [0x48, 0x49]
 # I2C BNO055
 ADDRESSES += [0x28, 0x29]
-# I2C BMP280
-ADDRESSES += [0x77]
 ################################################################################
 
 
@@ -129,7 +127,7 @@ PIN_MAP = {
             "CHANGE_DUTY_FREQUENCY": False
         },
         {
-            "DATA": "P8_45",
+            "DATA": "P9_42",
             "CHANGE_DUTY_FREQUENCY": True
         },
     ],
@@ -180,25 +178,21 @@ PIN_MAP = {
             "ADDRESS": 0x48,
             "BUSNUM": 2
         },
-        {
-            "ADDRESS": 0x77,
-            "BUSNUM": 2
-        }
     ],
     "SPI": [
         {
-            "SPI#": 0
-            # "CLOCK": "P9_22",
-            # "MISO": "P9_21",
-            # "MOSI": "P9_18",
-            # "CS": "P9_17"
+            "SPI#": 0,
+            "CLOCK": "P9_22",
+            "MISO": "P9_21",
+            "MOSI": "P9_18",
+            "CS": "P9_17"
         },
         {
-            "SPI#": 1
-            # "CLOCK": "P9_31",
-            # "MISO": "P9_29",
-            # "MOSI": "P9_30",
-            # "CS": "P9_28"
+            "SPI#": 1,
+            "CLOCK": "P9_31",
+            "MISO": "P9_29",
+            "MOSI": "P9_30",
+            "CS": "P9_28"
         }   
     ]
 

@@ -1,2 +1,7 @@
 serial
 termcolor
+Adafruit_GPIO
+Adafruit_BBIO
+Adafruit-Blinka
+adafruit-circuitpython-busdevice
+gprof2dot

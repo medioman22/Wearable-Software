@@ -161,7 +161,7 @@ class BMP280_SPI:
                 bmp_cs = digitalio.DigitalInOut(board.P9_17)
             elif pinConfig['SPI#'] == 1:
                 spi = busio.SPI(board.SCK_1, board.MOSI_1, board.MISO_1)
-                bmp_cs = digitalio.DigitalInOut(board.P8_9)
+                bmp_cs = digitalio.DigitalInOut(board.P9_28)
 
             self._bmp = BMP280_DRIVER.Adafruit_BMP280_SPI(spi, bmp_cs)  # Create the driver object
 
@@ -185,12 +185,16 @@ class BMP280_SPI:
         """Return True if the device is connected, false otherwise."""
         self.LOCK.acquire()                                     # Lock the driver for scanning
         try:
-            if (self._muxedChannel != None):
-                MuxModule.activate(self._muxName, self._muxedChannel) # Activate mux channel
-            status = self._bmp._get_status() # Get status
-            self._connected = True                       # Device is connected and has no error
-            if (self._muxedChannel != None):
-                MuxModule.deactivate(self._muxName)             # Deactivate mux
+            if self._bmp == None:
+                CHIP = self._bmp._read_byte(const(0xD0))
+                if CHIP == self._bmp.chip_id:
+                    self._connected = True
+                    if (self._muxedChannel != None):
+                        MuxModule.deactivate(self._muxName)  
+                else:
+                    self._connected = False                             # Device disconnected
+                    if (self._muxedChannel != None):
+                        MuxModule.deactivate(self._muxName)             # Deactivate mux
         except:
             self._connected = False                             # Device disconnected
             if (self._muxedChannel != None):
@@ -374,8 +378,6 @@ class BMP280_SPI:
 
     def comparePinConfig(self, pinConfig, muxedChannel = None):
         """Check if the same pin config."""
-        return ("ADDRESS" in pinConfig and
-                "BUSNUM" in pinConfig and
-                pinConfig["ADDRESS"] == self._address and
-                pinConfig["BUSNUM"] == self._busnum and
+        return ("SPI#" in pinConfig and
+                pinConfig["SPI#"] == self.SPI_number and
                 muxedChannel == self._muxedChannel)
