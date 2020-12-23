@@ -580,6 +580,11 @@ class MainWindow(QMainWindow):
                 cmd = 'gprof2dot -f pstats Profiller/'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')
                 os.system(cmd)
             img = mpimg.imread('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png'))
+        elif ('darwin' in sys.platform or 'mac' in sys.platform) and not "-- Select" in self._interface._ProfillerFile:
+            if not os.path.isfile('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')):
+                cmd = 'gprof2dot -f pstats Profiller/'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')
+                os.system(cmd)
+            img = mpimg.imread('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png'))
 
         plt.imshow(img)
         plt.axis('off')
