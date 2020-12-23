@@ -293,7 +293,7 @@ class InterfaceWidget(QWidget):
     def setStreamLabel(self, stream, toChannel=None):
         """Set stream label and channel."""
         if stream:                                              # Show stream label
-            self._streamLabel.setText('Stream <b>{}</b>'.format(toChannel))
+            self._streamLabel.setText('Stream {}'.format(toChannel))
             self._streamLabel.setVisible(True)
             self._streamGifLabel.setVisible(True)
         else:                                                   # Hide stream label
