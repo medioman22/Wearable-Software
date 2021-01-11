@@ -70,19 +70,19 @@ class BMP280_SPI:
     _settings = {
         #Data refresh frequency
         'frequencies': [
-            '1 Hz',
-            '2 Hz',
-            '3 Hz',
-            '4 Hz',
-            '5 Hz',
-            '6 Hz',
-            '10 Hz',
-            '20 Hz',
-            '30 Hz',
-            '40 Hz',
-            '50 Hz',
-            '60 Hz',
-            '100 Hz'
+            '25 KHz',
+            '50 KHz',
+            '75 KHz',
+            '100 KHz',
+            '125 KHz',
+            '150 KHz',
+            '175 KHz',
+            '200 KHz',
+            '225 KHz',
+            '250 KHz',
+            '275 KHz',
+            '300 KHz',
+            '325 KHz'
         ],
         #Operation mode for driver
         'modes': [
@@ -131,6 +131,9 @@ class BMP280_SPI:
     # Module number for SPI
     SPI_number = None
 
+    # Connection Status
+    _Status = False
+
 
 
     # Lock for the driver, used in scan and loop thread
@@ -148,7 +151,7 @@ class BMP280_SPI:
 
             self._values = []                                       # Set empty values array
 
-            self._mode = self._settings['modes'][0]                 # Set default mode
+            self._mode = self._settings['modes'][1]                 # Set default mode
 
             self._frequency = self._settings['frequencies'][6]      # Set default frequency
 
@@ -185,16 +188,23 @@ class BMP280_SPI:
         """Return True if the device is connected, false otherwise."""
         self.LOCK.acquire()                                     # Lock the driver for scanning
         try:
-            if self._bmp == None:
-                CHIP = self._bmp._read_byte(const(0xD0))
-                if CHIP == self._bmp.chip_id:
-                    self._connected = True
-                    if (self._muxedChannel != None):
-                        MuxModule.deactivate(self._muxName)  
-                else:
-                    self._connected = False                             # Device disconnected
-                    if (self._muxedChannel != None):
-                        MuxModule.deactivate(self._muxName)             # Deactivate mux
+            if not self._connected:
+                if self.SPI_number == 0:
+                    spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+                    bmp_cs = digitalio.DigitalInOut(board.P9_17)
+                elif self.SPI_number == 1:
+                    spi = busio.SPI(board.SCK_1, board.MOSI_1, board.MISO_1)
+                    bmp_cs = digitalio.DigitalInOut(board.P9_28)
+
+                BMP280_DRIVER.Adafruit_BMP280_SPI(spi, bmp_cs)
+
+
+                self._bmp = BMP280_DRIVER.Adafruit_BMP280_SPI(spi, bmp_cs)  # Create the driver object
+                self._connected = True
+                
+            if (self._muxedChannel != None):
+                MuxModule.deactivate(self._muxName)  
+                
         except:
             self._connected = False                             # Device disconnected
             if (self._muxedChannel != None):
@@ -364,6 +374,8 @@ class BMP280_SPI:
         if (frequency in self._settings['frequencies']):
             self._frequency = frequency
             self._period = 1./int(self._frequency[:-3])
+            GetfreqNum = int(self._frequency.replace("KHz",""))*1000
+            self._bmp._spi.baudrate = GetfreqNum
         else:
             raise ValueError('frequency {} is not allowed'.format(frequency))
 

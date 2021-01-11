@@ -6,11 +6,15 @@ Graphical User Interface
 
 This application provides an interface to the firmware loaded on the BBB
 
-Author: Cyrill Lippuner
-Last edited: September 2018
+Author: Salar Rahimi
+Last edited: November 2020
 """
-
-import os                                                       # Operating system package
+import base64                                                   # for decoding json messages
+from datetime import datetime
+import cProfile, pstats                                         # For profiling the code
+import matplotlib.pyplot as plt                                 # Showing the picture for profiller result
+import matplotlib.image as mpimg                                # Same reason as above                    
+import os, glob , io , getpass                                  # Operating system package
 import sys                                                      # System package
 import time                                                     # Time package
 import logging                                                  # Logging package
@@ -36,6 +40,7 @@ from boards.beagleboneGreenWirelessBoard import BeagleboneGreenWirelessBoard # B
 from connections.connection import Message                      # Message class
 from connections.beagleboneGreenWirelessConnection import BeagleboneGreenWirelessConnection # BBGWConnection implementation
 from utils import standardColorSet                              # Import color set
+from SSH.SSHClient import SSHClient                             # Import the SSH Client class for running the python code.
 
 # Logging settings
 LOG_LEVEL_PRINT = logging.INFO                                  # Set print level for stout logging
@@ -67,6 +72,13 @@ PLOT_POINTS = '256 Points'                                      # Default plot p
 
 class MainWindow(QMainWindow):
     """The main window of the application."""
+    #Profiler 
+    _Profiler = None
+    _ProfilerState = "Initialized"
+    _ProfillerSavingLocation = None
+    _porfillerFileFormat = ".pstats"
+    # SSH client
+    _Client = None
     # The selected board
     _board = None
     # The selected boards connection
@@ -97,7 +109,8 @@ class MainWindow(QMainWindow):
     _logger = None
 
     def __init__(self):
-
+        #Place the profiler here
+        self._Profiler = cProfile.Profile()
         """Initialize the main window."""
         super().__init__()
 
@@ -130,6 +143,20 @@ class MainWindow(QMainWindow):
         self._logger.debug("Start timer [{}ms] for update loop".format(UPDATE_LOOP))
 
         self._logger.info("Main initialized")
+        
+        #making a folder for storing the profilling data
+        self._DirectoryProf = os.getcwd() + "\\Profiller"
+        if(not os.path.isdir(self._DirectoryProf)):
+            os.mkdir(self._DirectoryProf)
+            self._logger.info("Proffiler folder is created")
+        else:
+            self._logger.info("Profiller folder is already available")
+
+        #Check the files in the Profiling folder and show it in the combobox of the profiller
+        for file in os.listdir(self._DirectoryProf):
+            if file.endswith(self._porfillerFileFormat) or file.endswith('Firmware.png'):
+                self._interface._ProfillerFiles.addItem(file)
+
 
 
     def initUI(self):
@@ -278,8 +305,16 @@ class MainWindow(QMainWindow):
         interface = InterfaceWidget()
         interface.configureConnectionClicked.connect(self._showConnectionDialogListener)
         interface.connect.connect(self._connectListener)
+        interface.disconnect.connect(self._disconnectListener)
         interface.sendMessage.connect(self._sendMessageListener)
         interface.update.connect(self._updateInterfaceListener)
+        # Add Profiller
+        interface.StartProfiller.connect(self._StartProfillerListener)
+        interface.StopProfiller.connect(self._StopProfillerListener)
+        interface.visualizeProfiler.connect(self._VisualizeProfillerListener)
+        interface.updateProfillerFile.connect(self._UpdateProfillerFileListener)
+        interface._profillergrouplayout.setTitle("Profiller")
+
         self._interface = interface
         self.setCentralWidget(interface)
         self._logger.debug("Main UI interface created")
@@ -350,12 +385,58 @@ class MainWindow(QMainWindow):
 
         self._logger.info("Connection '{}' loaded".format(type))
 
+    #This function command the board to start the code
+    def RunPythonScript(self):
+        if (True): #self._Client == None or not self._Client.state
+            self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
+            # setting SPI mode for the following pins
+            self._Client.execute('config-pin P9_17 spi_cs', sudo=True)
+            self._Client.execute('config-pin P9_18 spi', sudo=True)
+            self._Client.execute('config-pin P9_21 spi', sudo=True)
+            self._Client.execute('config-pin P9_22 spi_sclk', sudo=True)
+            # Run the Software
+            self._Client.execute('python3 Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
+    #This function tried to connect to the board
+    def EstablishConnection(self):
+        """Try to connect listener."""
+        if (self._connection.status() == 'Connected'):          # Do a reconnect if already connected
+            self._logger.info("Terminate existing connection before reconnecting")
+            self._connection.disconnect()
+            self._board.reset()
+            self._onStreamStop()
+            self._connection = None
+        try:
+            self._logger.debug("Start connection attempt …")
+            self.loadConnection(self._board.connectionType())   # Create connection
+            self._connection.connect()                          # Start connection attempts
+            self._logger.debug("Connection successfully established") # Reaching next line means connection is established
+            self._logger.info('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
+            self._statusBar.showMessage('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
+            time.sleep(0.1)                                     # Wait a bit
+                                                                # Send a message to get a list of all devices
+            self._connection.sendMessages([self._board.serializeMessage(Message('DeviceList',''))])
+            self.updateBoardMenu()                              # Refresh UI
+        except ConnectionError as e:                            # Error thrown during the connection attempt
+            if (self._Client != None ):
+                if (self._Client.state):
+                    self._connection._state = "Connecting ..."
+            else:
+                self._connection._state = "Disconnected" 
+            self._logger.error("Connection error, could not create connection: {}".format(e))
+            self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
+
+
     def updateUI(self):
         """Update all ui elements."""
         self.updateStatusValues()
+        self.updateProfillerStatus()
         self.updateDeviceList()
         #self.updateData()
         self._logger.debug("Main UI updated")
+
+    def updateProfillerStatus(self):
+        """Update profiller status value"""
+        self._interface.setProfillerStatus(self._ProfilerState)
 
     def updateStatusValues(self):
         """Update all status values."""
@@ -382,10 +463,6 @@ class MainWindow(QMainWindow):
         self._interface.updateData()
 
 
-
-
-
-
     def closeEvent(self, event):
         """Confirm closing application."""
         # Close for no connection
@@ -403,6 +480,7 @@ class MainWindow(QMainWindow):
             if reply == QMessageBox.Yes:
                 # Terminate connection and stop data streams
                 self._connection.disconnect()
+                self._Client.close() #closing the python code for Firmware
                 self._board.reset()
                 self._onStreamStop()
 
@@ -411,11 +489,6 @@ class MainWindow(QMainWindow):
             else:
                 # Keep app open
                 event.ignore()
-
-
-
-
-
 
 
 
@@ -438,30 +511,103 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def _connectListener(self):
-        """Try to connect listener."""
-        if (self._connection.status() == 'Connected'):          # Do a reconnect if already connected
-            self._logger.info("Terminate existing connection before reconnecting")
+        try:
+            self.RunPythonScript()                              #execute the Firmware code
+        except:
+            self._Client = None
+        
+        self.EstablishConnection()                              #Connect to the board
+
+        self.updateUI()
+    @pyqtSlot()
+    def _disconnectListener(self):
+        """Confirm closing application."""
+        # Close for no connection
+        if (self._connection.status() != 'Connected'):
             self._connection.disconnect()
             self._board.reset()
             self._onStreamStop()
-            self._connection = None
-        try:
-            self._logger.debug("Start connection attempt …")
-            self.loadConnection(self._board.connectionType())   # Create connection
-            self._connection.connect()                          # Start connection attempts
-            self._logger.debug("Connection successfully established") # Reaching next line means connection is established
-            self._logger.info('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
-            self._statusBar.showMessage('Successfully connected to {} via {}'.format(self._board.name(), self._connection.type()))
-            time.sleep(0.1)                                     # Wait a bit
-                                                                # Send a message to get a list of all devices
-            self._connection.sendMessages([self._board.serializeMessage(Message('DeviceList',''))])
-            self.updateBoardMenu()                              # Refresh UI
-        except ConnectionError as e:                            # Error thrown during the connection attempt
-            self._logger.error("Connection error, could not create connection: {}".format(e))
-            self._statusBar.showMessage('Connection to {} via {} failed'.format(self._board.name(), self._connection.type()))
-  
+        # Ask for confirmation
+        else:
+            reply = QMessageBox.question(self, 'Message',
+                "Are you sure to disconnect?", QMessageBox.Yes |
+                QMessageBox.No, QMessageBox.No)
 
+            if reply == QMessageBox.Yes:
+                # Terminate connection and stop data streams
+                self._connection.disconnect()
+                if self._Client != None:
+                    self._Client.close() #closing the python code for Firmware
+                    self._Client = None
+                self._board.reset()
+                self._onStreamStop()
         self.updateUI()
+       
+
+    @pyqtSlot()
+    def _StartProfillerListener(self):
+        self._Profiler.enable()
+        self._ProfilerState = "Profilling ..."
+        #Command board to profile
+        self._connection.sendMessages([self._board.serializeMessage(Message('profile','', {'value': True}))])
+        self.updateUI()
+
+    @pyqtSlot()
+    def _StopProfillerListener(self):
+        self._Profiler.disable()
+        TimeObject = datetime.now()
+        s = io.StringIO() 
+        ps = pstats.Stats(self._Profiler,stream=s).strip_dirs().sort_stats('cumulative')
+        ps.dump_stats(self._DirectoryProf + "\\" + TimeObject.strftime("%d-%b-%Y_%H-%M-%S.%f")+"_Interface" + self._porfillerFileFormat)
+        #self._Profiler.dump_stats(self._DirectoryProf + "\\" + TimeObject.strftime("%d-%b-%Y_%H-%M-%S.%f")+"_Interface" + self._porfillerFileFormat)
+        
+        #For stopping process of profilling in the board
+        self._connection.sendMessages([self._board.serializeMessage(Message('profile','', {'value': False})),self._board.serializeMessage(Message('profile_FileName','', 
+            {'value': TimeObject.strftime("%d-%b-%Y_%H-%M-%S.%f")+"_Firmware"}))]) 
+        self._ProfilerState = "Stopped"
+        self._Profiler = cProfile.Profile()
+        self.updateUI()
+    
+    @pyqtSlot()
+    def _VisualizeProfillerListener(self):
+        
+        #This option is for SnakeViz
+        #cmd = 'cmd /c snakeviz '+"Profiller\\"+self._interface._ProfillerFile 
+        #os.system('cmd /c snakeviz '+"Profiller\\"+self._interface._ProfillerFile)
+        #This option is for gprof2dot
+        if 'win' in sys.platform and not "-- Select" in self._interface._ProfillerFile:
+            if not os.path.isfile('Profiller\\'+self._interface._ProfillerFile.replace('.pstats','.png')):
+                cmd = 'cmd /c gprof2dot -f pstats Profiller\\'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller\\'+self._interface._ProfillerFile.replace('.pstats','.png')
+                os.system(cmd)
+            img = mpimg.imread('Profiller\\'+self._interface._ProfillerFile.replace('.pstats','.png'))
+            
+        elif 'linux' in sys.platform and not "-- Select" in self._interface._ProfillerFile:
+            if not os.path.isfile('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')):
+                cmd = 'gprof2dot -f pstats Profiller/'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')
+                os.system(cmd)
+            img = mpimg.imread('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png'))
+        elif ('darwin' in sys.platform or 'mac' in sys.platform) and not "-- Select" in self._interface._ProfillerFile:
+            if not os.path.isfile('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')):
+                cmd = 'gprof2dot -f pstats Profiller/'+ self._interface._ProfillerFile +' | dot -Tpng -o Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png')
+                os.system(cmd)
+            img = mpimg.imread('Profiller/'+self._interface._ProfillerFile.replace('.pstats','.png'))
+
+        plt.imshow(img)
+        plt.axis('off')
+        plt.suptitle(self._interface._ProfillerFile.replace('.pstats','').replace('.png',''))
+        plt.show()
+
+
+    @pyqtSlot()
+    def _UpdateProfillerFileListener(self):
+        #Updating the profiller
+        indexSelected = self._interface._ProfillerFiles.currentIndex()
+        self._interface._ProfillerFiles.clear()
+        self._interface._ProfillerFiles.addItem("-- Select The File To Visualize --")
+        for file in os.listdir(self._DirectoryProf):
+            if file.endswith(self._porfillerFileFormat) or file.endswith('Firmware.png'):
+                self._interface._ProfillerFiles.addItem(file)
+        self._interface._ProfillerFiles.setCurrentIndex(indexSelected)
 
 
     @pyqtSlot(QAction)
@@ -576,11 +722,13 @@ class MainWindow(QMainWindow):
         self._logger.info("Set plot {}".format(action.text()))
 
 
-
-
-
     @pyqtSlot()
     def connectionIteration(self):
+        #check the connection if SSH is created
+        if(self._Client != None):
+            if (self._Client.state and self._connection._state != "Connected"):
+                self.EstablishConnection()
+                self.updateUI()
         """Next connection iteration listener."""
         if (self._connection.status() == 'Connected'):          # Only do something when there is a connection
                                                                 # Get the new messages from the connection and unserialize them
@@ -649,6 +797,16 @@ class MainWindow(QMainWindow):
                             self._updateLoopDurations.pop(0)
                         if self._popupDiagPlot != None:
                             self._popupDiagPlot.setData(y=np.asarray(self._updateLoopDurations), x=np.arange(len(self._updateLoopDurations))) # Plot values
+                    elif (message.type == 'PNG'):
+                        Image = base64.b64decode(message.data['values'])
+                        if 'win' in sys.platform:
+                            Filename =self._DirectoryProf +"\\"+ message.name
+                        elif 'linux' in sys.platform:
+                            Filename =self._DirectoryProf +"/"+ message.name
+                        f = open(Filename,'wb')
+                        f.write(Image)
+                        f.close()
+
                     elif (message.type == 'Ping'):              # Ping message
                         self._logger.debug('PING')
 
@@ -681,6 +839,7 @@ class MainWindow(QMainWindow):
 
             if (len(messagesSend) > 0):                         # Send and serialize messages
                 self._connection.sendMessages(list(map(lambda x: self._board.serializeMessage(x), messagesSend)))
+        
 
             self.update()                                       # Update all GUI
             """Ping"""

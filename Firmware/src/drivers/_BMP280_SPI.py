@@ -39,7 +39,7 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_BMP280.git"
 
 #    I2C ADDRESS/BITS/SETTINGS
 #    -----------------------------------------------------------------------
-_CHIP_ID = const(0x58)
+_CHIP_ID = const(0xc0)#const(0x58)
 
 _REGISTER_CHIPID = const(0xD0)
 _REGISTER_DIG_T1 = const(0x88)

@@ -136,7 +136,36 @@ Initially pins are not configured as SPI and it should either be done manually e
 
 #### Manually
 
+It is required to set spi pins to proper mode with following commands on Bash:
+
+```
+sudo config-pin P9_17 spi_cs
+sudo config-pin P9_18 spi
+sudo config-pin P9_21 spi
+sudo config-pin P9_22 spi_sclk
+
+```
+
 #### Permanently
+
+Add the overlay to uEnv.txt
+
+First open the file
+
+```
+sudo nano /boot/uEnv.txt  
+```
+
+then use on of the slot in the file for spi0 or spi1
+
+```
+###Additional custom capes  
+# 20190727 jc: enable SPI0 by default  
+uboot_overlay_addr1=/lib/firmware/BB-SPIDEV0-00A0.dtbo
+```
+Then reboot the system:
+
+Make sure if you use this, for the current version for BMP280 you should not use P9_17 as cs but another pin should be assigned. (Change it from its driver)
 
 #### Template for Creating new Driver
 

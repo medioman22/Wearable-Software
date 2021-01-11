@@ -402,6 +402,12 @@ class MainWindow(QMainWindow):
     def RunPythonScript(self):
         if (True): #self._Client == None or not self._Client.state
             self._Client = SSHClient(host=self._ip, port=22, username='debian', password='temppwd')
+            # setting SPI mode for the following pins
+            self._Client.execute('config-pin P9_17 spi_cs', sudo=True)
+            self._Client.execute('config-pin P9_18 spi', sudo=True)
+            self._Client.execute('config-pin P9_21 spi', sudo=True)
+            self._Client.execute('config-pin P9_22 spi_sclk', sudo=True)
+            # Run the Software
             self._Client.execute('python3 Wearable-Software/Firmware/src/Main.py [dmepf]', sudo=True)
     #This function tried to connect to the board
     def EstablishConnection(self):

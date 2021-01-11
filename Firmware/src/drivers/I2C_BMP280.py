@@ -153,7 +153,7 @@ class BMP280_I2C:
 
             self._values = []                                       # Set empty values array
 
-            self._mode = self._settings['modes'][0]                 # Set default mode
+            self._mode = self._settings['modes'][1]                 # Set default mode
 
             self._frequency = self._settings['frequencies'][6]      # Set default frequency
 
